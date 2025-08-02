@@ -1,0 +1,27 @@
+# Development files
+node_modules/
+.git/
+.gitignore
+README.md
+*.log
+npm-debug.log*
+
+# Build artifacts (will be rebuilt on Railway)
+css/main.css
+
+# Development scripts
+dev-server.js
+
+# Documentation
+*.md
+!README.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db 
