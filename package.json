@@ -1,0 +1,54 @@
+{
+  "name": "plwgscreativeapparel-admin",
+  "version": "1.0.0",
+  "description": "Modern dark futuristic e-commerce admin dashboard for PlwgsCreativeApparel",
+  "main": "index.html",
+  "scripts": {
+    "build:css": "npx @dhiwise/component-tagger && npx tailwindcss -i ./css/tailwind.css -o ./css/main.css",
+    "watch:css": "npx @dhiwise/component-tagger && npx tailwindcss -i ./css/tailwind.css -o ./css/main.css --watch",
+    "dev": "npm run watch:css",
+    "start": "npm run build:css && echo 'CSS built successfully. Open index.html in your browser to view the project.'",
+    "serve": "node dev-server.js",
+    "dev:full": "npm run build:css && node dev-server.js",
+    "build": "npm run build:css",
+    "clean": "rm -rf node_modules package-lock.json",
+    "reinstall": "npm run clean && npm install"
+  },
+  "keywords": [
+    "e-commerce",
+    "admin-dashboard",
+    "tailwindcss",
+    "html",
+    "javascript",
+    "dark-theme",
+    "futuristic-design"
+  ],
+  "author": "PlwgsCreativeApparel Team",
+  "license": "MIT",
+  "dependencies": {
+    "@dhiwise/component-tagger": "^1.0.10",
+    "@tailwindcss/forms": "^0.5.7",
+    "tailwindcss-animate": "^1.0.7",
+    "tailwindcss-elevation": "^2.0.0",
+    "tailwindcss-fluid-type": "^2.0.7"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/line-clamp": "^0.1.0",
+    "@tailwindcss/typography": "^0.5.16"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mariaisabeljuarezgomez/PLWGCREATIVEAPPAREL.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mariaisabeljuarezgomez/PLWGCREATIVEAPPAREL/issues"
+  },
+  "homepage": "https://github.com/mariaisabeljuarezgomez/PLWGCREATIVEAPPAREL#readme"
+}

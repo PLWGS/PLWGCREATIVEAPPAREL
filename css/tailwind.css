@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Primary Colors */
+  --color-primary: #0a0a0a; /* Deep canvas for product showcase */
+  --color-secondary: #1a1a1a; /* Subtle surface elevation and depth */
+  --color-accent: #00bcd4; /* Interactive elements and progress indicators - cyan-400 */
+  
+  /* Background Colors */
+  --color-background: #000000; /* Pure backdrop for maximum contrast - black */
+  --color-surface: #2a2a2a; /* Card backgrounds and content containers - gray-800 */
+  
+  /* Text Colors */
+  --color-text-primary: #ffffff; /* High contrast for readability - white */
+  --color-text-secondary: #a0a0a0; /* Supporting information and metadata - gray-400 */
+  
+  /* Status Colors */
+  --color-success: #10b981; /* Purchase confirmations and positive states - emerald-500 */
+  --color-warning: #f59e0b; /* Inventory alerts and attention items - amber-500 */
+  --color-error: #ef4444; /* Form validation and error messaging - red-500 */
+  
+  /* Additional Shades */
+  --color-accent-light: #4dd0e1; /* cyan-300 */
+  --color-accent-dark: #0097a7; /* cyan-600 */
+  --color-surface-light: #3a3a3a; /* gray-700 */
+  --color-surface-dark: #1f1f1f; /* gray-900 */
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Orbitron', sans-serif;
+  }
+  
+  button {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+  }
+  
+  code, .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-accent text-black px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-out;
+    box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
+  }
+  
+  .btn-primary:hover {
+    @apply bg-accent-light;
+    box-shadow: 0 0 30px rgba(0, 188, 212, 0.5);
+  }
+  
+  .card {
+    @apply bg-surface border border-surface-light rounded-lg p-6;
+  }
+  
+  .input-field {
+    @apply bg-surface border border-surface-light text-text-primary px-4 py-2 rounded-lg transition-all duration-300 ease-out;
+  }
+  
+  .input-field:focus {
+    @apply border-accent outline-none;
+    box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
+  }
+  
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
+  }
+  
+  .text-gradient {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@layer utilities {
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
+    }
+    to {
+      box-shadow: 0 0 30px rgba(0, 188, 212, 0.6);
+    }
+  }
+  
+  .transition-smooth {
+    transition: all 300ms ease-out;
+  }
+}
