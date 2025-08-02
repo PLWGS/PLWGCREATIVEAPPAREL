@@ -97,8 +97,8 @@ def create_product_detail_pages():
         
         # Replace product information
         product_content = product_content.replace(
-            "Midnight Horror Skull Tee - PlwgsCreativeApparel | Wear Your Weird",
-            f"{product['name']} - PlwgsCreativeApparel | Wear Your Weird"
+                "Midnight Horror Skull Tee - PlwgsCreativeApparel | Be Loud. Be Seen. Be You.",
+    f"{product['name']} - PlwgsCreativeApparel | Be Loud. Be Seen. Be You."
         )
         
         product_content = product_content.replace(

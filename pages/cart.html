@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cart - PlwgsCreativeApparel | Wear Your Weird</title>
+    <title>Cart - PlwgsCreativeApparel | Be Loud. Be Seen. Be You.</title>
     <meta name="description" content="Complete your purchase with PlwgsCreativeApparel. Secure checkout for unique horror and creative apparel designs." />
     <link rel="stylesheet" href="../css/main.css" />
     <style>
@@ -423,6 +423,10 @@
 
         // Load product data from URL parameters using URLSearchParams
         function loadProductData() {
+            console.log('=== CART PAGE DEBUG ===');
+            console.log('Current URL:', window.location.href);
+            console.log('Search params:', window.location.search);
+            
             const urlParams = new URLSearchParams(window.location.search);
             
             const image = urlParams.get('image');
@@ -438,6 +442,7 @@
             console.log('Price:', price);
             console.log('Rating:', rating);
             console.log('Description:', description);
+            console.log('All URL parameters:', Object.fromEntries(urlParams.entries()));
 
             if (image && title && price) {
                 // Fix image path - ensure it's relative to the cart page
@@ -467,12 +472,38 @@
                 const productRatingElement = document.getElementById('product-rating');
                 const productDescriptionElement = document.getElementById('product-description');
 
-                if (productTitleElement) productTitleElement.textContent = currentProduct.title;
-                if (productNameElement) productNameElement.textContent = currentProduct.title;
-                if (productPriceElement) productPriceElement.textContent = currentProduct.price;
-                if (totalPriceElement) totalPriceElement.textContent = currentProduct.price;
-                if (productRatingElement) productRatingElement.textContent = currentProduct.rating;
-                if (productDescriptionElement) productDescriptionElement.textContent = currentProduct.description;
+                console.log('Found elements:');
+                console.log('productTitleElement:', productTitleElement);
+                console.log('productNameElement:', productNameElement);
+                console.log('productPriceElement:', productPriceElement);
+                console.log('totalPriceElement:', totalPriceElement);
+                console.log('productRatingElement:', productRatingElement);
+                console.log('productDescriptionElement:', productDescriptionElement);
+
+                if (productTitleElement) {
+                    productTitleElement.textContent = currentProduct.title;
+                    console.log('Updated product-title with:', currentProduct.title);
+                }
+                if (productNameElement) {
+                    productNameElement.textContent = currentProduct.title;
+                    console.log('Updated product-name with:', currentProduct.title);
+                }
+                if (productPriceElement) {
+                    productPriceElement.textContent = currentProduct.price;
+                    console.log('Updated product-price with:', currentProduct.price);
+                }
+                if (totalPriceElement) {
+                    totalPriceElement.textContent = currentProduct.price;
+                    console.log('Updated total-price with:', currentProduct.price);
+                }
+                if (productRatingElement) {
+                    productRatingElement.textContent = currentProduct.rating;
+                    console.log('Updated product-rating with:', currentProduct.rating);
+                }
+                if (productDescriptionElement) {
+                    productDescriptionElement.textContent = currentProduct.description;
+                    console.log('Updated product-description with:', currentProduct.description);
+                }
                 
                 // Update main image
                 const mainImage = document.getElementById('mainImage');
