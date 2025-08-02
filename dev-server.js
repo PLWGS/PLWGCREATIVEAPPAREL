@@ -4,6 +4,7 @@ const path = require('path');
 const url = require('url');
 
 const PORT = process.env.PORT || 3000;
+const FORCE_HTTPS = process.env.FORCE_HTTPS === 'true';
 
 const mimeTypes = {
   '.html': 'text/html',
@@ -19,6 +20,16 @@ const mimeTypes = {
 };
 
 const server = http.createServer((req, res) => {
+  // Force HTTPS redirect in production
+  if (FORCE_HTTPS && req.headers['x-forwarded-proto'] === 'http') {
+    res.writeHead(301, {
+      'Location': `https://${req.headers.host}${req.url}`,
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+    });
+    res.end();
+    return;
+  }
+
   const parsedUrl = url.parse(req.url);
   let pathname = parsedUrl.pathname;
   
@@ -46,7 +57,14 @@ const server = http.createServer((req, res) => {
       return;
     }
     
-    res.writeHead(200, { 'Content-Type': contentType });
+    // Add security headers
+    res.writeHead(200, { 
+      'Content-Type': contentType,
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin'
+    });
     res.end(data);
   });
 });
@@ -54,6 +72,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`🚀 Development server running at http://localhost:${PORT}`);
   console.log(`📁 Serving files from: ${__dirname}`);
+  console.log(`🔒 HTTPS redirect: ${FORCE_HTTPS ? 'ENABLED' : 'DISABLED'}`);
   console.log(`🎨 CSS watching enabled. Run 'npm run watch:css' in another terminal for live CSS updates.`);
   console.log(`\n📋 Available pages:`);
   console.log(`   • Homepage: http://localhost:${PORT}/`);
