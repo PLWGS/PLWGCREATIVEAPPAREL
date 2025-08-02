@@ -1448,8 +1448,8 @@
 
         function createProductCard(product) {
             const productCard = document.createElement('div');
-            productCard.className = 'product-card glass-card rounded-2xl overflow-hidden group cursor-pointer';
-            productCard.onclick = () => window.location.href = 'product.html';
+            productCard.className = 'product-card glass-card rounded-2xl overflow-hidden group';
+            // Removed the card click handler since we don't need individual product detail pages
             
             productCard.innerHTML = `
                 <div class="relative">
@@ -1481,7 +1481,11 @@
                 const productData = JSON.parse(quickAddBtn.dataset.product);
                 
                 // Debug logging
+                console.log('=== SHOP PAGE DEBUG ===');
                 console.log('Product data being sent to cart:', productData);
+                console.log('Product title:', productData.title);
+                console.log('Product price:', productData.price);
+                console.log('Product image:', productData.image);
                 
                 // Keep the original image path as is
                 const imagePath = productData.image;
@@ -1495,7 +1499,10 @@
                 });
                 
                 console.log('URL parameters being sent:', params.toString());
-                window.location.href = `cart.html?${params.toString()}`;
+                console.log('Full URL will be:', `cart.html?${params.toString()}&v=${Date.now()}`);
+                
+                // Navigate to cart with product data
+                window.location.href = `cart.html?${params.toString()}&v=${Date.now()}`;
             });
             
             return productCard;
