@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PlwgsCreativeApparel Admin</title>
+    <title>PlwgsCreativeApparel - Welcome</title>
     <link rel="stylesheet" href="css/main.css" />
     <style>
         body {
@@ -67,23 +67,23 @@
 </head>
 <body>
     <div class="redirect-container">
-        <div class="logo">PlwgsCreativeApparel Admin</div>
-        <div class="loading-text">Redirecting to Admin Dashboard...</div>
+        <div class="logo">PlwgsCreativeApparel</div>
+        <div class="loading-text">Welcome to PlwgsCreativeApparel...</div>
         <div class="spinner"></div>
-        <div class="redirect-info">Please wait while we load your admin panel</div>
+        <div class="redirect-info">Please wait while we load your shopping experience</div>
     </div>
 
     <script>
-        // Redirect to admin dashboard after 2 seconds
+        // Redirect to homepage after 2 seconds
         setTimeout(function() {
-            window.location.href = 'pages/admin_dashboard_comprehensive_business_management.html';
+            window.location.href = 'pages/homepage_dark_futuristic_e_commerce.html';
         }, 2000);
         
         // Fallback redirect in case of any issues
         window.addEventListener('load', function() {
             setTimeout(function() {
                 if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
-                    window.location.replace('pages/admin_dashboard_comprehensive_business_management.html');
+                    window.location.replace('pages/homepage_dark_futuristic_e_commerce.html');
                 }
             }, 3000);
         });
