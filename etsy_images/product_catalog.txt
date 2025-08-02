@@ -217,3 +217,85 @@ PLWGCREATIVEAPPAREL - Product Catalog
     Image: product_36_*.jpg
 --------------------------------------------------
 
+
+
+ADDITIONAL PRODUCTS FROM REVIEWS
+==================================================
+
+37. Custom Song Lyric TShirt | High Quality Print | Rock or Country Guitar Design or Piano Design | Unisex Size
+    Price: $25.00
+    Category: Custom Music
+    Description: Custom Song Lyric TShirt with high quality print featuring rock or country guitar design or piano design
+    Image: product_37_*.jpg
+--------------------------------------------------
+
+38. Custom Shirt Listing Any Text Design | Printed Design | Personalized Text Shirt Up to 200 Character | Unisex Sizes
+    Price: $23.00
+    Category: Custom Text
+    Description: Custom shirt with any text design, personalized text shirt up to 200 characters
+    Image: product_38_*.jpg
+--------------------------------------------------
+
+39. Custom Order
+    Price: $30.00
+    Category: Custom Orders
+    Description: Custom order with personalized design and specifications
+    Image: product_39_*.jpg
+--------------------------------------------------
+
+40. It's Where My Story Begins Hoodie | Printed Design | Personalize with Your City and State with State Flag and Seal | Adult Unisex Size
+    Price: $38.00
+    Category: Personalized Hoodies
+    Description: It's Where My Story Begins Hoodie with personalized city and state with state flag and seal
+    Image: product_40_*.jpg
+--------------------------------------------------
+
+41. Down Syndrome Awareness Shirt | Printed Design | Down Right Perfect Shirt | Awareness Shirt | Down Syndrome T-Shirt | Adult Unisex Size
+    Price: $22.00
+    Category: Awareness
+    Description: Down Syndrome Awareness Shirt with 'Down Right Perfect' design for awareness
+    Image: product_41_*.jpg
+--------------------------------------------------
+
+42. Kid's Acknowledge Me It's My Birthday Shirt | Printed Design | Kid's Custom Birthday T-Shirt | Kid's Personalized Birthday T-Shirt
+    Price: $20.00
+    Category: Kids Birthday
+    Description: Kid's Acknowledge Me It's My Birthday Shirt with custom birthday design
+    Image: product_42_*.jpg
+--------------------------------------------------
+
+43. Acknowledge Me Birthday Shirt | Printed Design | It's My Birthday T-Shirt | Personalized Birthday Shirt | Unisex Tee
+    Price: $22.00
+    Category: Birthday
+    Description: Acknowledge Me Birthday Shirt with personalized birthday design for adults
+    Image: product_43_*.jpg
+--------------------------------------------------
+
+44. It's Where My Story Begins Hoodie | Printed Design | Personalize with Your City and State with State Flag and Seal | Adult Unisex Size
+    Price: $38.00
+    Category: Personalized Hoodies
+    Description: It's Where My Story Begins Hoodie with personalized city and state with state flag and seal
+    Image: product_44_*.jpg
+--------------------------------------------------
+
+45. Down Syndrome Awareness Shirt | Printed Design | Down Right Perfect Shirt | Awareness Shirt | Down Syndrome T-Shirt | Adult Unisex Size
+    Price: $22.00
+    Category: Awareness
+    Description: Down Syndrome Awareness Shirt with 'Down Right Perfect' design for awareness
+    Image: product_45_*.jpg
+--------------------------------------------------
+
+46. Kid's Acknowledge Me It's My Birthday Shirt | Printed Design | Kid's Custom Birthday T-Shirt | Kid's Personalized Birthday T-Shirt
+    Price: $20.00
+    Category: Kids Birthday
+    Description: Kid's Acknowledge Me It's My Birthday Shirt with custom birthday design
+    Image: product_46_*.jpg
+--------------------------------------------------
+
+47. Acknowledge Me Birthday Shirt | Printed Design | It's My Birthday T-Shirt | Personalized Birthday Shirt | Unisex Tee
+    Price: $22.00
+    Category: Birthday
+    Description: Acknowledge Me Birthday Shirt with personalized birthday design for adults
+    Image: product_47_*.jpg
+--------------------------------------------------
+

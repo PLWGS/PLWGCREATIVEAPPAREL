@@ -57,12 +57,12 @@ server.listen(PORT, () => {
   console.log(`🎨 CSS watching enabled. Run 'npm run watch:css' in another terminal for live CSS updates.`);
   console.log(`\n📋 Available pages:`);
   console.log(`   • Homepage: http://localhost:${PORT}/`);
-  console.log(`   • Admin Dashboard: http://localhost:${PORT}/pages/admin_dashboard_comprehensive_business_management.html`);
-  console.log(`   • Customer Account: http://localhost:${PORT}/pages/customer_account_order_history_profile_management.html`);
-  console.log(`   • Custom Orders: http://localhost:${PORT}/pages/custom_orders_personalized_design_requests.html`);
-  console.log(`   • Homepage: http://localhost:${PORT}/pages/homepage_dark_futuristic_e_commerce.html`);
-  console.log(`   • Product Detail: http://localhost:${PORT}/pages/product_detail_conversion_focused_design_showcase.html`);
-  console.log(`   • Shop Grid: http://localhost:${PORT}/pages/shop_grid_advanced_product_discovery.html`);
+  console.log(`   • Admin Dashboard: http://localhost:${PORT}/pages/admin.html`);
+  console.log(`   • Customer Account: http://localhost:${PORT}/pages/account.html`);
+  console.log(`   • Custom Orders: http://localhost:${PORT}/pages/custom.html`);
+  console.log(`   • Homepage: http://localhost:${PORT}/pages/homepage.html`);
+  console.log(`   • Shop: http://localhost:${PORT}/pages/shop.html`);
+  console.log(`   • Cart: http://localhost:${PORT}/pages/cart.html`);
   console.log(`\n💡 Press Ctrl+C to stop the server`);
 });
 
