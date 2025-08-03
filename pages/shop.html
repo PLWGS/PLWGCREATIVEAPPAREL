@@ -1478,31 +1478,38 @@
             const quickAddBtn = productCard.querySelector('.quick-add-btn');
             quickAddBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent card click
-                const productData = JSON.parse(quickAddBtn.dataset.product);
                 
-                // Debug logging
-                console.log('=== SHOP PAGE DEBUG ===');
-                console.log('Product data being sent to cart:', productData);
-                console.log('Product title:', productData.title);
-                console.log('Product price:', productData.price);
-                console.log('Product image:', productData.image);
-                
-                // Keep the original image path as is
-                const imagePath = productData.image;
-                
-                const params = new URLSearchParams({
-                    image: imagePath,
-                    title: productData.title,
-                    price: productData.price,
-                    rating: productData.rating,
-                    description: productData.collection
-                });
-                
-                console.log('URL parameters being sent:', params.toString());
-                console.log('Full URL will be:', `cart.html?${params.toString()}&v=${Date.now()}`);
-                
-                // Navigate to cart with product data
-                window.location.href = `cart.html?${params.toString()}&v=${Date.now()}`;
+                try {
+                    const productData = JSON.parse(quickAddBtn.dataset.product);
+                    
+                    // Debug logging
+                    console.log('=== SHOP PAGE DEBUG ===');
+                    console.log('Product data being sent to cart:', productData);
+                    console.log('Product title:', productData.title);
+                    console.log('Product price:', productData.price);
+                    console.log('Product image:', productData.image);
+                    
+                    // Keep the original image path as is
+                    const imagePath = productData.image;
+                    
+                    // Properly encode the data to handle special characters
+                    const params = new URLSearchParams();
+                    params.append('image', imagePath);
+                    params.append('title', productData.title);
+                    params.append('price', productData.price);
+                    params.append('rating', productData.rating);
+                    params.append('description', productData.collection);
+                    
+                    console.log('URL parameters being sent:', params.toString());
+                    console.log('Full URL will be:', `cart.html?${params.toString()}&v=${Date.now()}`);
+                    
+                    // Navigate to cart with product data
+                    window.location.href = `cart.html?${params.toString()}&v=${Date.now()}`;
+                } catch (error) {
+                    console.error('Error processing product data:', error);
+                    console.error('Product data string:', quickAddBtn.dataset.product);
+                    alert('Error adding product to cart. Please try again.');
+                }
             });
             
             return productCard;
