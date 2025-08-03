@@ -678,6 +678,31 @@
                 </div>
             </div>
         </section>
+
+        <!-- Newsletter Signup -->
+        <section class="py-20 relative z-10">
+            <div class="container mx-auto px-6">
+                <div class="glass-card rounded-2xl p-12 text-center max-w-4xl mx-auto">
+                    <h2 class="font-orbitron text-3xl font-bold text-white mb-4">Join the Creative Rebellion</h2>
+                    <p class="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">
+                        Be the first to know about new designs, exclusive drops, and behind-the-scenes content from Lori's creative journey.
+                    </p>
+                    
+                    <form id="newsletterForm" class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+                        <input type="email" id="newsletterEmail" placeholder="Enter your email" class="input-field flex-1" required />
+                        <button type="submit" id="subscribeBtn" class="btn-primary neon-glow whitespace-nowrap">
+                            <span class="btn-text">Subscribe Now</span>
+                            <span class="btn-loading hidden">Subscribing...</span>
+                        </button>
+                    </form>
+                    <div id="newsletterMessage" class="mt-4 hidden"></div>
+                    
+                    <p class="text-text-secondary text-sm mt-4">
+                        No spam, just creative inspiration. Unsubscribe anytime.
+                    </p>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Recently Viewed Bar -->
@@ -1623,6 +1648,76 @@
                 button.classList.add('border-accent', 'text-accent', 'bg-accent', 'bg-opacity-10');
             });
         });
+
+        // Newsletter Subscription
+        const newsletterForm = document.getElementById('newsletterForm');
+        const newsletterEmail = document.getElementById('newsletterEmail');
+        const subscribeBtn = document.getElementById('subscribeBtn');
+        const btnText = subscribeBtn?.querySelector('.btn-text');
+        const btnLoading = subscribeBtn?.querySelector('.btn-loading');
+        const newsletterMessage = document.getElementById('newsletterMessage');
+
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = newsletterEmail.value.trim();
+                
+                if (!email) {
+                    showMessage('Please enter a valid email address.', 'error');
+                    return;
+                }
+
+                // Show loading state
+                btnText.classList.add('hidden');
+                btnLoading.classList.remove('hidden');
+                subscribeBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/api/subscribe', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage('🎉 Welcome to the Creative Rebellion! Check your email for your 20% OFF code.', 'success');
+                        newsletterEmail.value = '';
+                    } else {
+                        showMessage(data.error || 'Something went wrong. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Newsletter subscription error:', error);
+                    showMessage('Network error. Please check your connection and try again.', 'error');
+                } finally {
+                    // Reset button state
+                    btnText.classList.remove('hidden');
+                    btnLoading.classList.add('hidden');
+                    subscribeBtn.disabled = false;
+                }
+            });
+        }
+
+        function showMessage(message, type) {
+            if (!newsletterMessage) return;
+            
+            newsletterMessage.textContent = message;
+            newsletterMessage.className = `mt-4 p-3 rounded-lg text-center ${
+                type === 'success' 
+                    ? 'bg-green-900/20 border border-green-500/30 text-green-400' 
+                    : 'bg-red-900/20 border border-red-500/30 text-red-400'
+            }`;
+            newsletterMessage.classList.remove('hidden');
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                newsletterMessage.classList.add('hidden');
+            }, 5000);
+        }
     </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
