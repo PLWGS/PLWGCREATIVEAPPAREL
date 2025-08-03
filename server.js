@@ -18,10 +18,16 @@ app.use(express.json());
 app.use(express.static('.'));
 
 // Database connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+let pool = null;
+
+if (process.env.DATABASE_URL) {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
+} else {
+  console.log('⚠️ No DATABASE_URL found - running in development mode without database');
+}
 
 // Email transporter
 const transporter = nodemailer.createTransport({
@@ -33,6 +39,14 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASSWORD
   }
 });
+
+// Helper function to check database availability
+function checkDatabase() {
+  if (!pool) {
+    return { available: false, error: 'Database not configured' };
+  }
+  return { available: true };
+}
 
 // Authentication middleware
 const authenticateToken = async (req, res, next) => {
@@ -54,6 +68,11 @@ const authenticateToken = async (req, res, next) => {
 
 // Initialize database tables
 async function initializeDatabase() {
+  if (!pool) {
+    console.log('⚠️ Skipping database initialization - no database connection');
+    return;
+  }
+  
   try {
     // Create subscribers table
     await pool.query(`
@@ -220,6 +239,12 @@ app.get('/api/admin/verify', authenticateToken, (req, res) => {
 
 // Get all orders
 app.get('/api/orders', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) {
+    // Return mock data for development
+    return res.json({ orders: [] });
+  }
+
   try {
     const { status, limit = 50, offset = 0 } = req.query;
     
@@ -546,6 +571,17 @@ app.patch('/api/custom-requests/:id/status', authenticateToken, async (req, res)
 
 // Get dashboard analytics
 app.get('/api/analytics/dashboard', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) {
+    // Return mock data for development
+    return res.json({
+      sales: { total_sales: 0, total_orders: 0 },
+      topProducts: [],
+      dailySales: [],
+      lowStock: []
+    });
+  }
+
   try {
     const { period = '7d' } = req.query;
     
@@ -957,6 +993,12 @@ async function sendWelcomeEmail(email, name) {
 
 // Get all subscribers (admin endpoint)
 app.get('/api/subscribers', async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) {
+    // Return mock data for development
+    return res.json({ subscribers: [] });
+  }
+
   try {
     const result = await pool.query('SELECT * FROM subscribers ORDER BY subscribed_at DESC');
     res.json({ subscribers: result.rows });
