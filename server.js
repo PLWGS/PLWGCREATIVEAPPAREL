@@ -196,13 +196,21 @@ app.post('/api/admin/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('🔍 DEBUG LOGIN ATTEMPT:');
+    console.log('Email provided:', email);
+    console.log('Password provided:', password ? '[HIDDEN]' : 'undefined');
+    console.log('ADMIN_EMAIL from env:', process.env.ADMIN_EMAIL);
+    console.log('ADMIN_PASSWORD_HASH from env:', process.env.ADMIN_PASSWORD_HASH ? '[EXISTS]' : 'undefined');
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
     // Check if admin credentials match
     if (email === process.env.ADMIN_EMAIL) {
+      console.log('✅ Email matches');
       const isValidPassword = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+      console.log('🔐 Password check result:', isValidPassword);
       
       if (isValidPassword) {
         const token = jwt.sign(
@@ -217,9 +225,11 @@ app.post('/api/admin/login', async (req, res) => {
           user: { email, role: 'admin' }
         });
       } else {
+        console.log('❌ Password does not match hash');
         res.status(401).json({ error: 'Invalid credentials' });
       }
     } else {
+      console.log('❌ Email does not match');
       res.status(401).json({ error: 'Invalid credentials' });
     }
   } catch (error) {
