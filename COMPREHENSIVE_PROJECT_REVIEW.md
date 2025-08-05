@@ -91,13 +91,16 @@ The `.env` file is now properly configured with:
 
 ## 🛍️ E-COMMERCE FUNCTIONALITY - MAJOR UPDATES
 
-### Product Catalog (83 Products) - FULLY FUNCTIONAL
+### Product Catalog (43 Products) - FULLY FUNCTIONAL
 - **Source:** Downloaded from Etsy shop
-- **Images:** 83 product photos in `etsy_images/` directory
+- **Images:** 43 product photos in `etsy_images/` directory (cleaned up from 83)
 - **Categories:** Halloween, Father's Day, Birthday, Cancer Awareness, Custom, etc.
 - **Pricing:** USD currency (corrected from MXN)
 - **Display:** Grid layout with pagination (6 products per page)
 - **Database Integration:** All products now properly stored in PostgreSQL database
+- **Image Cleanup:** Removed 40 products with missing image files using `fix_product_images.py`
+- **Naming Convention:** Some products have duplicate numbers with different names (e.g., product_01 with different suffixes)
+- **Status:** ✅ Working correctly despite naming inconsistencies
 - **Dynamic Loading:** Product details fetched from database via API
 
 ### Shopping Cart System - COMPLETELY REBUILT
@@ -130,6 +133,8 @@ The `.env` file is now properly configured with:
 - **Schema Updates:** Added missing columns (subcategory, tags, sale fields)
 - **Data Consistency:** All product names match between frontend and database
 - **Foreign Key Constraints:** Proper product_id lookup by name
+- **Image Cleanup:** Python script (`fix_product_images.py`) removes products with missing image files
+- **Database Optimization:** Reduced from 83 to 43 products by removing entries without corresponding images
 
 ---
 
@@ -173,7 +178,7 @@ The `.env` file is now properly configured with:
 
 ## 🛠️ ADMIN UPLOADS FUNCTIONALITY - NEW
 
-### Admin Uploads Page (`pages/admin-uploads.html`) - NEW FILE
+### Admin Uploads Page (`pages/admin-uploads.html`) - ENHANCED
 - **Comprehensive Product Management:** Full CRUD interface for product management
 - **Tabbed Interface:** "Add New Product" and "Edit Existing Products" tabs
 - **Form Features:**
@@ -189,6 +194,10 @@ The `.env` file is now properly configured with:
 - **Database Integration:** All changes immediately reflected in database
 - **Image Management:** Support for main product image and multiple sub-images
 - **Real-time Updates:** Changes immediately available for purchase
+- **NEW:** Back to Edit Products navigation button
+- **NEW:** Fixed image preview handling for existing products
+- **NEW:** Improved form state management and button text updates
+- **NEW:** Resolved undefined URL requests and navigation issues
 
 ### Enhanced Database Schema - UPDATED
 The `products` table now includes new JSON columns:
@@ -198,14 +207,25 @@ The `products` table now includes new JSON columns:
 - `features JSON` - Product features (preshrunk, double-stitched, etc.)
 - `sub_images JSON` - Additional product images
 
-### Admin Uploads JavaScript Functions - NEW
+### Admin Uploads JavaScript Functions - ENHANCED
 - `loadAllProducts()` - Fetches all products from database with authentication
 - `editProduct(productId)` - Populates form with existing product data for editing
 - `updateProduct(productId)` - Sends PUT request to update existing product
 - `saveProduct()` - Creates new product via POST request
 - `displayProducts()` - Renders product list with search and filter functionality
-- `updateImagePreviews()` - Handles image upload previews
+- `updateImagePreviews()` - Handles image upload previews (enhanced for existing products)
 - `updateColorSelection()` / `updateSizeSelection()` - Visual selection indicators
+- `clearForm()` - Enhanced to reset button states and hide navigation elements
+- `showNewProductForm()` / `showEditProductsForm()` - Improved tab switching
+
+### Recent Admin Uploads Fixes - RESOLVED
+- **Edit Button Functionality:** Fixed "TypeError: can't access property 'textContent', saveButton is null" error
+- **Image Preview Handling:** Enhanced to handle both new uploads and existing product images
+- **Navigation Issues:** Resolved undefined URL requests and navigation problems
+- **Form State Management:** Improved button text updates and form reset functionality
+- **Tab Switching:** Fixed issues with switching between Add/Edit modes
+- **Back Navigation:** Added "Back to Edit Products" button for better UX
+- **Database Integration:** All CRUD operations now working perfectly
 
 ### Navigation Integration - UPDATED
 - **Admin Dashboard Link:** Added "Uploads" link to `pages/admin.html`
