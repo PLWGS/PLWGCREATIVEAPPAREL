@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Login - PlwgsCreativeApparel | Access Your Account</title>
+    <meta name="description" content="Log in to your PlwgsCreativeApparel account to access your orders, wishlist, and loyalty rewards." />
+    <link rel="stylesheet" href="../css/main.css" />
+    <style>
+        /* Particle Animation Styles */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00bcd4;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        .particle:nth-child(odd) {
+            animation-delay: -2s;
+            animation-duration: 8s;
+        }
+        
+        .particle:nth-child(even) {
+            animation-delay: -4s;
+            animation-duration: 10s;
+        }
+        
+        /* Glassmorphism Effects */
+        .glass-card {
+            backdrop-filter: blur(15px);
+            background: rgba(42, 42, 42, 0.6);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        /* Neon Glow Effects */
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .neon-glow:hover {
+            box-shadow: 0 0 30px rgba(0, 188, 212, 0.6);
+        }
+        
+        /* Form Styles */
+        .form-input {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            border-color: #00bcd4;
+            box-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+        }
+        
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 188, 212, 0.3);
+            border-top: 2px solid #00bcd4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error/Success Messages */
+        .message {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #ef4444;
+        }
+        
+        .message.success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #10b981;
+        }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen">
+    <!-- Particle Background -->
+    <div class="particles-container" id="particles"></div>
+    
+    <!-- Navigation -->
+    <header class="glass-card border-0 border-b border-surface-light sticky top-0 z-40">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="homepage.html" class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-gradient-to-r from-accent to-accent-light rounded-lg flex items-center justify-center">
+                            <span class="font-orbitron font-bold text-black text-xl">P</span>
+                        </div>
+                        <span class="font-orbitron text-xl font-bold text-white">PlwgsCreativeApparel</span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="homepage.html" class="text-text-secondary hover:text-accent transition-colors">Home</a>
+                    <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Shop</a>
+                    <a href="account.html" class="btn-primary text-sm px-4 py-2">My Account</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+        <div class="max-w-md mx-auto">
+            <!-- Login Card -->
+            <div class="glass-card rounded-2xl p-8 neon-glow">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-gradient-to-r from-accent to-accent-light rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="font-orbitron font-bold text-black text-2xl">P</span>
+                    </div>
+                    <h1 class="font-orbitron text-3xl font-bold text-white mb-2">Welcome Back</h1>
+                    <p class="text-text-secondary">Access your creative rebellion account</p>
+                </div>
+
+                <!-- Messages -->
+                <div id="messages"></div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-white mb-2">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-input w-full px-4 py-3 rounded-lg focus:outline-none"
+                            placeholder="Enter your email"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-white mb-2">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input w-full px-4 py-3 rounded-lg focus:outline-none"
+                            placeholder="Enter your password"
+                            required
+                        />
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <input type="checkbox" class="rounded border-accent text-accent focus:ring-accent">
+                            <span class="ml-2 text-sm text-text-secondary">Remember me</span>
+                        </label>
+                        <a href="#" class="text-sm text-accent hover:text-accent-light transition-colors">Forgot password?</a>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        id="loginBtn"
+                        class="btn-primary w-full py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
+                    >
+                        <span id="loginBtnText">Sign In</span>
+                        <div id="loginSpinner" class="spinner ml-2 hidden"></div>
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-text-secondary">Don't have an account?</p>
+                    <button id="showRegisterBtn" class="text-accent hover:text-accent-light font-medium transition-colors">
+                        Create Account
+                    </button>
+                </div>
+
+                <!-- Register Form (Hidden by default) -->
+                <form id="registerForm" class="space-y-6 hidden">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-white mb-2">First Name</label>
+                            <input 
+                                type="text" 
+                                id="firstName" 
+                                name="firstName" 
+                                class="form-input w-full px-4 py-3 rounded-lg focus:outline-none"
+                                placeholder="First name"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-white mb-2">Last Name</label>
+                            <input 
+                                type="text" 
+                                id="lastName" 
+                                name="lastName" 
+                                class="form-input w-full px-4 py-3 rounded-lg focus:outline-none"
+                                placeholder="Last name"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="registerEmail" class="block text-sm font-medium text-white mb-2">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="registerEmail" 
+                            name="registerEmail" 
+                            class="form-input w-full px-4 py-3 rounded-lg focus:outline-none"
+                            placeholder="Enter your email"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label for="registerPassword" class="block text-sm font-medium text-white mb-2">Password</label>
+                        <input 
+                            type="password" 
+                            id="registerPassword" 
+                            name="registerPassword" 
+                            class="form-input w-full px-4 py-3 rounded-lg focus:outline-none"
+                            placeholder="Create a password"
+                            required
+                        />
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        id="registerBtn"
+                        class="btn-primary w-full py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
+                    >
+                        <span id="registerBtnText">Create Account</span>
+                        <div id="registerSpinner" class="spinner ml-2 hidden"></div>
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <button id="showLoginBtn" class="text-accent hover:text-accent-light font-medium transition-colors hidden">
+                        Back to Login
+                    </button>
+                </div>
+            </div>
+
+            <!-- Back to Store -->
+            <div class="text-center mt-6">
+                <a href="homepage.html" class="text-text-secondary hover:text-accent transition-colors">
+                    ← Back to Store
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Create particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Show message
+        function showMessage(message, type = 'error') {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            messagesContainer.innerHTML = '';
+            messagesContainer.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        // Toggle forms
+        function toggleForms() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const showRegisterBtn = document.getElementById('showRegisterBtn');
+            const showLoginBtn = document.getElementById('showLoginBtn');
+            
+            if (loginForm.classList.contains('hidden')) {
+                // Show login
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                showRegisterBtn.classList.remove('hidden');
+                showLoginBtn.classList.add('hidden');
+            } else {
+                // Show register
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                showRegisterBtn.classList.add('hidden');
+                showLoginBtn.classList.remove('hidden');
+            }
+        }
+
+        // Handle login
+        async function handleLogin(email, password) {
+            try {
+                const response = await fetch('/api/customer/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        action: 'login'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store token and customer data
+                    localStorage.setItem('customerToken', data.token);
+                    localStorage.setItem('customerData', JSON.stringify(data.customer));
+                    
+                    showMessage('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect to account page
+                    setTimeout(() => {
+                        window.location.href = 'account.html';
+                    }, 1000);
+                } else {
+                    showMessage(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Network error. Please try again.');
+            }
+        }
+
+        // Handle registration
+        async function handleRegister(firstName, lastName, email, password) {
+            try {
+                const response = await fetch('/api/customer/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        action: 'register',
+                        first_name: firstName,
+                        last_name: lastName
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store token and customer data
+                    localStorage.setItem('customerToken', data.token);
+                    localStorage.setItem('customerData', JSON.stringify(data.customer));
+                    
+                    showMessage('Account created successfully! Redirecting...', 'success');
+                    
+                    // Redirect to account page
+                    setTimeout(() => {
+                        window.location.href = 'account.html';
+                    }, 1000);
+                } else {
+                    showMessage(data.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage('Network error. Please try again.');
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            
+            // Check if already logged in
+            const token = localStorage.getItem('customerToken');
+            if (token) {
+                window.location.href = 'account.html';
+            }
+            
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                // Show loading
+                const loginBtn = document.getElementById('loginBtn');
+                const loginBtnText = document.getElementById('loginBtnText');
+                const loginSpinner = document.getElementById('loginSpinner');
+                
+                loginBtn.disabled = true;
+                loginBtnText.textContent = 'Signing In...';
+                loginSpinner.classList.remove('hidden');
+                
+                await handleLogin(email, password);
+                
+                // Reset button
+                loginBtn.disabled = false;
+                loginBtnText.textContent = 'Sign In';
+                loginSpinner.classList.add('hidden');
+            });
+            
+            // Register form
+            document.getElementById('registerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+                
+                // Show loading
+                const registerBtn = document.getElementById('registerBtn');
+                const registerBtnText = document.getElementById('registerBtnText');
+                const registerSpinner = document.getElementById('registerSpinner');
+                
+                registerBtn.disabled = true;
+                registerBtnText.textContent = 'Creating Account...';
+                registerSpinner.classList.remove('hidden');
+                
+                await handleRegister(firstName, lastName, email, password);
+                
+                // Reset button
+                registerBtn.disabled = false;
+                registerBtnText.textContent = 'Create Account';
+                registerSpinner.classList.add('hidden');
+            });
+            
+            // Toggle buttons
+            document.getElementById('showRegisterBtn').addEventListener('click', toggleForms);
+            document.getElementById('showLoginBtn').addEventListener('click', toggleForms);
+        });
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html> 

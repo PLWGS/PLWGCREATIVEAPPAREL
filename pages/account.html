@@ -1157,7 +1157,433 @@
             initTabs();
             initWishlistHearts();
             animateProgressRings();
+            
+            // Initialize customer dashboard functionality
+            initCustomerDashboard();
         });
+
+        // Customer Dashboard API Integration
+        function getAuthToken() {
+            return localStorage.getItem('customerToken');
+        }
+
+        function isCustomerLoggedIn() {
+            return !!getAuthToken();
+        }
+
+        function redirectToLogin() {
+            window.location.href = 'customer-login.html';
+        }
+
+        async function apiRequest(endpoint, options = {}) {
+            const token = getAuthToken();
+            
+            if (!token && !endpoint.includes('/auth')) {
+                redirectToLogin();
+                return null;
+            }
+
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` }),
+                    ...options.headers
+                }
+            };
+
+            try {
+                const response = await fetch(`/api/customer${endpoint}`, {
+                    ...defaultOptions,
+                    ...options
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('customerToken');
+                    localStorage.removeItem('customerData');
+                    redirectToLogin();
+                    return null;
+                }
+
+                return response;
+            } catch (error) {
+                console.error('API request error:', error);
+                return null;
+            }
+        }
+
+        // Initialize customer dashboard
+        async function initCustomerDashboard() {
+            if (!isCustomerLoggedIn()) {
+                // Show login prompt or redirect
+                showLoginPrompt();
+                return;
+            }
+
+            try {
+                // Load all customer data
+                await Promise.all([
+                    loadCustomerProfile(),
+                    loadCustomerOrders(),
+                    loadCustomerWishlist(),
+                    loadCustomerLoyalty(),
+                    loadCustomerRecommendations()
+                ]);
+
+                // Update UI with customer data
+                updateCustomerUI();
+            } catch (error) {
+                console.error('Error initializing customer dashboard:', error);
+            }
+        }
+
+        // Load customer profile
+        async function loadCustomerProfile() {
+            try {
+                const response = await apiRequest('/profile');
+                if (!response) return;
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    window.customerData = data;
+                    updateProfileSection(data);
+                }
+            } catch (error) {
+                console.error('Error loading customer profile:', error);
+            }
+        }
+
+        // Update profile section
+        function updateProfileSection(data) {
+            const { customer, addresses, preferences, style_profile } = data;
+            
+            // Update customer name
+            const customerNameElement = document.querySelector('.text-2xl.font-bold.text-white');
+            if (customerNameElement && customer.name) {
+                customerNameElement.textContent = `Welcome back, ${customer.name.split(' ')[0]}!`;
+            }
+
+            // Update loyalty points
+            const loyaltyPointsElement = document.querySelector('.font-orbitron.text-3xl.font-bold.text-accent');
+            if (loyaltyPointsElement && customer.loyalty_points) {
+                loyaltyPointsElement.textContent = customer.loyalty_points;
+            }
+
+            // Update order count
+            const orderCountElement = document.querySelector('.text-center:nth-child(1) .font-orbitron');
+            if (orderCountElement && customer.total_orders) {
+                orderCountElement.textContent = customer.total_orders;
+            }
+
+            // Update addresses
+            updateAddressesSection(addresses);
+            
+            // Update preferences
+            updatePreferencesSection(preferences);
+            
+            // Update style profile
+            updateStyleProfileSection(style_profile);
+        }
+
+        // Load customer orders
+        async function loadCustomerOrders() {
+            try {
+                const response = await apiRequest('/orders?limit=5');
+                if (!response) return;
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateOrdersSection(data.orders);
+                }
+            } catch (error) {
+                console.error('Error loading customer orders:', error);
+            }
+        }
+
+        // Update orders section
+        function updateOrdersSection(orders) {
+            const ordersContainer = document.querySelector('.space-y-4');
+            if (!ordersContainer || !orders) return;
+
+            ordersContainer.innerHTML = orders.map(order => `
+                <div class="glass-card rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-semibold text-white">Order #${order.order_number}</h3>
+                            <p class="text-text-secondary text-sm">${new Date(order.created_at).toLocaleDateString()} • ${order.item_count} items</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-accent font-bold">$${order.total_amount}</p>
+                            <span class="status-badge status-${order.status}">${order.status}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        ${order.items ? order.items.map(item => `
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-text-secondary">${item.product_name}</span>
+                                <span class="text-white">$${item.total_price}</span>
+                            </div>
+                        `).join('') : ''}
+                    </div>
+                    <div class="flex space-x-2 mt-4">
+                        <button class="btn-primary text-xs px-3 py-1">Track Package</button>
+                        <button class="border border-accent text-accent px-3 py-1 rounded text-xs">Reorder</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load customer wishlist
+        async function loadCustomerWishlist() {
+            try {
+                const response = await apiRequest('/wishlist');
+                if (!response) return;
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateWishlistSection(data.wishlist);
+                }
+            } catch (error) {
+                console.error('Error loading wishlist:', error);
+            }
+        }
+
+        // Update wishlist section
+        function updateWishlistSection(wishlist) {
+            const wishlistContainer = document.querySelector('.grid.md\\:grid-cols-3.gap-6');
+            if (!wishlistContainer || !wishlist) return;
+
+            wishlistContainer.innerHTML = wishlist.map(item => `
+                <div class="glass-card rounded-xl p-6 relative">
+                    <button class="heart-icon absolute top-4 right-4 active" onclick="removeFromWishlist(${item.product_id})">
+                        <svg class="w-6 h-6 text-accent" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </button>
+                    <img src="${item.image_url}" alt="${item.name}" class="w-full h-48 object-cover rounded-lg mb-4" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=300'; this.onerror=null;" />
+                    <h3 class="font-semibold text-white mb-2">${item.name}</h3>
+                    <p class="text-text-secondary text-sm mb-4">${item.description}</p>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            ${item.is_on_sale ? `
+                                <span class="text-error text-sm line-through">$${item.original_price}</span>
+                                <span class="text-accent font-bold ml-2">$${item.price}</span>
+                            ` : `
+                                <span class="text-accent font-bold">$${item.price}</span>
+                            `}
+                        </div>
+                        <button class="btn-primary text-xs px-3 py-1" onclick="addToCart(${item.id})">Add to Cart</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load customer loyalty
+        async function loadCustomerLoyalty() {
+            try {
+                const response = await apiRequest('/loyalty');
+                if (!response) return;
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateLoyaltySection(data);
+                }
+            } catch (error) {
+                console.error('Error loading loyalty info:', error);
+            }
+        }
+
+        // Update loyalty section
+        function updateLoyaltySection(data) {
+            const { loyalty, rewards, history, tier_progress } = data;
+            
+            // Update loyalty points
+            const pointsElement = document.querySelector('.font-orbitron.text-3xl.font-bold.text-accent');
+            if (pointsElement && loyalty.loyalty_points) {
+                pointsElement.textContent = loyalty.loyalty_points;
+            }
+
+            // Update tier progress
+            const progressBar = document.querySelector('.bg-gradient-to-r.from-accent.to-accent-light');
+            if (progressBar && tier_progress.percentage) {
+                progressBar.style.width = `${tier_progress.percentage}%`;
+            }
+
+            // Update rewards
+            updateRewardsSection(rewards);
+            
+            // Update points history
+            updatePointsHistorySection(history);
+        }
+
+        // Update rewards section
+        function updateRewardsSection(rewards) {
+            const rewardsContainer = document.querySelector('.grid.md\\:grid-cols-2.gap-4');
+            if (!rewardsContainer || !rewards) return;
+
+            rewardsContainer.innerHTML = rewards.map(reward => `
+                <div class="p-4 bg-surface rounded-lg border border-accent">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-semibold text-white">${reward.reward_name}</h4>
+                        <span class="text-accent font-bold text-sm">${reward.points_cost} pts</span>
+                    </div>
+                    <p class="text-text-secondary text-sm mb-4">${reward.reward_type}</p>
+                    <button class="btn-primary w-full text-sm" onclick="redeemReward(${reward.id})">Redeem Now</button>
+                </div>
+            `).join('');
+        }
+
+        // Wishlist functions
+        async function addToWishlist(productId) {
+            try {
+                const response = await apiRequest('/wishlist', {
+                    method: 'POST',
+                    body: JSON.stringify({ product_id: productId })
+                });
+
+                if (response && response.ok) {
+                    showNotification('Added to wishlist!', 'success');
+                    loadCustomerWishlist(); // Refresh wishlist
+                }
+            } catch (error) {
+                console.error('Error adding to wishlist:', error);
+                showNotification('Error adding to wishlist', 'error');
+            }
+        }
+
+        async function removeFromWishlist(productId) {
+            try {
+                const response = await apiRequest(`/wishlist/${productId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response && response.ok) {
+                    showNotification('Removed from wishlist!', 'success');
+                    loadCustomerWishlist(); // Refresh wishlist
+                }
+            } catch (error) {
+                console.error('Error removing from wishlist:', error);
+                showNotification('Error removing from wishlist', 'error');
+            }
+        }
+
+        // Loyalty functions
+        async function redeemReward(rewardId) {
+            try {
+                const response = await apiRequest('/loyalty/redeem', {
+                    method: 'POST',
+                    body: JSON.stringify({ reward_id: rewardId })
+                });
+
+                if (response && response.ok) {
+                    showNotification('Reward redeemed successfully!', 'success');
+                    loadCustomerLoyalty(); // Refresh loyalty data
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Error redeeming reward', 'error');
+                }
+            } catch (error) {
+                console.error('Error redeeming reward:', error);
+                showNotification('Error redeeming reward', 'error');
+            }
+        }
+
+        // Cart functions
+        function addToCart(productId) {
+            // Implement cart functionality
+            showNotification('Added to cart!', 'success');
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+                type === 'success' ? 'bg-success text-white' :
+                type === 'error' ? 'bg-error text-white' :
+                'bg-accent text-black'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Show login prompt
+        function showLoginPrompt() {
+            const loginPrompt = document.createElement('div');
+            loginPrompt.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            loginPrompt.innerHTML = `
+                <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
+                    <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Welcome to Your Account</h2>
+                    <p class="text-text-secondary mb-6">Please log in to access your personalized dashboard.</p>
+                    <div class="space-y-4">
+                        <button class="btn-primary w-full" onclick="window.location.href='customer-login.html'">Log In</button>
+                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" onclick="window.location.href='customer-register.html'">Create Account</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(loginPrompt);
+        }
+
+        // Update customer UI
+        function updateCustomerUI() {
+            // Update any remaining static elements with customer data
+            const customerData = window.customerData;
+            if (!customerData) return;
+
+            // Update loyalty tier
+            const tierElement = document.querySelector('.text-accent.font-semibold');
+            if (tierElement && customerData.customer.loyalty_tier) {
+                tierElement.textContent = customerData.customer.loyalty_tier;
+            }
+
+            // Update total spent
+            const spentElement = document.querySelector('.text-center:nth-child(2) .font-orbitron');
+            if (spentElement && customerData.customer.total_spent) {
+                spentElement.textContent = `$${customerData.customer.total_spent.toFixed(2)}`;
+            }
+        }
+
+        // Load customer recommendations
+        async function loadCustomerRecommendations() {
+            try {
+                const response = await apiRequest('/recommendations');
+                if (!response) return;
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateRecommendationsSection(data.recommendations);
+                }
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+            }
+        }
+
+        // Update recommendations section
+        function updateRecommendationsSection(recommendations) {
+            const recommendationsContainer = document.querySelector('.grid.md\\:grid-cols-2.gap-4');
+            if (!recommendationsContainer || !recommendations) return;
+
+            recommendationsContainer.innerHTML = recommendations.map(product => `
+                <div class="glass-card rounded-xl p-6">
+                    <img src="${product.image_url}" alt="${product.name}" class="w-full h-32 object-cover rounded-lg mb-4" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=300'; this.onerror=null;" />
+                    <h3 class="font-semibold text-white mb-2">${product.name}</h3>
+                    <p class="text-text-secondary text-sm mb-4">${product.description}</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-accent font-bold">$${product.price}</span>
+                        <button class="btn-primary text-xs px-3 py-1" onclick="addToWishlist(${product.id})">Add to Wishlist</button>
+                    </div>
+                </div>
+            `).join('');
+        }
     </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
