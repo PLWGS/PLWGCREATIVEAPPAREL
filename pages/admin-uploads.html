@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Uploads - PlwgsCreativeApparel Product Management</title>
+    <meta name="description" content="Comprehensive product management system for PlwgsCreativeApparel - upload, modify, and manage all product details with dark futuristic interface." />
+    <link rel="stylesheet" href="../css/main.css" />
+    <style>
+        /* Uploads Specific Styles */
+        .sidebar-nav {
+            backdrop-filter: blur(10px);
+            background: rgba(42, 42, 42, 0.95);
+            border-right: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(15px);
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .upload-area {
+            border: 2px dashed rgba(0, 188, 212, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: rgba(0, 188, 212, 0.6);
+            background: rgba(0, 188, 212, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #00bcd4;
+            background: rgba(0, 188, 212, 0.1);
+        }
+        
+        .image-preview {
+            position: relative;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+        
+        .image-preview img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            border: 2px solid rgba(0, 188, 212, 0.3);
+        }
+        
+        .image-preview .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .color-option.selected {
+            border-color: #00bcd4;
+            transform: scale(1.1);
+        }
+        
+        .size-option {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(0, 188, 212, 0.3);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .size-option.selected {
+            background: rgba(0, 188, 212, 0.2);
+            border-color: #00bcd4;
+            color: #00bcd4;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .product-card {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover {
+            border-color: rgba(0, 188, 212, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar-nav {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar-nav.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-text-primary overflow-x-hidden">
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar-nav fixed left-0 top-0 h-full w-64 z-50 transition-transform duration-300">
+        <div class="p-6">
+            <!-- Logo -->
+            <div class="flex items-center space-x-3 mb-8">
+                <svg class="w-8 h-8 text-accent" viewBox="0 0 40 40" fill="currentColor">
+                    <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
+                    <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
+                    <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
+                </svg>
+                <div>
+                    <span class="font-orbitron text-lg font-bold text-gradient">PlwgsCreative</span>
+                    <p class="text-text-secondary text-xs">Admin Dashboard</p>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="space-y-2">
+                <a href="admin.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v0H8v0z"/>
+                    </svg>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+
+                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <span>Products</span>
+                    <div class="notification-dot ml-auto"></div>
+                </a>
+
+                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <span>Orders</span>
+                    <span class="ml-auto bg-warning text-black text-xs px-2 py-1 rounded-full">0</span>
+                </a>
+
+                <a href="custom.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                    <span>Custom Orders</span>
+                    <span class="ml-auto bg-error text-white text-xs px-2 py-1 rounded-full">5</span>
+                </a>
+
+                <a href="account.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                    </svg>
+                    <span>Customers</span>
+                </a>
+
+                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span>Analytics</span>
+                </a>
+
+                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Marketing</span>
+                </a>
+
+                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                    </svg>
+                    <span>Financials</span>
+                </a>
+
+                <a href="admin-uploads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-accent bg-opacity-20 text-accent border border-accent border-opacity-30">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <span class="font-medium">Uploads</span>
+                </a>
+            </nav>
+
+            <!-- Quick Actions -->
+            <div class="mt-8 pt-6 border-t border-surface-light">
+                <h3 class="text-text-secondary text-sm font-medium mb-4">Quick Actions</h3>
+                <div class="space-y-2">
+                    <button onclick="showNewProductForm()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                        Add New Product
+                    </button>
+                    <button onclick="loadAllProducts()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                        Refresh Products
+                    </button>
+                    <button onclick="exportProductData()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                        Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen">
+        <!-- Top Header -->
+        <header class="glass-card border-0 border-b border-surface-light p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="lg:hidden text-text-primary hover:text-accent transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    
+                    <div>
+                        <h1 class="font-orbitron text-2xl font-bold text-white">Product Management</h1>
+                        <p class="text-text-secondary text-sm">Upload, modify, and manage all product details and specifications.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- View Store -->
+                    <a href="homepage.html" class="btn-primary text-sm px-4 py-2">
+                        View Store
+                    </a>
+
+                    <!-- Profile -->
+                    <div class="flex items-center space-x-3">
+                        <img src="/etsy_images/product_01_Adult-I-am-the-Storm-Cancer-Warrior-Jacket.jpg" alt="Lori Nelton" class="w-10 h-10 rounded-full border-2 border-accent object-cover" loading="lazy" onerror="this.src='/etsy_images/product_02_Adult-&-Kid\'s-Fight-Childhood-Cancer-Jacket.jpg'; this.onerror=null;" />
+                        <div class="hidden md:block">
+                            <p class="text-white font-medium text-sm">Lori Nelton</p>
+                            <p class="text-text-secondary text-xs">Store Owner</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="p-6 space-y-8">
+            <!-- Product Management Tabs -->
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex space-x-4 mb-6">
+                    <button id="tab-new-product" class="px-4 py-2 rounded-lg bg-accent bg-opacity-20 text-accent border border-accent border-opacity-30 font-medium">
+                        Add New Product
+                    </button>
+                    <button id="tab-edit-products" class="px-4 py-2 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                        Edit Existing Products
+                    </button>
+                </div>
+
+                <!-- New Product Form -->
+                <div id="new-product-form" class="space-y-6">
+                    <h2 class="font-orbitron text-xl font-bold text-white mb-4">Add New Product</h2>
+                    
+                    <!-- Basic Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Product Name</label>
+                            <input type="text" id="product-name" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="Enter product name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Category</label>
+                            <select id="product-category" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none">
+                                <option value="">Select Category</option>
+                                <option value="Halloween">Halloween</option>
+                                <option value="Father's Day">Father's Day</option>
+                                <option value="Birthday">Birthday</option>
+                                <option value="Cancer Awareness">Cancer Awareness</option>
+                                <option value="Custom">Custom</option>
+                                <option value="Horror Essentials">Horror Essentials</option>
+                                <option value="Pop Culture">Pop Culture</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Price ($)</label>
+                            <input type="number" id="product-price" step="0.01" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="22.00">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Original Price ($)</label>
+                            <input type="number" id="product-original-price" step="0.01" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="26.40">
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-text-primary mb-2">Description</label>
+                        <textarea id="product-description" rows="3" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="Enter product description"></textarea>
+                    </div>
+
+                    <!-- Images Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-text-primary mb-2">Product Images (5 total - 1 main + 4 sub images)</label>
+                        <div class="upload-area rounded-lg p-8 text-center border-2 border-dashed" id="image-upload-area">
+                            <svg class="w-12 h-12 text-text-secondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            <p class="text-text-secondary mb-2">Drag and drop images here or click to browse</p>
+                            <p class="text-text-secondary text-sm">Upload 5 images: 1 main image + 4 sub images</p>
+                            <input type="file" id="image-upload" multiple accept="image/*" class="hidden">
+                        </div>
+                        <div id="image-previews" class="mt-4 flex flex-wrap"></div>
+                    </div>
+
+                    <!-- Colors and Sizes -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Available Colors</label>
+                            <div class="flex flex-wrap gap-2" id="color-options">
+                                <div class="color-option selected" style="background-color: #000000;" data-color="Black"></div>
+                                <div class="color-option" style="background-color: #ffffff; border: 1px solid #ccc;" data-color="White"></div>
+                                <div class="color-option" style="background-color: #808080;" data-color="Gray"></div>
+                                <div class="color-option" style="background-color: #000080;" data-color="Navy"></div>
+                                <div class="color-option" style="background-color: #800000;" data-color="Maroon"></div>
+                                <div class="color-option" style="background-color: #006400;" data-color="Dark Green"></div>
+                                <div class="color-option" style="background-color: #ffa500;" data-color="Orange"></div>
+                                <div class="color-option" style="background-color: #ff0000;" data-color="Red"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Available Sizes</label>
+                            <div class="flex flex-wrap gap-2" id="size-options">
+                                <div class="size-option selected" data-size="XS">XS</div>
+                                <div class="size-option selected" data-size="S">S</div>
+                                <div class="size-option selected" data-size="M">M</div>
+                                <div class="size-option selected" data-size="L">L</div>
+                                <div class="size-option selected" data-size="XL">XL</div>
+                                <div class="size-option selected" data-size="XXL">XXL</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Stock Quantity</label>
+                            <input type="number" id="stock-quantity" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="50" value="50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Low Stock Threshold</label>
+                            <input type="number" id="low-stock-threshold" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="5" value="5">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Sale Percentage</label>
+                            <input type="number" id="sale-percentage" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="15" value="15">
+                        </div>
+                    </div>
+
+                    <!-- Product Specifications -->
+                    <div>
+                        <label class="block text-sm font-medium text-text-primary mb-2">Product Specifications</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Material</label>
+                                <input type="text" id="spec-material" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="100% Premium Cotton" value="100% Premium Cotton">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Weight</label>
+                                <input type="text" id="spec-weight" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="180 GSM" value="180 GSM">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Fit</label>
+                                <input type="text" id="spec-fit" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Unisex Regular" value="Unisex Regular">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Neck Style</label>
+                                <input type="text" id="spec-neck" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Crew Neck" value="Crew Neck">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Sleeve Length</label>
+                                <input type="text" id="spec-sleeve" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Short Sleeve" value="Short Sleeve">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Origin</label>
+                                <input type="text" id="spec-origin" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Made in USA" value="Made in USA">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <div>
+                        <label class="block text-sm font-medium text-text-primary mb-2">Product Features</label>
+                        <div class="space-y-2">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="feature-preshrunk" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+                                <label for="feature-preshrunk" class="text-sm text-text-primary">Pre-shrunk for consistent fit</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="feature-double-stitched" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+                                <label for="feature-double-stitched" class="text-sm text-text-primary">Double-stitched seams for durability</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="feature-fade-resistant" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+                                <label for="feature-fade-resistant" class="text-sm text-text-primary">Fade-resistant printing technology</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="feature-soft-touch" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+                                <label for="feature-soft-touch" class="text-sm text-text-primary">Soft-touch finish for comfort</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div>
+                        <label class="block text-sm font-medium text-text-primary mb-2">Tags</label>
+                        <input type="text" id="product-tags" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="custom, printed, quality (comma separated)">
+                    </div>
+
+                                         <!-- Action Buttons -->
+                     <div class="flex space-x-4">
+                         <button id="save-product-btn" onclick="saveNewProduct()" class="btn-primary px-8 py-3">
+                             Save Product
+                         </button>
+                         <button onclick="clearForm()" class="px-8 py-3 border border-surface-light text-text-primary rounded-lg hover:bg-surface-light transition-colors">
+                             Clear Form
+                         </button>
+                         <button id="back-to-edit-btn" onclick="showEditProductsForm()" class="px-8 py-3 border border-surface-light text-text-primary rounded-lg hover:bg-surface-light transition-colors hidden">
+                             Back to Edit Products
+                         </button>
+                     </div>
+                </div>
+
+                <!-- Edit Products Section -->
+                <div id="edit-products-section" class="hidden space-y-6">
+                    <h2 class="font-orbitron text-xl font-bold text-white mb-4">Edit Existing Products</h2>
+                    
+                    <!-- Search and Filter -->
+                    <div class="flex space-x-4 mb-6">
+                        <input type="text" id="product-search" placeholder="Search products..." class="flex-1 px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none">
+                        <select id="category-filter" class="px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none">
+                            <option value="">All Categories</option>
+                            <option value="Halloween">Halloween</option>
+                            <option value="Father's Day">Father's Day</option>
+                            <option value="Birthday">Birthday</option>
+                            <option value="Cancer Awareness">Cancer Awareness</option>
+                            <option value="Custom">Custom</option>
+                            <option value="Horror Essentials">Horror Essentials</option>
+                            <option value="Pop Culture">Pop Culture</option>
+                        </select>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div id="products-grid" class="product-grid">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let uploadedImages = [];
+        let selectedColors = ['Black'];
+        let selectedSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+        let allProducts = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUploadsPage();
+        });
+
+        function initializeUploadsPage() {
+            // Tab switching
+            document.getElementById('tab-new-product').addEventListener('click', () => {
+                showNewProductForm();
+            });
+            
+            document.getElementById('tab-edit-products').addEventListener('click', () => {
+                showEditProductsForm();
+            });
+
+            // Image upload handling
+            setupImageUpload();
+            
+            // Color and size selection
+            setupColorSelection();
+            setupSizeSelection();
+            
+            // Load all products initially
+            loadAllProducts();
+        }
+
+        function showNewProductForm() {
+            document.getElementById('new-product-form').classList.remove('hidden');
+            document.getElementById('edit-products-section').classList.add('hidden');
+            document.getElementById('tab-new-product').classList.add('bg-accent', 'bg-opacity-20', 'text-accent', 'border', 'border-accent', 'border-opacity-30');
+            document.getElementById('tab-new-product').classList.remove('text-text-secondary', 'hover:text-accent', 'hover:bg-accent', 'hover:bg-opacity-10');
+            document.getElementById('tab-edit-products').classList.remove('bg-accent', 'bg-opacity-20', 'text-accent', 'border', 'border-accent', 'border-opacity-30');
+            document.getElementById('tab-edit-products').classList.add('text-text-secondary', 'hover:text-accent', 'hover:bg-accent', 'hover:bg-opacity-10');
+        }
+
+        function showEditProductsForm() {
+            document.getElementById('new-product-form').classList.add('hidden');
+            document.getElementById('edit-products-section').classList.remove('hidden');
+            document.getElementById('tab-edit-products').classList.add('bg-accent', 'bg-opacity-20', 'text-accent', 'border', 'border-accent', 'border-opacity-30');
+            document.getElementById('tab-edit-products').classList.remove('text-text-secondary', 'hover:text-accent', 'hover:bg-accent', 'hover:bg-opacity-10');
+            document.getElementById('tab-new-product').classList.remove('bg-accent', 'bg-opacity-20', 'text-accent', 'border', 'border-accent', 'border-opacity-30');
+            document.getElementById('tab-new-product').classList.add('text-text-secondary', 'hover:text-accent', 'hover:bg-accent', 'hover:bg-opacity-10');
+        }
+
+        function setupImageUpload() {
+            const uploadArea = document.getElementById('image-upload-area');
+            const fileInput = document.getElementById('image-upload');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                handleImageUpload(files);
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                handleImageUpload(files);
+            });
+        }
+
+        function handleImageUpload(files) {
+            files.forEach(file => {
+                if (file.type.startsWith('image/') && uploadedImages.length < 5) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        uploadedImages.push({
+                            name: file.name,
+                            data: e.target.result
+                        });
+                        updateImagePreviews();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function updateImagePreviews() {
+            const container = document.getElementById('image-previews');
+            container.innerHTML = '';
+            
+            uploadedImages.forEach((image, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'image-preview';
+                // Handle both data URLs and file paths
+                const imageSrc = image.data || image.url || '';
+                preview.innerHTML = `
+                    <img src="${imageSrc}" alt="Product image ${index + 1}">
+                    <div class="remove-btn" onclick="removeImage(${index})">×</div>
+                `;
+                container.appendChild(preview);
+            });
+        }
+
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            updateImagePreviews();
+        }
+
+        function setupColorSelection() {
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const color = option.dataset.color;
+                    if (option.classList.contains('selected')) {
+                        option.classList.remove('selected');
+                        selectedColors = selectedColors.filter(c => c !== color);
+                    } else {
+                        option.classList.add('selected');
+                        selectedColors.push(color);
+                    }
+                });
+            });
+        }
+
+        function setupSizeSelection() {
+            document.querySelectorAll('.size-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const size = option.dataset.size;
+                    if (option.classList.contains('selected')) {
+                        option.classList.remove('selected');
+                        selectedSizes = selectedSizes.filter(s => s !== size);
+                    } else {
+                        option.classList.add('selected');
+                        selectedSizes.push(size);
+                    }
+                });
+            });
+        }
+
+        async function loadAllProducts() {
+            try {
+                const response = await fetch('/api/admin/products', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+                if (response.ok) {
+                    allProducts = await response.json();
+                    displayProducts();
+                } else {
+                    console.error('Failed to load products');
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        function displayProducts() {
+            const grid = document.getElementById('products-grid');
+            const searchTerm = document.getElementById('product-search').value.toLowerCase();
+            const categoryFilter = document.getElementById('category-filter').value;
+            
+            let filteredProducts = allProducts.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || product.category === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            grid.innerHTML = filteredProducts.map(product => `
+                <div class="product-card">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <img src="/${product.image_url}" alt="${product.name}" class="w-16 h-16 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <h3 class="text-white font-medium">${product.name}</h3>
+                            <p class="text-text-secondary text-sm">$${product.price}</p>
+                            <p class="text-text-secondary text-xs">Stock: ${product.stock_quantity}</p>
+                        </div>
+                        <button onclick="editProduct(${product.id})" class="btn-primary text-sm px-3 py-1">
+                            Edit
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function saveNewProduct() {
+            const productData = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-description').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                original_price: parseFloat(document.getElementById('product-original-price').value),
+                category: document.getElementById('product-category').value,
+                stock_quantity: parseInt(document.getElementById('stock-quantity').value),
+                low_stock_threshold: parseInt(document.getElementById('low-stock-threshold').value),
+                sale_percentage: parseInt(document.getElementById('sale-percentage').value),
+                tags: document.getElementById('product-tags').value.split(',').map(tag => tag.trim()),
+                colors: selectedColors,
+                sizes: selectedSizes,
+                images: uploadedImages,
+                specifications: {
+                    material: document.getElementById('spec-material').value,
+                    weight: document.getElementById('spec-weight').value,
+                    fit: document.getElementById('spec-fit').value,
+                    neck_style: document.getElementById('spec-neck').value,
+                    sleeve_length: document.getElementById('spec-sleeve').value,
+                    origin: document.getElementById('spec-origin').value
+                },
+                features: {
+                    preshrunk: document.getElementById('feature-preshrunk').checked,
+                    double_stitched: document.getElementById('feature-double-stitched').checked,
+                    fade_resistant: document.getElementById('feature-fade-resistant').checked,
+                    soft_touch: document.getElementById('feature-soft-touch').checked
+                }
+            };
+
+            try {
+                const response = await fetch('/api/admin/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                if (response.ok) {
+                    alert('Product saved successfully!');
+                    clearForm();
+                    loadAllProducts();
+                } else {
+                    const error = await response.json();
+                    alert('Error saving product: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error saving product:', error);
+                alert('Error saving product. Please try again.');
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-description').value = '';
+            document.getElementById('product-price').value = '';
+            document.getElementById('product-original-price').value = '';
+            document.getElementById('product-category').value = '';
+            document.getElementById('stock-quantity').value = '50';
+            document.getElementById('low-stock-threshold').value = '5';
+            document.getElementById('sale-percentage').value = '15';
+            document.getElementById('product-tags').value = '';
+            uploadedImages = [];
+            updateImagePreviews();
+            selectedColors = ['Black'];
+            selectedSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+            updateColorSelection();
+            updateSizeSelection();
+            
+            // Reset the save button and hide the back button
+            const saveButton = document.getElementById('save-product-btn');
+            saveButton.textContent = 'Save Product';
+            saveButton.onclick = saveNewProduct;
+            document.getElementById('back-to-edit-btn').classList.add('hidden');
+        }
+
+        function updateColorSelection() {
+            document.querySelectorAll('.color-option').forEach(option => {
+                const color = option.dataset.color;
+                if (selectedColors.includes(color)) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        function updateSizeSelection() {
+            document.querySelectorAll('.size-option').forEach(option => {
+                const size = option.dataset.size;
+                if (selectedSizes.includes(size)) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        async function editProduct(productId) {
+            try {
+                // Find the product in the loaded products array
+                const product = allProducts.find(p => p.id === productId);
+                if (!product) {
+                    alert('Product not found');
+                    return;
+                }
+
+                // Switch to the "Add New Product" tab and show the form
+                showNewProductForm();
+
+                // Populate the form with product data
+                document.getElementById('product-name').value = product.name || '';
+                document.getElementById('product-description').value = product.description || '';
+                document.getElementById('product-price').value = product.price || '';
+                document.getElementById('product-original-price').value = product.original_price || '';
+                document.getElementById('product-category').value = product.category || '';
+                document.getElementById('stock-quantity').value = product.stock_quantity || 50;
+                document.getElementById('low-stock-threshold').value = product.low_stock_threshold || 5;
+                document.getElementById('sale-percentage').value = product.sale_percentage || 15;
+                document.getElementById('product-tags').value = product.tags ? JSON.stringify(product.tags) : '';
+
+                // Handle colors
+                if (product.colors && Array.isArray(product.colors)) {
+                    selectedColors = [...product.colors];
+                } else {
+                    selectedColors = ['Black'];
+                }
+                updateColorSelection();
+
+                // Handle sizes
+                if (product.sizes && Array.isArray(product.sizes)) {
+                    selectedSizes = [...product.sizes];
+                } else {
+                    selectedSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+                }
+                updateSizeSelection();
+
+                // Handle images
+                uploadedImages = [];
+                if (product.image_url) {
+                    uploadedImages.push({
+                        name: 'main-image.jpg',
+                        data: product.image_url,
+                        type: 'main'
+                    });
+                }
+                if (product.sub_images && Array.isArray(product.sub_images)) {
+                    product.sub_images.forEach((subImage, index) => {
+                        uploadedImages.push({
+                            name: `sub-image-${index + 1}.jpg`,
+                            data: subImage,
+                            type: 'sub'
+                        });
+                    });
+                }
+                updateImagePreviews();
+
+                // Handle specifications
+                if (product.specifications) {
+                    document.getElementById('spec-material').value = product.specifications.material || '';
+                    document.getElementById('spec-weight').value = product.specifications.weight || '';
+                    document.getElementById('spec-fit').value = product.specifications.fit || '';
+                    document.getElementById('spec-neck').value = product.specifications.neck_style || '';
+                    document.getElementById('spec-sleeve').value = product.specifications.sleeve_length || '';
+                    document.getElementById('spec-origin').value = product.specifications.origin || '';
+                }
+
+                // Handle features
+                if (product.features) {
+                    document.getElementById('feature-preshrunk').checked = product.features.preshrunk || false;
+                    document.getElementById('feature-double-stitched').checked = product.features.double_stitched || false;
+                    document.getElementById('feature-fade-resistant').checked = product.features.fade_resistant || false;
+                    document.getElementById('feature-soft-touch').checked = product.features.soft_touch || false;
+                }
+
+                // Update the save button to use PUT instead of POST
+                const saveButton = document.getElementById('save-product-btn');
+                saveButton.textContent = 'Update Product';
+                saveButton.onclick = () => updateProduct(productId);
+
+                // Show the "Back to Edit Products" button
+                document.getElementById('back-to-edit-btn').classList.remove('hidden');
+
+                // Scroll to the form
+                document.getElementById('new-product-form').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Error loading product for editing:', error);
+                alert('Error loading product for editing. Please try again.');
+            }
+        }
+
+        async function updateProduct(productId) {
+            const productData = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-description').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                original_price: parseFloat(document.getElementById('product-original-price').value) || null,
+                category: document.getElementById('product-category').value,
+                stock_quantity: parseInt(document.getElementById('stock-quantity').value),
+                low_stock_threshold: parseInt(document.getElementById('low-stock-threshold').value),
+                sale_percentage: parseInt(document.getElementById('sale-percentage').value),
+                tags: document.getElementById('product-tags').value ? JSON.parse(document.getElementById('product-tags').value) : [],
+                colors: selectedColors,
+                sizes: selectedSizes,
+                images: uploadedImages,
+                specifications: {
+                    material: document.getElementById('spec-material').value,
+                    weight: document.getElementById('spec-weight').value,
+                    fit: document.getElementById('spec-fit').value,
+                    neck_style: document.getElementById('spec-neck').value,
+                    sleeve_length: document.getElementById('spec-sleeve').value,
+                    origin: document.getElementById('spec-origin').value
+                },
+                features: {
+                    preshrunk: document.getElementById('feature-preshrunk').checked,
+                    double_stitched: document.getElementById('feature-double-stitched').checked,
+                    fade_resistant: document.getElementById('feature-fade-resistant').checked,
+                    soft_touch: document.getElementById('feature-soft-touch').checked
+                }
+            };
+
+            try {
+                const response = await fetch(`/api/admin/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify(productData)
+                });
+
+                if (response.ok) {
+                    alert('Product updated successfully!');
+                    clearForm();
+                    loadAllProducts();
+                } else {
+                    const error = await response.json();
+                    alert('Error updating product: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error updating product:', error);
+                alert('Error updating product. Please try again.');
+            }
+        }
+
+        function exportProductData() {
+            // Export functionality
+            console.log('Export product data');
+        }
+
+        // Search and filter functionality
+        document.getElementById('product-search').addEventListener('input', displayProducts);
+        document.getElementById('category-filter').addEventListener('change', displayProducts);
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html> 

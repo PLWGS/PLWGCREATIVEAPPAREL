@@ -16,6 +16,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.static('.'));
+app.use('/public', express.static('public'));
+app.use('/etsy_images', express.static('etsy_images'));
+app.use('/favicon.ico', express.static('public/favicon.ico'));
 
 // Database connection
 let pool = null;
@@ -218,10 +221,26 @@ async function initializeDatabase() {
         is_featured BOOLEAN DEFAULT false,
         is_on_sale BOOLEAN DEFAULT false,
         sale_percentage INTEGER DEFAULT 0,
+        colors JSON,
+        sizes JSON,
+        specifications JSON,
+        features JSON,
+        sub_images JSON,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Add new columns if they don't exist
+    try {
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS colors JSON`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS sizes JSON`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS specifications JSON`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS features JSON`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS sub_images JSON`);
+    } catch (error) {
+      console.log('Some columns may already exist:', error.message);
+    }
 
     // Create orders table
     await pool.query(`
@@ -2284,6 +2303,23 @@ app.delete('/api/cart/clear', authenticateCustomer, async (req, res) => {
   }
 });
 
+// Get all products (public endpoint for admin uploads page)
+app.get('/api/products/public', async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT * FROM products WHERE is_active = true ORDER BY created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
 // Search product by name
 app.get('/api/products/search', async (req, res) => {
   if (!pool) {
@@ -2309,6 +2345,175 @@ app.get('/api/products/search', async (req, res) => {
   } catch (error) {
     console.error('Error searching product:', error);
     res.status(500).json({ error: 'Failed to search product' });
+  }
+});
+
+// Admin Product Management Endpoints
+app.get('/api/admin/products', authenticateToken, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT * FROM products ORDER BY created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+app.post('/api/admin/products', authenticateToken, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const {
+      name,
+      description,
+      price,
+      original_price,
+      category,
+      stock_quantity,
+      low_stock_threshold,
+      sale_percentage,
+      tags,
+      colors,
+      sizes,
+      images,
+      specifications,
+      features
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !price || !category) {
+      return res.status(400).json({ error: 'Name, price, and category are required' });
+    }
+
+    // Handle image uploads (for now, we'll use placeholder paths)
+    const image_url = images && images.length > 0 ? images[0].data : 'etsy_images/default-product.jpg';
+    const sub_images = images && images.length > 1 ? images.slice(1).map(img => img.data) : [];
+
+    // Insert product
+    const result = await pool.query(`
+      INSERT INTO products (
+        name, description, price, original_price, image_url, category, subcategory, 
+        tags, stock_quantity, low_stock_threshold, is_featured, is_on_sale, sale_percentage,
+        colors, sizes, specifications, features, sub_images
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      RETURNING *
+    `, [
+      name, description, price, original_price, image_url, category, 'Featured',
+      JSON.stringify(tags || []), stock_quantity || 50, low_stock_threshold || 5,
+      true, true, sale_percentage || 15, JSON.stringify(colors || []), 
+      JSON.stringify(sizes || []), JSON.stringify(specifications || {}),
+      JSON.stringify(features || {}), JSON.stringify(sub_images)
+    ]);
+
+    res.json({ 
+      message: 'Product created successfully', 
+      product: result.rows[0] 
+    });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
+app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const productId = req.params.id;
+    const {
+      name,
+      description,
+      price,
+      original_price,
+      category,
+      stock_quantity,
+      low_stock_threshold,
+      sale_percentage,
+      tags,
+      colors,
+      sizes,
+      images,
+      specifications,
+      features
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !price || !category) {
+      return res.status(400).json({ error: 'Name, price, and category are required' });
+    }
+
+    // Handle image uploads
+    const image_url = images && images.length > 0 ? images[0].data : 'etsy_images/default-product.jpg';
+    const sub_images = images && images.length > 1 ? images.slice(1).map(img => img.data) : [];
+
+    // Update product
+    const result = await pool.query(`
+      UPDATE products SET
+        name = $1, description = $2, price = $3, original_price = $4, 
+        image_url = $5, category = $6, tags = $7, stock_quantity = $8,
+        low_stock_threshold = $9, sale_percentage = $10, colors = $11,
+        sizes = $12, specifications = $13, features = $14, sub_images = $15,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $16
+      RETURNING *
+    `, [
+      name, description, price, original_price, image_url, category,
+      JSON.stringify(tags || []), stock_quantity || 50, low_stock_threshold || 5,
+      sale_percentage || 15, JSON.stringify(colors || []), JSON.stringify(sizes || []),
+      JSON.stringify(specifications || {}), JSON.stringify(features || {}),
+      JSON.stringify(sub_images), productId
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json({ 
+      message: 'Product updated successfully', 
+      product: result.rows[0] 
+    });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const productId = req.params.id;
+
+    // Check if product exists
+    const checkResult = await pool.query(`
+      SELECT id FROM products WHERE id = $1
+    `, [productId]);
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Delete product
+    await pool.query(`
+      DELETE FROM products WHERE id = $1
+    `, [productId]);
+
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 });
 
