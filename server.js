@@ -4,6 +4,8 @@ const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -14,7 +16,8 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static('.'));
 app.use('/public', express.static('public'));
 app.use('/etsy_images', express.static('etsy_images'));
@@ -344,63 +347,8 @@ async function initializeDatabase() {
       )
     `);
 
-    // Only insert sample products if the products table is empty (first time setup)
-    const productCount = await pool.query('SELECT COUNT(*) FROM products');
-    if (parseInt(productCount.rows[0].count) === 0) {
-      console.log('📦 Products table is empty, inserting initial sample products...');
-      
-      // Insert sample products with correct image paths
-      await pool.query(`
-        INSERT INTO products (name, description, price, original_price, image_url, category, subcategory, tags, stock_quantity, is_featured, is_on_sale, sale_percentage) VALUES
-            ('Just a Little BOO-jee Halloween Shirt', 'Quality printed Halloween design', 24.99, 29.99, 'etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg', 'Horror', 'Essentials', ARRAY['horror', 'halloween', 'dark'], 50, true, true, 17),
-            ('Just a Little BOO-st Halloween Shirt', 'Quality printed Halloween design', 26.99, 32.99, 'etsy_images/product_02_Just-a-Little-BOO-st-Halloween-Shirt-Quality-Print.jpg', 'Pop Culture', 'Featured', ARRAY['halloween', 'spooky', 'retro'], 35, true, true, 18),
-            ('Wish You Were Here Shirt', 'Quality printed design', 24.99, 29.99, 'etsy_images/product_03_Wish-You-Were-Here-Shirt-Quality-Printed-Design-So.jpg', 'Humor & Sass', 'Quotes', ARRAY['humor', 'quotes', 'funny'], 40, false, true, 17),
-            ('Halloween One Two Hes Coming for You Shirt', 'Printed Halloween design', 22.99, 27.99, 'etsy_images/product_04_Halloween-One-Two-Hes-Coming-for-You-Shirt-Printed.jpg', 'Custom Designs', 'Minimalist', ARRAY['halloween', 'spooky', 'clean'], 30, false, true, 18),
-            ('Personalized Straight Outta (Add Text) Shirt', 'Custom printed design with personalized text', 22.00, 27.00, 'etsy_images/product_05_Personalized-Straight-Outta-Add-Text-Shirt-Printed.jpg', 'Custom Designs', 'Personalized', ARRAY['custom', 'personalized', 'text'], 25, true, true, 19),
-            ('Custom Bridezilla Shirt', 'Printed design', 23.99, 29.99, 'etsy_images/product_06_Custom-Bridezilla-Shirt-Printed-Design-Bridezilla-.jpg', 'Horror', 'Gothic', ARRAY['custom', 'bridezilla', 'funny'], 45, true, true, 20),
-            ('Best Dad Ever T-Shirt', 'Printed design', 28.99, 34.99, 'etsy_images/product_08_Best-Dad-Ever-T-Shirt-Printed-Design-Best-Dad-Shir.jpg', 'Custom Designs', 'Whimsical', ARRAY['dad', 'father', 'funny'], 30, false, true, 17),
-            ('Grandma Heart Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_09_Grandma-Heart-Shirt-Printed-Design-Personalize-wit.jpg', 'Custom Designs', 'Family', ARRAY['grandma', 'family', 'heart'], 30, false, true, 17),
-            ('Custom Fathers Day Photo Shirt for Dad', 'Printed design', 26.99, 32.99, 'etsy_images/product_10_Custom-Fathers-Day-Photo-Shirt-for-Dad-Printed-Des.jpg', 'Custom Designs', 'Fathers Day', ARRAY['father', 'dad', 'custom'], 35, true, true, 18),
-            ('Fathers Day Shirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_12_Fathers-Day-Shirt-Printed-Design-Husband-Father-Le.jpg', 'Custom Designs', 'Fathers Day', ARRAY['father', 'dad', 'family'], 40, false, true, 16),
-            ('Acknowledge Me Its My Birthday Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_15_Acknowledge-Me-Its-My-Birthday-Shirt-Printed-Desig.jpg', 'Custom Designs', 'Birthday', ARRAY['birthday', 'funny', 'acknowledge'], 25, true, true, 15),
-            ('Biker Lives Matter Shirt', 'Quality printed design', 26.99, 31.99, 'etsy_images/product_16_Biker-Lives-Matter-Shirt-Quality-Printed-Design-Mo.jpg', 'Custom Designs', 'Biker', ARRAY['biker', 'motorcycle', 'lifestyle'], 30, false, true, 16),
-            ('Girls Trip 2025 Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_17_Girls-Trip-2025-Shirt-Printed-Design-Custom-Girls-.jpg', 'Custom Designs', 'Travel', ARRAY['girls', 'trip', 'travel'], 35, true, true, 17),
-            ('Old Lives Matter Shirt', 'Quality printed design', 25.99, 30.99, 'etsy_images/product_18_Old-Lives-Matter-Shirt-Quality-Printed-Design-Funn.jpg', 'Humor & Sass', 'Funny', ARRAY['funny', 'humor', 'age'], 40, false, true, 16),
-            ('Breast Cancer Awareness Shirt', 'Printed design', 27.99, 32.99, 'etsy_images/product_19_Breast-Cancer-Awareness-Shirt-Printed-Design-Breas.jpg', 'Awareness', 'Cancer', ARRAY['cancer', 'awareness', 'pink'], 50, true, true, 15),
-            ('Down Syndrome Awareness Shirt', 'Printed design', 26.99, 31.99, 'etsy_images/product_21_Down-Syndrome-Awareness-Shirt-Printed-Design-Down-.jpg', 'Awareness', 'Down Syndrome', ARRAY['awareness', 'down syndrome', 'blue'], 45, true, true, 16),
-            ('Bikers Against Dumbass Drivers Shirt', '2-Sided Print', 28.99, 33.99, 'etsy_images/product_23_Bikers-Against-Dumbass-Drivers-Shirt-2-Sided-Print.jpg', 'Custom Designs', 'Biker', ARRAY['biker', 'motorcycle', 'funny'], 30, false, true, 15),
-            ('Family Jurassic Birthday Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_24_Family-Jurassic-Birthday-Shirt-Printed-Design-Boys.jpg', 'Custom Designs', 'Birthday', ARRAY['family', 'birthday', 'jurassic'], 35, true, true, 17),
-            ('Custom The Devil Whispered to Me Im Coming For You Shirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_25_Custom-The-Devil-Whispered-to-Me-Im-Coming-For-You.jpg', 'Custom Designs', 'Dark', ARRAY['custom', 'dark', 'devil'], 25, false, true, 16),
-            ('Custom Vintage Dude Birthday Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_26_Custom-Vintage-Dude-Birthday-Shirt-Printed-Design-.jpg', 'Custom Designs', 'Birthday', ARRAY['vintage', 'birthday', 'dude'], 30, false, true, 18),
-            ('Custom Grumpy Old Man Shirt', 'Quality printed design', 24.99, 29.99, 'etsy_images/product_27_Custom-Grumpy-Old-Man-Shirt-Quality-Printed-Design.jpg', 'Humor & Sass', 'Funny', ARRAY['grumpy', 'old man', 'funny'], 35, true, true, 17),
-            ('Teaching My Favorite Peeps Shirt', 'Quality printed design', 26.99, 31.99, 'etsy_images/product_28_Teaching-My-Favorite-Peeps-Shirt-Quality-Printed-D.jpg', 'Custom Designs', 'Teacher', ARRAY['teacher', 'education', 'peeps'], 40, false, true, 16),
-            ('Matching St. Patricks Day Shirts', 'Printed design', 23.99, 28.99, 'etsy_images/product_29_Matching-St-Patricks-Day-Shirts-Printed-Design-Not.jpg', 'Custom Designs', 'Holiday', ARRAY['st patricks', 'holiday', 'matching'], 30, true, true, 18),
-            ('Custom Family Shirt', 'Its A Name Thing You Wouldnt Understand', 24.99, 29.99, 'etsy_images/product_30_Custom-Family-Shirt-Its-A-Name-Thing-You-Wouldnt-U.jpg', 'Custom Designs', 'Family', ARRAY['family', 'custom', 'name'], 35, false, true, 17),
-            ('Kids Mischief Managed Wizard Shirt', 'Printed design', 22.99, 27.99, 'etsy_images/product_31_Kids-Mischief-Managed-Wizard-Shirt-Printed-Design-.jpg', 'Custom Designs', 'Kids', ARRAY['kids', 'wizard', 'harry potter'], 40, true, true, 18),
-            ('Custom Song Lyric TShirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_29_Custom-Song-Lyric-TShirt.jpg', 'Custom Designs', 'Music', ARRAY['music', 'lyrics', 'custom'], 30, false, true, 16),
-            ('Custom Shirt Listing Any Text Design', 'Printed design', 24.99, 29.99, 'etsy_images/product_38_Custom-Shirt-Listing-Any-Text-Design---Printed-Des.jpg', 'Custom Designs', 'Personalized', ARRAY['custom', 'text', 'personalized'], 25, true, true, 17),
-            ('Kids Acknowledge Me Its My Birthday Shirt', 'Printed design', 22.99, 27.99, 'etsy_images/product_42_Kids-Acknowledge-Me-Its-My-Birthday-Shirt---Prin.jpg', 'Custom Designs', 'Kids Birthday', ARRAY['kids', 'birthday', 'acknowledge'], 30, false, true, 18),
-            ('Acknowledge Me Birthday Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_43_Acknowledge-Me-Birthday-Shirt---Printed-Design---I.jpg', 'Custom Designs', 'Birthday', ARRAY['birthday', 'acknowledge', 'funny'], 35, true, true, 17),
-            ('Custom Best Friends Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_28_Custom-Best-Friends-Shirt.jpg', 'Custom Designs', 'Friendship', ARRAY['friends', 'best friends', 'custom'], 35, true, true, 17),
-            ('Custom Legendary Since Birthday Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_27_Custom-Legendary-Since-Birthday-Shirt.jpg', 'Custom Designs', 'Birthday', ARRAY['birthday', 'legendary', 'custom'], 30, false, true, 18),
-            ('Im Drinking My Favorite Drink Tonight T-Shirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_26_Im-Drinking-My-Favorite-Drink-Tonight-T-Shirt.jpg', 'Humor & Sass', 'Funny', ARRAY['drinking', 'funny', 'humor'], 35, true, true, 17),
-            ('Hide Your Diamonds My Kid Steals TShirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_24_Hide-Your-Diamonds-My-Kid-Steals-TShirt.jpg', 'Humor & Sass', 'Funny', ARRAY['kids', 'funny', 'diamonds'], 40, false, true, 17),
-            ('Its 5 OClock Everywhere Im Retired Shirt', 'Printed design', 26.99, 31.99, 'etsy_images/product_21_Its-5-OClock-Everywhere-Im-Retired-Shirt.jpg', 'Humor & Sass', 'Retirement', ARRAY['retirement', 'funny', '5 oclock'], 30, true, true, 16),
-            ('Custom Shirt Provide City & State', 'Printed design', 24.99, 29.99, 'etsy_images/product_19_Custom-Shirt-Provide-City-&-State.jpg', 'Custom Designs', 'Location', ARRAY['custom', 'city', 'state'], 35, false, true, 17),
-            ('Personalized State Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_19_Custom-Shirt-Provide-City-&-State.jpg', 'Custom Designs', 'Location', ARRAY['personalized', 'state', 'location'], 30, true, true, 18),
-            ('Its Not a Dad Bod Its a Father Figure Shirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_16_Its-Not-a-Dad-Bod-Its-a-Father-Figure-Shirt.jpg', 'Humor & Sass', 'Dad', ARRAY['dad', 'funny', 'father'], 35, false, true, 16),
-            ('Shes My Sweet Potato Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_15_Shes-My-Sweet-Potato-Shirt.jpg', 'Custom Designs', 'Family', ARRAY['sweet potato', 'family', 'love'], 30, true, true, 17),
-            ('Kids Dinosaur Birthday Party Shirt', 'Printed design', 22.99, 27.99, 'etsy_images/product_13_Kids-Dinosaur-Birthday-Party-Shirt.jpg', 'Custom Designs', 'Kids Birthday', ARRAY['kids', 'dinosaur', 'birthday'], 40, false, true, 18),
-            ('Kids Racecar Birthday Party Shirt', 'Printed design', 22.99, 27.99, 'etsy_images/product_12_Kids-Racecar-Birthday-Party-Shirt.jpg', 'Custom Designs', 'Kids Birthday', ARRAY['kids', 'racecar', 'birthday'], 40, false, true, 18),
-            ('You Are Awesome T-Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_08_You-Are-Awesome-T-Shirt.jpg', 'Custom Designs', 'Positive', ARRAY['awesome', 'positive', 'motivation'], 35, true, true, 17),
-            ('Fight Cancer T-Shirt', 'Printed design', 26.99, 31.99, 'etsy_images/product_07_Fight-Cancer-T-Shirt.jpg', 'Awareness', 'Cancer', ARRAY['cancer', 'fight', 'awareness'], 50, true, true, 16),
-            ('Kids Mischief Managed Wizard Long Sleeve Shirt', 'Printed design', 28.99, 33.99, 'etsy_images/product_07_Kids-Halloween-Horror-Friends-Hoodie-Printed-Desig.jpg', 'Custom Designs', 'Kids', ARRAY['kids', 'wizard', 'long sleeve'], 30, false, true, 15),
-            ('Be Kind T-Shirt', 'Quality printed design', 27.99, 34.99, 'etsy_images/product_05_Be-Kind-T-Shirt.jpg', 'Horror', 'Halloween', ARRAY['kindness', 'positive', 'message'], 25, true, true, 20)
-        `);
-      console.log('✅ Initial sample products inserted');
-    } else {
-      console.log('📦 Products table already has data, skipping initial product insertion');
-    }
+    // Skip inserting sample products - we want to start fresh
+    console.log('📦 Products table initialized - ready for fresh product uploads');
 
     console.log('✅ Database tables initialized successfully');
   } catch (error) {
@@ -2365,6 +2313,29 @@ app.get('/api/admin/products', authenticateToken, async (req, res) => {
   }
 });
 
+// Get single product by ID
+app.get('/api/admin/products/:id', authenticateToken, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const productId = req.params.id;
+    const result = await pool.query(`
+      SELECT * FROM products WHERE id = $1
+    `, [productId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
 app.post('/api/admin/products', authenticateToken, async (req, res) => {
   if (!pool) {
     return res.status(500).json({ error: 'Database not available' });
@@ -2393,25 +2364,68 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Name, price, and category are required' });
     }
 
-    // Handle image uploads (for now, we'll use placeholder paths)
-    const image_url = images && images.length > 0 ? images[0].data : 'etsy_images/default-product.jpg';
-    const sub_images = images && images.length > 1 ? images.slice(1).map(img => img.data) : [];
+    // Get the next sequential ID
+    const nextIdResult = await pool.query(`
+      SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM products
+    `);
+    const nextId = nextIdResult.rows[0].next_id;
 
-    // Insert product
+    // Create product folder
+    const productFolderName = `product_${String(nextId).padStart(3, '0')}`;
+    const productFolderPath = path.join(__dirname, 'etsy_images', productFolderName);
+    
+    if (!fs.existsSync(productFolderPath)) {
+      fs.mkdirSync(productFolderPath, { recursive: true });
+      console.log(`✅ Created product folder: ${productFolderPath}`);
+    }
+
+    // Handle image uploads and save to product folder
+    let image_url = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
+    let sub_images = [];
+    
+    if (images && images.length > 0) {
+      // Save first image as main image
+      const mainImagePath = path.join(productFolderPath, '01.jpg');
+      const mainImageData = images[0].data.replace(/^data:image\/[a-z]+;base64,/, '');
+      fs.writeFileSync(mainImagePath, Buffer.from(mainImageData, 'base64'));
+      image_url = `etsy_images/${productFolderName}/01.jpg`;
+      
+      // Save additional images
+      for (let i = 1; i < images.length && i < 5; i++) {
+        const subImagePath = path.join(productFolderPath, `${String(i + 1).padStart(2, '0')}.jpg`);
+        const subImageData = images[i].data.replace(/^data:image\/[a-z]+;base64,/, '');
+        fs.writeFileSync(subImagePath, Buffer.from(subImageData, 'base64'));
+        sub_images.push(`etsy_images/${productFolderName}/${String(i + 1).padStart(2, '0')}.jpg`);
+      }
+    }
+
+    // Insert product with sequential ID
     const result = await pool.query(`
       INSERT INTO products (
-        name, description, price, original_price, image_url, category, subcategory, 
+        id, name, description, price, original_price, image_url, category, subcategory, 
         tags, stock_quantity, low_stock_threshold, is_featured, is_on_sale, sale_percentage,
         colors, sizes, specifications, features, sub_images
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
       RETURNING *
     `, [
-      name, description, price, original_price, image_url, category, 'Featured',
+      nextId, name, description, price, original_price, image_url, category, 'Featured',
       JSON.stringify(tags || []), stock_quantity || 50, low_stock_threshold || 5,
       true, true, sale_percentage || 15, JSON.stringify(colors || []), 
       JSON.stringify(sizes || []), JSON.stringify(specifications || {}),
       JSON.stringify(features || {}), JSON.stringify(sub_images)
     ]);
+
+    console.log(`✅ Product created with ID ${nextId} and folder ${productFolderName}`);
+
+    // Create edit page for the new product
+    const { createEditPageForProduct } = require('./create_edit_page_for_product.js');
+    const editPageCreated = createEditPageForProduct(nextId, name);
+    
+    if (editPageCreated) {
+      console.log(`✅ Edit page created for product ${nextId}`);
+    } else {
+      console.log(`⚠️ Failed to create edit page for product ${nextId}`);
+    }
 
     res.json({ 
       message: 'Product created successfully', 
@@ -2453,7 +2467,7 @@ app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
     }
 
     // Handle image uploads
-    const image_url = images && images.length > 0 ? images[0].data : 'etsy_images/default-product.jpg';
+    const image_url = images && images.length > 0 ? images[0].data : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
     const sub_images = images && images.length > 1 ? images.slice(1).map(img => img.data) : [];
 
     // Update product
@@ -2505,10 +2519,38 @@ app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Delete product
+    // Delete product folder
+    const productFolderName = `product_${String(productId).padStart(3, '0')}`;
+    const productFolderPath = path.join(__dirname, 'etsy_images', productFolderName);
+    
+    if (fs.existsSync(productFolderPath)) {
+      fs.rmSync(productFolderPath, { recursive: true, force: true });
+      console.log(`✅ Deleted product folder: ${productFolderPath}`);
+    }
+
+    // Delete product from database
     await pool.query(`
       DELETE FROM products WHERE id = $1
     `, [productId]);
+
+    console.log(`✅ Product ${productId} deleted successfully`);
+
+    // Delete edit page for the product
+    const editPagePattern = `product-edit-product-${productId}_*.html`;
+    const pagesDir = path.join(__dirname, 'pages');
+    
+    try {
+      const files = fs.readdirSync(pagesDir);
+      const editPageFile = files.find(file => file.startsWith(`product-edit-product-${productId}_`));
+      
+      if (editPageFile) {
+        const editPagePath = path.join(pagesDir, editPageFile);
+        fs.unlinkSync(editPagePath);
+        console.log(`✅ Deleted edit page: ${editPageFile}`);
+      }
+    } catch (error) {
+      console.log(`⚠️ Error deleting edit page for product ${productId}:`, error.message);
+    }
 
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
