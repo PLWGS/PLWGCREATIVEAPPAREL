@@ -90,3 +90,6 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Project documentation with sensitive information
+COMPREHENSIVE_PROJECT_REVIEW.md

@@ -984,20 +984,189 @@
             const container = document.querySelector('.glass-card:nth-child(2) .space-y-4');
             if (!container || !requests) return;
             
-            container.innerHTML = requests.map(request => `
-                <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="status-badge status-${request.priority}">${request.priority}</span>
-                        <span class="text-text-secondary text-xs">${formatTimeAgo(request.created_at)}</span>
+            container.innerHTML = requests.map(request => {
+                const statusClass = request.status === 'pending' ? 'status-pending' : 
+                                  request.status === 'processing' ? 'status-processing' : 
+                                  request.status === 'urgent' ? 'status-urgent' : 'status-pending';
+                
+                const timelineText = request.timeline === 'rush' ? 'Rush' : 
+                                   request.timeline === 'express' ? 'Express' : 'Standard';
+                
+                return `
+                    <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="status-badge ${statusClass}">${request.status}</span>
+                            <span class="text-text-secondary text-xs">${formatTimeAgo(request.created_at)}</span>
+                        </div>
+                        <h4 class="text-white font-medium text-sm mb-2">${request.customer_name} - ${request.product_type}</h4>
+                        <p class="text-text-secondary text-xs mb-2">${request.concept_description.substring(0, 100)}${request.concept_description.length > 100 ? '...' : ''}</p>
+                        <div class="flex items-center justify-between text-xs mb-2">
+                            <span class="text-text-secondary">Qty: ${request.quantity}</span>
+                            <span class="text-text-secondary">Timeline: ${timelineText}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-accent font-bold text-sm">Budget: ${request.budget_range}</span>
+                            <button class="btn-primary text-xs px-3 py-1" onclick="viewCustomRequest(${request.id})">View Details</button>
+                        </div>
                     </div>
-                    <h4 class="text-white font-medium text-sm mb-2">${request.request_type || 'Custom Request'}</h4>
-                    <p class="text-text-secondary text-xs mb-3">${request.description || 'No description'}</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-accent font-bold text-sm">Est. $${request.estimated_budget || 0}</span>
-                        <button class="btn-primary text-xs px-3 py-1">Quote Now</button>
+                `;
+            }).join('');
+        }
+
+        // View custom request details
+        async function viewCustomRequest(requestId) {
+            try {
+                const response = await apiRequest(`/api/custom-requests/${requestId}`);
+                if (!response) return;
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showCustomRequestModal(data.request);
+                } else {
+                    console.error('Error loading custom request details:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading custom request details:', error);
+            }
+        }
+
+        // Show custom request modal
+        function showCustomRequestModal(request) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="glass-card rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-orbitron text-xl font-bold text-white">Custom Request Details</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-text-secondary hover:text-accent">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-text-secondary text-sm">Customer Name</label>
+                                <p class="text-white font-medium">${request.customer_name}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Email</label>
+                                <p class="text-white font-medium">${request.email}</p>
+                            </div>
+                            ${request.phone ? `
+                            <div>
+                                <label class="text-text-secondary text-sm">Phone</label>
+                                <p class="text-white font-medium">${request.phone}</p>
+                            </div>
+                            ` : ''}
+                            <div>
+                                <label class="text-text-secondary text-sm">Timeline</label>
+                                <p class="text-white font-medium">${request.timeline}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Product Type</label>
+                                <p class="text-white font-medium">${request.product_type}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Quantity</label>
+                                <p class="text-white font-medium">${request.quantity}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Budget Range</label>
+                                <p class="text-white font-medium">${request.budget_range}</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-text-secondary text-sm">Design Concept</label>
+                            <p class="text-white mt-2">${request.concept_description}</p>
+                        </div>
+                        
+                        ${request.additional_notes ? `
+                        <div>
+                            <label class="text-text-secondary text-sm">Additional Notes</label>
+                            <p class="text-white mt-2">${request.additional_notes}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${request.style_preferences ? `
+                        <div>
+                            <label class="text-text-secondary text-sm">Style Preferences</label>
+                            <p class="text-white mt-2">${JSON.parse(request.style_preferences).join(', ')}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${request.size_requirements ? `
+                        <div>
+                            <label class="text-text-secondary text-sm">Size Requirements</label>
+                            <p class="text-white mt-2">${JSON.parse(request.size_requirements).join(', ')}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${request.color_preferences ? `
+                        <div>
+                            <label class="text-text-secondary text-sm">Color Preferences</label>
+                            <p class="text-white mt-2">${request.color_preferences}</p>
+                        </div>
+                        ` : ''}
+                        
+                        ${request.reference_images ? `
+                        <div>
+                            <label class="text-text-secondary text-sm">Reference Images</label>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                ${JSON.parse(request.reference_images).map(img => `
+                                    <div class="bg-surface-dark p-2 rounded">
+                                        <p class="text-xs text-text-secondary">${img.name}</p>
+                                        <p class="text-xs text-text-secondary">${(img.size / 1024).toFixed(1)} KB</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="flex justify-between items-center pt-4 border-t border-surface-light">
+                            <div>
+                                <span class="status-badge status-${request.status}">${request.status}</span>
+                                <span class="text-text-secondary text-sm ml-2">Created: ${new Date(request.created_at).toLocaleString()}</span>
+                            </div>
+                            <div class="space-x-2">
+                                <button onclick="updateRequestStatus(${request.id}, 'processing')" class="btn-primary text-sm px-4 py-2">Start Processing</button>
+                                <button onclick="sendQuote(${request.id})" class="border border-accent text-accent px-4 py-2 rounded text-sm hover:bg-accent hover:text-black transition-all duration-300">Send Quote</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            `).join('');
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Update request status
+        async function updateRequestStatus(requestId, status) {
+            try {
+                const response = await apiRequest(`/api/custom-requests/${requestId}/status`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ status })
+                });
+                
+                if (response && response.ok) {
+                    showNotification('Request status updated successfully', 'success');
+                    loadCustomRequests(); // Refresh the list
+                } else {
+                    showNotification('Failed to update request status', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating request status:', error);
+                showNotification('Error updating request status', 'error');
+            }
+        }
+
+        // Send quote (placeholder function)
+        function sendQuote(requestId) {
+            showNotification('Quote functionality coming soon!', 'info');
         }
 
         // Auto-refresh dashboard data

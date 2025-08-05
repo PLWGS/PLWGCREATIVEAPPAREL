@@ -236,11 +236,11 @@
 
                 <!-- Cart & Search -->
                 <div class="flex items-center space-x-4">
-                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative">
+                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
-                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-counter">0</span>
                     </button>
                     
                     <!-- Mobile Menu Button -->
@@ -305,11 +305,11 @@
                                         <span class="text-text-primary">Horror Essentials</span>
                                     </button>
                                     <button class="flex items-center space-x-3 w-full text-left hover:bg-surface-light p-2 rounded">
-                                        <img src="../etsy_images/product_21_Down-Syndrome-Awareness-Shirt-Printed-Design-Down-.jpg" alt="Down Syndrome Awareness Shirt" class="w-8 h-8 rounded object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=40&auto=format&fit=crop'; this.onerror=null;" />
+                                        <img src="../etsy_images/product_21_Down-Syndrome-Awareness-Shirt-Printed-Design-Down-.jpg" alt="Down Syndrome Awareness Shirt" class="w-8 h-8 rounded object-cover" loading="lazy" onerror="this.src='../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg'; this.onerror=null;" />
                                         <span class="text-text-primary">Pop Culture</span>
                                     </button>
                                     <button class="flex items-center space-x-3 w-full text-left hover:bg-surface-light p-2 rounded">
-                                        <img src="../etsy_images/product_22_Down-Syndrome-Awareness-Shirt-Printed-Design-Down-.jpg" alt="Down Syndrome Awareness Shirt" class="w-8 h-8 rounded object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=40&auto=format&fit=crop'; this.onerror=null;" />
+                                        <img src="../etsy_images/product_22_Down-Syndrome-Awareness-Shirt-Printed-Design-Down-.jpg" alt="Down Syndrome Awareness Shirt" class="w-8 h-8 rounded object-cover" loading="lazy" onerror="this.src='../etsy_images/product_02_Just-a-Little-BOO-st-Halloween-Shirt-Quality-Print.jpg'; this.onerror=null;" />
                                         <span class="text-text-primary">Humor & Sass</span>
                                     </button>
                                 </div>
@@ -483,7 +483,7 @@
                             <!-- Product Card 2 -->
                             <div class="product-card glass-card rounded-2xl overflow-hidden group cursor-pointer" onclick="window.location.href='product.html'">
                                 <div class="relative">
-                                    <img src="../etsy_images/product_24_Family-Jurassic-Birthday-Shirt-Printed-Design-Boys.jpg" alt="Family Jurassic Birthday Shirt" class="w-full h-64 object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=400&auto=format&fit=crop'; this.onerror=null;" />
+                                    <img src="../etsy_images/product_24_Family-Jurassic-Birthday-Shirt-Printed-Design-Boys.jpg" alt="Family Jurassic Birthday Shirt" class="w-full h-64 object-cover" loading="lazy" onerror="this.src='../etsy_images/product_03_Wish-You-Were-Here-Shirt-Quality-Printed-Design-So.jpg'; this.onerror=null;" />
                                     <div class="product-overlay"></div>
                                     <div class="product-info">
                                         <p class="text-text-secondary text-sm mb-2">A nostalgic blend of 80s gaming culture with modern pop references, perfect for gamers who appreciate retro aesthetics.</p>
@@ -588,7 +588,7 @@
                             <!-- Product Card 6 -->
                             <div class="product-card glass-card rounded-2xl overflow-hidden group cursor-pointer" onclick="window.location.href='product.html'">
                                 <div class="relative">
-                                    <img src="https://images.pixabay.com/photo/2016/11/29/20/22/girl-1871104_1280.jpg?q=80&w=400&auto=format&fit=crop" alt="Teaching My Favorite Peeps Shirt" class="w-full h-64 object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=400&auto=format&fit=crop'; this.onerror=null;" />
+                                    <img src="../etsy_images/product_28_Teaching-My-Favorite-Peeps-Shirt-Quality-Printed-D.jpg" alt="Teaching My Favorite Peeps Shirt" class="w-full h-64 object-cover" loading="lazy" onerror="this.src='../etsy_images/product_04_Halloween-One-Two-Hes-Coming-for-You-Shirt-Printed.jpg'; this.onerror=null;" />
                                     <div class="product-overlay"></div>
                                     <div class="product-info">
                                         <p class="text-text-secondary text-sm mb-2">Channel your inner anime villain with this dark aesthetic design featuring Japanese typography and dramatic artwork.</p>
@@ -651,7 +651,7 @@
 
                     <!-- Recommendation 2 -->
                     <div class="glass-card rounded-xl overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300" onclick="window.location.href='product.html'">
-                        <img src="../etsy_images/product_30_Custom-Family-Shirt-Its-A-Name-Thing-You-Wouldnt-U.jpg" alt="Custom Family Shirt" class="w-full h-40 object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=300&auto=format&fit=crop'; this.onerror=null;" />
+                        <img src="../etsy_images/product_30_Custom-Family-Shirt-Its-A-Name-Thing-You-Wouldnt-U.jpg" alt="Custom Family Shirt" class="w-full h-40 object-cover" loading="lazy" onerror="this.src='../etsy_images/product_05_Be-Kind-T-Shirt.jpg'; this.onerror=null;" />
                         <div class="p-4">
                             <h3 class="font-orbitron text-sm font-bold text-white mb-1">Custom Family Shirt</h3>
                             <p class="text-accent font-bold">$22.00</p>
@@ -669,7 +669,7 @@
 
                     <!-- Recommendation 4 -->
                     <div class="glass-card rounded-xl overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300" onclick="window.location.href='product.html'">
-                        <img src="../etsy_images/product_32_Adults-Everything-Dope-Comes-From-City-or-State-Ho.jpg" alt="Adult's Everything Dope Comes From Hoodie" class="w-full h-40 object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=300&auto=format&fit=crop'; this.onerror=null;" />
+                        <img src="../etsy_images/product_32_Adults-Everything-Dope-Comes-From-City-or-State-Ho.jpg" alt="Adult's Everything Dope Comes From Hoodie" class="w-full h-40 object-cover" loading="lazy" onerror="this.src='../etsy_images/product_06_Custom-Bridezilla-Shirt-Printed-Design-Bridezilla-.jpg'; this.onerror=null;" />
                         <div class="p-4">
                             <h3 class="font-orbitron text-sm font-bold text-white mb-1">Adult's Everything Dope Comes From Hoodie</h3>
                             <p class="text-accent font-bold">$22.00</p>
@@ -1476,12 +1476,12 @@
             productCard.className = 'product-card glass-card rounded-2xl overflow-hidden group';
             // Removed the card click handler since we don't need individual product detail pages
             
-            productCard.innerHTML = `
+                                productCard.innerHTML = `
                 <div class="relative">
-                    <img src="${product.image}" alt="${product.title}" class="w-full h-64 object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=400&auto=format&fit=crop'; this.onerror=null;">
+                    <img src="${product.image}" alt="${product.title}" class="w-full h-64 object-cover" loading="lazy" onerror="this.src='../etsy_images/product_07_Kids-Halloween-Horror-Friends-Hoodie-Printed-Desig.jpg'; this.onerror=null;">
                     <div class="product-overlay"></div>
                     <div class="product-info">
-                        <button class="btn-primary w-full text-sm quick-add-btn" data-product="${encodeURIComponent(JSON.stringify(product))}">Quick Add to Cart</button>
+                        <button class="btn-primary w-full text-sm view-details-btn" data-product="${encodeURIComponent(JSON.stringify(product))}">View Details</button>
                     </div>
                 </div>
                 <div class="p-6">
@@ -1499,45 +1499,113 @@
                 </div>
             `;
             
-            // Add event listener for Quick Add to Cart button
-            const quickAddBtn = productCard.querySelector('.quick-add-btn');
-            quickAddBtn.addEventListener('click', (e) => {
+            // Add event listener for View Details button
+            const viewDetailsBtn = productCard.querySelector('.view-details-btn');
+            viewDetailsBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent card click
                 
                 try {
-                    const productData = JSON.parse(decodeURIComponent(quickAddBtn.dataset.product));
+                    const productData = JSON.parse(decodeURIComponent(viewDetailsBtn.dataset.product));
                     
                     // Debug logging
                     console.log('=== SHOP PAGE DEBUG ===');
-                    console.log('Product data being sent to cart:', productData);
+                    console.log('Product data for details page:', productData);
                     console.log('Product title:', productData.title);
                     console.log('Product price:', productData.price);
                     console.log('Product image:', productData.image);
                     
-                    // Keep the original image path as is
-                    const imagePath = productData.image;
-                    
-                    // Properly encode the data to handle special characters
-                    const params = new URLSearchParams();
-                    params.append('image', imagePath);
-                    params.append('title', productData.title);
-                    params.append('price', productData.price);
-                    params.append('rating', productData.rating);
-                    params.append('description', productData.collection);
-                    
-                    console.log('URL parameters being sent:', params.toString());
-                    console.log('Full URL will be:', `cart.html?${params.toString()}&v=${Date.now()}`);
-                    
-                    // Navigate to cart with product data
-                    window.location.href = `cart.html?${params.toString()}&v=${Date.now()}`;
+                    // Redirect to product detail page with product data
+                    const productId = encodeURIComponent(productData.title);
+                    window.location.href = `product.html?id=${productId}`;
                 } catch (error) {
                     console.error('Error processing product data:', error);
-                    console.error('Product data string:', quickAddBtn.dataset.product);
-                    alert('Error adding product to cart. Please try again.');
+                    console.error('Product data string:', viewDetailsBtn.dataset.product);
+                    alert('Error loading product details. Please try again.');
                 }
             });
             
             return productCard;
+        }
+
+        // Function to add item to cart via API
+        async function addToCartAPI(productData) {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    alert('Please log in to add items to cart');
+                    window.location.href = 'customer-login.html';
+                    return;
+                }
+
+                // Extract price as number
+                const priceMatch = productData.price.match(/\$(\d+\.?\d*)/);
+                const unitPrice = priceMatch ? parseFloat(priceMatch[1]) : 0;
+
+                const cartData = {
+                    product_name: productData.title,
+                    quantity: 1,
+                    unit_price: unitPrice,
+                    size: 'M', // Default size
+                    color: 'Black', // Default color
+                    image_url: productData.image
+                };
+
+                console.log('Sending cart data to API:', cartData);
+
+                const response = await fetch('/api/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(cartData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Cart API response:', result);
+                    
+                    // Show success message
+                    showNotification('Added to cart!', 'success');
+                    
+                    // Update cart counter
+                    updateCartCounter();
+                    
+                    // Optionally redirect to cart page
+                    setTimeout(() => {
+                        if (confirm('Item added to cart! Would you like to view your cart?')) {
+                            window.location.href = 'cart.html';
+                        }
+                    }, 1000);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Cart API error:', errorData);
+                    alert('Error adding to cart: ' + (errorData.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Error adding product to cart. Please try again.');
+            }
+        }
+
+        // Function to show notifications
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
 
         function displayProducts(page) {
@@ -1718,6 +1786,40 @@
                 newsletterMessage.classList.add('hidden');
             }, 5000);
         }
+
+        // Cart counter functionality
+        async function updateCartCounter() {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    document.getElementById('cart-counter').textContent = '0';
+                    return;
+                }
+
+                const response = await fetch('/api/cart', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const cartData = await response.json();
+                    const itemCount = cartData.items ? cartData.items.length : 0;
+                    document.getElementById('cart-counter').textContent = itemCount.toString();
+                } else {
+                    document.getElementById('cart-counter').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error updating cart counter:', error);
+                document.getElementById('cart-counter').textContent = '0';
+            }
+        }
+
+        // Update cart counter on page load
+        updateCartCounter();
+
+
     </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>

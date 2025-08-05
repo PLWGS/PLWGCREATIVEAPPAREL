@@ -1011,21 +1011,113 @@
         });
 
         // Form submission
-        document.getElementById('custom-order-form').addEventListener('submit', (e) => {
+        document.getElementById('custom-order-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Show success message
-            alert('Thank you for your custom design request! We\'ll review your submission and get back to you within 24 hours with a detailed quote and timeline.');
+            // Show loading state
+            const submitBtn = document.getElementById('submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Submitting...';
+            submitBtn.disabled = true;
             
-            // Reset form
-            document.getElementById('custom-order-form').reset();
-            currentStep = 1;
-            showStep(currentStep);
-            
-            // Reset mood board selections
-            document.querySelectorAll('.mood-board-item').forEach(item => {
-                item.classList.remove('selected');
-            });
+            try {
+                // Collect form data
+                const formData = new FormData(e.target);
+                const formObject = {};
+                
+                // Convert FormData to object
+                for (let [key, value] of formData.entries()) {
+                    if (key === 'styles[]' || key === 'sizes[]') {
+                        if (!formObject[key.replace('[]', '')]) {
+                            formObject[key.replace('[]', '')] = [];
+                        }
+                        formObject[key.replace('[]', '')].push(value);
+                    } else {
+                        formObject[key] = value;
+                    }
+                }
+                
+                // Handle file uploads
+                const fileInput = document.querySelector('input[type="file"]');
+                const files = fileInput.files;
+                const referenceImages = [];
+                
+                if (files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        // Convert file to base64 for storage
+                        const base64 = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.readAsDataURL(file);
+                        });
+                        referenceImages.push({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            data: base64
+                        });
+                    }
+                }
+                
+                // Prepare request data
+                const requestData = {
+                    fullName: formObject.fullName,
+                    email: formObject.email,
+                    phone: formObject.phone || null,
+                    timeline: formObject.timeline,
+                    concept: formObject.concept,
+                    styles: formObject.styles || [],
+                    productType: formObject.productType,
+                    quantity: formObject.quantity,
+                    sizes: formObject.sizes || [],
+                    colors: formObject.colors || null,
+                    budget: formObject.budget,
+                    notes: formObject.notes || null,
+                    referenceImages: referenceImages.length > 0 ? referenceImages : null
+                };
+                
+                // Submit to backend
+                const response = await fetch('/api/custom-requests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Show success message
+                    alert(result.message || 'Thank you for your custom design request! We\'ll review your submission and get back to you within 24 hours with a detailed quote and timeline.');
+                    
+                    // Reset form
+                    document.getElementById('custom-order-form').reset();
+                    currentStep = 1;
+                    showStep(currentStep);
+                    
+                    // Reset mood board selections
+                    document.querySelectorAll('.mood-board-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    // Reset file upload display
+                    const fileUploadArea = document.querySelector('.file-upload-area');
+                    const uploadText = fileUploadArea.querySelector('p');
+                    uploadText.textContent = 'Drag and drop your reference images here';
+                } else {
+                    throw new Error(result.error || 'Failed to submit request');
+                }
+                
+            } catch (error) {
+                console.error('Error submitting custom request:', error);
+                alert('Sorry, there was an error submitting your request. Please try again or contact us directly.');
+            } finally {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
         });
 
         // Smooth scrolling functions

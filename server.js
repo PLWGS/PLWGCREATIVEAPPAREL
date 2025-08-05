@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'https://plwgscreativeapparel.com',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
@@ -92,6 +92,7 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS customers (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255),
         name VARCHAR(255),
         first_name VARCHAR(100),
         last_name VARCHAR(100),
@@ -253,14 +254,49 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS order_items (
         id SERIAL PRIMARY KEY,
         order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
-        product_id INTEGER REFERENCES products(id),
-        product_name VARCHAR(255),
+        product_id INTEGER,
+        product_name VARCHAR(255) NOT NULL,
         quantity INTEGER NOT NULL,
         unit_price DECIMAL(10,2) NOT NULL,
         total_price DECIMAL(10,2) NOT NULL,
         size VARCHAR(10),
         color VARCHAR(50),
-        custom_design_details TEXT
+        image_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create cart table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS cart (
+        id SERIAL PRIMARY KEY,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE,
+        product_id INTEGER,
+        product_name VARCHAR(255) NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        unit_price DECIMAL(10,2) NOT NULL,
+        size VARCHAR(50) DEFAULT 'M',
+        color VARCHAR(50) DEFAULT 'Black',
+        image_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create cart_items table for better cart management
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS cart_items (
+        id SERIAL PRIMARY KEY,
+        cart_id INTEGER REFERENCES cart(id) ON DELETE CASCADE,
+        product_id INTEGER,
+        product_name VARCHAR(255) NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        unit_price DECIMAL(10,2) NOT NULL,
+        size VARCHAR(50) DEFAULT 'M',
+        color VARCHAR(50) DEFAULT 'Black',
+        image_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -269,13 +305,19 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS custom_requests (
         id SERIAL PRIMARY KEY,
         customer_id INTEGER REFERENCES customers(id),
-        customer_name VARCHAR(255),
-        customer_email VARCHAR(255),
-        customer_phone VARCHAR(50),
-        request_type VARCHAR(100),
-        description TEXT,
-        quantity INTEGER,
-        estimated_budget DECIMAL(10,2),
+        customer_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        timeline VARCHAR(100),
+        concept_description TEXT NOT NULL,
+        style_preferences JSONB,
+        product_type VARCHAR(100) NOT NULL,
+        quantity VARCHAR(50) NOT NULL,
+        size_requirements JSONB,
+        color_preferences TEXT,
+        budget_range VARCHAR(100) NOT NULL,
+        additional_notes TEXT,
+        reference_images JSONB,
         status VARCHAR(50) DEFAULT 'pending',
         priority VARCHAR(20) DEFAULT 'normal',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -283,20 +325,62 @@ async function initializeDatabase() {
       )
     `);
 
-    // Insert sample products if table is empty
+    // Only insert sample products if the products table is empty (first time setup)
     const productCount = await pool.query('SELECT COUNT(*) FROM products');
     if (parseInt(productCount.rows[0].count) === 0) {
+      console.log('📦 Products table is empty, inserting initial sample products...');
+      
+      // Insert sample products with correct image paths
       await pool.query(`
         INSERT INTO products (name, description, price, original_price, image_url, category, subcategory, tags, stock_quantity, is_featured, is_on_sale, sale_percentage) VALUES
-        ('Horror Skull Tee', 'Classic horror skull design on premium cotton', 24.99, 29.99, '../etsy_images/product_01_Horror-Skull-Tee.jpg', 'Horror', 'Essentials', ARRAY['horror', 'skull', 'dark'], 50, true, true, 17),
-        ('Pop Culture Mashup', 'Unique pop culture combination design', 26.99, 32.99, '../etsy_images/product_02_Pop-Culture-Mashup.jpg', 'Pop Culture', 'Featured', ARRAY['pop culture', 'mashup', 'retro'], 35, true, true, 18),
-        ('Sarcastic Quote Tee', 'Witty and sarcastic quote design', 24.99, 29.99, '../etsy_images/product_03_Sarcastic-Quote-Tee.jpg', 'Humor & Sass', 'Quotes', ARRAY['sarcastic', 'humor', 'quotes'], 40, false, true, 17),
-        ('Minimalist Rebel', 'Clean minimalist rebel design', 22.99, 27.99, '../etsy_images/product_04_Minimalist-Rebel.jpg', 'Custom Designs', 'Minimalist', ARRAY['minimalist', 'rebel', 'clean'], 30, false, true, 18),
-        ('Halloween One Two He''s Coming for You Shirt', 'Spooky Halloween design', 27.99, 34.99, '../etsy_images/product_07_Kids-Halloween-Horror-Friends-Hoodie-Printed-Desig.jpg', 'Horror', 'Halloween', ARRAY['halloween', 'spooky', 'horror'], 25, true, true, 20),
-        ('Gothic Dreams Tee', 'Dark aesthetic meets comfort in this premium design', 23.99, 29.99, '../etsy_images/product_05_Be-Kind-T-Shirt.jpg', 'Horror', 'Gothic', ARRAY['gothic', 'dark', 'aesthetic'], 45, true, true, 20),
-        ('Neon Nights Tee', 'Cyberpunk vibes with retro aesthetics', 32.99, 39.99, '../etsy_images/product_06_Custom-Bridezilla-Shirt-Printed-Design-Bridezilla-.jpg', 'Pop Culture', 'Cyberpunk', ARRAY['cyberpunk', 'neon', 'retro'], 20, true, false, 0),
-        ('Cosmic Cat Tee', 'Feline meets space in this whimsical design', 28.99, 34.99, '../etsy_images/product_08_Best-Dad-Ever-T-Shirt-Printed-Design-Best-Dad-Shir.jpg', 'Custom Designs', 'Whimsical', ARRAY['cosmic', 'cat', 'space'], 30, false, true, 17)
-      `);
+            ('Just a Little BOO-jee Halloween Shirt', 'Quality printed Halloween design', 24.99, 29.99, 'etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg', 'Horror', 'Essentials', ARRAY['horror', 'halloween', 'dark'], 50, true, true, 17),
+            ('Just a Little BOO-st Halloween Shirt', 'Quality printed Halloween design', 26.99, 32.99, 'etsy_images/product_02_Just-a-Little-BOO-st-Halloween-Shirt-Quality-Print.jpg', 'Pop Culture', 'Featured', ARRAY['halloween', 'spooky', 'retro'], 35, true, true, 18),
+            ('Wish You Were Here Shirt', 'Quality printed design', 24.99, 29.99, 'etsy_images/product_03_Wish-You-Were-Here-Shirt-Quality-Printed-Design-So.jpg', 'Humor & Sass', 'Quotes', ARRAY['humor', 'quotes', 'funny'], 40, false, true, 17),
+            ('Halloween One Two Hes Coming for You Shirt', 'Printed Halloween design', 22.99, 27.99, 'etsy_images/product_04_Halloween-One-Two-Hes-Coming-for-You-Shirt-Printed.jpg', 'Custom Designs', 'Minimalist', ARRAY['halloween', 'spooky', 'clean'], 30, false, true, 18),
+            ('Personalized Straight Outta (Add Text) Shirt', 'Custom printed design with personalized text', 22.00, 27.00, 'etsy_images/product_05_Personalized-Straight-Outta-Add-Text-Shirt-Printed.jpg', 'Custom Designs', 'Personalized', ARRAY['custom', 'personalized', 'text'], 25, true, true, 19),
+            ('Custom Bridezilla Shirt', 'Printed design', 23.99, 29.99, 'etsy_images/product_06_Custom-Bridezilla-Shirt-Printed-Design-Bridezilla-.jpg', 'Horror', 'Gothic', ARRAY['custom', 'bridezilla', 'funny'], 45, true, true, 20),
+            ('Best Dad Ever T-Shirt', 'Printed design', 28.99, 34.99, 'etsy_images/product_08_Best-Dad-Ever-T-Shirt-Printed-Design-Best-Dad-Shir.jpg', 'Custom Designs', 'Whimsical', ARRAY['dad', 'father', 'funny'], 30, false, true, 17),
+            ('Grandma Heart Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_09_Grandma-Heart-Shirt-Printed-Design-Personalize-wit.jpg', 'Custom Designs', 'Family', ARRAY['grandma', 'family', 'heart'], 30, false, true, 17),
+            ('Custom Fathers Day Photo Shirt for Dad', 'Printed design', 26.99, 32.99, 'etsy_images/product_10_Custom-Fathers-Day-Photo-Shirt-for-Dad-Printed-Des.jpg', 'Custom Designs', 'Fathers Day', ARRAY['father', 'dad', 'custom'], 35, true, true, 18),
+            ('Fathers Day Shirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_12_Fathers-Day-Shirt-Printed-Design-Husband-Father-Le.jpg', 'Custom Designs', 'Fathers Day', ARRAY['father', 'dad', 'family'], 40, false, true, 16),
+            ('Acknowledge Me Its My Birthday Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_15_Acknowledge-Me-Its-My-Birthday-Shirt-Printed-Desig.jpg', 'Custom Designs', 'Birthday', ARRAY['birthday', 'funny', 'acknowledge'], 25, true, true, 15),
+            ('Biker Lives Matter Shirt', 'Quality printed design', 26.99, 31.99, 'etsy_images/product_16_Biker-Lives-Matter-Shirt-Quality-Printed-Design-Mo.jpg', 'Custom Designs', 'Biker', ARRAY['biker', 'motorcycle', 'lifestyle'], 30, false, true, 16),
+            ('Girls Trip 2025 Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_17_Girls-Trip-2025-Shirt-Printed-Design-Custom-Girls-.jpg', 'Custom Designs', 'Travel', ARRAY['girls', 'trip', 'travel'], 35, true, true, 17),
+            ('Old Lives Matter Shirt', 'Quality printed design', 25.99, 30.99, 'etsy_images/product_18_Old-Lives-Matter-Shirt-Quality-Printed-Design-Funn.jpg', 'Humor & Sass', 'Funny', ARRAY['funny', 'humor', 'age'], 40, false, true, 16),
+            ('Breast Cancer Awareness Shirt', 'Printed design', 27.99, 32.99, 'etsy_images/product_19_Breast-Cancer-Awareness-Shirt-Printed-Design-Breas.jpg', 'Awareness', 'Cancer', ARRAY['cancer', 'awareness', 'pink'], 50, true, true, 15),
+            ('Down Syndrome Awareness Shirt', 'Printed design', 26.99, 31.99, 'etsy_images/product_21_Down-Syndrome-Awareness-Shirt-Printed-Design-Down-.jpg', 'Awareness', 'Down Syndrome', ARRAY['awareness', 'down syndrome', 'blue'], 45, true, true, 16),
+            ('Bikers Against Dumbass Drivers Shirt', '2-Sided Print', 28.99, 33.99, 'etsy_images/product_23_Bikers-Against-Dumbass-Drivers-Shirt-2-Sided-Print.jpg', 'Custom Designs', 'Biker', ARRAY['biker', 'motorcycle', 'funny'], 30, false, true, 15),
+            ('Family Jurassic Birthday Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_24_Family-Jurassic-Birthday-Shirt-Printed-Design-Boys.jpg', 'Custom Designs', 'Birthday', ARRAY['family', 'birthday', 'jurassic'], 35, true, true, 17),
+            ('Custom The Devil Whispered to Me Im Coming For You Shirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_25_Custom-The-Devil-Whispered-to-Me-Im-Coming-For-You.jpg', 'Custom Designs', 'Dark', ARRAY['custom', 'dark', 'devil'], 25, false, true, 16),
+            ('Custom Vintage Dude Birthday Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_26_Custom-Vintage-Dude-Birthday-Shirt-Printed-Design-.jpg', 'Custom Designs', 'Birthday', ARRAY['vintage', 'birthday', 'dude'], 30, false, true, 18),
+            ('Custom Grumpy Old Man Shirt', 'Quality printed design', 24.99, 29.99, 'etsy_images/product_27_Custom-Grumpy-Old-Man-Shirt-Quality-Printed-Design.jpg', 'Humor & Sass', 'Funny', ARRAY['grumpy', 'old man', 'funny'], 35, true, true, 17),
+            ('Teaching My Favorite Peeps Shirt', 'Quality printed design', 26.99, 31.99, 'etsy_images/product_28_Teaching-My-Favorite-Peeps-Shirt-Quality-Printed-D.jpg', 'Custom Designs', 'Teacher', ARRAY['teacher', 'education', 'peeps'], 40, false, true, 16),
+            ('Matching St. Patricks Day Shirts', 'Printed design', 23.99, 28.99, 'etsy_images/product_29_Matching-St-Patricks-Day-Shirts-Printed-Design-Not.jpg', 'Custom Designs', 'Holiday', ARRAY['st patricks', 'holiday', 'matching'], 30, true, true, 18),
+            ('Custom Family Shirt', 'Its A Name Thing You Wouldnt Understand', 24.99, 29.99, 'etsy_images/product_30_Custom-Family-Shirt-Its-A-Name-Thing-You-Wouldnt-U.jpg', 'Custom Designs', 'Family', ARRAY['family', 'custom', 'name'], 35, false, true, 17),
+            ('Kids Mischief Managed Wizard Shirt', 'Printed design', 22.99, 27.99, 'etsy_images/product_31_Kids-Mischief-Managed-Wizard-Shirt-Printed-Design-.jpg', 'Custom Designs', 'Kids', ARRAY['kids', 'wizard', 'harry potter'], 40, true, true, 18),
+            ('Custom Song Lyric TShirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_29_Custom-Song-Lyric-TShirt.jpg', 'Custom Designs', 'Music', ARRAY['music', 'lyrics', 'custom'], 30, false, true, 16),
+            ('Custom Shirt Listing Any Text Design', 'Printed design', 24.99, 29.99, 'etsy_images/product_38_Custom-Shirt-Listing-Any-Text-Design---Printed-Des.jpg', 'Custom Designs', 'Personalized', ARRAY['custom', 'text', 'personalized'], 25, true, true, 17),
+            ('Kids Acknowledge Me Its My Birthday Shirt', 'Printed design', 22.99, 27.99, 'etsy_images/product_42_Kids-Acknowledge-Me-Its-My-Birthday-Shirt---Prin.jpg', 'Custom Designs', 'Kids Birthday', ARRAY['kids', 'birthday', 'acknowledge'], 30, false, true, 18),
+            ('Acknowledge Me Birthday Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_43_Acknowledge-Me-Birthday-Shirt---Printed-Design---I.jpg', 'Custom Designs', 'Birthday', ARRAY['birthday', 'acknowledge', 'funny'], 35, true, true, 17),
+            ('Custom Best Friends Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_28_Custom-Best-Friends-Shirt.jpg', 'Custom Designs', 'Friendship', ARRAY['friends', 'best friends', 'custom'], 35, true, true, 17),
+            ('Custom Legendary Since Birthday Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_27_Custom-Legendary-Since-Birthday-Shirt.jpg', 'Custom Designs', 'Birthday', ARRAY['birthday', 'legendary', 'custom'], 30, false, true, 18),
+            ('Im Drinking My Favorite Drink Tonight T-Shirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_26_Im-Drinking-My-Favorite-Drink-Tonight-T-Shirt.jpg', 'Humor & Sass', 'Funny', ARRAY['drinking', 'funny', 'humor'], 35, true, true, 17),
+            ('Hide Your Diamonds My Kid Steals TShirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_24_Hide-Your-Diamonds-My-Kid-Steals-TShirt.jpg', 'Humor & Sass', 'Funny', ARRAY['kids', 'funny', 'diamonds'], 40, false, true, 17),
+            ('Its 5 OClock Everywhere Im Retired Shirt', 'Printed design', 26.99, 31.99, 'etsy_images/product_21_Its-5-OClock-Everywhere-Im-Retired-Shirt.jpg', 'Humor & Sass', 'Retirement', ARRAY['retirement', 'funny', '5 oclock'], 30, true, true, 16),
+            ('Custom Shirt Provide City & State', 'Printed design', 24.99, 29.99, 'etsy_images/product_19_Custom-Shirt-Provide-City-&-State.jpg', 'Custom Designs', 'Location', ARRAY['custom', 'city', 'state'], 35, false, true, 17),
+            ('Personalized State Shirt', 'Printed design', 23.99, 28.99, 'etsy_images/product_19_Custom-Shirt-Provide-City-&-State.jpg', 'Custom Designs', 'Location', ARRAY['personalized', 'state', 'location'], 30, true, true, 18),
+            ('Its Not a Dad Bod Its a Father Figure Shirt', 'Printed design', 25.99, 30.99, 'etsy_images/product_16_Its-Not-a-Dad-Bod-Its-a-Father-Figure-Shirt.jpg', 'Humor & Sass', 'Dad', ARRAY['dad', 'funny', 'father'], 35, false, true, 16),
+            ('Shes My Sweet Potato Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_15_Shes-My-Sweet-Potato-Shirt.jpg', 'Custom Designs', 'Family', ARRAY['sweet potato', 'family', 'love'], 30, true, true, 17),
+            ('Kids Dinosaur Birthday Party Shirt', 'Printed design', 22.99, 27.99, 'etsy_images/product_13_Kids-Dinosaur-Birthday-Party-Shirt.jpg', 'Custom Designs', 'Kids Birthday', ARRAY['kids', 'dinosaur', 'birthday'], 40, false, true, 18),
+            ('Kids Racecar Birthday Party Shirt', 'Printed design', 22.99, 27.99, 'etsy_images/product_12_Kids-Racecar-Birthday-Party-Shirt.jpg', 'Custom Designs', 'Kids Birthday', ARRAY['kids', 'racecar', 'birthday'], 40, false, true, 18),
+            ('You Are Awesome T-Shirt', 'Printed design', 24.99, 29.99, 'etsy_images/product_08_You-Are-Awesome-T-Shirt.jpg', 'Custom Designs', 'Positive', ARRAY['awesome', 'positive', 'motivation'], 35, true, true, 17),
+            ('Fight Cancer T-Shirt', 'Printed design', 26.99, 31.99, 'etsy_images/product_07_Fight-Cancer-T-Shirt.jpg', 'Awareness', 'Cancer', ARRAY['cancer', 'fight', 'awareness'], 50, true, true, 16),
+            ('Kids Mischief Managed Wizard Long Sleeve Shirt', 'Printed design', 28.99, 33.99, 'etsy_images/product_07_Kids-Halloween-Horror-Friends-Hoodie-Printed-Desig.jpg', 'Custom Designs', 'Kids', ARRAY['kids', 'wizard', 'long sleeve'], 30, false, true, 15),
+            ('Be Kind T-Shirt', 'Quality printed design', 27.99, 34.99, 'etsy_images/product_05_Be-Kind-T-Shirt.jpg', 'Horror', 'Halloween', ARRAY['kindness', 'positive', 'message'], 25, true, true, 20)
+        `);
+      console.log('✅ Initial sample products inserted');
+    } else {
+      console.log('📦 Products table already has data, skipping initial product insertion');
     }
 
     console.log('✅ Database tables initialized successfully');
@@ -498,9 +582,9 @@ app.post('/api/orders', async (req, res) => {
     // Create order items
     for (const item of items) {
       await pool.query(`
-        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      `, [order.id, item.product_id, item.product_name, item.quantity, item.unit_price, item.total_price, item.size, item.color]);
+        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color, image_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [order.id, item.product_id, item.product_name, item.quantity, item.unit_price, item.total_price, item.size, item.color, item.image_url]);
     }
     
     res.json({ order });
@@ -670,6 +754,26 @@ app.get('/api/custom-requests', authenticateToken, async (req, res) => {
   }
 });
 
+// Get single custom request by ID
+app.get('/api/custom-requests/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await pool.query(`
+      SELECT * FROM custom_requests WHERE id = $1
+    `, [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+    
+    res.json({ request: result.rows[0] });
+  } catch (error) {
+    console.error('Error fetching custom request:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Update custom request status
 app.patch('/api/custom-requests/:id/status', authenticateToken, async (req, res) => {
   try {
@@ -689,6 +793,124 @@ app.patch('/api/custom-requests/:id/status', authenticateToken, async (req, res)
     res.json({ request: result.rows[0] });
   } catch (error) {
     console.error('Error updating custom request:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create new custom request
+app.post('/api/custom-requests', async (req, res) => {
+  try {
+    console.log('📝 Custom request received:', req.body);
+    
+    const {
+      fullName,
+      email,
+      phone,
+      timeline,
+      concept,
+      styles,
+      productType,
+      quantity,
+      sizes,
+      colors,
+      budget,
+      notes,
+      referenceImages
+    } = req.body;
+
+    // Validate required fields
+    if (!fullName || !email || !concept || !productType || !quantity || !budget) {
+      console.log('❌ Missing required fields');
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    console.log('✅ Required fields validated');
+
+    // Check if database is available
+    const dbCheck = checkDatabase();
+    console.log('🗄️ Database check:', dbCheck);
+    
+    if (!dbCheck.available) {
+      console.log('⚠️ Database not available, using mock request');
+      
+      // Create mock custom request object for email
+      const mockCustomRequest = {
+        id: Date.now(),
+        customer_name: fullName,
+        email: email,
+        phone: phone || null,
+        timeline: timeline,
+        concept_description: concept,
+        style_preferences: styles ? JSON.stringify(styles) : null,
+        product_type: productType,
+        quantity: quantity,
+        size_requirements: sizes ? JSON.stringify(sizes) : null,
+        color_preferences: colors || null,
+        budget_range: budget,
+        additional_notes: notes || null,
+        reference_images: referenceImages ? JSON.stringify(referenceImages) : null,
+        status: 'pending',
+        created_at: new Date()
+      };
+
+      console.log('📧 Sending email for mock request...');
+
+      // Send email notification to admin
+      try {
+        await sendCustomRequestEmail(mockCustomRequest);
+        console.log('✅ Email sent successfully');
+      } catch (emailError) {
+        console.error('❌ Error sending custom request email:', emailError);
+        // Don't fail the request if email fails
+      }
+
+      console.log('✅ Returning mock response');
+      return res.status(201).json({ 
+        success: true, 
+        message: 'Custom request submitted successfully! We\'ll review your submission and get back to you within 24 hours.',
+        request: mockCustomRequest 
+      });
+    }
+
+    console.log('🗄️ Database available, inserting into database...');
+
+    // Insert into database
+    const result = await pool.query(`
+      INSERT INTO custom_requests (
+        customer_name, email, phone, timeline, concept_description, 
+        style_preferences, product_type, quantity, size_requirements, 
+        color_preferences, budget_range, additional_notes, reference_images, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'pending')
+      RETURNING *
+    `, [
+      fullName, email, phone || null, timeline, concept,
+      styles ? JSON.stringify(styles) : null, productType, quantity,
+      sizes ? JSON.stringify(sizes) : null, colors || null, budget,
+      notes || null, referenceImages ? JSON.stringify(referenceImages) : null
+    ]);
+
+    const customRequest = result.rows[0];
+    console.log('✅ Database insert successful');
+
+    // Send email notification to admin
+    try {
+      await sendCustomRequestEmail(customRequest);
+      console.log('✅ Email sent successfully');
+    } catch (emailError) {
+      console.error('❌ Error sending custom request email:', emailError);
+      // Don't fail the request if email fails
+    }
+
+    console.log('✅ Returning success response');
+    res.status(201).json({ 
+      success: true, 
+      message: 'Custom request submitted successfully! We\'ll review your submission and get back to you within 24 hours.',
+      request: customRequest 
+    });
+
+  } catch (error) {
+    console.error('❌ Error creating custom request:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1119,6 +1341,233 @@ async function sendWelcomeEmail(email, name) {
   }
 }
 
+// Send custom request email function
+async function sendCustomRequestEmail(customRequest) {
+  const customRequestEmailHTML = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Custom Design Request - PlwgsCreativeApparel</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .container {
+                max-width: 700px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }
+            .header p {
+                margin: 10px 0 0 0;
+                font-size: 16px;
+                opacity: 0.9;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+            .request-details {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 25px;
+                margin: 25px 0;
+            }
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                margin: 10px 0;
+                padding: 8px 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+            .detail-label {
+                font-weight: bold;
+                color: #495057;
+            }
+            .detail-value {
+                color: #333;
+                text-align: right;
+            }
+            .concept-box {
+                background: #e3f2fd;
+                border-left: 4px solid #2196f3;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 5px;
+            }
+            .cta-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 30px;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: bold;
+                margin: 20px 0;
+            }
+            .footer {
+                background: #f8f9fa;
+                padding: 30px;
+                text-align: center;
+                color: #6c757d;
+            }
+            .priority-high {
+                background: #fff3cd;
+                border-left: 4px solid #ffc107;
+            }
+            .priority-rush {
+                background: #f8d7da;
+                border-left: 4px solid #dc3545;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎨 New Custom Design Request</h1>
+                <p>You have a new custom design request from ${customRequest.customer_name}</p>
+            </div>
+
+            <div class="content">
+                <div class="request-details ${customRequest.timeline === 'rush' || customRequest.timeline === 'express' ? 'priority-rush' : 'priority-high'}">
+                    <h3>📋 Request Details</h3>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Name:</span>
+                        <span class="detail-value">${customRequest.customer_name}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value">${customRequest.email}</span>
+                    </div>
+                    
+                    ${customRequest.phone ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Phone:</span>
+                        <span class="detail-value">${customRequest.phone}</span>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Timeline:</span>
+                        <span class="detail-value">${customRequest.timeline}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Product Type:</span>
+                        <span class="detail-value">${customRequest.product_type}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Quantity:</span>
+                        <span class="detail-value">${customRequest.quantity}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Budget Range:</span>
+                        <span class="detail-value">${customRequest.budget_range}</span>
+                    </div>
+                    
+                    ${customRequest.size_requirements ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Size Requirements:</span>
+                        <span class="detail-value">${JSON.parse(customRequest.size_requirements).join(', ')}</span>
+                    </div>
+                    ` : ''}
+                    
+                    ${customRequest.color_preferences ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Color Preferences:</span>
+                        <span class="detail-value">${customRequest.color_preferences}</span>
+                    </div>
+                    ` : ''}
+                    
+                    ${customRequest.style_preferences ? `
+                    <div class="detail-row">
+                        <span class="detail-label">Style Preferences:</span>
+                        <span class="detail-value">${JSON.parse(customRequest.style_preferences).join(', ')}</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <div class="concept-box">
+                    <h4>💡 Design Concept</h4>
+                    <p>${customRequest.concept_description}</p>
+                </div>
+
+                ${customRequest.additional_notes ? `
+                <div class="concept-box">
+                    <h4>📝 Additional Notes</h4>
+                    <p>${customRequest.additional_notes}</p>
+                </div>
+                ` : ''}
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://plwgscreativeapparel.com/pages/admin.html" class="cta-button">
+                        📊 View in Admin Dashboard
+                    </a>
+                </div>
+
+                <div style="background: #fff3cd; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                    <h4>⏰ Action Required</h4>
+                    <p><strong>Please review this request and respond to the customer within 24 hours.</strong></p>
+                    <ul style="text-align: left;">
+                        <li>Review the design concept and requirements</li>
+                        <li>Prepare a detailed quote</li>
+                        <li>Send initial mockup or concept sketches</li>
+                        <li>Set up timeline and milestones</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p><strong>PlwgsCreativeApparel</strong></p>
+                <p>Custom Design Request - ID: ${customRequest.id}</p>
+                <p>Submitted: ${new Date(customRequest.created_at).toLocaleString()}</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
+    to: process.env.ADMIN_EMAIL,
+    subject: `🎨 New Custom Design Request from ${customRequest.customer_name}`,
+    html: customRequestEmailHTML
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Custom request email sent to admin for request ${customRequest.id}`);
+  } catch (error) {
+    console.error(`❌ Error sending custom request email:`, error);
+  }
+}
+
 // Get all subscribers (admin endpoint)
 app.get('/api/subscribers', async (req, res) => {
   const dbCheck = checkDatabase();
@@ -1215,9 +1664,9 @@ app.post('/api/customer/auth', async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 12);
       
       const newCustomer = await pool.query(`
-        INSERT INTO customers (email, first_name, last_name, name)
-        VALUES ($1, $2, $3, $4) RETURNING *
-      `, [email, first_name, last_name, `${first_name} ${last_name}`]);
+        INSERT INTO customers (email, password, first_name, last_name, name)
+        VALUES ($1, $2, $3, $4, $5) RETURNING *
+      `, [email, hashedPassword, first_name, last_name, `${first_name} ${last_name}`]);
 
       const customer = newCustomer.rows[0];
       
@@ -1255,9 +1704,9 @@ app.post('/api/customer/auth', async (req, res) => {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      // For now, we'll use a simple password check
-      // In production, you'd want to store hashed passwords
-      if (password !== 'customer123') { // Temporary simple auth
+      // Check hashed password
+      const isValidPassword = await bcrypt.compare(password, customer.rows[0].password);
+      if (!isValidPassword) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
@@ -1660,6 +2109,287 @@ function calculateTierProgress(points, currentTier) {
   
   return { percentage: Math.round(progress), pointsToNext };
 }
+
+// CART MANAGEMENT ENDPOINTS
+// =============================================================================
+
+// Get customer's cart
+app.get('/api/cart', authenticateCustomer, async (req, res) => {
+  if (!pool) {
+    return res.json({ items: [] });
+  }
+
+  try {
+    const customerId = req.customer.id;
+    
+    const result = await pool.query(`
+      SELECT 
+        c.id,
+        c.product_id,
+        c.product_name,
+        c.quantity,
+        c.unit_price,
+        c.size,
+        c.color,
+        c.image_url,
+        (c.quantity * c.unit_price) as total_price
+      FROM cart c
+      WHERE c.customer_id = $1
+      ORDER BY c.created_at DESC
+    `, [customerId]);
+
+    res.json({ items: result.rows });
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    res.status(500).json({ error: 'Failed to fetch cart' });
+  }
+});
+
+// Add item to cart
+app.post('/api/cart/add', authenticateCustomer, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const customerId = req.customer.id;
+    const { product_name, quantity, size, color, image_url } = req.body;
+
+    // Look up product ID, price, and image by name
+    const productResult = await pool.query(`
+      SELECT id, price, image_url FROM products WHERE name = $1
+    `, [product_name]);
+
+    if (productResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    const product_id = productResult.rows[0].id;
+    const unit_price = productResult.rows[0].price;
+    const product_image_url = productResult.rows[0].image_url;
+
+    // Check if item already exists in cart
+    const existingItem = await pool.query(`
+      SELECT id, quantity FROM cart 
+      WHERE customer_id = $1 AND product_id = $2 AND size = $3 AND color = $4
+    `, [customerId, product_id, size || 'M', color || 'Black']);
+
+    if (existingItem.rows.length > 0) {
+      // Update quantity
+      const newQuantity = existingItem.rows[0].quantity + (quantity || 1);
+      await pool.query(`
+        UPDATE cart 
+        SET quantity = $1, updated_at = CURRENT_TIMESTAMP 
+        WHERE id = $2
+      `, [newQuantity, existingItem.rows[0].id]);
+
+      res.json({ message: 'Cart updated', item: { id: existingItem.rows[0].id, quantity: newQuantity } });
+    } else {
+      // Add new item
+      const result = await pool.query(`
+        INSERT INTO cart (customer_id, product_id, product_name, quantity, unit_price, size, color, image_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
+      `, [customerId, product_id, product_name, quantity || 1, unit_price, size || 'M', color || 'Black', product_image_url]);
+
+      res.json({ message: 'Item added to cart', item: result.rows[0] });
+    }
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    res.status(500).json({ error: 'Failed to add item to cart' });
+  }
+});
+
+// Update cart item quantity
+app.put('/api/cart/update/:id', authenticateCustomer, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const customerId = req.customer.id;
+    const cartItemId = req.params.id;
+    const { quantity } = req.body;
+
+    if (quantity <= 0) {
+      // Remove item if quantity is 0 or less
+      await pool.query(`
+        DELETE FROM cart WHERE id = $1 AND customer_id = $2
+      `, [cartItemId, customerId]);
+
+      res.json({ message: 'Item removed from cart' });
+    } else {
+      // Update quantity
+      const result = await pool.query(`
+        UPDATE cart 
+        SET quantity = $1, updated_at = CURRENT_TIMESTAMP 
+        WHERE id = $2 AND customer_id = $3
+        RETURNING *
+      `, [quantity, cartItemId, customerId]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Cart item not found' });
+      }
+
+      res.json({ message: 'Cart updated', item: result.rows[0] });
+    }
+  } catch (error) {
+    console.error('Error updating cart:', error);
+    res.status(500).json({ error: 'Failed to update cart' });
+  }
+});
+
+// Remove item from cart
+app.delete('/api/cart/remove/:id', authenticateCustomer, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const customerId = req.customer.id;
+    const cartItemId = req.params.id;
+
+    const result = await pool.query(`
+      DELETE FROM cart WHERE id = $1 AND customer_id = $2
+    `, [cartItemId, customerId]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Cart item not found' });
+    }
+
+    res.json({ message: 'Item removed from cart' });
+  } catch (error) {
+    console.error('Error removing from cart:', error);
+    res.status(500).json({ error: 'Failed to remove item from cart' });
+  }
+});
+
+// Clear customer's cart
+app.delete('/api/cart/clear', authenticateCustomer, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const customerId = req.customer.id;
+
+    await pool.query(`
+      DELETE FROM cart WHERE customer_id = $1
+    `, [customerId]);
+
+    res.json({ message: 'Cart cleared' });
+  } catch (error) {
+    console.error('Error clearing cart:', error);
+    res.status(500).json({ error: 'Failed to clear cart' });
+  }
+});
+
+// Search product by name
+app.get('/api/products/search', async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const { name } = req.query;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Product name is required' });
+    }
+
+    const result = await pool.query(`
+      SELECT * FROM products WHERE name = $1
+    `, [name]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error searching product:', error);
+    res.status(500).json({ error: 'Failed to search product' });
+  }
+});
+
+// Checkout - convert cart to order
+app.post('/api/cart/checkout', authenticateCustomer, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const customerId = req.customer.id;
+    const { shipping_address } = req.body;
+
+    // Get customer info
+    const customerResult = await pool.query(`
+      SELECT id, email, first_name, last_name FROM customers WHERE id = $1
+    `, [customerId]);
+
+    if (customerResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    const customer = customerResult.rows[0];
+
+    // Get cart items
+    const cartResult = await pool.query(`
+      SELECT * FROM cart WHERE customer_id = $1
+    `, [customerId]);
+
+    if (cartResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    const cartItems = cartResult.rows;
+    const total_amount = cartItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+
+    // Generate order number
+    const orderNumber = 'PLW-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-4);
+
+    // Create order
+    const orderResult = await pool.query(`
+      INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `, [orderNumber, customerId, customer.email, `${customer.first_name} ${customer.last_name}`, total_amount, shipping_address]);
+
+    const order = orderResult.rows[0];
+
+    // Create order items from cart items
+    for (const item of cartItems) {
+      await pool.query(`
+        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `, [order.id, item.product_id, item.product_name, item.quantity, item.unit_price, (item.quantity * item.unit_price), item.size, item.color]);
+    }
+
+    // Clear cart after successful order
+    await pool.query(`
+      DELETE FROM cart WHERE customer_id = $1
+    `, [customerId]);
+
+    // Update customer stats
+    await pool.query(`
+      UPDATE customers 
+      SET total_orders = total_orders + 1,
+          total_spent = total_spent + $1,
+          average_order_value = (total_spent + $1) / (total_orders + 1),
+          loyalty_points = loyalty_points + FLOOR($1 * 0.1)
+      WHERE id = $2
+    `, [total_amount, customerId]);
+
+    res.json({ 
+      message: 'Order created successfully', 
+      order: order,
+      orderNumber: orderNumber
+    });
+  } catch (error) {
+    console.error('Error during checkout:', error);
+    res.status(500).json({ error: 'Failed to process checkout' });
+  }
+});
 
 // Initialize database and start server
 initializeDatabase().then(() => {

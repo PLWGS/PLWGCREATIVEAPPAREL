@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Midnight Horror Skull Tee - PlwgsCreativeApparel | Be Loud. Be Seen. Be You.</title>
+    <title id="pageTitle">Product Details - PlwgsCreativeApparel | Be Loud. Be Seen. Be You.</title>
     <meta name="description" content="Embrace the darkness with our spine-chilling Midnight Horror Skull design. Premium quality t-shirt featuring intricate gothic artwork that speaks to bold personalities." />
     <link rel="stylesheet" href="../css/main.css" />
     <style>
@@ -235,11 +235,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </button>
-                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative">
+                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
-                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-counter">3</span>
                     </button>
                     
                     <!-- Mobile Menu Button -->
@@ -269,7 +269,7 @@
                 <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
-                <span class="text-accent">Midnight Horror Skull Tee</span>
+                <span class="text-accent" id="breadcrumbProductName">Product Details</span>
             </nav>
         </div>
     </section>
@@ -283,7 +283,7 @@
                     <!-- Main Image -->
                     <div class="image-gallery">
                         <div class="relative overflow-hidden rounded-2xl bg-surface-dark">
-                            <img id="mainImage" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop" alt="Midnight Horror Skull Tee - Main View" class="main-image w-full h-96 lg:h-[500px] object-cover cursor-zoom-in" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=800'; this.onerror=null;" />
+                            <img id="mainImage" src="../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg" alt="Product Image" class="main-image w-full h-96 lg:h-[500px] object-cover cursor-zoom-in" loading="lazy" />
                             
                             <!-- Zoom Icon -->
                             <div class="absolute top-4 right-4 bg-black bg-opacity-50 rounded-full p-2">
@@ -329,7 +329,7 @@
                             </button>
                         </div>
                         
-                        <h1 class="font-orbitron text-3xl lg:text-4xl font-bold text-white">Midnight Horror Skull Tee</h1>
+                        <h1 id="productTitle" class="font-orbitron text-3xl lg:text-4xl font-bold text-white">Product Title</h1>
                         
                         <div class="flex items-center space-x-4">
                             <div class="flex items-center space-x-1">
@@ -356,8 +356,8 @@
                         </div>
                         
                         <div class="flex items-center space-x-4">
-                            <span class="font-orbitron text-3xl font-bold text-accent">$29.99</span>
-                            <span class="text-text-secondary line-through text-lg">$39.99</span>
+                            <span id="currentPrice" class="font-orbitron text-3xl font-bold text-accent">$22.00</span>
+                            <span id="originalPrice" class="text-text-secondary line-through text-lg">$26.40</span>
                             <span class="bg-warning text-black px-2 py-1 rounded text-sm font-bold">25% OFF</span>
                         </div>
                     </div>
@@ -365,8 +365,8 @@
                     <!-- Design Story -->
                     <div class="glass-card rounded-xl p-6">
                         <h3 class="font-orbitron text-xl font-bold text-white mb-4">Design Story</h3>
-                        <p class="text-text-secondary leading-relaxed">
-                            Born from the depths of gothic imagination, this design channels the raw energy of classic horror aesthetics with a modern twist. The intricate skull artwork pays homage to vintage horror movie posters while incorporating contemporary street art elements. Perfect for those who find beauty in darkness and aren't afraid to make a statement.
+                        <p id="productDescription" class="text-text-secondary leading-relaxed">
+                            Quality printed design with custom artwork. Perfect for those who want to express their unique style.
                         </p>
                         <div class="flex flex-wrap gap-2 mt-4">
                             <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#Horror</span>
@@ -428,10 +428,10 @@
                         </div>
                         
                         <div class="space-y-3">
-                            <button class="btn-primary w-full neon-glow text-lg py-4">
-                                Add to Cart - $29.99
+                            <button id="addToCartBtn" class="btn-primary w-full neon-glow text-lg py-4">
+                                Add to Cart - $22.00
                             </button>
-                            <button class="w-full border border-accent text-accent px-6 py-3 rounded-lg font-semibold hover:bg-accent hover:text-black transition-all duration-300">
+                            <button id="buyNowBtn" class="w-full border border-accent text-accent px-6 py-3 rounded-lg font-semibold hover:bg-accent hover:text-black transition-all duration-300">
                                 Buy Now
                             </button>
                         </div>
@@ -1141,6 +1141,131 @@
 
     <!-- JavaScript -->
     <script>
+        // Load product data from URL parameter
+        function loadProductData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            
+            if (!productId) {
+                console.error('No product ID provided');
+                return;
+            }
+            
+            // Decode the product ID (product title)
+            const productTitle = decodeURIComponent(productId);
+            console.log('Loading product:', productTitle);
+            
+            // Find the product in the allProducts array from shop.html
+            // For now, we'll use a simplified approach and load from the database
+            loadProductFromDatabase(productTitle);
+        }
+        
+        // Load product data from database
+        async function loadProductFromDatabase(productTitle) {
+            try {
+                const response = await fetch(`/api/products/search?name=${encodeURIComponent(productTitle)}`);
+                if (!response.ok) {
+                    throw new Error('Product not found');
+                }
+                
+                const product = await response.json();
+                updateProductPage(product);
+            } catch (error) {
+                console.error('Error loading product:', error);
+                // Fallback to hardcoded data for now
+                loadFallbackProduct(productTitle);
+            }
+        }
+        
+        // Update the product page with dynamic data
+        function updateProductPage(product) {
+            console.log('Updating product page with:', product);
+            
+            // Update page title
+            document.title = `${product.name} - PlwgsCreativeApparel`;
+            
+            // Update breadcrumb
+            const breadcrumbElement = document.getElementById('breadcrumbProductName');
+            if (breadcrumbElement) {
+                breadcrumbElement.textContent = product.name;
+            }
+            
+            // Update product title
+            const productTitleElement = document.getElementById('productTitle');
+            if (productTitleElement) {
+                productTitleElement.textContent = product.name;
+            }
+            
+            // Update current price
+            const currentPriceElement = document.getElementById('currentPrice');
+            if (currentPriceElement) {
+                currentPriceElement.textContent = `$${product.price}`;
+            }
+            
+            // Update original price
+            const originalPriceElement = document.getElementById('originalPrice');
+            if (originalPriceElement && product.original_price) {
+                originalPriceElement.textContent = `$${product.original_price}`;
+            }
+            
+            // Update main image
+            const mainImage = document.getElementById('mainImage');
+            if (mainImage && product.image_url) {
+                // Convert database path to frontend path
+                let imagePath = product.image_url;
+                if (imagePath.startsWith('etsy_images/')) {
+                    imagePath = '../' + imagePath;
+                }
+                mainImage.src = imagePath;
+                mainImage.alt = product.name;
+            }
+            
+            // Update thumbnails
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumbnail, index) => {
+                if (index === 0 && product.image_url) {
+                    let imagePath = product.image_url;
+                    if (imagePath.startsWith('etsy_images/')) {
+                        imagePath = '../' + imagePath;
+                    }
+                    thumbnail.src = imagePath;
+                    thumbnail.dataset.image = imagePath;
+                }
+            });
+            
+            // Update description
+            const descriptionElement = document.getElementById('productDescription');
+            if (descriptionElement && product.description) {
+                descriptionElement.textContent = product.description;
+            }
+            
+            // Update add to cart button price
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (addToCartBtn) {
+                addToCartBtn.textContent = `Add to Cart - $${product.price}`;
+            }
+        }
+        
+        // Fallback function for when database lookup fails
+        function loadFallbackProduct(productTitle) {
+            console.log('Using fallback data for:', productTitle);
+            
+            // Update page title
+            document.title = `${productTitle} - PlwgsCreativeApparel`;
+            
+            // Update breadcrumb
+            const breadcrumbElement = document.getElementById('breadcrumbProductName');
+            if (breadcrumbElement) {
+                breadcrumbElement.textContent = productTitle;
+            }
+            
+            // Update product title
+            const productTitleElement = document.getElementById('productTitle');
+            if (productTitleElement) {
+                productTitleElement.textContent = productTitle;
+            }
+        }
+        
         // Particle Animation
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
@@ -1248,8 +1373,11 @@
             });
         });
 
-        // Initialize particles on load
-        document.addEventListener('DOMContentLoaded', createParticles);
+        // Initialize particles on load and load product data
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            loadProductData();
+        });
 
         // Navbar scroll effect
         window.addEventListener('scroll', () => {
@@ -1278,6 +1406,189 @@
                 quantitySpan.textContent = currentQuantity;
             });
         });
+        
+        // Add to Cart functionality
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', async () => {
+                try {
+                    // Check if user is logged in
+                    const token = localStorage.getItem('customerToken');
+                    if (!token) {
+                        alert('Please log in to add items to cart');
+                        window.location.href = 'customer-login.html';
+                        return;
+                    }
+                    
+                    // Get selected size
+                    const selectedSize = document.querySelector('.size-option.selected');
+                    if (!selectedSize) {
+                        alert('Please select a size');
+                        return;
+                    }
+                    
+                    // Extract just the size letter (M, L, etc.) from the selected size
+                    const sizeText = selectedSize.textContent.trim();
+                    const sizeMatch = sizeText.match(/^([A-Z]+)/);
+                    const size = sizeMatch ? sizeMatch[1] : 'M'; // Default to M if no match
+                    
+                    // Get quantity
+                    const quantitySpan = document.querySelector('.sticky-cart span');
+                    const quantity = quantitySpan ? parseInt(quantitySpan.textContent) : 1;
+                    
+                    // Get product data from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const productId = urlParams.get('id');
+                    const productTitle = decodeURIComponent(productId);
+                    
+                    console.log('Adding to cart:', {
+                        product_name: productTitle,
+                        quantity: quantity,
+                        size: size,
+                        color: 'Black'
+                    });
+                    
+                    // Add to cart via API
+                    const response = await fetch('/api/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            product_name: productTitle,
+                            quantity: quantity,
+                            size: size,
+                            color: 'Black' // Default color for now
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to add to cart');
+                    }
+                    
+                    const result = await response.json();
+                    alert('Item added to cart successfully!');
+                    
+                    // Update cart counter
+                    updateCartCounter();
+                    
+                    // DO NOT redirect - stay on the same page
+                    // window.location.href = 'cart.html';
+                    
+                } catch (error) {
+                    console.error('Error adding to cart:', error);
+                    alert('Error adding item to cart: ' + error.message);
+                }
+            });
+        }
+        
+        // Buy Now functionality
+        const buyNowBtn = document.getElementById('buyNowBtn');
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', async () => {
+                try {
+                    // Check if user is logged in
+                    const token = localStorage.getItem('customerToken');
+                    if (!token) {
+                        alert('Please log in to purchase items');
+                        window.location.href = 'customer-login.html';
+                        return;
+                    }
+                    
+                    // Get selected size
+                    const selectedSize = document.querySelector('.size-option.selected');
+                    if (!selectedSize) {
+                        alert('Please select a size');
+                        return;
+                    }
+                    
+                    // Extract just the size letter (M, L, etc.) from the selected size
+                    const sizeText = selectedSize.textContent.trim();
+                    const sizeMatch = sizeText.match(/^([A-Z]+)/);
+                    const size = sizeMatch ? sizeMatch[1] : 'M'; // Default to M if no match
+                    
+                    // Get quantity
+                    const quantitySpan = document.querySelector('.sticky-cart span');
+                    const quantity = quantitySpan ? parseInt(quantitySpan.textContent) : 1;
+                    
+                    // Get product data from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const productId = urlParams.get('id');
+                    const productTitle = decodeURIComponent(productId);
+                    
+                    console.log('Buy Now - Adding to cart:', {
+                        product_name: productTitle,
+                        quantity: quantity,
+                        size: size,
+                        color: 'Black'
+                    });
+                    
+                    // Add to cart via API
+                    const response = await fetch('/api/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            product_name: productTitle,
+                            quantity: quantity,
+                            size: size,
+                            color: 'Black' // Default color for now
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to add to cart');
+                    }
+                    
+                    const result = await response.json();
+                    console.log('Item added to cart, redirecting to checkout...');
+                    
+                    // Redirect to checkout
+                    window.location.href = 'cart.html';
+                    
+                } catch (error) {
+                    console.error('Error with Buy Now:', error);
+                    alert('Error processing purchase: ' + error.message);
+                }
+            });
+        }
+        
+        // Cart counter functionality
+        async function updateCartCounter() {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    document.getElementById('cart-counter').textContent = '0';
+                    return;
+                }
+                
+                const response = await fetch('/api/cart', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const cartData = await response.json();
+                    const totalItems = cartData.items ? cartData.items.reduce((total, item) => total + item.quantity, 0) : 0;
+                    document.getElementById('cart-counter').textContent = totalItems.toString();
+                } else {
+                    document.getElementById('cart-counter').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error updating cart counter:', error);
+                document.getElementById('cart-counter').textContent = '0';
+            }
+        }
+        
+        // Update cart counter on page load
+        updateCartCounter();
     </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>

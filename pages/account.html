@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Account - PlwgsCreativeApparel | Order History & Profile Management</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>P</text></svg>">
     <meta name="description" content="Manage your PlwgsCreativeApparel account, track orders, view purchase history, and personalize your creative rebellion experience." />
     <link rel="stylesheet" href="../css/main.css" />
     <style>
@@ -172,7 +173,7 @@
                                 <div>
                                     <h3 class="font-orbitron text-accent text-sm font-bold mb-3">Featured</h3>
                                     <div class="space-y-2">
-                                        <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop" alt="Featured Product" class="w-full h-20 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=400'; this.onerror=null;" />
+                                        <img src="../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg" alt="Featured Product" class="w-full h-20 object-cover rounded-lg" loading="lazy" onerror="this.src='../etsy_images/product_02_Just-a-Little-BOO-st-Halloween-Shirt-Quality-Print.jpg'; this.onerror=null;"s.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=400'; this.onerror=null;" />
                                         <p class="text-xs text-text-secondary">New Horror Collection</p>
                                     </div>
                                 </div>
@@ -191,17 +192,17 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </button>
-                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative">
+                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
-                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-counter">3</span>
                     </button>
                     
                     <!-- User Avatar -->
                     <div class="flex items-center space-x-2">
-                        <img src="https://images.unsplash.com/photo-1494790108755-2616c0763c5c?q=80&w=100&auto=format&fit=crop" alt="User Avatar" class="w-8 h-8 rounded-full border-2 border-accent" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;" />
-                        <span class="hidden md:block text-sm font-medium">Sarah</span>
+                        <img src="../etsy_images/product_03_Wish-You-Were-Here-Shirt-Quality-Printed-Design-So.jpg" alt="User Avatar" class="w-8 h-8 rounded-full border-2 border-accent" loading="lazy" onerror="this.src='../etsy_images/product_04_Halloween-One-Two-Hes-Coming-for-You-Shirt-Printed.jpg'; this.onerror=null;"xels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;" />
+                        <span class="hidden md:block text-sm font-medium" id="customerName">Loading...</span>
                     </div>
                     
                     <!-- Mobile Menu Button -->
@@ -221,9 +222,9 @@
             <!-- Page Header -->
             <div class="mb-12">
                 <div class="flex items-center space-x-4 mb-6">
-                    <img src="https://images.unsplash.com/photo-1494790108755-2616c0763c5c?q=80&w=200&auto=format&fit=crop" alt="Sarah's Avatar" class="w-16 h-16 rounded-full border-4 border-accent neon-glow" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=200'; this.onerror=null;" />
+                    <img src="../etsy_images/product_05_Be-Kind-T-Shirt.jpg" alt="Customer Avatar" class="w-16 h-16 rounded-full border-4 border-accent neon-glow" loading="lazy" onerror="this.src='../etsy_images/product_06_Custom-Bridezilla-Shirt-Printed-Design-Bridezilla-.jpg'; this.onerror=null;"ttps://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=200'; this.onerror=null;" />
                     <div>
-                        <h1 class="font-orbitron text-4xl font-bold text-white">Welcome back, Sarah!</h1>
+                        <h1 class="font-orbitron text-4xl font-bold text-white" id="welcomeMessage">Welcome back!</h1>
                         <p class="text-text-secondary text-lg">Creative Rebel since October 2023</p>
                     </div>
                 </div>
@@ -231,19 +232,19 @@
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div class="glass-card rounded-xl p-4 text-center">
-                        <div class="font-orbitron text-2xl font-bold text-accent mb-1">12</div>
+                        <div class="font-orbitron text-2xl font-bold text-accent mb-1" id="totalOrders">0</div>
                         <div class="text-text-secondary text-sm">Total Orders</div>
                     </div>
                     <div class="glass-card rounded-xl p-4 text-center">
-                        <div class="font-orbitron text-2xl font-bold text-accent mb-1">5</div>
+                        <div class="font-orbitron text-2xl font-bold text-accent mb-1" id="wishlistItems">0</div>
                         <div class="text-text-secondary text-sm">Wishlist Items</div>
                     </div>
                     <div class="glass-card rounded-xl p-4 text-center">
-                        <div class="font-orbitron text-2xl font-bold text-accent mb-1">850</div>
+                        <div class="font-orbitron text-2xl font-bold text-accent mb-1" id="loyaltyPoints">0</div>
                         <div class="text-text-secondary text-sm">Loyalty Points</div>
                     </div>
                     <div class="glass-card rounded-xl p-4 text-center">
-                        <div class="font-orbitron text-2xl font-bold text-accent mb-1">3</div>
+                        <div class="font-orbitron text-2xl font-bold text-accent mb-1" id="customOrders">0</div>
                         <div class="text-text-secondary text-sm">Custom Orders</div>
                     </div>
                 </div>
@@ -277,8 +278,8 @@
                     <div class="glass-card rounded-2xl p-6 neon-glow">
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
                             <div>
-                                <h3 class="font-orbitron text-xl font-bold text-white mb-2">Order #PLW-2025-0847</h3>
-                                <p class="text-text-secondary">Placed on January 28, 2025 • Total: $89.97</p>
+                                <h3 class="font-orbitron text-xl font-bold text-white mb-2" id="recentOrderNumber">No recent orders</h3>
+                                <p class="text-text-secondary" id="recentOrderDetails">Start shopping to see your orders here</p>
                             </div>
                             <div class="flex items-center space-x-4 mt-4 lg:mt-0">
                                 <span class="status-shipped px-3 py-1 rounded-full text-white text-sm font-medium">Shipped</span>
@@ -286,36 +287,8 @@
                             </div>
                         </div>
 
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <!-- Order Item 1 -->
-                            <div class="flex items-center space-x-4 p-4 bg-surface rounded-lg">
-                                <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=200&auto=format&fit=crop" alt="Horror Essentials Tee" class="w-16 h-16 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=200'; this.onerror=null;" />
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-white">Midnight Screams Tee</h4>
-                                    <p class="text-text-secondary text-sm">Size: M • Black</p>
-                                    <p class="text-accent font-bold">$29.99</p>
-                                </div>
-                            </div>
-
-                            <!-- Order Item 2 -->
-                            <div class="flex items-center space-x-4 p-4 bg-surface rounded-lg">
-                                <img src="https://images.pixabay.com/photo/2017/08/01/11/48/woman-2564660_1280.jpg?q=80&w=200&auto=format&fit=crop" alt="Pop Culture Tee" class="w-16 h-16 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=200&auto=format&fit=crop'; this.onerror=null;" />
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-white">Retro Rebel Tee</h4>
-                                    <p class="text-text-secondary text-sm">Size: M • Navy</p>
-                                    <p class="text-accent font-bold">$32.99</p>
-                                </div>
-                            </div>
-
-                            <!-- Order Item 3 -->
-                            <div class="flex items-center space-x-4 p-4 bg-surface rounded-lg">
-                                <img src="https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Custom Design" class="w-16 h-16 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop'; this.onerror=null;" />
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-white">Custom Cat Lover</h4>
-                                    <p class="text-text-secondary text-sm">Size: M • White</p>
-                                    <p class="text-accent font-bold">$26.99</p>
-                                </div>
-                            </div>
+                        <div class="grid md:grid-cols-3 gap-4" id="recentOrderItems">
+                            <!-- Order items will be dynamically populated here -->
                         </div>
 
                         <div class="flex flex-col sm:flex-row gap-4 mt-6">
@@ -333,41 +306,8 @@
                     <div class="glass-card rounded-2xl p-6">
                         <h3 class="font-orbitron text-xl font-bold text-white mb-6">Previous Orders</h3>
                         
-                        <div class="space-y-4">
-                            <!-- Order 2 -->
-                            <div class="flex items-center justify-between p-4 bg-surface rounded-lg">
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex -space-x-2">
-                                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=100&auto=format&fit=crop" alt="Order Item" class="w-12 h-12 object-cover rounded-lg border-2 border-background" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;" />
-                                        <img src="https://images.pixabay.com/photo/2016/11/29/20/22/girl-1871104_1280.jpg?q=80&w=100&auto=format&fit=crop" alt="Order Item" class="w-12 h-12 object-cover rounded-lg border-2 border-background" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=100&auto=format&fit=crop'; this.onerror=null;" />
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-white">Order #PLW-2024-0823</h4>
-                                        <p class="text-text-secondary text-sm">December 15, 2024 • 2 items • $58.98</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center space-x-4">
-                                    <span class="status-delivered px-3 py-1 rounded-full text-white text-sm font-medium">Delivered</span>
-                                    <button class="text-accent hover:text-accent-light transition-colors">Reorder</button>
-                                </div>
-                            </div>
-
-                            <!-- Order 3 -->
-                            <div class="flex items-center justify-between p-4 bg-surface rounded-lg">
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex -space-x-2">
-                                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop" alt="Order Item" class="w-12 h-12 object-cover rounded-lg border-2 border-background" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;" />
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-white">Order #PLW-2024-0756</h4>
-                                        <p class="text-text-secondary text-sm">November 3, 2024 • 1 item • $34.99</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center space-x-4">
-                                    <span class="status-delivered px-3 py-1 rounded-full text-white text-sm font-medium">Delivered</span>
-                                    <button class="text-accent hover:text-accent-light transition-colors">Reorder</button>
-                                </div>
-                            </div>
+                        <div class="space-y-4" id="previousOrdersList">
+                            <!-- Previous orders will be dynamically populated here -->
                         </div>
 
                         <div class="text-center mt-6">
@@ -385,7 +325,7 @@
                     <!-- Wishlist Item 1 -->
                     <div class="glass-card rounded-2xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
                         <div class="relative">
-                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop" alt="Wishlist Item" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=600'; this.onerror=null;" />
+                            <img src="../etsy_images/product_07_Kids-Halloween-Horror-Friends-Hoodie-Printed-Desig.jpg" alt="Wishlist Item" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.src='../etsy_images/product_08_Best-Dad-Ever-T-Shirt-Printed-Design-Best-Dad-Shir.jpg'; this.onerror=null;" />
                             <button class="heart-icon active absolute top-4 right-4 w-10 h-10 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -411,7 +351,7 @@
                     <!-- Wishlist Item 2 -->
                     <div class="glass-card rounded-2xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
                         <div class="relative">
-                            <img src="https://images.pixabay.com/photo/2017/08/01/11/48/woman-2564660_1280.jpg?q=80&w=600&auto=format&fit=crop" alt="Wishlist Item" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=600&auto=format&fit=crop'; this.onerror=null;" />
+                            <img src="../etsy_images/product_09_Grandma-Heart-Shirt-Printed-Design-Personalize-wit.jpg" alt="Wishlist Item" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.src='../etsy_images/product_10_Custom-Fathers-Day-Photo-Shirt-for-Dad-Printed-Des.jpg'; this.onerror=null;" />
                             <button class="heart-icon active absolute top-4 right-4 w-10 h-10 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -434,7 +374,7 @@
                     <!-- Wishlist Item 3 -->
                     <div class="glass-card rounded-2xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
                         <div class="relative">
-                            <img src="https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Wishlist Item" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=600&auto=format&fit=crop'; this.onerror=null;" />
+                            <img src="../etsy_images/product_11_Custom-Fathers-Day-Photo-Shirt-for-Dad-Printed-Des.jpg" alt="Wishlist Item" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.src='../etsy_images/product_12_Fathers-Day-Shirt-Printed-Design-Husband-Father-Le.jpg'; this.onerror=null;" />
                             <button class="heart-icon active absolute top-4 right-4 w-10 h-10 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -470,7 +410,7 @@
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-text-secondary text-sm font-medium mb-2">First Name</label>
-                                    <input type="text" value="Sarah" class="input-field w-full" />
+                                    <input type="text" id="profileFirstName" class="input-field w-full" />
                                 </div>
                                 <div>
                                     <label class="block text-text-secondary text-sm font-medium mb-2">Last Name</label>
@@ -480,7 +420,7 @@
                             
                             <div>
                                 <label class="block text-text-secondary text-sm font-medium mb-2">Email Address</label>
-                                <input type="email" value="sarah.darkstyle@email.com" class="input-field w-full" />
+                                <input type="email" id="profileEmail" class="input-field w-full" />
                             </div>
                             
                             <div>
@@ -519,7 +459,7 @@
                                         </svg>
                                     </button>
                                 </div>
-                                <p class="text-white font-medium">Sarah Mitchell</p>
+                                <p class="text-white font-medium" id="addressName1">Loading...</p>
                                 <p class="text-text-secondary text-sm">123 Gothic Street</p>
                                 <p class="text-text-secondary text-sm">Dark City, DC 12345</p>
                                 <p class="text-text-secondary text-sm">United States</p>
@@ -535,7 +475,7 @@
                                         </svg>
                                     </button>
                                 </div>
-                                <p class="text-white font-medium">Sarah Mitchell</p>
+                                <p class="text-white font-medium" id="addressName2">Loading...</p>
                                 <p class="text-text-secondary text-sm">456 Creative Avenue</p>
                                 <p class="text-text-secondary text-sm">Art District, AD 67890</p>
                                 <p class="text-text-secondary text-sm">United States</p>
@@ -701,7 +641,7 @@
                             
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div class="flex items-center space-x-4 p-4 bg-surface rounded-lg">
-                                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=200&auto=format&fit=crop" alt="Recommended Design" class="w-16 h-16 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=200'; this.onerror=null;" />
+                                    <img src="../etsy_images/product_13_Fathers-Day-Shirt-Printed-Design-Husband-Father-Gr.jpg" alt="Recommended Design" class="w-16 h-16 object-cover rounded-lg" loading="lazy" onerror="this.src='../etsy_images/product_14_Look-Whos-All-Grown-Up-And-Ready-For-Senior-Discou.jpg'; this.onerror=null;" />
                                     <div class="flex-1">
                                         <h4 class="font-semibold text-white">Haunted Memories</h4>
                                         <p class="text-text-secondary text-sm">95% match • Horror</p>
@@ -710,7 +650,7 @@
                                 </div>
                                 
                                 <div class="flex items-center space-x-4 p-4 bg-surface rounded-lg">
-                                    <img src="https://images.pixabay.com/photo/2016/11/29/20/22/girl-1871104_1280.jpg?q=80&w=200&auto=format&fit=crop" alt="Recommended Design" class="w-16 h-16 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=200&auto=format&fit=crop'; this.onerror=null;" />
+                                    <img src="../etsy_images/product_15_Acknowledge-Me-Its-My-Birthday-Shirt-Printed-Desig.jpg" alt="Recommended Design" class="w-16 h-16 object-cover rounded-lg" loading="lazy" onerror="this.src='../etsy_images/product_16_Biker-Lives-Matter-Shirt-Quality-Printed-Design-Mo.jpg'; this.onerror=null;" />
                                     <div class="flex-1">
                                         <h4 class="font-semibold text-white">Retro Villain</h4>
                                         <p class="text-text-secondary text-sm">88% match • Pop Culture</p>
@@ -1257,22 +1197,68 @@
         function updateProfileSection(data) {
             const { customer, addresses, preferences, style_profile } = data;
             
-            // Update customer name
-            const customerNameElement = document.querySelector('.text-2xl.font-bold.text-white');
-            if (customerNameElement && customer.name) {
-                customerNameElement.textContent = `Welcome back, ${customer.name.split(' ')[0]}!`;
+            console.log('=== PROFILE UPDATE DEBUG ===');
+            console.log('Customer data received:', customer);
+            console.log('Customer first_name:', customer.first_name);
+            console.log('Customer last_name:', customer.last_name);
+            console.log('Customer name:', customer.name);
+            
+            // Update customer name in header
+            const customerNameElement = document.getElementById('customerName');
+            if (customerNameElement) {
+                if (customer.first_name && customer.last_name) {
+                    customerNameElement.textContent = customer.first_name;
+                } else if (customer.name) {
+                    customerNameElement.textContent = customer.name.split(' ')[0];
+                } else {
+                    customerNameElement.textContent = 'Customer';
+                }
             }
 
-            // Update loyalty points
-            const loyaltyPointsElement = document.querySelector('.font-orbitron.text-3xl.font-bold.text-accent');
-            if (loyaltyPointsElement && customer.loyalty_points) {
+            // Update welcome message
+            const welcomeMessageElement = document.getElementById('welcomeMessage');
+            if (welcomeMessageElement) {
+                if (customer.first_name && customer.last_name) {
+                    welcomeMessageElement.textContent = `Welcome back, ${customer.first_name}!`;
+                } else if (customer.name) {
+                    welcomeMessageElement.textContent = `Welcome back, ${customer.name.split(' ')[0]}!`;
+                } else {
+                    welcomeMessageElement.textContent = 'Welcome back!';
+                }
+            }
+
+            // Update profile form fields
+            const profileFirstNameElement = document.getElementById('profileFirstName');
+            if (profileFirstNameElement && customer.first_name) {
+                profileFirstNameElement.value = customer.first_name;
+            }
+
+            const profileEmailElement = document.getElementById('profileEmail');
+            if (profileEmailElement && customer.email) {
+                profileEmailElement.value = customer.email;
+            }
+
+            // Update summary statistics
+            const totalOrdersElement = document.getElementById('totalOrders');
+            if (totalOrdersElement && customer.total_orders !== undefined) {
+                totalOrdersElement.textContent = customer.total_orders;
+            }
+
+            const loyaltyPointsElement = document.getElementById('loyaltyPoints');
+            if (loyaltyPointsElement && customer.loyalty_points !== undefined) {
                 loyaltyPointsElement.textContent = customer.loyalty_points;
             }
 
-            // Update order count
-            const orderCountElement = document.querySelector('.text-center:nth-child(1) .font-orbitron');
-            if (orderCountElement && customer.total_orders) {
-                orderCountElement.textContent = customer.total_orders;
+            const wishlistItemsElement = document.getElementById('wishlistItems');
+            if (wishlistItemsElement) {
+                // This will be updated when wishlist is loaded
+                wishlistItemsElement.textContent = '0';
+            }
+
+            const customOrdersElement = document.getElementById('customOrders');
+            if (customOrdersElement) {
+                // This will be updated when custom orders are loaded
+                customOrdersElement.textContent = '0';
             }
 
             // Update addresses
@@ -1303,35 +1289,82 @@
 
         // Update orders section
         function updateOrdersSection(orders) {
-            const ordersContainer = document.querySelector('.space-y-4');
-            if (!ordersContainer || !orders) return;
-
-            ordersContainer.innerHTML = orders.map(order => `
-                <div class="glass-card rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="font-semibold text-white">Order #${order.order_number}</h3>
-                            <p class="text-text-secondary text-sm">${new Date(order.created_at).toLocaleDateString()} • ${order.item_count} items</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-accent font-bold">$${order.total_amount}</p>
-                            <span class="status-badge status-${order.status}">${order.status}</span>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        ${order.items ? order.items.map(item => `
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-text-secondary">${item.product_name}</span>
-                                <span class="text-white">$${item.total_price}</span>
+            // Update recent order details
+            const recentOrderNumberElement = document.getElementById('recentOrderNumber');
+            const recentOrderDetailsElement = document.getElementById('recentOrderDetails');
+            const recentOrderItemsElement = document.getElementById('recentOrderItems');
+            const previousOrdersListElement = document.getElementById('previousOrdersList');
+            
+            if (orders && orders.length > 0) {
+                const recentOrder = orders[0];
+                if (recentOrderNumberElement) {
+                    recentOrderNumberElement.textContent = `Order #${recentOrder.order_number}`;
+                }
+                if (recentOrderDetailsElement) {
+                    const orderDate = new Date(recentOrder.created_at).toLocaleDateString();
+                    recentOrderDetailsElement.textContent = `Placed on ${orderDate} • Total: $${recentOrder.total_amount}`;
+                }
+                
+                // Update recent order items
+                if (recentOrderItemsElement && recentOrder.items && recentOrder.items.length > 0) {
+                    recentOrderItemsElement.innerHTML = recentOrder.items.slice(0, 3).map(item => `
+                        <div class="flex items-center space-x-4 p-4 bg-surface rounded-lg">
+                            <img src="${item.image_url || '../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg'}" alt="${item.product_name}" class="w-16 h-16 object-cover rounded-lg" loading="lazy" onerror="this.src='../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg'; this.onerror=null;" />
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white">${item.product_name}</h4>
+                                <p class="text-text-secondary text-sm">Size: ${item.size || 'M'} • ${item.color || 'Black'}</p>
+                                <p class="text-accent font-bold">$${item.unit_price || item.price || '0.00'}</p>
                             </div>
-                        `).join('') : ''}
-                    </div>
-                    <div class="flex space-x-2 mt-4">
-                        <button class="btn-primary text-xs px-3 py-1">Track Package</button>
-                        <button class="border border-accent text-accent px-3 py-1 rounded text-xs">Reorder</button>
-                    </div>
-                </div>
-            `).join('');
+                        </div>
+                    `).join('');
+                } else if (recentOrderItemsElement) {
+                    recentOrderItemsElement.innerHTML = '';
+                }
+                
+                // Update previous orders list (skip the first order as it's shown in recent)
+                if (previousOrdersListElement) {
+                    const previousOrders = orders.slice(1);
+                    if (previousOrders.length > 0) {
+                        previousOrdersListElement.innerHTML = previousOrders.map(order => `
+                            <div class="flex items-center justify-between p-4 bg-surface rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex -space-x-2">
+                                                                ${order.items && order.items.length > 0 ? order.items.slice(0, 2).map(item => `
+                            <img src="${item.image_url || '../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg'}" alt="Order Item" class="w-12 h-12 object-cover rounded-lg border-2 border-background" loading="lazy" onerror="this.src='../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg'; this.onerror=null;" />
+                        `).join('') : `
+                            <img src="../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg" alt="Order Item" class="w-12 h-12 object-cover rounded-lg border-2 border-background" loading="lazy" onerror="this.src='../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg'; this.onerror=null;" />
+                        `}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-white">Order #${order.order_number}</h4>
+                                        <p class="text-text-secondary text-sm">${new Date(order.created_at).toLocaleDateString()} • ${order.items ? order.items.length : 0} items • $${order.total_amount}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <span class="status-${order.status} px-3 py-1 rounded-full text-white text-sm font-medium">${order.status}</span>
+                                    <button class="text-accent hover:text-accent-light transition-colors">Reorder</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        previousOrdersListElement.innerHTML = '';
+                    }
+                }
+            } else {
+                // No orders - clear all sections
+                if (recentOrderNumberElement) {
+                    recentOrderNumberElement.textContent = 'No recent orders';
+                }
+                if (recentOrderDetailsElement) {
+                    recentOrderDetailsElement.textContent = 'Start shopping to see your orders here';
+                }
+                if (recentOrderItemsElement) {
+                    recentOrderItemsElement.innerHTML = '';
+                }
+                if (previousOrdersListElement) {
+                    previousOrdersListElement.innerHTML = '';
+                }
+            }
         }
 
         // Load customer wishlist
@@ -1546,8 +1579,9 @@
 
             // Update total spent
             const spentElement = document.querySelector('.text-center:nth-child(2) .font-orbitron');
-            if (spentElement && customerData.customer.total_spent) {
-                spentElement.textContent = `$${customerData.customer.total_spent.toFixed(2)}`;
+            if (spentElement && customerData.customer.total_spent !== undefined && customerData.customer.total_spent !== null) {
+                const totalSpent = parseFloat(customerData.customer.total_spent) || 0;
+                spentElement.textContent = `$${totalSpent.toFixed(2)}`;
             }
         }
 
@@ -1572,18 +1606,113 @@
             const recommendationsContainer = document.querySelector('.grid.md\\:grid-cols-2.gap-4');
             if (!recommendationsContainer || !recommendations) return;
 
-            recommendationsContainer.innerHTML = recommendations.map(product => `
-                <div class="glass-card rounded-xl p-6">
-                    <img src="${product.image_url}" alt="${product.name}" class="w-full h-32 object-cover rounded-lg mb-4" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=300'; this.onerror=null;" />
-                    <h3 class="font-semibold text-white mb-2">${product.name}</h3>
-                    <p class="text-text-secondary text-sm mb-4">${product.description}</p>
-                    <div class="flex items-center justify-between">
-                        <span class="text-accent font-bold">$${product.price}</span>
-                        <button class="btn-primary text-xs px-3 py-1" onclick="addToWishlist(${product.id})">Add to Wishlist</button>
+                            recommendationsContainer.innerHTML = recommendations.map(product => `
+                    <div class="glass-card rounded-xl p-6">
+                        <img src="${product.image_url || '../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg'}" alt="${product.name}" class="w-full h-32 object-cover rounded-lg mb-4" loading="lazy" onerror="this.src='../etsy_images/product_01_Just-a-Little-BOO-jee-Halloween-Shirt-Quality-Prin.jpg'; this.onerror=null;" />
+                        <h3 class="font-semibold text-white mb-2">${product.name}</h3>
+                        <p class="text-text-secondary text-sm mb-4">${product.description}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-accent font-bold">$${product.price}</span>
+                            <button class="btn-primary text-xs px-3 py-1" onclick="addToWishlist(${product.id})">Add to Wishlist</button>
+                        </div>
                     </div>
+                `).join('');
+        }
+
+        // Update addresses section
+        function updateAddressesSection(addresses) {
+            // Update address names with customer name from customerData
+            const addressNameElements = document.querySelectorAll('[id^="addressName"]');
+            if (addressNameElements.length > 0) {
+                let customerName = 'Customer';
+                
+                if (window.customerData && window.customerData.customer) {
+                    const customer = window.customerData.customer;
+                    if (customer.first_name && customer.last_name) {
+                        customerName = `${customer.first_name} ${customer.last_name}`;
+                    } else if (customer.name) {
+                        customerName = customer.name;
+                    }
+                }
+                
+                addressNameElements.forEach(element => {
+                    element.textContent = customerName;
+                });
+            }
+        }
+
+        // Update preferences section
+        function updatePreferencesSection(preferences) {
+            if (!preferences) return;
+            
+            // Update communication preferences based on customer data
+            const preferenceCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+            preferenceCheckboxes.forEach(checkbox => {
+                // Set default checked state based on preferences
+                checkbox.checked = true; // Default to checked for demo
+            });
+        }
+
+        // Update style profile section
+        function updateStyleProfileSection(style_profile) {
+            if (!style_profile) return;
+            
+            // Update style preferences if they exist
+            const styleElements = document.querySelectorAll('[data-style-preference]');
+            styleElements.forEach(element => {
+                const preference = element.getAttribute('data-style-preference');
+                if (style_profile[preference]) {
+                    element.textContent = style_profile[preference];
+                }
+            });
+        }
+
+        // Update points history section
+        function updatePointsHistorySection(history) {
+            if (!history || !history.length) return;
+            
+            const historyContainer = document.querySelector('.space-y-2');
+            if (!historyContainer) return;
+
+            historyContainer.innerHTML = history.map(entry => `
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-text-secondary">${entry.description}</span>
+                    <span class="text-accent">+${entry.points}</span>
                 </div>
             `).join('');
         }
+        
+        // Cart counter functionality
+        async function updateCartCounter() {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    document.getElementById('cart-counter').textContent = '0';
+                    return;
+                }
+                
+                const response = await fetch('/api/cart', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const cartData = await response.json();
+                    const totalItems = cartData.items ? cartData.items.reduce((total, item) => total + item.quantity, 0) : 0;
+                    document.getElementById('cart-counter').textContent = totalItems.toString();
+                } else {
+                    document.getElementById('cart-counter').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error updating cart counter:', error);
+                document.getElementById('cart-counter').textContent = '0';
+            }
+        }
+        
+        // Update cart counter on page load
+        updateCartCounter();
     </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
