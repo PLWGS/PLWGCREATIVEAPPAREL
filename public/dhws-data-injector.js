@@ -330,9 +330,19 @@
       }
     } catch(_) {}
 
+    // Detect if a native hamburger already exists in header
+    const nativeHamburgerBtn = (() => {
+      const candidates = Array.from(document.querySelectorAll('header button, header [role="button"]'));
+      return candidates.find(el => {
+        const label = (el.getAttribute('aria-label') || '') + ' ' + el.className + ' ' + el.textContent;
+        return /menu|hamburger/i.test(label);
+      });
+    })();
+    const useNative = !!nativeHamburgerBtn;
+
     // Create a fixed top-right toolbar container with responsive right offsets
     let trBar = document.getElementById('globalTopRightBar');
-    if (!trBar) {
+    if (!useNative && !trBar) {
       trBar = document.createElement('div');
       trBar.id = 'globalTopRightBar';
       // Anchor to LEFT to guarantee visibility on very narrow simulations
@@ -348,12 +358,15 @@
       document.body.appendChild(trBar);
     }
 
-    const btn = document.createElement('button');
-    btn.id = 'globalHamburger';
-    btn.setAttribute('aria-label', 'Open menu');
-    btn.style.cssText = 'padding:8px;border-radius:8px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,0.3)';
-    btn.textContent = '☰';
-    trBar.appendChild(btn);
+    let btn = nativeHamburgerBtn;
+    if (!useNative) {
+      btn = document.createElement('button');
+      btn.id = 'globalHamburger';
+      btn.setAttribute('aria-label', 'Open menu');
+      btn.style.cssText = 'padding:8px;border-radius:8px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,0.3)';
+      btn.textContent = '☰';
+      trBar.appendChild(btn);
+    }
     try { console.log('[dhws-data-injector] hamburger created'); } catch(_) {}
 
     // If button renders at zero size, switch to text fallback to guarantee visibility
@@ -372,10 +385,10 @@
     syncHamburgerVisibility();
     window.addEventListener('resize', syncHamburgerVisibility);
 
-    // Fallback cart icon (only if none exists in header)
+    // Fallback cart icon (only if none exists in header and we created our own toolbar)
     const hasCart = !!document.querySelector('header a[href$="cart.html"], header button#cart-button, [href*="cart"], [data-cart], .cart-btn, #cart-btn');
     let cartBtn = document.getElementById('globalCartBtn');
-    if (!hasCart && !cartBtn) {
+    if (!useNative && !hasCart && !cartBtn) {
       cartBtn = document.createElement('button');
       cartBtn.id = 'globalCartBtn';
       cartBtn.setAttribute('aria-label', 'Open cart');
