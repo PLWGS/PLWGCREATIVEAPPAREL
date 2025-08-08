@@ -330,21 +330,33 @@
       }
     } catch(_) {}
 
-    // Create hamburger (inline styles so it works on all pages)
-    // Create a fixed top-right toolbar container to ensure visibility
+    // Create a fixed top-right toolbar container with responsive right offsets
     let trBar = document.getElementById('globalTopRightBar');
     if (!trBar) {
       trBar = document.createElement('div');
       trBar.id = 'globalTopRightBar';
-      trBar.style.cssText = 'position:fixed;top:8px;right:8px;z-index:2147483647 !important;display:flex;gap:8px;align-items:center;background:transparent;padding:0;margin:0;pointer-events:auto';
+      trBar.style.cssText = 'position:fixed;top:8px;z-index:2147483647 !important;display:flex;gap:8px;align-items:center;background:transparent;padding:0;margin:0;pointer-events:auto;right:8px';
+
+      const updatePosition = () => {
+        const w = window.innerWidth;
+        if (w <= 480) {
+          trBar.style.right = '16px';
+        } else if (w <= 768) {
+          trBar.style.right = '12px';
+        } else {
+          trBar.style.right = '8px';
+        }
+      };
+      updatePosition();
+      window.addEventListener('resize', updatePosition);
       document.body.appendChild(trBar);
     }
 
     const btn = document.createElement('button');
     btn.id = 'globalHamburger';
     btn.setAttribute('aria-label', 'Open menu');
-    btn.style.cssText = 'padding:10px;border-radius:10px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 0 0 2px rgba(0,188,212,0.8) inset';
-    btn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>';
+    btn.style.cssText = 'padding:8px;border-radius:8px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,0.3)';
+    btn.innerHTML = '☰';
     trBar.appendChild(btn);
     try { console.log('[dhws-data-injector] hamburger created'); } catch(_) {}
 
@@ -356,14 +368,14 @@
     window.addEventListener('resize', syncHamburgerVisibility);
 
     // Fallback cart icon (only if none exists in header)
-    const hasCart = !!document.querySelector('header a[href$="cart.html"], header button#cart-button');
+    const hasCart = !!document.querySelector('header a[href$="cart.html"], header button#cart-button, [href*="cart"], [data-cart], .cart-btn, #cart-btn');
     let cartBtn = document.getElementById('globalCartBtn');
     if (!hasCart && !cartBtn) {
       cartBtn = document.createElement('button');
       cartBtn.id = 'globalCartBtn';
       cartBtn.setAttribute('aria-label', 'Open cart');
-      cartBtn.style.cssText = 'padding:10px;border-radius:10px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 0 0 2px rgba(0,188,212,0.8) inset';
-      cartBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 12.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>';
+      cartBtn.style.cssText = 'padding:8px;border-radius:8px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,0.3)';
+      cartBtn.innerHTML = '🛒';
       cartBtn.addEventListener('click', () => { try { window.location.href = 'cart.html'; } catch(_){} });
       trBar.appendChild(cartBtn);
       try { console.log('[dhws-data-injector] cart fallback created'); } catch(_) {}
