@@ -25,8 +25,14 @@ async function initializeAdminCredentials() {
 
     const envHash = process.env.ADMIN_PASSWORD_HASH;
     const envPassword = process.env.ADMIN_PASSWORD;
+    const isDevelopment = (process.env.NODE_ENV || 'development') !== 'production';
+    const overrideWithPassword = isDevelopment || process.env.ADMIN_OVERRIDE_PASSWORD === 'true';
 
-    if (envHash && envHash.startsWith('$2')) {
+    if (overrideWithPassword && envPassword && envPassword.length > 0) {
+      // Prefer plain password in development or when explicitly overridden
+      ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
+      console.log('🔐 Using ADMIN_PASSWORD (hashed at startup)');
+    } else if (envHash && envHash.startsWith('$2')) {
       ADMIN_PASSWORD_HASH_MEMO = envHash;
       console.log('🔐 Using ADMIN_PASSWORD_HASH from environment');
     } else if (envPassword && envPassword.length > 0) {
