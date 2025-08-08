@@ -292,17 +292,16 @@
 
   async function setupAdminLinkVisibility() {
     try {
-      // Hide by default using a CSS rule
+      // Hide by default using a CSS rule that matches admin links directly
       if (!document.getElementById('adminLinkHideStyle')) {
         const style = document.createElement('style');
         style.id = 'adminLinkHideStyle';
-        style.textContent = 'a[data-admin-link]{display:none !important;}';
+        style.textContent = 'a[href$="admin.html"], a[href*="/admin.html"] { display:none !important; }';
         document.head.appendChild(style);
       }
 
-      // Tag all admin links
+      // Collect admin links (may be none)
       const adminLinks = Array.from(document.querySelectorAll("a[href$='admin.html'], a[href*='/admin.html']"));
-      adminLinks.forEach(a => a.setAttribute('data-admin-link', 'true'));
       if (adminLinks.length === 0) return;
 
       const token = localStorage.getItem('adminToken');
@@ -315,19 +314,12 @@
       }).catch(() => null);
       const isValid = !!res && res.ok;
       if (isValid) {
-        adminLinks.forEach(a => {
-          a.style.display = '';
-          a.classList.remove('hidden');
-          a.removeAttribute('data-admin-link');
-        });
         const style = document.getElementById('adminLinkHideStyle');
         if (style) style.remove();
+        adminLinks.forEach(a => { a.style.display = ''; a.classList.remove('hidden'); });
       }
     } catch (_) {
-      // Fail closed – hide links
-      document.querySelectorAll("a[href$='admin.html'], a[href*='/admin.html']").forEach(a => {
-        a.setAttribute('data-admin-link', 'true');
-      });
+      // Fail closed – leave CSS rule in place (hidden)
     }
   }
 
@@ -344,11 +336,12 @@
         headerRight.appendChild(button);
       }
       if (!button) {
-        // Fallback button if header structure is different
+        // Fallback button if header structure is different (inline styles for reliability)
         const fallback = document.createElement('button');
         fallback.id = 'globalHamburger';
-        fallback.className = 'fixed top-4 right-4 z-[70] p-2 rounded bg-surface/70 text-white shadow lg:hidden';
-        fallback.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>';
+        fallback.setAttribute('aria-label', 'Open menu');
+        fallback.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483647;padding:10px;border-radius:8px;background:rgba(42,42,42,0.85);color:#fff;display:block';
+        fallback.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>';
         document.body.appendChild(fallback);
         button = fallback;
       }
@@ -362,15 +355,15 @@
       if (!panel) {
         panel = document.createElement('div');
         panel.id = 'mobileMenuPanel';
-        panel.className = 'fixed inset-0 z-[60] lg:hidden pointer-events-none';
+        panel.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none;display:block';
         panel.innerHTML = `
-          <div id="mobileMenuBackdrop" class="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-300"></div>
-          <div id="mobileMenuSheet" class="absolute right-0 top-0 bottom-0 w-72 max-w-[85%] bg-surface text-white shadow-xl translate-x-full transition-transform duration-300 overflow-y-auto">
-            <div class="p-4 border-b border-surface-light flex items-center justify-between">
-              <span class="font-orbitron text-lg">Menu</span>
-              <button id="mobileMenuClose" class="text-text-secondary hover:text-accent">✕</button>
+          <div id="mobileMenuBackdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);opacity:0;transition:opacity .3s"></div>
+          <div id="mobileMenuSheet" style="position:absolute;right:0;top:0;bottom:0;width:300px;max-width:85%;background:#1a1a1a;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.6);transform:translateX(100%);transition:transform .3s;overflow-y:auto">
+            <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:700">Menu</span>
+              <button id="mobileMenuClose" style="color:#a0a0a0">✕</button>
             </div>
-            <nav id="mobileMenuLinks" class="p-4 space-y-2"></nav>
+            <nav id="mobileMenuLinks" style="padding:12px 8px"></nav>
           </div>`;
         document.body.appendChild(panel);
       }
@@ -381,7 +374,9 @@
         const link = document.createElement('a');
         link.href = a.getAttribute('href');
         link.textContent = a.textContent || a.getAttribute('aria-label') || 'Link';
-        link.className = 'block px-3 py-2 rounded hover:bg-accent hover:text-black transition-colors';
+        link.style.cssText = 'display:block;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none';
+        link.onmouseenter = () => { link.style.background = '#00bcd4'; link.style.color = '#000'; };
+        link.onmouseleave = () => { link.style.background = 'transparent'; link.style.color = '#fff'; };
         // Respect admin visibility (hidden means not allowed)
         if (a.classList.contains('hidden') || a.style.display === 'none') link.classList.add('hidden');
         linksContainer.appendChild(link);
@@ -392,16 +387,16 @@
       const closeBtn = panel.querySelector('#mobileMenuClose');
 
       function openMenu() {
-        panel.classList.remove('pointer-events-none');
+        panel.style.pointerEvents = 'auto';
         requestAnimationFrame(() => {
-          backdrop.classList.remove('opacity-0');
-          sheet.classList.remove('translate-x-full');
+          backdrop.style.opacity = '1';
+          sheet.style.transform = 'translateX(0)';
         });
       }
       function closeMenu() {
-        backdrop.classList.add('opacity-0');
-        sheet.classList.add('translate-x-full');
-        setTimeout(() => panel.classList.add('pointer-events-none'), 300);
+        backdrop.style.opacity = '0';
+        sheet.style.transform = 'translateX(100%)';
+        setTimeout(() => { panel.style.pointerEvents = 'none'; }, 300);
       }
 
       button.addEventListener('click', openMenu);
