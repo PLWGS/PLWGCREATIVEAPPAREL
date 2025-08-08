@@ -509,6 +509,39 @@
     }
     syncBrandAbbrev();
     window.addEventListener('resize', syncBrandAbbrev);
+
+    // Center the brand + logo on small screens so the toolbar does not overlap
+    try {
+      const header = document.querySelector('header');
+      if (header && getComputedStyle(header).position === 'static') {
+        header.style.position = 'relative';
+      }
+      // Find the immediate flex container that wraps logo svg + text
+      let brandWrap = brand.closest('div');
+      for (let i = 0; i < 3 && brandWrap && !brandWrap.className.includes('flex'); i++) {
+        brandWrap = brandWrap.parentElement;
+      }
+      if (brandWrap) {
+        const centerBrand = () => {
+          const w = window.innerWidth;
+          if (w <= 600) {
+            brandWrap.style.position = 'absolute';
+            brandWrap.style.left = '50%';
+            brandWrap.style.transform = 'translateX(-50%)';
+            brandWrap.style.top = '8px';
+            brandWrap.style.zIndex = '2147483640';
+          } else {
+            brandWrap.style.position = '';
+            brandWrap.style.left = '';
+            brandWrap.style.transform = '';
+            brandWrap.style.top = '';
+            brandWrap.style.zIndex = '';
+          }
+        };
+        centerBrand();
+        window.addEventListener('resize', centerBrand);
+      }
+    } catch(_) {}
   }
 
   if (document.readyState === 'loading') {
