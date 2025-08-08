@@ -639,6 +639,38 @@ app.post('/api/admin/password/reset', async (req, res) => {
   }
 });
 
+// One-time bootstrap endpoint to set admin password without email (for emergencies)
+// Requires ADMIN_BOOTSTRAP_TOKEN to be set in env and provided via header or body
+app.post('/api/admin/password/bootstrap', async (req, res) => {
+  try {
+    const provided = req.headers['x-admin-bootstrap-token'] || (req.body && req.body.bootstrapToken);
+    const expected = process.env.ADMIN_BOOTSTRAP_TOKEN;
+    if (!expected) {
+      return res.status(400).json({ error: 'Bootstrap not configured' });
+    }
+    if (!provided || String(provided) !== String(expected)) {
+      return res.status(403).json({ error: 'Invalid bootstrap token' });
+    }
+    const { newPassword } = req.body || {};
+    if (!newPassword || String(newPassword).length < 8) {
+      return res.status(400).json({ error: 'Password too short' });
+    }
+    const newHash = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10));
+    if (pool) {
+      await pool.query(
+        `INSERT INTO admin_settings(key, value, updated_at) VALUES('admin_password_hash', $1, NOW())
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+        [newHash]
+      );
+    }
+    ADMIN_PASSWORD_HASH_MEMO = newHash;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Bootstrap set password error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Verify admin token
 app.get('/api/admin/verify', authenticateToken, (req, res) => {
   res.json({ valid: true, user: req.user });
