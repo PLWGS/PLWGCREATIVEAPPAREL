@@ -292,14 +292,18 @@
 
   async function setupAdminLinkVisibility() {
     try {
-      const adminLinks = Array.from(document.querySelectorAll('a[href$="admin.html"], a[data-role="admin-link"]'));
-      if (adminLinks.length === 0) return;
+      // Hide by default using a CSS rule
+      if (!document.getElementById('adminLinkHideStyle')) {
+        const style = document.createElement('style');
+        style.id = 'adminLinkHideStyle';
+        style.textContent = 'a[data-admin-link]{display:none !important;}';
+        document.head.appendChild(style);
+      }
 
-      // Hide by default immediately (no flash for public)
-      adminLinks.forEach(a => {
-        a.style.display = 'none';
-        a.setAttribute('data-role', 'admin-link');
-      });
+      // Tag all admin links
+      const adminLinks = Array.from(document.querySelectorAll("a[href$='admin.html'], a[href*='/admin.html']"));
+      adminLinks.forEach(a => a.setAttribute('data-admin-link', 'true'));
+      if (adminLinks.length === 0) return;
 
       const token = localStorage.getItem('adminToken');
       if (!token) {
@@ -310,15 +314,19 @@
         headers: { Authorization: `Bearer ${token}` }
       }).catch(() => null);
       const isValid = !!res && res.ok;
-      adminLinks.forEach(a => {
-        a.style.display = isValid ? '' : 'none';
-        a.classList.toggle('hidden', !isValid);
-      });
+      if (isValid) {
+        adminLinks.forEach(a => {
+          a.style.display = '';
+          a.classList.remove('hidden');
+          a.removeAttribute('data-admin-link');
+        });
+        const style = document.getElementById('adminLinkHideStyle');
+        if (style) style.remove();
+      }
     } catch (_) {
       // Fail closed – hide links
-      document.querySelectorAll('a[href$="admin.html"], a[data-role="admin-link"]').forEach(a => {
-        a.style.display = 'none';
-        a.classList.add('hidden');
+      document.querySelectorAll("a[href$='admin.html'], a[href*='/admin.html']").forEach(a => {
+        a.setAttribute('data-admin-link', 'true');
       });
     }
   }
@@ -335,7 +343,15 @@
         button.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>';
         headerRight.appendChild(button);
       }
-      if (!button) return; // nothing to do if page has no header/button
+      if (!button) {
+        // Fallback button if header structure is different
+        const fallback = document.createElement('button');
+        fallback.id = 'globalHamburger';
+        fallback.className = 'fixed top-4 right-4 z-[70] p-2 rounded bg-surface/70 text-white shadow lg:hidden';
+        fallback.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>';
+        document.body.appendChild(fallback);
+        button = fallback;
+      }
 
       // Build slide-over menu from existing top nav links
       const existingNavLinks = Array.from(document.querySelectorAll('header nav a'))
