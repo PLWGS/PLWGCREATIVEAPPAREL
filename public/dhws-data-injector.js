@@ -335,17 +335,13 @@
     if (!trBar) {
       trBar = document.createElement('div');
       trBar.id = 'globalTopRightBar';
-      trBar.style.cssText = 'position:fixed;top:8px;z-index:2147483647 !important;display:flex;gap:8px;align-items:center;background:transparent;padding:0;margin:0;pointer-events:auto;right:8px';
+      // Anchor to LEFT to guarantee visibility on very narrow simulations
+      trBar.style.cssText = 'position:fixed;top:8px;left:16px;z-index:2147483647 !important;display:flex;gap:8px;align-items:center;background:transparent;padding:0;margin:0;pointer-events:auto';
 
       const updatePosition = () => {
+        // Keep left anchoring, but adjust slight padding if needed
         const w = window.innerWidth;
-        if (w <= 480) {
-          trBar.style.right = '16px';
-        } else if (w <= 768) {
-          trBar.style.right = '12px';
-        } else {
-          trBar.style.right = '8px';
-        }
+        trBar.style.left = w <= 480 ? '16px' : (w <= 768 ? '16px' : '16px');
       };
       updatePosition();
       window.addEventListener('resize', updatePosition);
