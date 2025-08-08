@@ -375,14 +375,38 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-text-primary mb-2">Available Sizes</label>
-                            <div class="flex flex-wrap gap-2" id="size-options">
-                                <div class="size-option selected" data-size="XS">XS</div>
-                                <div class="size-option selected" data-size="S">S</div>
-                                <div class="size-option selected" data-size="M">M</div>
-                                <div class="size-option selected" data-size="L">L</div>
-                                <div class="size-option selected" data-size="XL">XL</div>
-                                <div class="size-option selected" data-size="XXL">XXL</div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Available Sizes & Stock</label>
+                            <div class="space-y-3" id="size-options">
+                                <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                                    <div class="size-option selected flex-1" data-size="XS">XS</div>
+                                    <input type="number" id="stock-xs" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="10" value="10" min="0">
+                                    <span class="text-text-secondary text-sm">in stock</span>
+                                </div>
+                                <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                                    <div class="size-option selected flex-1" data-size="S">S</div>
+                                    <input type="number" id="stock-s" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="15" value="15" min="0">
+                                    <span class="text-text-secondary text-sm">in stock</span>
+                                </div>
+                                <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                                    <div class="size-option selected flex-1" data-size="M">M</div>
+                                    <input type="number" id="stock-m" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="20" value="20" min="0">
+                                    <span class="text-text-secondary text-sm">in stock</span>
+                                </div>
+                                <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                                    <div class="size-option selected flex-1" data-size="L">L</div>
+                                    <input type="number" id="stock-l" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="20" value="20" min="0">
+                                    <span class="text-text-secondary text-sm">in stock</span>
+                                </div>
+                                <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                                    <div class="size-option selected flex-1" data-size="XL">XL</div>
+                                    <input type="number" id="stock-xl" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="15" value="15" min="0">
+                                    <span class="text-text-secondary text-sm">in stock</span>
+                                </div>
+                                <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                                    <div class="size-option selected flex-1" data-size="XXL">XXL</div>
+                                    <input type="number" id="stock-xxl" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="10" value="10" min="0">
+                                    <span class="text-text-secondary text-sm">in stock</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -752,7 +776,7 @@
             grid.innerHTML = filteredProducts.map(product => `
                 <div class="product-card">
                     <div class="flex items-center space-x-4 mb-4">
-                        <img src="/${product.image_url}" alt="${product.name}" class="w-16 h-16 rounded-lg object-cover">
+                        <img src="${product.image_url}" alt="${product.name}" class="w-16 h-16 rounded-lg object-cover">
                         <div class="flex-1">
                             <h3 class="text-white font-medium">${product.name}</h3>
                             <p class="text-text-secondary text-sm">$${product.price}</p>
@@ -810,6 +834,17 @@
                 return;
             }
             
+            // Collect size-specific stock quantities
+            const sizeStock = {};
+            selectedSizes.forEach(size => {
+                const stockInput = document.getElementById(`stock-${size.toLowerCase()}`);
+                if (stockInput) {
+                    sizeStock[size] = parseInt(stockInput.value) || 0;
+                }
+            });
+            
+            console.log('🔍 DEBUG: uploadedImages before sending:', JSON.stringify(uploadedImages, null, 2));
+            
             const productData = {
                 name: name,
                 description: description,
@@ -822,6 +857,7 @@
                 tags: document.getElementById('product-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag),
                 colors: selectedColors,
                 sizes: selectedSizes,
+                size_stock: sizeStock, // Add size-specific stock quantities
                 images: uploadedImages,
                 specifications: {
                     material: document.getElementById('spec-material').value,
@@ -838,6 +874,8 @@
                     soft_touch: document.getElementById('feature-soft-touch').checked
                 }
             };
+            
+            console.log('🔍 DEBUG: productData being sent:', JSON.stringify(productData, null, 2));
 
             try {
                 // First, save to database

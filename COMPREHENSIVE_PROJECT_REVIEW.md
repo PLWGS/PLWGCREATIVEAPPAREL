@@ -6,6 +6,110 @@
 
 ---
 
+## December 2024 – Today's Update (Appears Working, Not Fully Tested)
+
+This section documents everything implemented and adjusted today. The end-to-end product management workflow now appears to be working based on targeted manual checks and API validation, but it still requires thorough, repeatable testing.
+
+### Scope and Goals Completed Today
+- Implement end-to-end management of individual size quantities (size_stock) across create/edit, database, and public display.
+- Ensure edit pages mirror the upload form exactly and stay in sync with database updates and filenames.
+- Migrate image handling to Cloudinary with proper transformations and avoid re-uploading existing Cloudinary URLs.
+- Remove hardcoded values across public pages; ensure dynamic rendering from API responses.
+
+### Backend Changes (server.js)
+- Database migration on startup:
+  - Added: `ALTER TABLE products ADD COLUMN IF NOT EXISTS size_stock JSON`.
+- Create product `POST /api/admin/products`:
+  - Accepts `size_stock` from `req.body` and persists via `JSON.stringify(sizeStock)`.
+  - Handles tags robustly (array or JSON string); converts to proper array; keeps TEXT[] storage.
+  - Uses Cloudinary upload helpers to store `image_url` (main) and `sub_images` (array). Main/sub images are derived from uploaded list.
+  - After DB insert, automatically generates the per-product edit page (see create_edit_page_for_product.js).
+- Update product `PUT /api/admin/products/:id`:
+  - Accepts and updates `size_stock` as JSON.
+  - Accepts image data in either legacy `images` array (base64) or new `image_url` + `sub_images` format.
+  - Skips re-upload if the image value is already a Cloudinary URL; only uploads fresh base64 data.
+  - Regenerates the product’s edit page using the updated name to keep filenames and links consistent.
+- Public product endpoints:
+  - `GET /api/products/public` returns all active products (no auth).
+  - `GET /api/products/public/:id` returns a single product for the product detail page.
+- Authentication and misc:
+  - Admin JWT verification for admin endpoints.
+  - Improved error logging and input validation for create/update flows.
+
+### Cloudinary Integration (cloudinary-upload.js)
+- Config supports either discrete credentials or `CLOUDINARY_URL`.
+- Transformations:
+  - Main image: width 800, height 800, crop 'fill', gravity 'auto', quality 'auto:best'.
+  - Thumbnails: width 300, height 120, crop 'fill', gravity 'auto', quality 'auto:good'.
+- Helper functions:
+  - `uploadImageToCloudinary`, `uploadProductImages`, `deleteImagesFromCloudinary`.
+
+### Frontend Changes
+- Admin Uploads (`pages/admin-uploads.html`):
+  - Validation for Name, Category, Price with visible indicators and messages.
+  - Added individual stock fields for sizes XS, S, M, L, XL, XXL.
+  - `saveNewProduct()` collects `size_stock`, selected sizes/colors, main/sub images, specs, features.
+  - Products list switched to use admin endpoint with token.
+- Dynamic Edit Page Generator (`create_edit_page_for_product.js`):
+  - Rewritten to mirror `admin-uploads.html` structure & IDs exactly.
+  - Deletes any existing edit page file for that product ID, then creates an up-to-date file.
+  - `populateForm()` loads DB values including `size_stock`, `image_url`, and `sub_images`.
+  - `saveProductChanges()` sends `image_url` and `sub_images` (vs legacy `images`), and includes `size_stock`.
+- Product Detail (`pages/product.html`):
+  - Fetches `GET /api/products/public/:id` to render title, description, price, tags, colors, sizes, stock status.
+  - Size badges show stock status (In Stock / Sold Out / X left) based on `size_stock`.
+  - Images now sourced from Cloudinary; static placeholders removed.
+- Shop (`pages/shop.html`):
+  - Now uses `GET /api/products/public` (no auth) to render products.
+  - Counts (showing X of Y, All Designs Z) computed dynamically.
+
+### Data Model and Types (PostgreSQL)
+- TEXT[] fields remain arrays (e.g., `tags`).
+- JSON fields are stringified in code and parsed by Postgres:
+  - `colors`, `sizes`, `specifications`, `features`, `sub_images`, and now `size_stock`.
+- New `size_stock` persists individual size quantities per product, enabling accurate per-size inventory.
+
+### Errors Encountered Today and Fixes
+1) 400 Bad Request on product create due to missing fields →
+   - Added comprehensive client-side validation with visible required indicators.
+2) 500 Internal Server Error: "Failed to create product" caused by large base64 images →
+   - Integrated Cloudinary; uploads happen server-side, URLs persisted; local static route removed.
+3) Cloudinary config issues ("Must supply api_key" / ENOENT) →
+   - Ensured `.env` is the single source, corrected dotenv loading.
+4) Admin login "Invalid credentials" →
+   - Provided new bcrypt hash for the configured admin email/password pair.
+5) Malformed array literal `[]` for tags →
+   - Passed arrays directly to TEXT[] columns; JSON fields use `JSON.stringify()`.
+   - Added robust tag parsing when frontend sends JSON string.
+6) Edit page not identical; images not loading/updating →
+   - Rewrote edit page generator to mirror upload form exactly; fixed IDs and `uploadedImages` logic; prevented re-upload of existing Cloudinary URLs.
+7) Shop page not showing products / hardcoded numbers / 401 →
+   - Switched to public endpoint; counts computed dynamically.
+8) Product detail page static images, wrong sizing, missing sizes/XXL, no stock counters →
+   - Added `GET /api/products/public/:id`, dynamic DOM population, Cloudinary transformations, size stock badges.
+9) Primary key reuse issue observed after manual deletion →
+   - Not a blocker for current flow; immediate data anomalies were corrected by explicit updates.
+10) Edit sizes function lacked per-size quantities →
+   - Implemented `size_stock` end-to-end; forms and DB save/load now aligned.
+
+### Current Observed Status (Appears Working)
+- Database contains `size_stock` and values save/load correctly.
+- Admin upload form creates products with images, tags, colors, sizes, and `size_stock`.
+- Edit pages show current images and per-size inputs, allow deleting/adding images, and persist `size_stock` updates.
+- Public shop and product pages render dynamic data (no hardcoded placeholders).
+- Cloudinary images display with correct dimensions/quality per role (main vs thumbnail).
+
+### Gaps / To Test Thoroughly
+- Multiple products with varying size sets; edge cases: zero stock, very large stock.
+- Concurrent edits and rapid updates (race conditions).
+- Stress test image operations and verify no accidental re-uploads of Cloudinary URLs.
+- Full regression of tags/colors/sizes parsing from the admin forms.
+- Visual QA across devices for image crops and quality.
+
+### Notes & Conventions
+- Single `.env` file is used; no secondary env files are created or referenced.
+- When product names change, the edit page is regenerated and old edit pages for that ID are deleted to avoid file/DB mismatches.
+
 ## 📋 PROJECT OVERVIEW
 
 **Project Name:** PLWGCREATIVEAPPAREL  

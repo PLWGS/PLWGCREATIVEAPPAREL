@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const { uploadProductImages, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
 require('dotenv').config();
 
 const app = express();
@@ -20,7 +21,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static('.'));
 app.use('/public', express.static('public'));
-app.use('/etsy_images', express.static('etsy_images'));
+// Removed etsy_images static route - now using Cloudinary for image hosting
 app.use('/favicon.ico', express.static('public/favicon.ico'));
 
 // Database connection
@@ -241,6 +242,7 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS specifications JSON`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS features JSON`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS sub_images JSON`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS size_stock JSON`);
     } catch (error) {
       console.log('Some columns may already exist:', error.message);
     }
@@ -2268,6 +2270,29 @@ app.get('/api/products/public', async (req, res) => {
   }
 });
 
+// Get single product by ID (public endpoint for product detail pages)
+app.get('/api/products/public/:id', async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const productId = req.params.id;
+    const result = await pool.query(`
+      SELECT * FROM products WHERE id = $1 AND is_active = true
+    `, [productId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
 // Search product by name
 app.get('/api/products/search', async (req, res) => {
   if (!pool) {
@@ -2359,6 +2384,26 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
       features
     } = req.body;
 
+    // Process tags to ensure it's always a JavaScript array
+    let processedTags = [];
+    if (Array.isArray(tags)) {
+      processedTags = tags;
+    } else if (typeof tags === 'string') {
+      // Try to parse as JSON first (in case it's a JSON string)
+      try {
+        const parsedTags = JSON.parse(tags);
+        if (Array.isArray(parsedTags)) {
+          processedTags = parsedTags;
+        } else {
+          // If not an array, treat as comma-separated string
+          processedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+        }
+      } catch (e) {
+        // If JSON parsing fails, treat as comma-separated string
+        processedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+      }
+    }
+
     // Validate required fields
     if (!name || !price || !category) {
       return res.status(400).json({ error: 'Name, price, and category are required' });
@@ -2370,61 +2415,76 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
     `);
     const nextId = nextIdResult.rows[0].next_id;
 
-    // Create product folder
-    const productFolderName = `product_${String(nextId).padStart(3, '0')}`;
-    const productFolderPath = path.join(__dirname, 'etsy_images', productFolderName);
-    
-    if (!fs.existsSync(productFolderPath)) {
-      fs.mkdirSync(productFolderPath, { recursive: true });
-      console.log(`✅ Created product folder: ${productFolderPath}`);
-    }
-
-    // Handle image uploads and save to product folder
+    // Handle image uploads to Cloudinary
     let image_url = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
     let sub_images = [];
     
+    console.log('🔍 DEBUG: Received images data:', JSON.stringify(images, null, 2));
+    
     if (images && images.length > 0) {
-      // Save first image as main image
-      const mainImagePath = path.join(productFolderPath, '01.jpg');
-      const mainImageData = images[0].data.replace(/^data:image\/[a-z]+;base64,/, '');
-      fs.writeFileSync(mainImagePath, Buffer.from(mainImageData, 'base64'));
-      image_url = `etsy_images/${productFolderName}/01.jpg`;
-      
-      // Save additional images
-      for (let i = 1; i < images.length && i < 5; i++) {
-        const subImagePath = path.join(productFolderPath, `${String(i + 1).padStart(2, '0')}.jpg`);
-        const subImageData = images[i].data.replace(/^data:image\/[a-z]+;base64,/, '');
-        fs.writeFileSync(subImagePath, Buffer.from(subImageData, 'base64'));
-        sub_images.push(`etsy_images/${productFolderName}/${String(i + 1).padStart(2, '0')}.jpg`);
+      try {
+        console.log(`☁️ Uploading ${images.length} images to Cloudinary for product: ${name}`);
+        console.log('🔍 DEBUG: First image structure:', JSON.stringify(images[0], null, 2));
+        
+        // Upload images to Cloudinary
+        const uploadedUrls = await uploadProductImages(images, name);
+        
+        if (uploadedUrls.mainImage) {
+          image_url = uploadedUrls.mainImage;
+          console.log(`✅ Main image uploaded to Cloudinary: ${image_url}`);
+        }
+        
+        if (uploadedUrls.subImages.length > 0) {
+          sub_images = uploadedUrls.subImages;
+          console.log(`✅ ${sub_images.length} sub images uploaded to Cloudinary`);
+        }
+        
+        console.log(`🎉 All images uploaded successfully to Cloudinary for product: ${name}`);
+      } catch (imageError) {
+        console.error('❌ Error uploading images to Cloudinary:', imageError);
+        // Continue without images if there's an error
+        console.log('⚠️ Continuing product creation without images');
       }
+    } else {
+      console.log('⚠️ No images provided for upload');
     }
 
     // Insert product with sequential ID
+    console.log(`💾 Inserting product into database: ID ${nextId}, Name: ${name}`);
+    
+    // Collect size stock quantities from the request
+    const sizeStock = req.body.size_stock || {};
+    
     const result = await pool.query(`
       INSERT INTO products (
         id, name, description, price, original_price, image_url, category, subcategory, 
         tags, stock_quantity, low_stock_threshold, is_featured, is_on_sale, sale_percentage,
-        colors, sizes, specifications, features, sub_images
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+        colors, sizes, specifications, features, sub_images, size_stock
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
       RETURNING *
     `, [
       nextId, name, description, price, original_price, image_url, category, 'Featured',
-      JSON.stringify(tags || []), stock_quantity || 50, low_stock_threshold || 5,
+      processedTags, stock_quantity || 50, low_stock_threshold || 5,
       true, true, sale_percentage || 15, JSON.stringify(colors || []), 
       JSON.stringify(sizes || []), JSON.stringify(specifications || {}),
-      JSON.stringify(features || {}), JSON.stringify(sub_images)
+      JSON.stringify(features || {}), JSON.stringify(sub_images), JSON.stringify(sizeStock)
     ]);
 
-    console.log(`✅ Product created with ID ${nextId} and folder ${productFolderName}`);
+    console.log(`✅ Product created with ID ${nextId}`);
 
     // Create edit page for the new product
-    const { createEditPageForProduct } = require('./create_edit_page_for_product.js');
-    const editPageCreated = createEditPageForProduct(nextId, name);
-    
-    if (editPageCreated) {
-      console.log(`✅ Edit page created for product ${nextId}`);
-    } else {
-      console.log(`⚠️ Failed to create edit page for product ${nextId}`);
+    try {
+      const { createEditPageForProduct } = require('./create_edit_page_for_product.js');
+      const editPageCreated = createEditPageForProduct(nextId, name);
+      
+      if (editPageCreated) {
+        console.log(`✅ Edit page created for product ${nextId}`);
+      } else {
+        console.log(`⚠️ Failed to create edit page for product ${nextId}`);
+      }
+    } catch (editPageError) {
+      console.error('❌ Error creating edit page:', editPageError);
+      console.log('⚠️ Continuing without edit page creation');
     }
 
     res.json({ 
@@ -2456,19 +2516,88 @@ app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
       tags,
       colors,
       sizes,
+      size_stock,
       images,
+      image_url,
+      sub_images,
       specifications,
       features
     } = req.body;
+
+    // Process tags to ensure it's always a JavaScript array
+    let processedTags = [];
+    if (Array.isArray(tags)) {
+      processedTags = tags;
+    } else if (typeof tags === 'string') {
+      // Try to parse as JSON first (in case it's a JSON string)
+      try {
+        const parsedTags = JSON.parse(tags);
+        if (Array.isArray(parsedTags)) {
+          processedTags = parsedTags;
+        } else {
+          // If not an array, treat as comma-separated string
+          processedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+        }
+      } catch (e) {
+        // If JSON parsing fails, treat as comma-separated string
+        processedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+      }
+    }
 
     // Validate required fields
     if (!name || !price || !category) {
       return res.status(400).json({ error: 'Name, price, and category are required' });
     }
 
-    // Handle image uploads
-    const image_url = images && images.length > 0 ? images[0].data : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
-    const sub_images = images && images.length > 1 ? images.slice(1).map(img => img.data) : [];
+    // Handle image uploads to Cloudinary
+    let final_image_url = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
+    let final_sub_images = [];
+    
+    // Handle both old format (images array) and new format (image_url + sub_images)
+    let imagesToUpload = [];
+    let hasNewImages = false;
+    
+    if (images && images.length > 0) {
+      // New images uploaded (base64 format)
+      imagesToUpload = images;
+      hasNewImages = true;
+      console.log(`📸 Found ${images.length} new images to upload`);
+    } else if (image_url || (sub_images && sub_images.length > 0)) {
+      // Existing images (URL format) - keep them as is
+      if (image_url && !image_url.startsWith('data:')) {
+        final_image_url = image_url;
+        console.log(`✅ Keeping existing main image: ${final_image_url}`);
+      }
+      if (sub_images && Array.isArray(sub_images)) {
+        final_sub_images = sub_images.filter(img => img && !img.startsWith('data:'));
+        console.log(`✅ Keeping ${final_sub_images.length} existing sub images`);
+      }
+    }
+    
+    if (hasNewImages && imagesToUpload.length > 0) {
+      try {
+        console.log(`☁️ Uploading ${imagesToUpload.length} new images to Cloudinary for product: ${name}`);
+        
+        // Upload new images to Cloudinary
+        const uploadedUrls = await uploadProductImages(imagesToUpload, name);
+        
+        if (uploadedUrls.mainImage) {
+          final_image_url = uploadedUrls.mainImage;
+          console.log(`✅ New main image uploaded to Cloudinary: ${final_image_url}`);
+        }
+        
+        if (uploadedUrls.subImages.length > 0) {
+          final_sub_images = uploadedUrls.subImages;
+          console.log(`✅ ${final_sub_images.length} new sub images uploaded to Cloudinary`);
+        }
+        
+        console.log(`🎉 All new images uploaded successfully to Cloudinary for product: ${name}`);
+      } catch (imageError) {
+        console.error('❌ Error uploading new images to Cloudinary:', imageError);
+        // Continue without updating images if there's an error
+        console.log('⚠️ Continuing product update without image changes');
+      }
+    }
 
     // Update product
     const result = await pool.query(`
@@ -2477,19 +2606,34 @@ app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
         image_url = $5, category = $6, tags = $7, stock_quantity = $8,
         low_stock_threshold = $9, sale_percentage = $10, colors = $11,
         sizes = $12, specifications = $13, features = $14, sub_images = $15,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $16
+        size_stock = $16, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $17
       RETURNING *
     `, [
-      name, description, price, original_price, image_url, category,
-      JSON.stringify(tags || []), stock_quantity || 50, low_stock_threshold || 5,
+      name, description, price, original_price, final_image_url, category,
+      processedTags, stock_quantity || 50, low_stock_threshold || 5,
       sale_percentage || 15, JSON.stringify(colors || []), JSON.stringify(sizes || []),
       JSON.stringify(specifications || {}), JSON.stringify(features || {}),
-      JSON.stringify(sub_images), productId
+      JSON.stringify(final_sub_images), JSON.stringify(size_stock || {}), productId
     ]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Update edit page if product name changed
+    try {
+      const { createEditPageForProduct } = require('./create_edit_page_for_product.js');
+      const editPageCreated = createEditPageForProduct(productId, name);
+      
+      if (editPageCreated) {
+        console.log(`✅ Edit page updated for product ${productId} with new name: ${name}`);
+      } else {
+        console.log(`⚠️ Failed to update edit page for product ${productId}`);
+      }
+    } catch (editPageError) {
+      console.error('❌ Error updating edit page:', editPageError);
+      console.log('⚠️ Continuing without edit page update');
     }
 
     res.json({ 
@@ -2510,22 +2654,39 @@ app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
   try {
     const productId = req.params.id;
 
-    // Check if product exists
+    // Check if product exists and get image URLs
     const checkResult = await pool.query(`
-      SELECT id FROM products WHERE id = $1
+      SELECT id, image_url, sub_images FROM products WHERE id = $1
     `, [productId]);
 
     if (checkResult.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Delete product folder
-    const productFolderName = `product_${String(productId).padStart(3, '0')}`;
-    const productFolderPath = path.join(__dirname, 'etsy_images', productFolderName);
+    const product = checkResult.rows[0];
     
-    if (fs.existsSync(productFolderPath)) {
-      fs.rmSync(productFolderPath, { recursive: true, force: true });
-      console.log(`✅ Deleted product folder: ${productFolderPath}`);
+    // Collect all image URLs for deletion from Cloudinary
+    const imageUrlsToDelete = [];
+    if (product.image_url && !product.image_url.startsWith('data:')) {
+      imageUrlsToDelete.push(product.image_url);
+    }
+    
+    if (product.sub_images && Array.isArray(product.sub_images)) {
+      product.sub_images.forEach(url => {
+        if (url && !url.startsWith('data:')) {
+          imageUrlsToDelete.push(url);
+        }
+      });
+    }
+    
+    // Delete images from Cloudinary
+    if (imageUrlsToDelete.length > 0) {
+      try {
+        await deleteImagesFromCloudinary(imageUrlsToDelete);
+        console.log(`✅ Deleted ${imageUrlsToDelete.length} images from Cloudinary`);
+      } catch (error) {
+        console.error('❌ Error deleting images from Cloudinary:', error);
+      }
     }
 
     // Delete product from database

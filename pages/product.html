@@ -107,6 +107,18 @@
             background: rgba(239, 68, 68, 0.1);
             border-color: #ef4444;
         }
+
+        /* Color swatch selection feedback */
+        .color-swatch {
+            transition: transform 0.15s ease;
+            cursor: pointer;
+        }
+        .color-swatch.selected {
+            outline: 2px solid #00bcd4;
+            border-color: #00bcd4 !important;
+            transform: scale(1.08);
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.6);
+        }
         
         /* Sticky Add to Cart */
         .sticky-cart {
@@ -329,7 +341,7 @@
                             </button>
                         </div>
                         
-                        <h1 id="productTitle" class="font-orbitron text-3xl lg:text-4xl font-bold text-white">Product Title</h1>
+                        <h1 id="productTitle" class="product-name font-orbitron text-3xl lg:text-4xl font-bold text-white">Product Title</h1>
                         
                         <div class="flex items-center space-x-4">
                             <div class="flex items-center space-x-1">
@@ -356,19 +368,19 @@
                         </div>
                         
                         <div class="flex items-center space-x-4">
-                            <span id="currentPrice" class="font-orbitron text-3xl font-bold text-accent">$22.00</span>
-                            <span id="originalPrice" class="text-text-secondary line-through text-lg">$26.40</span>
-                            <span class="bg-warning text-black px-2 py-1 rounded text-sm font-bold">25% OFF</span>
+                            <span id="currentPrice" class="price font-orbitron text-3xl font-bold text-accent">$22.00</span>
+                            <span id="originalPrice" class="original-price text-text-secondary line-through text-lg" style="display: none;">$26.40</span>
+                            <span class="sale-percentage bg-warning text-black px-2 py-1 rounded text-sm font-bold" style="display: none;">25% OFF</span>
                         </div>
                     </div>
 
                     <!-- Design Story -->
                     <div class="glass-card rounded-xl p-6">
                         <h3 class="font-orbitron text-xl font-bold text-white mb-4">Design Story</h3>
-                        <p id="productDescription" class="text-text-secondary leading-relaxed">
+                        <p id="productDescription" class="product-description text-text-secondary leading-relaxed">
                             Quality printed design with custom artwork. Perfect for those who want to express their unique style.
                         </p>
-                        <div class="flex flex-wrap gap-2 mt-4">
+                        <div class="flex flex-wrap gap-2 mt-4 product-tags">
                             <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#Horror</span>
                             <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#Gothic</span>
                             <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#StreetArt</span>
@@ -382,34 +394,13 @@
                             <h3 class="font-orbitron text-lg font-bold text-white">Size</h3>
                             <button class="text-accent text-sm hover:text-accent-light transition-colors">Size Guide</button>
                         </div>
-                        <div class="grid grid-cols-5 gap-3">
-                            <div class="size-option unavailable border border-surface-light rounded-lg p-3 text-center">
-                                <span class="font-semibold">XS</span>
-                                <div class="text-xs text-text-secondary mt-1">Sold Out</div>
-                            </div>
-                            <div class="size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent">
-                                <span class="font-semibold">S</span>
-                                <div class="text-xs text-text-secondary mt-1">3 left</div>
-                            </div>
-                            <div class="size-option selected border border-accent rounded-lg p-3 text-center">
-                                <span class="font-semibold">M</span>
-                                <div class="text-xs mt-1">In Stock</div>
-                            </div>
-                            <div class="size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent">
-                                <span class="font-semibold">L</span>
-                                <div class="text-xs text-text-secondary mt-1">In Stock</div>
-                            </div>
-                            <div class="size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent">
-                                <span class="font-semibold">XL</span>
-                                <div class="text-xs text-text-secondary mt-1">In Stock</div>
-                            </div>
-                        </div>
+                        <div class="grid grid-cols-5 gap-3 size-options"></div>
                     </div>
 
                     <!-- Color Options -->
                     <div class="space-y-4">
                         <h3 class="font-orbitron text-lg font-bold text-white">Color</h3>
-                        <div class="flex space-x-4">
+                        <div class="flex space-x-4 color-options">
                             <div class="w-12 h-12 bg-black rounded-full border-2 border-accent cursor-pointer"></div>
                             <div class="w-12 h-12 bg-gray-800 rounded-full border-2 border-surface-light hover:border-accent cursor-pointer transition-colors"></div>
                             <div class="w-12 h-12 bg-gray-600 rounded-full border-2 border-surface-light hover:border-accent cursor-pointer transition-colors"></div>
@@ -420,16 +411,16 @@
                     <div class="sticky-cart glass-card rounded-xl p-6 space-y-4">
                         <div class="flex items-center space-x-4">
                             <div class="flex items-center border border-surface-light rounded-lg">
-                                <button class="px-3 py-2 hover:bg-surface-light transition-colors">-</button>
-                                <span class="px-4 py-2 border-x border-surface-light">1</span>
-                                <button class="px-3 py-2 hover:bg-surface-light transition-colors">+</button>
+                                <button id="qtyMinus" class="px-3 py-2 hover:bg-surface-light transition-colors">-</button>
+                                <span id="qtyValue" class="px-4 py-2 border-x border-surface-light">1</span>
+                                <button id="qtyPlus" class="px-3 py-2 hover:bg-surface-light transition-colors">+</button>
                             </div>
-                            <span class="text-text-secondary text-sm">Only 8 left in stock</span>
+                            <span id="stockSummary" class="text-text-secondary text-sm">&nbsp;</span>
                         </div>
                         
                         <div class="space-y-3">
                             <button id="addToCartBtn" class="btn-primary w-full neon-glow text-lg py-4">
-                                Add to Cart - $22.00
+                                Add to Cart - <span id="addToCartPrice">$22.00</span>
                             </button>
                             <button id="buyNowBtn" class="w-full border border-accent text-accent px-6 py-3 rounded-lg font-semibold hover:bg-accent hover:text-black transition-all duration-300">
                                 Buy Now
@@ -1141,6 +1132,15 @@
 
     <!-- JavaScript -->
     <script>
+        console.log('🚀 PRODUCT.HTML SCRIPT LOADED');
+        
+        // Initialize variables
+        let currentImageIndex = 0;
+        let selectedSize = 'M';
+        let selectedColor = 'Black';
+        let quantity = 1;
+        let productData = null;
+        
         // Load product data from URL parameter
         function loadProductData() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1389,23 +1389,51 @@
             }
         });
 
-        // Quantity selector
-        const quantityButtons = document.querySelectorAll('.quantity-btn');
-        quantityButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const isIncrement = button.textContent === '+';
-                const quantitySpan = button.parentElement.querySelector('span');
-                let currentQuantity = parseInt(quantitySpan.textContent);
-                
-                if (isIncrement && currentQuantity < 10) {
-                    currentQuantity++;
-                } else if (!isIncrement && currentQuantity > 1) {
-                    currentQuantity--;
-                }
-                
-                quantitySpan.textContent = currentQuantity;
+        // Quantity selector with dynamic stock summary
+        const qtyMinus = document.getElementById('qtyMinus');
+        const qtyPlus = document.getElementById('qtyPlus');
+        const qtyValue = document.getElementById('qtyValue');
+        function updateStockSummaryForQty() {
+            const sizeContainer = document.querySelector('.size-options');
+            const selectedSizeEl = sizeContainer?.querySelector('.size-option.selected');
+            const selectedSizeKey = selectedSizeEl?.getAttribute('data-size');
+            const sizeStock = (productData && productData.size_stock) ? productData.size_stock : {};
+            // Compute base stock: prefer selected size stock; else total stock
+            let baseStock = 0;
+            if (selectedSizeKey && sizeStock[selectedSizeKey] != null) {
+                baseStock = Number(sizeStock[selectedSizeKey]);
+            } else {
+                baseStock = Object.keys(sizeStock).reduce((s,k)=>s + Number(sizeStock[k]||0), 0);
+            }
+            const stockSummaryEl = document.getElementById('stockSummary');
+            if (stockSummaryEl) {
+                const q = parseInt(qtyValue?.textContent || '1');
+                const remaining = Math.max(0, baseStock - q);
+                if (remaining <= 0) stockSummaryEl.textContent = 'Sold Out';
+                else if (remaining <= 5) stockSummaryEl.textContent = `Only ${remaining} left in stock`;
+                else stockSummaryEl.textContent = `${remaining} in stock`;
+            }
+        }
+        if (qtyMinus && qtyPlus && qtyValue) {
+            qtyMinus.addEventListener('click', () => {
+                let q = parseInt(qtyValue.textContent || '1');
+                if (q > 1) { q--; qtyValue.textContent = String(q); updateStockSummaryForQty(); }
             });
-        });
+            qtyPlus.addEventListener('click', () => {
+                let q = parseInt(qtyValue.textContent || '1');
+                // Do not allow selecting more than available for selected size
+                const selectedSizeEl = document.querySelector('.size-options .size-option.selected');
+                const selectedSizeKey = selectedSizeEl?.getAttribute('data-size');
+                const sizeStock = (productData && productData.size_stock) ? productData.size_stock : {};
+                let maxAllowed = 99;
+                if (selectedSizeKey && sizeStock[selectedSizeKey] != null) {
+                    maxAllowed = Number(sizeStock[selectedSizeKey]);
+                } else if (Object.keys(sizeStock).length) {
+                    maxAllowed = Object.keys(sizeStock).reduce((s,k)=>s + Number(sizeStock[k]||0), 0);
+                }
+                if (q < maxAllowed) { q++; qtyValue.textContent = String(q); updateStockSummaryForQty(); }
+            });
+        }
         
         // Add to Cart functionality
         const addToCartBtn = document.getElementById('addToCartBtn');
@@ -1433,13 +1461,11 @@
                     const size = sizeMatch ? sizeMatch[1] : 'M'; // Default to M if no match
                     
                     // Get quantity
-                    const quantitySpan = document.querySelector('.sticky-cart span');
-                    const quantity = quantitySpan ? parseInt(quantitySpan.textContent) : 1;
+                    const quantityEl = document.getElementById('qtyValue');
+                    const quantity = quantityEl ? parseInt(quantityEl.textContent) : 1;
                     
-                    // Get product data from URL
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const productId = urlParams.get('id');
-                    const productTitle = decodeURIComponent(productId);
+                    // Determine product name from loaded data
+                    const productTitle = (productData && productData.name) ? productData.name : (document.getElementById('productTitle')?.textContent || '');
                     
                     console.log('Adding to cart:', {
                         product_name: productTitle,
@@ -1459,7 +1485,7 @@
                             product_name: productTitle,
                             quantity: quantity,
                             size: size,
-                            color: 'Black' // Default color for now
+                            color: selectedColor || 'Black'
                         })
                     });
                     
@@ -1513,16 +1539,14 @@
                     const quantitySpan = document.querySelector('.sticky-cart span');
                     const quantity = quantitySpan ? parseInt(quantitySpan.textContent) : 1;
                     
-                    // Get product data from URL
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const productId = urlParams.get('id');
-                    const productTitle = decodeURIComponent(productId);
+                    // Determine product name from loaded data
+                    const productTitle = (productData && productData.name) ? productData.name : (document.getElementById('productTitle')?.textContent || '');
                     
                     console.log('Buy Now - Adding to cart:', {
                         product_name: productTitle,
                         quantity: quantity,
                         size: size,
-                        color: 'Black'
+                        color: selectedColor || 'Black'
                     });
                     
                     // Add to cart via API
@@ -1536,7 +1560,7 @@
                             product_name: productTitle,
                             quantity: quantity,
                             size: size,
-                            color: 'Black' // Default color for now
+                            color: selectedColor || 'Black'
                         })
                     });
                     
@@ -1587,8 +1611,315 @@
             }
         }
         
+        // Load product data dynamically
+        async function loadProductData() {
+            console.log('🚀 loadProductData function called');
+            
+            try {
+                // Get product ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const productId = urlParams.get('id');
+                
+                console.log('🔍 URL parameters:', window.location.search);
+                console.log('🔍 Product ID from URL:', productId);
+                
+                if (!productId) {
+                    console.error('❌ No product ID found in URL');
+                    return;
+                }
+                
+                console.log('🔄 Loading product data for ID:', productId);
+                
+                // Fetch product data from API
+                const response = await fetch(`/api/products/public/${productId}`);
+                
+                console.log('📡 API Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch product: ${response.status}`);
+                }
+                
+                const product = await response.json();
+                console.log('📦 Loaded product data:', product);
+                // Store globally for cart actions
+                productData = product;
+                console.log('📦 Product image_url:', product.image_url);
+                
+                // Update page content with product data
+                updateProductDisplay(product);
+                
+            } catch (error) {
+                console.error('❌ Error loading product data:', error);
+                // Show error message to user
+                const mainContent = document.querySelector('main');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="container mx-auto px-6 py-12">
+                            <div class="glass-card rounded-2xl p-8 text-center">
+                                <h1 class="text-2xl font-bold text-white mb-4">Product Not Found</h1>
+                                <p class="text-text-secondary mb-6">The product you're looking for could not be loaded.</p>
+                                <a href="shop.html" class="btn-primary">Back to Shop</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        // Update product display with dynamic data
+        function updateProductDisplay(product) {
+            console.log('🎨 Updating product display with:', product);
+            
+            // Update page title
+            const pageTitle = document.getElementById('pageTitle');
+            if (pageTitle) {
+                pageTitle.textContent = `${product.name} - PlwgsCreativeApparel`;
+            }
+            
+            // Update product name
+            const productName = document.getElementById('productTitle');
+            if (productName) {
+                productName.textContent = product.name;
+            }
+            
+            // Update product description
+            const productDescription = document.getElementById('productDescription');
+            if (productDescription) {
+                productDescription.textContent = product.description || 'Quality printed design with custom artwork. Perfect for those who want to express their unique style.';
+            }
+            
+            // Update price
+            const priceElement = document.getElementById('currentPrice');
+            if (priceElement) {
+                priceElement.textContent = `$${product.price}`;
+            }
+            // Also update Add to Cart button price
+            const addToCartPrice = document.getElementById('addToCartPrice');
+            if (addToCartPrice) {
+                addToCartPrice.textContent = `$${product.price}`;
+            }
+            
+            // Update original price if on sale
+            const originalPriceElement = document.getElementById('originalPrice');
+            if (originalPriceElement && product.original_price) {
+                originalPriceElement.textContent = `$${product.original_price}`;
+                originalPriceElement.style.display = 'block';
+            }
+            
+            // Update sale percentage
+            const salePercentageElement = document.querySelector('.sale-percentage');
+            if (salePercentageElement && product.is_on_sale && product.original_price) {
+                const discount = Math.round(((parseFloat(product.original_price) - parseFloat(product.price)) / parseFloat(product.original_price)) * 100);
+                salePercentageElement.textContent = `${discount}% OFF`;
+                salePercentageElement.style.display = 'block';
+            }
+            
+            // Update main product image
+            const mainImage = document.getElementById('mainImage');
+            if (mainImage && product.image_url) {
+                console.log('🖼️ Setting main image to:', product.image_url);
+                console.log('🖼️ Main image element found:', mainImage);
+                console.log('🖼️ Current src before update:', mainImage.src);
+                
+                mainImage.src = product.image_url;
+                mainImage.alt = product.name;
+                
+                console.log('🖼️ New src after update:', mainImage.src);
+                console.log('🖼️ Image dimensions:', mainImage.width, 'x', mainImage.height);
+                console.log('🖼️ Image natural dimensions:', mainImage.naturalWidth, 'x', mainImage.naturalHeight);
+                console.log('🖼️ Image display style:', getComputedStyle(mainImage).display);
+                console.log('🖼️ Image visibility:', getComputedStyle(mainImage).visibility);
+                console.log('🖼️ Image opacity:', getComputedStyle(mainImage).opacity);
+                
+                mainImage.onerror = function() {
+                    console.error('❌ Failed to load image:', product.image_url);
+                    console.error('❌ Image error details:', this.error);
+                    this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik03NSA3NUgyMjVWMjI1SDc1WiIgc3Ryb2tlPSIjMDBDQ0Q0IiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTEwNSAxMzVMMTk1IDEzNUwxOTUgMTk1TDEwNSAxOTVMMTA1IDEzNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
+                };
+                mainImage.onload = function() {
+                    console.log('✅ Main image loaded successfully:', product.image_url);
+                    console.log('✅ Loaded image dimensions:', this.naturalWidth, 'x', this.naturalHeight);
+                    console.log('✅ Image is visible:', this.offsetWidth > 0 && this.offsetHeight > 0);
+                };
+            } else {
+                console.error('❌ Main image element not found or no image_url provided');
+                console.error('❌ mainImage element:', mainImage);
+                console.error('❌ product.image_url:', product.image_url);
+            }
+            
+            // Update thumbnail images
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            if (thumbnails.length > 0 && product.sub_images && product.sub_images.length > 0) {
+                console.log('🖼️ Updating thumbnail images with sub_images:', product.sub_images);
+                
+                // Update each thumbnail with sub_images
+                product.sub_images.forEach((subImage, index) => {
+                    if (thumbnails[index]) {
+                        const thumbnailImg = thumbnails[index].querySelector('img');
+                        if (thumbnailImg) {
+                            thumbnailImg.src = subImage;
+                            thumbnailImg.alt = `${product.name} - View ${index + 1}`;
+                            thumbnails[index].setAttribute('data-image', subImage);
+                        }
+                    }
+                });
+                
+                // If we have more thumbnails than sub_images, hide the extra ones
+                for (let i = product.sub_images.length; i < thumbnails.length; i++) {
+                    thumbnails[i].style.display = 'none';
+                }
+            }
+            
+            // Update colors if available
+            if (product.colors && product.colors.length > 0) {
+                const colorContainer = document.querySelector('.color-options');
+                if (colorContainer) {
+                    colorContainer.innerHTML = product.colors.map((color, idx) => `
+                        <div class="color-swatch w-12 h-12 rounded-full border-2 border-surface-light hover:border-accent cursor-pointer transition-colors ${idx===0 ? 'ring-2 ring-accent border-accent' : ''}"
+                             data-color="${color}"
+                             style="background-color: ${color.toLowerCase()}"
+                             title="${color}"></div>
+                    `).join('');
+
+                    // Default selected color = first
+                    const firstSwatch = colorContainer.querySelector('.color-swatch');
+                    if (firstSwatch) {
+                        selectedColor = firstSwatch.getAttribute('data-color');
+                        firstSwatch.classList.add('selected');
+                    }
+
+                    // Selection handlers
+                    colorContainer.querySelectorAll('.color-swatch').forEach(swatch => {
+                        swatch.addEventListener('click', () => {
+                            colorContainer.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected','ring-2','ring-accent','border-accent'));
+                            swatch.classList.add('selected','ring-2','ring-accent','border-accent');
+                            selectedColor = swatch.getAttribute('data-color');
+                            console.log('🎨 Selected color:', selectedColor);
+                            // Optional: update main image tint or border to give feedback visually
+                        });
+                    });
+                }
+            }
+            
+            // Update tags if available
+            if (product.tags && product.tags.length > 0) {
+                const tagsContainer = document.querySelector('.product-tags');
+                if (tagsContainer) {
+                    tagsContainer.innerHTML = product.tags.map(tag => `
+                        <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#${tag}</span>
+                    `).join('');
+                }
+            }
+            
+            // Update sizes and stock dynamically
+            if ((product.sizes && product.sizes.length > 0) || product.size_stock) {
+                const sizeContainer = document.querySelector('.size-options');
+                if (sizeContainer) {
+                    console.log('📏 Updating size options with:', product.sizes, product.size_stock);
+
+                    // Build size list: prefer explicit product.sizes; else derive keys from size_stock
+                    const knownOrder = ['XS','S','M','L','XL','XXL'];
+                    let sizes = Array.isArray(product.sizes) && product.sizes.length > 0
+                        ? product.sizes
+                        : Object.keys(product.size_stock || {});
+                    // Sort sizes to consistent order
+                    sizes = sizes.sort((a,b) => knownOrder.indexOf(a) - knownOrder.indexOf(b));
+
+                    const sizeStock = product.size_stock || {};
+
+                    const sizeHTML = sizes.map(size => {
+                        const stock = Number(sizeStock[size] || 0);
+                        let status = 'In Stock';
+                        let statusClass = 'text-text-secondary';
+                        let optionClass = 'size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent';
+
+                        if (stock <= 0) {
+                            status = 'Sold Out';
+                            statusClass = 'text-error';
+                            optionClass = 'size-option unavailable border border-surface-light rounded-lg p-3 text-center';
+                        } else if (stock <= 5) {
+                            status = `${stock} left`;
+                            statusClass = 'text-warning';
+                        }
+
+                        return `
+                            <div class="${optionClass}" data-size="${size}">
+                                <span class="font-semibold">${size}</span>
+                                <div class="text-xs ${statusClass} mt-1">${status}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    sizeContainer.innerHTML = sizeHTML;
+
+                    // Add click handlers for size selection
+                    sizeContainer.querySelectorAll('.size-option').forEach(option => {
+                        if (!option.classList.contains('unavailable')) {
+                            option.addEventListener('click', () => {
+                                sizeContainer.querySelectorAll('.size-option').forEach(opt => {
+                                    opt.classList.remove('selected', 'border-accent');
+                                    opt.classList.add('border-surface-light');
+                                });
+                                option.classList.add('selected', 'border-accent');
+                                option.classList.remove('border-surface-light');
+                            });
+                        }
+                    });
+
+                    // Default select first available size
+                    const firstAvailable = sizeContainer.querySelector('.size-option:not(.unavailable)');
+                    if (firstAvailable) {
+                        firstAvailable.classList.add('selected','border-accent');
+                        firstAvailable.classList.remove('border-surface-light');
+                    }
+
+                    // Update total stock summary
+                    const stockSummaryEl = document.getElementById('stockSummary');
+                    if (stockSummaryEl) {
+                        const totalStock = sizes.reduce((sum, s) => sum + Number(sizeStock[s] || 0), 0);
+                        if (totalStock <= 0) {
+                            stockSummaryEl.textContent = 'Sold Out';
+                        } else if (totalStock <= 5) {
+                            stockSummaryEl.textContent = `Only ${totalStock} left in stock`;
+                        } else {
+                            stockSummaryEl.textContent = `${totalStock} in stock`;
+                        }
+                    }
+                }
+            }
+            
+            // Update breadcrumbs
+            const breadcrumbContainer = document.querySelector('.breadcrumb-container');
+            if (breadcrumbContainer) {
+                breadcrumbContainer.innerHTML = `
+                    <a href="homepage.html" class="text-text-secondary hover:text-accent transition-colors">Home</a>
+                    <span class="text-text-secondary">></span>
+                    <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Shop</a>
+                    <span class="text-text-secondary">></span>
+                    <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">${product.category || 'All Designs'}</a>
+                    <span class="text-text-secondary">></span>
+                    <span class="text-accent">Product Details</span>
+                `;
+            }
+            
+            console.log('✅ Product display updated successfully');
+        }
+        
+        // Load product data when page loads
+        document.addEventListener('DOMContentLoaded', loadProductData);
+        
         // Update cart counter on page load
         updateCartCounter();
+
+        // Load product data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOMContentLoaded event fired');
+            loadProductData();
+        });
+        
+        // Also try calling it immediately
+        console.log('🔍 Calling loadProductData immediately');
+        loadProductData();
     </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>

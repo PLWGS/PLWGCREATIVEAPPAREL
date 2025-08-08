@@ -361,27 +361,27 @@
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" checked />
                                         <span class="text-text-primary">All Designs</span>
-                                        <span class="text-text-secondary text-sm ml-auto">(247)</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="all-designs-count">(0)</span>
                                     </label>
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
                                         <span class="text-text-primary">Horror Essentials</span>
-                                        <span class="text-text-secondary text-sm ml-auto">(89)</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="horror-essentials-count">(0)</span>
                                     </label>
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
                                         <span class="text-text-primary">Pop Culture Rebels</span>
-                                        <span class="text-text-secondary text-sm ml-auto">(76)</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="pop-culture-count">(0)</span>
                                     </label>
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
                                         <span class="text-text-primary">Humor & Sass</span>
-                                        <span class="text-text-secondary text-sm ml-auto">(54)</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="humor-sass-count">(0)</span>
                                     </label>
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
                                         <span class="text-text-primary">Custom Creations</span>
-                                        <span class="text-text-secondary text-sm ml-auto">(28)</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="custom-creations-count">(0)</span>
                                     </label>
                                 </div>
                             </div>
@@ -446,8 +446,8 @@
                     <div class="flex-1">
                         <!-- Sort & Results Header -->
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-                            <div class="text-text-secondary">
-                                Showing <span class="text-accent font-semibold">1-24</span> of <span class="text-accent font-semibold">247</span> results
+                            <div class="text-text-secondary" id="results-display">
+                                Showing <span class="text-accent font-semibold">0-0</span> of <span class="text-accent font-semibold">0</span> results
                             </div>
                             
                             <div class="flex items-center space-x-4">
@@ -735,31 +735,94 @@
 
         // Load products from database
         async function loadProductsFromDatabase() {
+            console.log('🔄 Loading products from database...');
             try {
-                const response = await fetch('/api/products');
+                const response = await fetch('/api/products/public');
+                console.log('📡 API Response status:', response.status);
                 if (response.ok) {
-                    const data = await response.json();
-                    allProducts = data.products || [];
+                    const products = await response.json();
+                    console.log('📦 Loaded products:', products);
+                    console.log('📦 Raw products data:', JSON.stringify(products, null, 2));
+                    
+                    // Check each product's image URL
+                    products.forEach((product, index) => {
+                        console.log(`📸 Product ${index + 1}: ${product.name}`);
+                        console.log(`   Image URL: ${product.image_url}`);
+                        console.log(`   Has Cloudinary URL: ${product.image_url && product.image_url.startsWith('https://res.cloudinary.com')}`);
+                    });
+                    
+                    allProducts = Array.isArray(products) ? products : [];
+                    console.log('📦 Processed products array:', allProducts);
                     totalPages = Math.ceil(allProducts.length / productsPerPage);
-                    displayProducts();
+                    console.log('📄 Total pages:', totalPages);
+                    displayProducts(0);
+                    updateProductCounts();
                 } else {
-                    console.log('No products found in database');
+                    console.log('❌ No products found in database');
                     allProducts = [];
                     totalPages = 0;
-                    displayProducts();
+                    displayProducts(0);
+                    updateProductCounts();
                 }
             } catch (error) {
-                console.error('Error loading products:', error);
+                console.error('❌ Error loading products:', error);
                 allProducts = [];
                 totalPages = 0;
-                displayProducts();
+                displayProducts(0);
+                updateProductCounts();
             }
         }
 
         // Load products when page loads
         loadProductsFromDatabase();
 
+        // Function to update product counts and display
+        function updateProductCounts() {
+            const totalProducts = allProducts.length;
+            const startIndex = currentPage * productsPerPage + 1;
+            const endIndex = Math.min((currentPage + 1) * productsPerPage, totalProducts);
+            
+            console.log('📊 Updating product counts:');
+            console.log('📦 Total products:', totalProducts);
+            console.log('📄 Current page:', currentPage);
+            console.log('📋 Showing range:', startIndex, 'to', endIndex);
+            
+            // Update the results display
+            const resultsDisplay = document.getElementById('results-display');
+            if (resultsDisplay) {
+                resultsDisplay.innerHTML = `Showing <span class="text-accent font-semibold">${startIndex}-${endIndex}</span> of <span class="text-accent font-semibold">${totalProducts}</span> results`;
+                console.log('✅ Updated results display');
+            } else {
+                console.log('❌ Results display element not found');
+            }
+            
+            // Update category counts
+            const allDesignsCount = document.getElementById('all-designs-count');
+            if (allDesignsCount) {
+                allDesignsCount.textContent = `(${totalProducts})`;
+                console.log('✅ Updated all designs count');
+            } else {
+                console.log('❌ All designs count element not found');
+            }
+            
+            // Update other category counts (for now, set to 0 since we don't have category filtering yet)
+            const horrorCount = document.getElementById('horror-essentials-count');
+            const popCultureCount = document.getElementById('pop-culture-count');
+            const humorCount = document.getElementById('humor-sass-count');
+            const customCount = document.getElementById('custom-creations-count');
+            
+            if (horrorCount) horrorCount.textContent = '(0)';
+            if (popCultureCount) popCultureCount.textContent = '(0)';
+            if (humorCount) humorCount.textContent = '(0)';
+            if (customCount) customCount.textContent = '(0)';
+            
+            console.log('✅ Updated all category counts');
+        }
+
         function createProductCard(product) {
+            console.log('🎯 Creating product card for:', product.name);
+            console.log('📸 Product image_url:', product.image_url);
+            
             const productCard = document.createElement('div');
             productCard.className = 'product-card glass-card rounded-2xl overflow-hidden group';
             
@@ -769,9 +832,11 @@
             const productCategory = product.category || 'Custom Design';
             const productPrice = product.price ? `$${product.price}` : '$0.00';
             
+            console.log('🖼️ Final image URL being used:', productImage);
+            
             productCard.innerHTML = `
                 <div class="relative">
-                    <img src="${productImage}" alt="${productTitle}" class="w-full h-64 object-cover" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='; this.onerror=null;">
+                    <img src="${productImage}" alt="${productTitle}" class="w-full h-64 object-cover" loading="lazy" onerror="console.error('❌ Image failed to load:', this.src); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='; this.onerror=null;" onload="console.log('✅ Image loaded successfully:', this.src);">
                     <div class="product-overlay"></div>
                     <div class="product-info">
                         <button class="btn-primary w-full text-sm view-details-btn" data-product="${encodeURIComponent(JSON.stringify(product))}">View Details</button>
@@ -900,47 +965,70 @@
             }, 3000);
         }
 
-        function displayProducts(page) {
+        function displayProducts(page = 0) {
+            console.log('🎨 Displaying products for page:', page);
+            console.log('📦 Total products:', allProducts.length);
+            console.log('📄 Products per page:', productsPerPage);
+            
+            // Check if productsGrid exists
+            if (!productsGrid) {
+                console.error('❌ productsGrid element not found!');
+                return;
+            }
+            
             // Clear current products
             productsGrid.innerHTML = '';
             
             // Calculate start and end indices for current page
             const startIndex = page * productsPerPage;
             const endIndex = Math.min(startIndex + productsPerPage, allProducts.length);
+            console.log('📋 Showing products from index', startIndex, 'to', endIndex);
             
             // Add products for current page
             for (let i = startIndex; i < endIndex; i++) {
                 const product = allProducts[i];
+                console.log('🎯 Creating card for product:', product.name);
                 const productCard = createProductCard(product);
                 productsGrid.appendChild(productCard);
             }
             
             // Update button text
-            loadMoreBtn.textContent = `Load More Designs (${page + 1}/${totalPages})`;
-            
-            // Hide button if we're on the last page
-            if (page >= totalPages - 1) {
-                loadMoreBtn.style.display = 'none';
+            if (loadMoreBtn) {
+                loadMoreBtn.textContent = `Load More Designs (${page + 1}/${totalPages})`;
+                
+                // Hide button if we're on the last page
+                if (page >= totalPages - 1) {
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    loadMoreBtn.style.display = 'block';
+                }
             } else {
-                loadMoreBtn.style.display = 'block';
+                console.log('⚠️ loadMoreBtn element not found');
             }
+            
+            // Update product counts display
+            updateProductCounts();
         }
 
         // Initialize with first page
         displayProducts(0);
 
-        loadMoreBtn.addEventListener('click', () => {
-            // Show loading state
-            loadMoreBtn.textContent = 'Loading...';
-            loadMoreBtn.disabled = true;
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => {
+                // Show loading state
+                loadMoreBtn.textContent = 'Loading...';
+                loadMoreBtn.disabled = true;
 
-            // Simulate loading delay
-            setTimeout(() => {
-                currentPage++;
-                displayProducts(currentPage);
-                loadMoreBtn.disabled = false;
-            }, 800);
-        });
+                // Simulate loading delay
+                setTimeout(() => {
+                    currentPage++;
+                    displayProducts(currentPage);
+                    loadMoreBtn.disabled = false;
+                }, 800);
+            });
+        } else {
+            console.log('⚠️ loadMoreBtn not found, skipping event listener');
+        }
 
         // Mouse movement particle effect
         document.addEventListener('mousemove', (e) => {

@@ -90,6 +90,13 @@ LOW_STOCK_THRESHOLD=5
 OUT_OF_STOCK_THRESHOLD=0
 
 # =============================================================================
+# CLOUDINARY CONFIGURATION
+# =============================================================================
+CLOUDINARY_CLOUD_NAME=dfistxzb9
+CLOUDINARY_API_KEY=898761968645834
+CLOUDINARY_API_SECRET=e5umVYuU0FfCHwCkOCzvVvbhMFo
+
+# =============================================================================
 # ANALYTICS & TRACKING
 # =============================================================================
 GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
