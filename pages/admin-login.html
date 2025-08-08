@@ -174,6 +174,26 @@
                 </button>
             </form>
 
+            <!-- 2FA Verification -->
+            <div id="twoFASection" class="mt-6 hidden">
+                <label for="twoFactorCode" class="block text-sm font-medium text-text-secondary mb-2">
+                    Enter the 6-digit verification code sent to your email
+                </label>
+                <div class="flex space-x-3">
+                    <input
+                        type="text"
+                        id="twoFactorCode"
+                        inputmode="numeric"
+                        pattern="[0-9]{6}"
+                        maxlength="6"
+                        class="form-input w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-accent"
+                        placeholder="123456"
+                        autocomplete="one-time-code"
+                    />
+                    <button id="verify2FABtn" class="btn-primary px-6 py-3">Verify</button>
+                </div>
+            </div>
+
             <!-- Back to Store Link -->
             <div class="text-center mt-6 pt-6 border-t border-surface-light">
                 <a href="homepage.html" class="text-accent hover:text-accent-light text-sm transition-colors">
@@ -199,6 +219,10 @@
         const btnText = document.getElementById('btnText');
         const btnLoading = document.getElementById('btnLoading');
         const messageContainer = document.getElementById('messageContainer');
+        const twoFASection = document.getElementById('twoFASection');
+        const twoFactorCodeInput = document.getElementById('twoFactorCode');
+        const verify2FABtn = document.getElementById('verify2FABtn');
+        let pendingTwoFactorToken = null;
 
         // Enable/disable button based on form validity
         function updateButtonState() {
@@ -236,23 +260,64 @@
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    // Store token
+                if (!response.ok) {
+                    showMessage(data.error || 'Login failed. Please check your credentials.');
+                    return;
+                }
+
+                // Two-factor required path
+                if (data.twoFactorRequired && data.twoFactorToken) {
+                    pendingTwoFactorToken = data.twoFactorToken;
+                    twoFASection.classList.remove('hidden');
+                    showMessage('A verification code was sent to your email. Enter it below.', 'success');
+                    twoFactorCodeInput.focus();
+                    return;
+                }
+
+                // Direct token path
+                if (data.token && data.user) {
                     localStorage.setItem('adminToken', data.token);
                     localStorage.setItem('adminUser', JSON.stringify(data.user));
-                    
                     showMessage('Login successful! Redirecting...', 'success');
-                    
-                    // Redirect to admin dashboard
-                    setTimeout(() => {
-                        window.location.href = 'admin.html';
-                    }, 1000);
-                } else {
-                    showMessage(data.error || 'Login failed. Please check your credentials.');
+                    setTimeout(() => { window.location.href = 'admin.html'; }, 800);
+                    return;
                 }
+
+                showMessage('Unexpected response. Please try again.');
             } catch (error) {
                 console.error('Login error:', error);
                 showMessage('Network error. Please check your connection and try again.');
+            }
+        }
+
+        // Verify 2FA code
+        async function verifyTwoFactor() {
+            const code = twoFactorCodeInput.value.trim();
+            if (!pendingTwoFactorToken || code.length !== 6) {
+                showMessage('Enter the 6-digit code.');
+                return;
+            }
+            try {
+                verify2FABtn.disabled = true;
+                const response = await fetch('/api/admin/2fa/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ twoFactorToken: pendingTwoFactorToken, code })
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    showMessage(data.error || 'Invalid or expired code.');
+                    verify2FABtn.disabled = false;
+                    return;
+                }
+                localStorage.setItem('adminToken', data.token);
+                localStorage.setItem('adminUser', JSON.stringify(data.user));
+                showMessage('Verification successful! Redirecting...', 'success');
+                setTimeout(() => { window.location.href = 'admin.html'; }, 800);
+            } catch (err) {
+                console.error('2FA verify error:', err);
+                showMessage('Network error during verification.');
+                verify2FABtn.disabled = false;
             }
         }
 
@@ -281,6 +346,11 @@
             btnText.classList.remove('hidden');
             btnLoading.classList.add('hidden');
             loginBtn.disabled = false;
+        });
+
+        verify2FABtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await verifyTwoFactor();
         });
 
         // Check if already logged in
