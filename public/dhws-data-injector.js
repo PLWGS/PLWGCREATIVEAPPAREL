@@ -396,4 +396,55 @@
   } else {
     revealAdminIfAuthorized(); ensureHamburgerAndDrawer();
   }
+
+  // ---------------------------------------------------------------------------
+  // Header brand text: prevent overlap and clip on small screens
+  // - Truncate with ellipsis and optionally abbreviate to "PLWG" on ultra-small
+  // ---------------------------------------------------------------------------
+  function improveHeaderBrandForMobile() {
+    // Inject CSS once
+    if (!document.getElementById('brandAbbrevStyle')) {
+      const s = document.createElement('style');
+      s.id = 'brandAbbrevStyle';
+      s.textContent = `
+        @media (max-width: 992px){
+          .brand-text-abbr{max-width:55vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:inline-block}
+        }
+        @media (max-width: 420px){
+          .brand-text-abbr{max-width:48vw;font-size:.9rem}
+        }
+      `;
+      document.head.appendChild(s);
+    }
+
+    // Try to locate the brand span text near the logo
+    const candidates = [
+      document.querySelector('header nav .flex.items-center span.font-orbitron'),
+      document.querySelector('header .flex.items-center span.font-orbitron'),
+      document.querySelector('header span.font-orbitron'),
+    ].filter(Boolean);
+
+    const brand = candidates[0];
+    if (!brand) return;
+
+    brand.classList.add('brand-text-abbr');
+    if (!brand.dataset.fullBrand) brand.dataset.fullBrand = brand.textContent.trim();
+
+    function syncBrandAbbrev(){
+      const w = window.innerWidth;
+      if (w <= 360) {
+        brand.textContent = 'PLWG';
+      } else if (brand.dataset.fullBrand) {
+        brand.textContent = brand.dataset.fullBrand;
+      }
+    }
+    syncBrandAbbrev();
+    window.addEventListener('resize', syncBrandAbbrev);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', improveHeaderBrandForMobile);
+  } else {
+    improveHeaderBrandForMobile();
+  }
 })();
