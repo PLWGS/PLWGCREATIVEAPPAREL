@@ -285,4 +285,105 @@
 
   // Start the component tagger
   initialize();
+
+  // ---------------------------------------------------------------------------
+  // Admin link visibility and mobile menu helpers (site-wide)
+  // ---------------------------------------------------------------------------
+
+  async function setupAdminLinkVisibility() {
+    try {
+      const adminLinks = Array.from(document.querySelectorAll('a[href$="admin.html"], a[data-role="admin-link"]'));
+      if (adminLinks.length === 0) return;
+
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        adminLinks.forEach(a => a.classList.add('hidden'));
+        return;
+      }
+      const res = await fetch('/api/admin/verify', {
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => null);
+      const isValid = !!res && res.ok;
+      adminLinks.forEach(a => a.classList.toggle('hidden', !isValid));
+    } catch (_) {
+      // Fail closed – hide links
+      document.querySelectorAll('a[href$="admin.html"], a[data-role="admin-link"]').forEach(a => a.classList.add('hidden'));
+    }
+  }
+
+  function setupMobileMenu() {
+    try {
+      // Find an existing mobile menu button or create one
+      let button = document.querySelector('header button.lg\\:hidden');
+      if (!button) return; // nothing to do if page has no header/button
+
+      // Build slide-over menu from existing top nav links
+      const existingNavLinks = Array.from(document.querySelectorAll('header nav a'))
+        .filter(a => a.href && !a.classList.contains('hidden'));
+
+      // Create container if not present
+      let panel = document.getElementById('mobileMenuPanel');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'mobileMenuPanel';
+        panel.className = 'fixed inset-0 z-[60] lg:hidden pointer-events-none';
+        panel.innerHTML = `
+          <div id="mobileMenuBackdrop" class="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-300"></div>
+          <div id="mobileMenuSheet" class="absolute right-0 top-0 bottom-0 w-72 max-w-[85%] bg-surface text-white shadow-xl translate-x-full transition-transform duration-300 overflow-y-auto">
+            <div class="p-4 border-b border-surface-light flex items-center justify-between">
+              <span class="font-orbitron text-lg">Menu</span>
+              <button id="mobileMenuClose" class="text-text-secondary hover:text-accent">✕</button>
+            </div>
+            <nav id="mobileMenuLinks" class="p-4 space-y-2"></nav>
+          </div>`;
+        document.body.appendChild(panel);
+      }
+
+      const linksContainer = panel.querySelector('#mobileMenuLinks');
+      linksContainer.innerHTML = '';
+      existingNavLinks.forEach((a) => {
+        const link = document.createElement('a');
+        link.href = a.getAttribute('href');
+        link.textContent = a.textContent || a.getAttribute('aria-label') || 'Link';
+        link.className = 'block px-3 py-2 rounded hover:bg-accent hover:text-black transition-colors';
+        // Respect admin visibility (hidden means not allowed)
+        if (a.classList.contains('hidden')) link.classList.add('hidden');
+        linksContainer.appendChild(link);
+      });
+
+      const backdrop = panel.querySelector('#mobileMenuBackdrop');
+      const sheet = panel.querySelector('#mobileMenuSheet');
+      const closeBtn = panel.querySelector('#mobileMenuClose');
+
+      function openMenu() {
+        panel.classList.remove('pointer-events-none');
+        requestAnimationFrame(() => {
+          backdrop.classList.remove('opacity-0');
+          sheet.classList.remove('translate-x-full');
+        });
+      }
+      function closeMenu() {
+        backdrop.classList.add('opacity-0');
+        sheet.classList.add('translate-x-full');
+        setTimeout(() => panel.classList.add('pointer-events-none'), 300);
+      }
+
+      button.addEventListener('click', openMenu);
+      backdrop.addEventListener('click', closeMenu);
+      closeBtn.addEventListener('click', closeMenu);
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  // Run helpers after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setupAdminLinkVisibility();
+      setupMobileMenu();
+    });
+  } else {
+    setupAdminLinkVisibility();
+    setupMobileMenu();
+  }
 })();
