@@ -333,9 +333,20 @@
     // Detect if a native hamburger already exists in header
     const nativeHamburgerBtn = (() => {
       const candidates = Array.from(document.querySelectorAll('header button, header [role="button"]'));
+      // Robust detection: visible button near logo OR svg with hamburger path OR has lg:hidden class
       return candidates.find(el => {
-        const label = (el.getAttribute('aria-label') || '') + ' ' + el.className + ' ' + el.textContent;
-        return /menu|hamburger/i.test(label);
+        try {
+          const cs = getComputedStyle(el);
+          const rect = el.getBoundingClientRect();
+          const visible = rect.width > 12 && rect.height > 12 && cs.display !== 'none' && cs.visibility !== 'hidden';
+          const html = el.innerHTML || '';
+          const cls = el.className || '';
+          const hasHamburgerPath = html.includes('M4 6h16') && html.includes('M4 12h16') && html.includes('M4 18h16');
+          const responsiveClass = /\blg:hidden\b/.test(cls);
+          const label = (el.getAttribute('aria-label') || '') + ' ' + cls + ' ' + el.textContent;
+          const keywords = /menu|hamburger/i.test(label);
+          return visible && (hasHamburgerPath || responsiveClass || keywords);
+        } catch { return false; }
       });
     })();
     const useNative = !!nativeHamburgerBtn;
@@ -356,6 +367,11 @@
       updatePosition();
       window.addEventListener('resize', updatePosition);
       document.body.appendChild(trBar);
+    }
+    // Safety: if native was found but a toolbar already existed (from earlier loads), remove ours
+    if (useNative && trBar) {
+      try { trBar.remove(); } catch(_) {}
+      trBar = null;
     }
 
     let btn = nativeHamburgerBtn;
