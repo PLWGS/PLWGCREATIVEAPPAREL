@@ -287,134 +287,113 @@
   initialize();
 
   // ---------------------------------------------------------------------------
-  // Admin link visibility and mobile menu helpers (site-wide)
+  // Site-wide helpers: hide Admin link for non-admin and add mobile hamburger
   // ---------------------------------------------------------------------------
 
-  async function setupAdminLinkVisibility() {
+  function injectAdminHideCSS() {
+    if (document.getElementById('adminLinkHideStyle')) return;
+    const style = document.createElement('style');
+    style.id = 'adminLinkHideStyle';
+    style.textContent = 'a[href$="admin.html"], a[href*="/admin.html"] { display:none !important; }';
+    document.head.appendChild(style);
+  }
+
+  async function revealAdminIfAuthorized() {
     try {
-      // Hide by default using a CSS rule that matches admin links directly
-      if (!document.getElementById('adminLinkHideStyle')) {
-        const style = document.createElement('style');
-        style.id = 'adminLinkHideStyle';
-        style.textContent = 'a[href$="admin.html"], a[href*="/admin.html"] { display:none !important; }';
-        document.head.appendChild(style);
-      }
-
-      // Collect admin links (may be none)
-      const adminLinks = Array.from(document.querySelectorAll("a[href$='admin.html'], a[href*='/admin.html']"));
-      if (adminLinks.length === 0) return;
-
       const token = localStorage.getItem('adminToken');
-      if (!token) {
-        // Keep hidden
-        return;
-      }
-      const res = await fetch('/api/admin/verify', {
-        headers: { Authorization: `Bearer ${token}` }
-      }).catch(() => null);
-      const isValid = !!res && res.ok;
-      if (isValid) {
+      if (!token) return;
+      const res = await fetch('/api/admin/verify', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null);
+      if (res && res.ok) {
+        // Remove the hide rule and show any admin links
         const style = document.getElementById('adminLinkHideStyle');
         if (style) style.remove();
-        adminLinks.forEach(a => { a.style.display = ''; a.classList.remove('hidden'); });
-      }
-    } catch (_) {
-      // Fail closed – leave CSS rule in place (hidden)
-    }
-  }
-
-  function setupMobileMenu() {
-    try {
-      // Find an existing mobile menu button or create one
-      let button = document.querySelector('header button.lg\\:hidden');
-      const headerRight = document.querySelector('header .flex.items-center.space-x-4') || document.querySelector('header .flex.items-center:last-child');
-      if (!button && headerRight) {
-        button = document.createElement('button');
-        button.setAttribute('aria-label', 'Open menu');
-        button.className = 'lg:hidden text-text-primary hover:text-accent transition-colors duration-300';
-        button.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>';
-        headerRight.appendChild(button);
-      }
-      if (!button) {
-        // Fallback button if header structure is different (inline styles for reliability)
-        const fallback = document.createElement('button');
-        fallback.id = 'globalHamburger';
-        fallback.setAttribute('aria-label', 'Open menu');
-        fallback.style.cssText = 'position:fixed;top:16px;right:16px;z-index:2147483647;padding:10px;border-radius:8px;background:rgba(42,42,42,0.85);color:#fff;display:block';
-        fallback.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>';
-        document.body.appendChild(fallback);
-        button = fallback;
-      }
-
-      // Build slide-over menu from existing top nav links
-      const existingNavLinks = Array.from(document.querySelectorAll('header nav a'))
-        .filter(a => a.href && !a.classList.contains('hidden'));
-
-      // Create container if not present
-      let panel = document.getElementById('mobileMenuPanel');
-      if (!panel) {
-        panel = document.createElement('div');
-        panel.id = 'mobileMenuPanel';
-        panel.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none;display:block';
-        panel.innerHTML = `
-          <div id="mobileMenuBackdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);opacity:0;transition:opacity .3s"></div>
-          <div id="mobileMenuSheet" style="position:absolute;right:0;top:0;bottom:0;width:300px;max-width:85%;background:#1a1a1a;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.6);transform:translateX(100%);transition:transform .3s;overflow-y:auto">
-            <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between">
-              <span style="font-weight:700">Menu</span>
-              <button id="mobileMenuClose" style="color:#a0a0a0">✕</button>
-            </div>
-            <nav id="mobileMenuLinks" style="padding:12px 8px"></nav>
-          </div>`;
-        document.body.appendChild(panel);
-      }
-
-      const linksContainer = panel.querySelector('#mobileMenuLinks');
-      linksContainer.innerHTML = '';
-      existingNavLinks.forEach((a) => {
-        const link = document.createElement('a');
-        link.href = a.getAttribute('href');
-        link.textContent = a.textContent || a.getAttribute('aria-label') || 'Link';
-        link.style.cssText = 'display:block;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none';
-        link.onmouseenter = () => { link.style.background = '#00bcd4'; link.style.color = '#000'; };
-        link.onmouseleave = () => { link.style.background = 'transparent'; link.style.color = '#fff'; };
-        // Respect admin visibility (hidden means not allowed)
-        if (a.classList.contains('hidden') || a.style.display === 'none') link.classList.add('hidden');
-        linksContainer.appendChild(link);
-      });
-
-      const backdrop = panel.querySelector('#mobileMenuBackdrop');
-      const sheet = panel.querySelector('#mobileMenuSheet');
-      const closeBtn = panel.querySelector('#mobileMenuClose');
-
-      function openMenu() {
-        panel.style.pointerEvents = 'auto';
-        requestAnimationFrame(() => {
-          backdrop.style.opacity = '1';
-          sheet.style.transform = 'translateX(0)';
+        document.querySelectorAll("a[href$='admin.html'], a[href*='/admin.html']").forEach(a => {
+          a.style.display = '';
+          a.classList.remove('hidden');
         });
       }
-      function closeMenu() {
-        backdrop.style.opacity = '0';
-        sheet.style.transform = 'translateX(100%)';
-        setTimeout(() => { panel.style.pointerEvents = 'none'; }, 300);
-      }
-
-      button.addEventListener('click', openMenu);
-      backdrop.addEventListener('click', closeMenu);
-      closeBtn.addEventListener('click', closeMenu);
-    } catch (_) {
-      // ignore
-    }
+    } catch (_) { /* ignore */ }
   }
 
-  // Run helpers after DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      setupAdminLinkVisibility();
-      setupMobileMenu();
+  function ensureHamburgerAndDrawer() {
+    // If a hamburger already exists, do nothing
+    if (document.getElementById('globalHamburger')) return;
+
+    // Prefer an existing header right cluster; else attach to body as fallback
+    const headerRight = document.querySelector('header .flex.items-center.space-x-4') || document.querySelector('header');
+
+    // Create hamburger (inline styles so it works on all pages)
+    const btn = document.createElement('button');
+    btn.id = 'globalHamburger';
+    btn.setAttribute('aria-label', 'Open menu');
+    btn.style.cssText = 'position:fixed;top:14px;right:14px;z-index:2147483647;padding:10px;border-radius:8px;background:rgba(42,42,42,0.85);color:#fff;display:none';
+    btn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>';
+    (headerRight || document.body).appendChild(btn);
+
+    // Show only on small screens
+    function syncHamburgerVisibility() {
+      btn.style.display = window.matchMedia('(max-width: 1024px)').matches ? 'block' : 'none';
+    }
+    syncHamburgerVisibility();
+    window.addEventListener('resize', syncHamburgerVisibility);
+
+    // Build drawer panel
+    let panel = document.getElementById('mobileMenuPanel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'mobileMenuPanel';
+      panel.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none;display:block';
+      panel.innerHTML = '
+        <div id="mobileMenuBackdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);opacity:0;transition:opacity .3s"></div>
+        <div id="mobileMenuSheet" style="position:absolute;right:0;top:0;bottom:0;width:300px;max-width:85%;background:#1a1a1a;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.6);transform:translateX(100%);transition:transform .3s;overflow-y:auto">
+          <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-weight:700">Menu</span>
+            <button id="mobileMenuClose" style="color:#a0a0a0">✕</button>
+          </div>
+          <nav id="mobileMenuLinks" style="padding:12px 8px"></nav>
+        </div>';
+      document.body.appendChild(panel);
+    }
+
+    // Populate links from header nav; fallback to top-level header anchors
+    const linksContainer = panel.querySelector('#mobileMenuLinks');
+    linksContainer.innerHTML = '';
+    const navLinks = Array.from(document.querySelectorAll('header nav a'));
+    const fallbackLinks = navLinks.length ? navLinks : Array.from(document.querySelectorAll('header a[href]'));
+    (fallbackLinks || []).forEach(a => {
+      const link = document.createElement('a');
+      link.href = a.getAttribute('href');
+      link.textContent = a.textContent || a.getAttribute('aria-label') || 'Link';
+      link.style.cssText = 'display:block;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none';
+      link.onmouseenter = () => { link.style.background = '#00bcd4'; link.style.color = '#000'; };
+      link.onmouseleave = () => { link.style.background = 'transparent'; link.style.color = '#fff'; };
+      // Respect admin visibility (CSS hide rule will hide if not admin)
+      linksContainer.appendChild(link);
     });
+
+    const backdrop = panel.querySelector('#mobileMenuBackdrop');
+    const sheet = panel.querySelector('#mobileMenuSheet');
+    const closeBtn = panel.querySelector('#mobileMenuClose');
+
+    function openMenu() {
+      panel.style.pointerEvents = 'auto';
+      requestAnimationFrame(() => { backdrop.style.opacity = '1'; sheet.style.transform = 'translateX(0)'; });
+    }
+    function closeMenu() {
+      backdrop.style.opacity = '0'; sheet.style.transform = 'translateX(100%)';
+      setTimeout(() => { panel.style.pointerEvents = 'none'; }, 300);
+    }
+
+    btn.addEventListener('click', openMenu);
+    backdrop.addEventListener('click', closeMenu);
+    closeBtn.addEventListener('click', closeMenu);
+  }
+
+  // Initialize helpers
+  injectAdminHideCSS();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { revealAdminIfAuthorized(); ensureHamburgerAndDrawer(); });
   } else {
-    setupAdminLinkVisibility();
-    setupMobileMenu();
+    revealAdminIfAuthorized(); ensureHamburgerAndDrawer();
   }
 })();
