@@ -295,19 +295,31 @@
       const adminLinks = Array.from(document.querySelectorAll('a[href$="admin.html"], a[data-role="admin-link"]'));
       if (adminLinks.length === 0) return;
 
+      // Hide by default immediately (no flash for public)
+      adminLinks.forEach(a => {
+        a.style.display = 'none';
+        a.setAttribute('data-role', 'admin-link');
+      });
+
       const token = localStorage.getItem('adminToken');
       if (!token) {
-        adminLinks.forEach(a => a.classList.add('hidden'));
+        // Keep hidden
         return;
       }
       const res = await fetch('/api/admin/verify', {
         headers: { Authorization: `Bearer ${token}` }
       }).catch(() => null);
       const isValid = !!res && res.ok;
-      adminLinks.forEach(a => a.classList.toggle('hidden', !isValid));
+      adminLinks.forEach(a => {
+        a.style.display = isValid ? '' : 'none';
+        a.classList.toggle('hidden', !isValid);
+      });
     } catch (_) {
       // Fail closed – hide links
-      document.querySelectorAll('a[href$="admin.html"], a[data-role="admin-link"]').forEach(a => a.classList.add('hidden'));
+      document.querySelectorAll('a[href$="admin.html"], a[data-role="admin-link"]').forEach(a => {
+        a.style.display = 'none';
+        a.classList.add('hidden');
+      });
     }
   }
 
@@ -315,6 +327,14 @@
     try {
       // Find an existing mobile menu button or create one
       let button = document.querySelector('header button.lg\\:hidden');
+      const headerRight = document.querySelector('header .flex.items-center.space-x-4') || document.querySelector('header .flex.items-center:last-child');
+      if (!button && headerRight) {
+        button = document.createElement('button');
+        button.setAttribute('aria-label', 'Open menu');
+        button.className = 'lg:hidden text-text-primary hover:text-accent transition-colors duration-300';
+        button.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>';
+        headerRight.appendChild(button);
+      }
       if (!button) return; // nothing to do if page has no header/button
 
       // Build slide-over menu from existing top nav links
@@ -347,7 +367,7 @@
         link.textContent = a.textContent || a.getAttribute('aria-label') || 'Link';
         link.className = 'block px-3 py-2 rounded hover:bg-accent hover:text-black transition-colors';
         // Respect admin visibility (hidden means not allowed)
-        if (a.classList.contains('hidden')) link.classList.add('hidden');
+        if (a.classList.contains('hidden') || a.style.display === 'none') link.classList.add('hidden');
         linksContainer.appendChild(link);
       });
 
