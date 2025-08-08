@@ -356,9 +356,18 @@
     btn.id = 'globalHamburger';
     btn.setAttribute('aria-label', 'Open menu');
     btn.style.cssText = 'padding:8px;border-radius:8px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,0.3)';
-    btn.innerHTML = '☰';
+    btn.textContent = '☰';
     trBar.appendChild(btn);
     try { console.log('[dhws-data-injector] hamburger created'); } catch(_) {}
+
+    // If button renders at zero size, switch to text fallback to guarantee visibility
+    try {
+      const r = btn.getBoundingClientRect();
+      if (!r || r.width < 6 || r.height < 6) {
+        btn.textContent = 'MENU';
+        btn.style.cssText += ';font-weight:700;font-size:16px;color:#fff;background:#0a84ff;outline:2px solid #ff0;';
+      }
+    } catch(_){}
 
     // Always show for now (force visible); we can relax later
     function syncHamburgerVisibility() {
@@ -375,9 +384,17 @@
       cartBtn.id = 'globalCartBtn';
       cartBtn.setAttribute('aria-label', 'Open cart');
       cartBtn.style.cssText = 'padding:8px;border-radius:8px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,0.3)';
-      cartBtn.innerHTML = '🛒';
+      cartBtn.textContent = '🛒';
       cartBtn.addEventListener('click', () => { try { window.location.href = 'cart.html'; } catch(_){} });
       trBar.appendChild(cartBtn);
+
+      try {
+        const rc = cartBtn.getBoundingClientRect();
+        if (!rc || rc.width < 6 || rc.height < 6) {
+          cartBtn.textContent = 'CART';
+          cartBtn.style.cssText += ';font-weight:700;font-size:16px;color:#fff;background:#00b894;outline:2px solid #0ff;';
+        }
+      } catch(_){}
       try { console.log('[dhws-data-injector] cart fallback created'); } catch(_) {}
       const syncCartVisibility = () => { cartBtn.style.setProperty('display','block','important'); };
       syncCartVisibility();
