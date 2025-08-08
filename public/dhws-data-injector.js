@@ -1,5 +1,6 @@
 
 (function() {
+  try { console.log('[dhws-data-injector] Loaded'); } catch (_) {}
   // Configuration
   const CONFIG = {
     attributePrefix: 'data-component',
@@ -319,23 +320,57 @@
     // If a hamburger already exists, do nothing
     if (document.getElementById('globalHamburger')) return;
 
-    // Prefer an existing header right cluster; else attach to body as fallback
-    const headerRight = document.querySelector('header .flex.items-center.space-x-4') || document.querySelector('header');
+    // Prefer an existing header right cluster; else attach to header as fallback
+    const headerEl = document.querySelector('header') || document.body;
+    const headerRight = document.querySelector('header .flex.items-center.space-x-4') || headerEl;
+    try {
+      const cs = window.getComputedStyle(headerEl);
+      if (!cs || cs.position === 'static') {
+        headerEl.style.position = 'relative';
+      }
+    } catch(_) {}
 
     // Create hamburger (inline styles so it works on all pages)
+    // Create a fixed top-right toolbar container to ensure visibility
+    let trBar = document.getElementById('globalTopRightBar');
+    if (!trBar) {
+      trBar = document.createElement('div');
+      trBar.id = 'globalTopRightBar';
+      trBar.style.cssText = 'position:fixed;top:8px;right:8px;z-index:2147483647 !important;display:flex;gap:8px;align-items:center;background:transparent;padding:0;margin:0;pointer-events:auto';
+      document.body.appendChild(trBar);
+    }
+
     const btn = document.createElement('button');
     btn.id = 'globalHamburger';
     btn.setAttribute('aria-label', 'Open menu');
-    btn.style.cssText = 'position:fixed;top:14px;right:14px;z-index:2147483647;padding:10px;border-radius:8px;background:rgba(42,42,42,0.85);color:#fff;display:none';
+    btn.style.cssText = 'padding:10px;border-radius:10px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 0 0 2px rgba(0,188,212,0.8) inset';
     btn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>';
-    (headerRight || document.body).appendChild(btn);
+    trBar.appendChild(btn);
+    try { console.log('[dhws-data-injector] hamburger created'); } catch(_) {}
 
-    // Show only on small screens
+    // Always show for now (force visible); we can relax later
     function syncHamburgerVisibility() {
-      btn.style.display = window.matchMedia('(max-width: 1024px)').matches ? 'block' : 'none';
+      btn.style.setProperty('display', 'block', 'important');
     }
     syncHamburgerVisibility();
     window.addEventListener('resize', syncHamburgerVisibility);
+
+    // Fallback cart icon (only if none exists in header)
+    const hasCart = !!document.querySelector('header a[href$="cart.html"], header button#cart-button');
+    let cartBtn = document.getElementById('globalCartBtn');
+    if (!hasCart && !cartBtn) {
+      cartBtn = document.createElement('button');
+      cartBtn.id = 'globalCartBtn';
+      cartBtn.setAttribute('aria-label', 'Open cart');
+      cartBtn.style.cssText = 'padding:10px;border-radius:10px;background:rgba(30,30,30,0.95);color:#00bcd4;display:block !important;opacity:1;visibility:visible;pointer-events:auto;box-shadow:0 0 0 2px rgba(0,188,212,0.8) inset';
+      cartBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 12.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>';
+      cartBtn.addEventListener('click', () => { try { window.location.href = 'cart.html'; } catch(_){} });
+      trBar.appendChild(cartBtn);
+      try { console.log('[dhws-data-injector] cart fallback created'); } catch(_) {}
+      const syncCartVisibility = () => { cartBtn.style.setProperty('display','block','important'); };
+      syncCartVisibility();
+      window.addEventListener('resize', syncCartVisibility);
+    }
 
     // Build drawer panel
     let panel = document.getElementById('mobileMenuPanel');
@@ -343,7 +378,7 @@
       panel = document.createElement('div');
       panel.id = 'mobileMenuPanel';
       panel.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none;display:block';
-      panel.innerHTML = '
+      panel.innerHTML = `
         <div id="mobileMenuBackdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);opacity:0;transition:opacity .3s"></div>
         <div id="mobileMenuSheet" style="position:absolute;right:0;top:0;bottom:0;width:300px;max-width:85%;background:#1a1a1a;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.6);transform:translateX(100%);transition:transform .3s;overflow-y:auto">
           <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between">
@@ -351,7 +386,7 @@
             <button id="mobileMenuClose" style="color:#a0a0a0">✕</button>
           </div>
           <nav id="mobileMenuLinks" style="padding:12px 8px"></nav>
-        </div>';
+        </div>`;
       document.body.appendChild(panel);
     }
 
@@ -387,6 +422,15 @@
     btn.addEventListener('click', openMenu);
     backdrop.addEventListener('click', closeMenu);
     closeBtn.addEventListener('click', closeMenu);
+
+    // Also wire up any existing hamburger buttons inside the page header
+    try {
+      const existingHamburgers = Array.from(document.querySelectorAll('header button, header [role="button"]'))
+        .filter(el => el !== btn && (el.id === 'mobile-menu-btn' || /hamburger|menu/i.test(el.className) || el.innerHTML.includes('M4 6h16') || el.innerHTML.includes('menu')));
+      existingHamburgers.forEach(h => {
+        h.addEventListener('click', (e) => { e.preventDefault(); openMenu(); });
+      });
+    } catch (_) { /* ignore */ }
   }
 
   // Initialize helpers
@@ -408,10 +452,10 @@
       s.id = 'brandAbbrevStyle';
       s.textContent = `
         @media (max-width: 992px){
-          .brand-text-abbr{max-width:55vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:inline-block}
+          .brand-text-abbr{max-width:44vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:inline-block}
         }
         @media (max-width: 420px){
-          .brand-text-abbr{max-width:48vw;font-size:.9rem}
+          .brand-text-abbr{max-width:34vw;font-size:1.1rem}
         }
       `;
       document.head.appendChild(s);
@@ -432,8 +476,8 @@
 
     function syncBrandAbbrev(){
       const w = window.innerWidth;
-      if (w <= 360) {
-        brand.textContent = 'PLWG';
+      if (w <= 420) {
+        brand.textContent = 'PLWGS';
       } else if (brand.dataset.fullBrand) {
         brand.textContent = brand.dataset.fullBrand;
       }
