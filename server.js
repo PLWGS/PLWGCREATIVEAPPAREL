@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { uploadProductImages, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
 require('dotenv').config();
 
@@ -44,6 +45,25 @@ async function initializeAdminCredentials() {
   } catch (err) {
     console.error('❌ Failed to initialize admin credentials:', err);
   }
+}
+
+// Fetch active admin password hash. Preference order:
+// 1) Database-stored override in admin_settings ('admin_password_hash')
+// 2) In-memory memo computed at startup from env
+async function getActiveAdminPasswordHash() {
+  try {
+    if (pool) {
+      const result = await pool.query(`
+        SELECT value FROM admin_settings WHERE key = 'admin_password_hash' LIMIT 1
+      `);
+      if (result.rows.length > 0 && result.rows[0].value && result.rows[0].value.startsWith('$2')) {
+        return result.rows[0].value;
+      }
+    }
+  } catch (e) {
+    console.error('⚠️ Could not read admin password hash from admin_settings:', e.message);
+  }
+  return ADMIN_PASSWORD_HASH_MEMO;
 }
 
 const app = express();
@@ -284,6 +304,15 @@ async function initializeDatabase() {
       console.log('Some columns may already exist:', error.message);
     }
 
+    // Admin settings key-value store (for admin password hash and flags)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admin_settings (
+        key VARCHAR(100) PRIMARY KEY,
+        value TEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Create orders table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS orders (
@@ -399,6 +428,31 @@ async function initializeDatabase() {
 // AUTHENTICATION ENDPOINTS
 // =============================================================================
 
+// In-memory stores for email-based 2FA and password reset tokens
+const twoFactorStore = new Map(); // token -> { email, code, expiresAt }
+const passwordResetStore = new Map(); // token -> { email, expiresAt }
+
+function generateNumericCode(length = 6) {
+  const max = Math.pow(10, length) - 1;
+  const num = crypto.randomInt(0, max + 1);
+  return String(num).padStart(length, '0');
+}
+
+async function sendEmail(to, subject, html) {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to,
+      subject,
+      html
+    });
+    return true;
+  } catch (e) {
+    console.error('❌ Failed to send email:', e.message);
+    return false;
+  }
+}
+
 // Admin login
 app.post('/api/admin/login', async (req, res) => {
   try {
@@ -419,7 +473,15 @@ app.post('/api/admin/login', async (req, res) => {
       console.log('✅ Email matches');
       let isValidPassword = false;
 
-      if (ADMIN_PASSWORD_HASH_MEMO) {
+      // Prefer DB-stored admin hash if present
+      const activeHash = await getActiveAdminPasswordHash();
+      if (activeHash) {
+        try {
+          isValidPassword = await bcrypt.compare(password, activeHash);
+        } catch (e) {
+          console.error('❌ Error during bcrypt.compare for admin login:', e.message);
+        }
+      } else if (ADMIN_PASSWORD_HASH_MEMO) {
         try {
           isValidPassword = await bcrypt.compare(password, ADMIN_PASSWORD_HASH_MEMO);
         } catch (e) {
@@ -439,17 +501,35 @@ app.post('/api/admin/login', async (req, res) => {
       console.log('🔐 Password check result:', isValidPassword);
       
       if (isValidPassword) {
-        const token = jwt.sign(
-          { email, role: 'admin' },
-          process.env.JWT_SECRET,
-          { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-        );
+        // 2FA gate (email OTP) enabled by default unless disabled
+        const twoFAEnabled = (process.env.ADMIN_2FA_ENABLED || 'true') !== 'false';
+        if (twoFAEnabled) {
+          const code = generateNumericCode(6);
+          const twoFactorToken = crypto.randomBytes(24).toString('hex');
+          const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+          twoFactorStore.set(twoFactorToken, { email, code, expiresAt });
 
-        res.json({
-          success: true,
-          token,
-          user: { email, role: 'admin' }
-        });
+          const toEmail = process.env.ADMIN_2FA_EMAIL || process.env.ADMIN_EMAIL || 'letsgetcreative@myyahoo.com';
+          const sent = await sendEmail(
+            toEmail,
+            'Your Admin 2FA Code',
+            `<p>Your login verification code is:</p><p style="font-size:22px;font-weight:bold;letter-spacing:2px;">${code}</p><p>This code expires in 5 minutes.</p>`
+          );
+          if (!sent) {
+            console.warn('⚠️ 2FA email failed to send; denying login');
+            return res.status(500).json({ error: 'Failed to send 2FA code' });
+          }
+
+          return res.json({ twoFactorRequired: true, twoFactorToken });
+        } else {
+          const token = jwt.sign(
+            { email, role: 'admin' },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+          );
+
+          return res.json({ success: true, token, user: { email, role: 'admin' } });
+        }
       } else {
         console.log('❌ Password does not match hash');
         res.status(401).json({ error: 'Invalid credentials' });
@@ -460,6 +540,101 @@ app.post('/api/admin/login', async (req, res) => {
     }
   } catch (error) {
     console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Verify 2FA code and issue final admin JWT
+app.post('/api/admin/2fa/verify', async (req, res) => {
+  try {
+    const { twoFactorToken, code } = req.body || {};
+    if (!twoFactorToken || !code) {
+      return res.status(400).json({ error: 'Missing 2FA token or code' });
+    }
+    const record = twoFactorStore.get(twoFactorToken);
+    if (!record) {
+      return res.status(400).json({ error: 'Invalid or expired 2FA token' });
+    }
+    if (Date.now() > record.expiresAt) {
+      twoFactorStore.delete(twoFactorToken);
+      return res.status(400).json({ error: '2FA code expired' });
+    }
+    if (String(record.code) !== String(code)) {
+      return res.status(401).json({ error: 'Invalid 2FA code' });
+    }
+    twoFactorStore.delete(twoFactorToken);
+
+    const token = jwt.sign(
+      { email: record.email, role: 'admin' },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+    res.json({ success: true, token, user: { email: record.email, role: 'admin' } });
+  } catch (err) {
+    console.error('2FA verify error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Request admin password reset (sends a token link/code to email)
+app.post('/api/admin/password/request-reset', async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    const targetEmail = process.env.ADMIN_EMAIL;
+    if (!email || !targetEmail || email.toLowerCase() !== targetEmail.toLowerCase()) {
+      return res.status(400).json({ error: 'Invalid email' });
+    }
+    const token = crypto.randomBytes(24).toString('hex');
+    const expiresAt = Date.now() + 30 * 60 * 1000; // 30 minutes
+    passwordResetStore.set(token, { email: targetEmail, expiresAt });
+
+    const toEmail = process.env.ADMIN_2FA_EMAIL || targetEmail || 'letsgetcreative@myyahoo.com';
+    const resetHtml = `<p>You requested an admin password reset.</p>
+      <p>Reset token:</p>
+      <p style="font-size:14px;word-break:break-all;"><code>${token}</code></p>
+      <p>This token expires in 30 minutes.</p>`;
+    const sent = await sendEmail(toEmail, 'Admin Password Reset', resetHtml);
+    if (!sent) {
+      return res.status(500).json({ error: 'Failed to send reset email' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Password reset request error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Perform admin password reset using token
+app.post('/api/admin/password/reset', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body || {};
+    if (!token || !newPassword || String(newPassword).length < 8) {
+      return res.status(400).json({ error: 'Invalid token or password too short' });
+    }
+    const record = passwordResetStore.get(token);
+    if (!record) {
+      return res.status(400).json({ error: 'Invalid or expired token' });
+    }
+    if (Date.now() > record.expiresAt) {
+      passwordResetStore.delete(token);
+      return res.status(400).json({ error: 'Token expired' });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10));
+    passwordResetStore.delete(token);
+
+    // Persist new hash in DB admin_settings and update in-memory memo
+    if (pool) {
+      await pool.query(
+        `INSERT INTO admin_settings(key, value, updated_at) VALUES('admin_password_hash', $1, NOW())
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+        [newHash]
+      );
+    }
+    ADMIN_PASSWORD_HASH_MEMO = newHash;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Password reset error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
