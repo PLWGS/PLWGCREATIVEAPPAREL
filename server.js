@@ -9,6 +9,37 @@ const path = require('path');
 const { uploadProductImages, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
 require('dotenv').config();
 
+// -----------------------------------------------------------------------------
+// Admin credentials bootstrap
+// -----------------------------------------------------------------------------
+// We keep a single, in-memory, canonical hash so deployments never require
+// manually re-generating ADMIN_PASSWORD_HASH. If ADMIN_PASSWORD_HASH is not
+// provided, we will hash ADMIN_PASSWORD on startup and use that. This prevents
+// frequent invalid-credential issues during redeploys.
+let ADMIN_EMAIL_MEMO = null;
+let ADMIN_PASSWORD_HASH_MEMO = null;
+
+async function initializeAdminCredentials() {
+  try {
+    ADMIN_EMAIL_MEMO = process.env.ADMIN_EMAIL || null;
+
+    const envHash = process.env.ADMIN_PASSWORD_HASH;
+    const envPassword = process.env.ADMIN_PASSWORD;
+
+    if (envHash && envHash.startsWith('$2')) {
+      ADMIN_PASSWORD_HASH_MEMO = envHash;
+      console.log('🔐 Using ADMIN_PASSWORD_HASH from environment');
+    } else if (envPassword && envPassword.length > 0) {
+      ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
+      console.log('🔐 Generated admin password hash from ADMIN_PASSWORD');
+    } else {
+      console.warn('⚠️ No ADMIN_PASSWORD_HASH or ADMIN_PASSWORD provided. Admin login will fail until one is set.');
+    }
+  } catch (err) {
+    console.error('❌ Failed to initialize admin credentials:', err);
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -370,17 +401,35 @@ app.post('/api/admin/login', async (req, res) => {
     console.log('🔍 DEBUG LOGIN ATTEMPT:');
     console.log('Email provided:', email);
     console.log('Password provided:', password ? '[HIDDEN]' : 'undefined');
-    console.log('ADMIN_EMAIL from env:', process.env.ADMIN_EMAIL);
-    console.log('ADMIN_PASSWORD_HASH from env:', process.env.ADMIN_PASSWORD_HASH ? '[EXISTS]' : 'undefined');
+    console.log('ADMIN_EMAIL (active):', ADMIN_EMAIL_MEMO);
+    console.log('Admin hash available (memo):', ADMIN_PASSWORD_HASH_MEMO ? 'Yes' : 'No');
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
     // Check if admin credentials match
-    if (email === process.env.ADMIN_EMAIL) {
+    if (email && ADMIN_EMAIL_MEMO && email.toLowerCase() === ADMIN_EMAIL_MEMO.toLowerCase()) {
       console.log('✅ Email matches');
-      const isValidPassword = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+      let isValidPassword = false;
+
+      if (ADMIN_PASSWORD_HASH_MEMO) {
+        try {
+          isValidPassword = await bcrypt.compare(password, ADMIN_PASSWORD_HASH_MEMO);
+        } catch (e) {
+          console.error('❌ Error during bcrypt.compare for admin login:', e.message);
+        }
+      }
+
+      // Fallback: if a plain ADMIN_PASSWORD is provided and hash compare failed,
+      // allow direct comparison as an emergency measure to prevent lockouts.
+      if (!isValidPassword && process.env.ADMIN_PASSWORD) {
+        if (password === process.env.ADMIN_PASSWORD) {
+          isValidPassword = true;
+          console.warn('⚠️ Using plain ADMIN_PASSWORD fallback. Please set ADMIN_PASSWORD_HASH or keep ADMIN_PASSWORD stable.');
+        }
+      }
+
       console.log('🔐 Password check result:', isValidPassword);
       
       if (isValidPassword) {
@@ -2800,12 +2849,15 @@ app.post('/api/cart/checkout', authenticateCustomer, async (req, res) => {
 });
 
 // Initialize database and start server
-initializeDatabase().then(() => {
+Promise.all([
+  initializeAdminCredentials(),
+  initializeDatabase()
+]).then(() => {
   app.listen(PORT, () => {
     console.log(`🚀 Admin Dashboard API server running on port ${PORT}`);
     console.log(`📧 Email configured: ${process.env.EMAIL_FROM}`);
     console.log(`🗄️ Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
-    console.log(`🔐 Admin email: ${process.env.ADMIN_EMAIL}`);
+    console.log(`🔐 Admin email: ${ADMIN_EMAIL_MEMO}`);
   });
 });
 
