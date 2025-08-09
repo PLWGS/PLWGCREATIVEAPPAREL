@@ -19,8 +19,11 @@
     const style = document.createElement('style');
     style.id = 'dhws-injector-styles';
     style.textContent = `
-      #globalTopRightBar { position: fixed; top: 10px; right: 12px; z-index: 2147483647; display: flex; gap: 10px; }
-      #globalTopRightBar button { font-size: 22px !important; line-height: 1; padding: 8px 10px; border-radius: 10px; border: 0; background: rgba(0,0,0,0.6); color: #fff; box-shadow: 0 0 0 2px rgba(0,188,212,0.6); }
+      /* Centered, highly visible toolbar */
+      #globalTopRightBar { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; gap: 12px; align-items: center; justify-content: center; pointer-events: none; }
+      #globalTopRightBar button { pointer-events: auto; font-size: 24px !important; line-height: 1; padding: 10px 12px; border-radius: 12px; border: 0; background: rgba(0,0,0,0.65); color: #fff; box-shadow: 0 0 0 2px rgba(0,188,212,0.7); }
+      @media (max-width: 360px) { #globalTopRightBar { top: 10px; } #globalTopRightBar button { font-size: 22px !important; padding: 8px 10px; } }
+      @media (min-width: 768px) { #globalTopRightBar { top: 14px; } }
       #globalMobileDrawer { position: fixed; top: 0; right: 0; height: 100%; width: min(82vw, 320px); background: rgba(20,20,20,0.96); color: #fff; z-index: 2147483646; transform: translateX(100%); transition: transform .25s ease; padding: 20px; overflow-y: auto; box-shadow: -8px 0 24px rgba(0,0,0,0.5); }
       #globalMobileDrawer.open { transform: translateX(0); }
       #globalDrawerOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2147483645; display: none; }
@@ -38,11 +41,14 @@
       if (!el.dataset.fullBrandText) el.dataset.fullBrandText = el.textContent.trim();
       if (width <= 480) {
         el.textContent = 'PLWGS';
-        el.style.fontSize = '18px';
-        el.style.fontWeight = '700';
-        el.style.letterSpacing = '0.5px';
+        el.style.fontSize = '22px';
+        el.style.fontWeight = '800';
+        el.style.letterSpacing = '0.6px';
+        el.style.color = '#00bcd4';
+        el.style.textShadow = '0 0 8px rgba(0,188,212,0.35)';
       } else {
         el.textContent = el.dataset.fullBrandText;
+        el.style.textShadow = '';
       }
     });
   }
