@@ -19,11 +19,11 @@
     const style = document.createElement('style');
     style.id = 'dhws-injector-styles';
     style.textContent = `
-      /* Centered, highly visible toolbar */
+      /* Centered, highly visible toolbar (mobile-only; hidden on >=641px) */
       #globalTopRightBar { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; gap: 12px; align-items: center; justify-content: center; pointer-events: none; }
       #globalTopRightBar button { pointer-events: auto; font-size: 24px !important; line-height: 1; padding: 10px 12px; border-radius: 12px; border: 0; background: rgba(0,0,0,0.65); color: #fff; box-shadow: 0 0 0 2px rgba(0,188,212,0.7); }
       @media (max-width: 360px) { #globalTopRightBar { top: 10px; } #globalTopRightBar button { font-size: 22px !important; padding: 8px 10px; } }
-      @media (min-width: 768px) { #globalTopRightBar { top: 14px; } }
+      @media (min-width: 641px) { #globalTopRightBar { display: none !important; } }
       #globalMobileDrawer { position: fixed; top: 0; right: 0; height: 100%; width: min(82vw, 320px); background: rgba(20,20,20,0.96); color: #fff; z-index: 2147483646; transform: translateX(100%); transition: transform .25s ease; padding: 20px; overflow-y: auto; box-shadow: -8px 0 24px rgba(0,0,0,0.5); }
       #globalMobileDrawer.open { transform: translateX(0); }
       #globalDrawerOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2147483645; display: none; }
@@ -35,7 +35,7 @@
 
   function abbreviateBrand() {
     const width = window.innerWidth || document.documentElement.clientWidth;
-    const brandEls = Array.from(document.querySelectorAll('header, nav, .header, .navbar, .top')).flatMap(container => Array.from(container.querySelectorAll('span, a, div, h1'))).filter(el => /plwgs\s*creative\s*apparel/i.test(el.textContent || ''));
+    const brandEls = Array.from(document.querySelectorAll('header, nav, .header, .navbar, .top')).flatMap(container => Array.from(container.querySelectorAll('span, a, div, h1'))).filter(el => /plwgs\s*creative\s*apparel/i.test((el.textContent || '').trim()));
 
     brandEls.forEach(el => {
       if (!el.dataset.fullBrandText) el.dataset.fullBrandText = el.textContent.trim();
@@ -121,7 +121,10 @@
   function boot() {
     ensureStyles();
     abbreviateBrand();
-    ensureToolbar();
+    // Only for small screens; desktop stays untouched
+    if ((window.innerWidth || document.documentElement.clientWidth) <= 640) {
+      ensureToolbar();
+    }
     hideAdminLinksUntilVerified();
     window.addEventListener('resize', abbreviateBrand);
     log('Loaded v', window.__DHWS_INJECTOR_VERSION__);
