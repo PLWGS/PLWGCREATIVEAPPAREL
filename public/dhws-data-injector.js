@@ -2,7 +2,7 @@
 (function () {
   if (window.__DHWS_INJECTOR_ACTIVE__) return; // prevent double-run
   window.__DHWS_INJECTOR_ACTIVE__ = true;
-  window.__DHWS_INJECTOR_VERSION__ = '2025-08-09-1';
+  window.__DHWS_INJECTOR_VERSION__ = '2025-08-09-3';
 
   const log = (...args) => {
     try { console.log('[dhws-data-injector]', ...args); } catch (_) {}
@@ -36,7 +36,8 @@
 
   function abbreviateBrand() {
     const width = window.innerWidth || document.documentElement.clientWidth;
-    // Find likely brand text element: small inline element inside header with no children
+    if (width > 640) return; // never touch desktop
+
     const candidates = Array.from(document.querySelectorAll('header a, header span, header h1'))
       .filter(el => el.childElementCount === 0)
       .filter(el => /plwgs\s*creative\s*apparel/i.test((el.textContent || '').trim()));
@@ -44,15 +45,13 @@
     candidates.forEach(el => {
       if (!el.dataset.fullBrandText) el.dataset.fullBrandText = el.textContent.trim();
       if (width <= 480) {
-        // Abbreviate only on small screens
         el.textContent = 'PLWGS';
         el.style.fontSize = '22px';
         el.style.fontWeight = '800';
         el.style.letterSpacing = '0.6px';
         el.style.color = '#00bcd4';
         el.style.textShadow = '0 0 8px rgba(0,188,212,0.35)';
-      } else if (el.dataset.fullBrandText) {
-        // Restore on larger screens
+      } else {
         el.textContent = el.dataset.fullBrandText;
         el.style.textShadow = '';
       }
@@ -129,7 +128,6 @@
 
   function boot() {
     ensureStyles();
-    abbreviateBrand();
     // Only for small screens; desktop stays untouched (and ensure any accidental debug content is cleared)
     function maybeInject() {
       const w = (window.innerWidth || document.documentElement.clientWidth);
@@ -140,6 +138,7 @@
       if (w > 640 && bar) {
         bar.remove();
       }
+      if (w <= 640) { abbreviateBrand(); }
       // Remove any accidental text nodes that some themes inject at top-level inside header
       const header = document.querySelector('header');
       if (header) {
@@ -154,7 +153,6 @@
     maybeInject();
     window.addEventListener('resize', maybeInject);
     hideAdminLinksUntilVerified();
-    window.addEventListener('resize', abbreviateBrand);
     log('Loaded v', window.__DHWS_INJECTOR_VERSION__);
   }
 
