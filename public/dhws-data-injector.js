@@ -29,6 +29,7 @@
       #globalDrawerOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2147483645; display: none; }
       #globalDrawerOverlay.show { display: block; }
       .dhws-hide-admin-link a[href*="admin.html" i] { display: none !important; }
+      @media (min-width: 641px) { #globalMobileDrawer, #globalDrawerOverlay { display: none !important; } }
     `;
     document.head.appendChild(style);
   }
@@ -110,6 +111,9 @@
     bar.appendChild(menuBtn);
     bar.appendChild(cartBtn);
     document.body.appendChild(bar);
+    // Ensure toolbar not hidden by parent overflow
+    const root = document.documentElement; const body = document.body;
+    if (getComputedStyle(body).overflow !== 'visible') { body.style.overflowX = 'visible'; }
     log('toolbar injected');
   }
 
@@ -122,9 +126,19 @@
     ensureStyles();
     abbreviateBrand();
     // Only for small screens; desktop stays untouched
-    if ((window.innerWidth || document.documentElement.clientWidth) <= 640) {
-      ensureToolbar();
+    function maybeInject() {
+      const w = (window.innerWidth || document.documentElement.clientWidth);
+      const bar = document.getElementById('globalTopRightBar');
+      if (w <= 640 && !bar) {
+        ensureToolbar();
+      }
+      if (w > 640 && bar) {
+        bar.remove();
+      }
     }
+
+    maybeInject();
+    window.addEventListener('resize', maybeInject);
     hideAdminLinksUntilVerified();
     window.addEventListener('resize', abbreviateBrand);
     log('Loaded v', window.__DHWS_INJECTOR_VERSION__);
