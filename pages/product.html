@@ -558,6 +558,14 @@
                                         <span class="text-text-secondary">Sustainability:</span>
                                         <span class="text-white">Eco-Friendly Inks</span>
                                     </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Brand Preference:</span>
+                                        <span class="text-white" id="brandPrefText">Either (Gildan Softstyle 64000 or Bella+Canvas 3001)</span>
+                                    </div>
+                                    <div class="flex justify-between" id="specsNotesRow" style="display:none;">
+                                        <span class="text-text-secondary">Notes:</span>
+                                        <span class="text-white" id="specsNotesText"></span>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -1785,6 +1793,20 @@
             }
             
             // Do not render visible tags; keep container hidden intentionally
+
+            // Show brand preference and notes if available
+            try {
+                const brandPref = product.brand_preference || 'either';
+                const map = { either: 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', gildan: 'Gildan Softstyle 64000', bella: 'Bella+Canvas 3001' };
+                const brandTextEl = document.getElementById('brandPrefText');
+                if (brandTextEl) brandTextEl.textContent = map[brandPref] || map.either;
+                const notes = product.specs_notes || '';
+                if (notes) {
+                    const row = document.getElementById('specsNotesRow');
+                    const txt = document.getElementById('specsNotesText');
+                    if (row && txt) { txt.textContent = notes; row.style.display = 'flex'; }
+                }
+            } catch (e) { console.warn('Brand/specs notes render failed', e); }
             
             // Update sizes and stock dynamically
             if ((product.sizes && product.sizes.length > 0) || product.size_stock) {
