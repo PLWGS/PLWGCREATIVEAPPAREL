@@ -832,8 +832,24 @@ app.patch('/api/orders/:id/status', authenticateToken, async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
-    
-    res.json({ order: result.rows[0] });
+    const updated = result.rows[0];
+
+    // Seed a notification on status change (best-effort)
+    try {
+      await pool.query(`
+        INSERT INTO notifications (type, title, body, link, is_read)
+        VALUES ($1, $2, $3, $4, false)
+      `, [
+        'order',
+        `Order ${updated.order_number} updated`,
+        `Status changed to ${status.toUpperCase()}`,
+        `order:${updated.id}`
+      ]);
+    } catch (e) {
+      console.warn('Notification insert failed (non-fatal):', e.message);
+    }
+
+    res.json({ order: updated });
   } catch (error) {
     console.error('Error updating order:', error);
     res.status(500).json({ error: 'Internal server error' });
