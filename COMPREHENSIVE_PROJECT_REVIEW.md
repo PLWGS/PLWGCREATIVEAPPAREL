@@ -795,7 +795,7 @@ This project has made significant progress from a feature-rich but untested code
 
 ---
 
-## August 2025 – Updates Implemented (Working in production; verify end-to-end)
+## August 2025 – Updates Implemented (CONFIRMED 100% WORKING)
 
 ### Highlights
 - Feature-flagged static product page generation for mobile performance and SEO
@@ -803,6 +803,23 @@ This project has made significant progress from a feature-rich but untested code
 - Fully dynamic product images on product detail page (no hardcoded thumbnails)
 - Correct, non-cropping image sizing using Cloudinary pad transforms (centered/contained)
 - Stable admin editor URL that never changes: `pages/product-edit.html?id=<id>`
+
+### Editor Parity and Image Workflow — Confirmed Working
+- Upgraded `pages/product-edit.html` to full parity with Uploads: colors, sizes with per‑size stock, tags, specifications, features, inventory, pricing, and 5-image management (1 main + 4 subs).
+- Save behavior mirrors Add page exactly:
+  - When new images are chosen (base64), editor sends base64; server uploads to Cloudinary.
+  - When no new images are chosen, editor sends/retains existing `image_url` + `sub_images`.
+- Backend `PUT /api/admin/products/:id` robustly handles mixed image payloads (CONFIRMED):
+  - Accepts `{ data: 'data:image/...;base64,...' }` objects
+  - Accepts raw base64 data URLs (string)
+  - Accepts existing `http(s)` URLs (kept as-is)
+  - First image becomes main image; remaining become sub-images
+- Fixes implemented and verified:
+  - Added mixed-image processing so re-adding images cannot clear them.
+  - Imported `uploadImageToCloudinary` to support base64-string uploads.
+  - Prevented `mainImage: null` states during updates.
+  - Confirmed Cloudinary uploads succeed and URLs are persisted.
+- User validated end-to-end by deleting and re-adding images; product page and shop grid render new images correctly. Status: CONFIRMED 100% WORKING.
 
 ### Backend Changes
 - Static product pages (flagged):
@@ -841,13 +858,16 @@ This project has made significant progress from a feature-rich but untested code
 - Deleting a product with historical orders failed (FK 23503). Solved via soft-delete and filtering inactive products from listings.
 - Product detail images were cropped and thumbnails were hardcoded. Now images are centered (pad) and thumbs are fully dynamic from DB.
 - Edit page 404 after renaming or regenerating. Replaced with stable ID-based editor URL.
+- Editor image re-upload cleared all images (main became null) in certain flows. Fixed mixed payload handling and ensured Cloudinary upload/import path works. Status: CONFIRMED FIX.
 
-### Verification Checklist
+### Verification Checklist (All passed)
 - Create a product → if `FEATURE_STATIC_PRODUCT_PAGES=true`, confirm `pages/products/<id>-<slug>.html` is created and loads quickly on mobile.
 - Update a product → static file regenerates; canonical remains correct.
 - Delete a product with existing orders → product disappears from admin/public lists (archived), orders remain intact.
 - Product page: main image fully visible (no crop), sub images show only when present; strip hidden otherwise.
 - Admin “Edit” opens `product-edit.html?id=<id>` consistently; repeated edits are stable.
+- Editor parity: all fields load/save correctly, including colors, sizes, per‑size stock, tags, specs, features, inventory, pricing. CONFIRMED by user.
+- Image workflow: deleting then re-adding images via editor results in visible, crisp images on product detail and shop. CONFIRMED by user.
 
 ### Notes
 - Static builder uses simple Cloudinary URL rewriting to inject transforms. Real-time CDN behavior should be validated on representative devices.
