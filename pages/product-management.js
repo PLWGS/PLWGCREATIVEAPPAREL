@@ -43,9 +43,8 @@ class ProductManager {
                 this.productMapping = {};
                 
                 // Build mapping from actual database products
-                products.forEach(product => {
-                    const cleanName = this.cleanProductName(product.name);
-                    this.productMapping[product.id] = `product-edit-product-${product.id}_${cleanName}.html`;
+        products.forEach(product => {
+                    this.productMapping[product.id] = `product-edit.html?id=${product.id}`;
                 });
                 
                 console.log('📦 Product mapping loaded from database:', this.productMapping);
@@ -291,12 +290,7 @@ class ProductManager {
      * Navigate to edit page for a product
      */
     editProduct(productId) {
-        const editPage = this.productMapping[productId];
-        if (editPage) {
-            window.location.href = editPage;
-        } else {
-            alert(`Edit page not found for product ${productId}. Please contact support.`);
-        }
+        window.location.href = `product-edit.html?id=${productId}`;
     }
 
     /**

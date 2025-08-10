@@ -1034,25 +1034,7 @@
         }
 
         function editProduct(productId) {
-                // Find the product in the loaded products array
-                const product = allProducts.find(p => p.id === productId);
-                if (!product) {
-                alert(`Product ${productId} not found in database.`);
-                    return;
-                }
-
-            // Clean the product name for filename
-            const cleanName = product.name
-                .toLowerCase()
-                .replace(/[^a-z0-9\s]/g, '')
-                .replace(/\s+/g, '_')
-                .substring(0, 50); // Limit length
-            
-            // Create the edit page filename dynamically
-            const editPageFilename = `product-edit-product-${productId}_${cleanName}.html`;
-            
-            // Navigate directly to the edit page
-            window.location.href = editPageFilename;
+            window.location.href = `product-edit.html?id=${productId}`;
         }
 
         async function updateProduct(productId) {
