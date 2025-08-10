@@ -430,20 +430,70 @@
                         </div>
                     </div>
 
-                    <!-- Social Proof -->
+                    <!-- Social Proof (dynamic) -->
                     <div class="glass-card rounded-xl p-4">
                         <div class="flex items-center space-x-3">
-                            <div class="flex -space-x-2">
-                                <img src="https://images.unsplash.com/photo-1494790108755-2616c0763c5c?q=80&w=40&auto=format&fit=crop" alt="Customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=40'; this.onerror=null;" />
-                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=40&auto=format&fit=crop" alt="Customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=40'; this.onerror=null;" />
-                                <img src="https://images.pixabay.com/photo/2016/11/29/20/22/girl-1871104_1280.jpg?q=80&w=40&auto=format&fit=crop" alt="Customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=40&auto=format&fit=crop'; this.onerror=null;" />
+                            <div class="flex -space-x-2 social-proof-avatars">
+                                <img src="https://i.pravatar.cc/40?img=12" alt="Recent customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" />
+                                <img src="https://i.pravatar.cc/40?img=23" alt="Recent customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" />
+                                <img src="https://i.pravatar.cc/40?img=36" alt="Recent customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" />
                             </div>
                             <div>
-                                <p class="text-sm text-white">Sarah from Portland just bought this</p>
-                                <p class="text-xs text-text-secondary">2 minutes ago</p>
+                                <p id="social-proof-text" class="text-sm text-white">Someone from your area just bought this</p>
+                                <p id="social-proof-time" class="text-xs text-text-secondary">just now</p>
                             </div>
                         </div>
                     </div>
+                    <script>
+                      (function(){
+                        const names = [
+                          'Alex','Jordan','Taylor','Morgan','Casey','Riley','Avery','Parker','Quinn','Jamie',
+                          'Drew','Harper','Cameron','Kai','Rowan','Emerson','Sydney','Logan','Reese','Skyler'
+                        ];
+                        const cities = [
+                          'Portland','Seattle','Los Angeles','San Diego','Phoenix','Denver','Dallas','Austin','Chicago','Nashville',
+                          'Miami','Orlando','Atlanta','Charlotte','New York','Boston','Philadelphia','Cleveland','Detroit','Minneapolis'
+                        ];
+                        const productActionPhrases = [
+                          'just bought this','added this to cart','is checking out this design','just grabbed one','picked this up'
+                        ];
+                        const avatarBase = 'https://i.pravatar.cc/40?img=';
+                        const avatarIds = Array.from({length: 70}, (_,i)=>i+1);
+
+                        function sample(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+                        function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+                        function updateSocialProof(){
+                          const name = sample(names);
+                          const city = sample(cities);
+                          const action = sample(productActionPhrases);
+                          const minutesAgo = randInt(1, 9); // 1–9 minutes for realism
+
+                          const textEl = document.getElementById('social-proof-text');
+                          const timeEl = document.getElementById('social-proof-time');
+                          if (textEl) textEl.textContent = `${name} from ${city} ${action}`;
+                          if (timeEl) timeEl.textContent = `${minutesAgo} minute${minutesAgo===1?'':'s'} ago`;
+
+                          const imgs = document.querySelectorAll('.social-proof-avatars img');
+                          imgs.forEach(img => {
+                            const id = sample(avatarIds);
+                            img.src = `${avatarBase}${id}`;
+                            img.alt = 'Recent customer';
+                          });
+                        }
+
+                        // Initial and interval updates
+                        if (document.readyState === 'loading') {
+                          document.addEventListener('DOMContentLoaded', () => {
+                            updateSocialProof();
+                            setInterval(updateSocialProof, 10000); // every 10 seconds
+                          });
+                        } else {
+                          updateSocialProof();
+                          setInterval(updateSocialProof, 10000);
+                        }
+                      })();
+                    </script>
                 </div>
             </div>
         </div>
