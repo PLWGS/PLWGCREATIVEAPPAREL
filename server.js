@@ -1329,6 +1329,54 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
   }
 });
 
+// Export orders as CSV for a given period
+app.get('/api/orders/export', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) {
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="orders_export.csv"`);
+    return res.send('order_number,status,total_amount,created_at,customer_name\n');
+  }
+  try {
+    const { period = '7d' } = req.query;
+    let dateFilter = '';
+    switch (period) {
+      case '1d': dateFilter = "WHERE o.created_at >= CURRENT_DATE"; break;
+      case '7d': dateFilter = "WHERE o.created_at >= CURRENT_DATE - INTERVAL '7 days'"; break;
+      case '30d': dateFilter = "WHERE o.created_at >= CURRENT_DATE - INTERVAL '30 days'"; break;
+      case '90d': dateFilter = "WHERE o.created_at >= CURRENT_DATE - INTERVAL '90 days'"; break;
+      default: dateFilter = "WHERE o.created_at >= CURRENT_DATE - INTERVAL '7 days'"; break;
+    }
+
+    const result = await pool.query(`
+      SELECT o.order_number, o.status, o.total_amount, o.created_at,
+             COALESCE(c.name, '') AS customer_name
+      FROM orders o
+      LEFT JOIN customers c ON c.id = o.customer_id
+      ${dateFilter}
+      ORDER BY o.created_at DESC
+    `);
+
+    const rows = result.rows;
+    const header = ['order_number','status','total_amount','created_at','customer_name'];
+    const escape = (val) => {
+      if (val === null || val === undefined) return '';
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+    const csv = [header.join(',')]
+      .concat(rows.map(r => [r.order_number, r.status, r.total_amount, r.created_at.toISOString(), r.customer_name].map(escape).join(',')))
+      .join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="orders_${period}.csv"`);
+    res.send(csv);
+  } catch (e) {
+    console.error('Error exporting orders:', e);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // =============================================================================
 // ADMIN ACTIVITY FEED (READ-ONLY)
 // =============================================================================
