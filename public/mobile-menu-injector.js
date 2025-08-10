@@ -3,7 +3,7 @@
 
   if (window.__MOBILE_MENU_INJECTOR_LOADED__) return;
   window.__MOBILE_MENU_INJECTOR_LOADED__ = true;
-  window.__DHWS_INJECTOR_VERSION__ = '2025-08-09-5';
+  window.__DHWS_INJECTOR_VERSION__ = '2025-08-09-6';
 
   const MOBILE_MAX_WIDTH_PX = 640;
 
@@ -149,22 +149,41 @@
     setTimeout(() => { overlay.style.display = 'none'; }, 250);
   }
 
+  function abbreviateBrandOnce() {
+    if (!isMobileViewport()) return;
+    if (window.__BRAND_ABBREVIATED__) return;
+    let target = null;
+    // Prefer header/nav regions
+    const scoped = document.querySelectorAll('header *, nav *, [class*="header" i] *, [id*="header" i] *');
+    for (const el of scoped) {
+      const t = (el.textContent || '').trim();
+      if (t === 'PlwgsCreativeApparel') { target = el; break; }
+    }
+    // Fallback: first exact match near the top of the page
+    if (!target) {
+      const all = document.querySelectorAll('span, a, div, h1, h2');
+      for (const el of all) {
+        const t = (el.textContent || '').trim();
+        if (t === 'PlwgsCreativeApparel') {
+          const r = el.getBoundingClientRect();
+          if (r.top >= 0 && r.top <= 200) { target = el; break; }
+        }
+      }
+    }
+    if (target) {
+      target.textContent = 'PLWGS';
+      target.style.fontSize = '20px';
+      target.style.fontWeight = '800';
+      target.style.letterSpacing = '0.5px';
+      window.__BRAND_ABBREVIATED__ = true;
+    }
+  }
+
   function init() {
     ensureToolbar();
     createMobileDrawer();
-
-    // Abbreviate brand on mobile: PlwgsCreativeApparel -> PLWGS
-    try {
-      if (isMobileViewport()) {
-        const brandNodes = Array.from(document.querySelectorAll('span, a, div, h1, h2')).filter(el => /PlwgsCreativeApparel/i.test(el.textContent || ''));
-        brandNodes.forEach(el => {
-          el.textContent = 'PLWGS';
-          el.style.fontSize = '20px';
-          el.style.fontWeight = '800';
-          el.style.letterSpacing = '0.5px';
-        });
-      }
-    } catch (_) {}
+    abbreviateBrandOnce();
+    setTimeout(abbreviateBrandOnce, 150);
   }
 
   if (document.readyState === 'loading') {
@@ -173,13 +192,17 @@
     init();
   }
 
-  window.addEventListener('resize', ensureToolbar);
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { ensureToolbar(); abbreviateBrandOnce(); }, 100);
+  });
 
   // Persist if removed by other scripts
   const mo = new MutationObserver(() => {
-    if (isMobileViewport() && !document.getElementById('globalTopRightBar')) {
-      ensureToolbar();
-    }
+    if (!isMobileViewport()) return;
+    if (!document.getElementById('globalTopRightBar')) ensureToolbar();
+    if (!window.__BRAND_ABBREVIATED__) abbreviateBrandOnce();
   });
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
