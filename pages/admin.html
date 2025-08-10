@@ -802,7 +802,9 @@
         // Load real dashboard data
         async function loadDashboardData() {
             try {
-                const response = await apiRequest('/api/analytics/dashboard?period=7d');
+                const periodSel = document.getElementById('sales-period');
+                const period = periodSel ? periodSel.value : '7d';
+                const response = await apiRequest(`/api/analytics/dashboard?period=${encodeURIComponent(period)}`);
                 if (!response) return;
                 
                 const data = await response.json();
@@ -887,6 +889,11 @@
             const topProductsContainer = document.querySelector('.glass-card:nth-child(2) .space-y-4');
             if (!topProductsContainer || !products) return;
             
+            if (!products.length) {
+                topProductsContainer.innerHTML = `<div class="text-center text-text-secondary text-sm py-4">No top products for the selected period</div>`;
+                return;
+            }
+
             topProductsContainer.innerHTML = products.map((product, index) => `
                 <div class="flex items-center space-x-4 p-3 bg-surface-dark rounded-lg">
                     <img src="${product.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=60&auto=format&fit=crop'}" alt="${product.product_name}" class="w-12 h-12 rounded-lg object-cover" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=60'; this.onerror=null;" />
@@ -1502,7 +1509,7 @@
             // Period selector
             const periodSel = document.getElementById('sales-period');
             if (periodSel) {
-                periodSel.addEventListener('change', () => loadSalesSeries(periodSel.value));
+                periodSel.addEventListener('change', () => { loadSalesSeries(periodSel.value); loadDashboardData(); });
             }
         });
 

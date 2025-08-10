@@ -1250,22 +1250,26 @@ app.get('/api/analytics/sales-series', authenticateToken, async (req, res) => {
 
   try {
     const { period = '7d' } = req.query;
-    let dateFilter = '';
+    let numDays = 7;
     switch (period) {
-      case '1d': dateFilter = "WHERE created_at >= CURRENT_DATE"; break;
-      case '7d': dateFilter = "WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'"; break;
-      case '30d': dateFilter = "WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'"; break;
-      case '90d': dateFilter = "WHERE created_at >= CURRENT_DATE - INTERVAL '90 days'"; break;
-      default: dateFilter = "WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'"; break;
+      case '1d': numDays = 1; break;
+      case '7d': numDays = 7; break;
+      case '30d': numDays = 30; break;
+      case '90d': numDays = 90; break;
+      default: numDays = 7; break;
     }
 
+    // Build a continuous date series including zero-sale days
     const seriesResult = await pool.query(`
-      SELECT DATE(created_at) as date,
-             SUM(total_amount) as total
-      FROM orders ${dateFilter}
-      GROUP BY DATE(created_at)
-      ORDER BY date ASC
-      LIMIT 90
+      WITH dates AS (
+        SELECT generate_series(CURRENT_DATE - INTERVAL '${numDays - 1} days', CURRENT_DATE, INTERVAL '1 day')::date AS date
+      )
+      SELECT d.date,
+             COALESCE(SUM(o.total_amount), 0) AS total
+      FROM dates d
+      LEFT JOIN orders o ON DATE(o.created_at) = d.date
+      GROUP BY d.date
+      ORDER BY d.date ASC
     `);
 
     res.json({ series: seriesResult.rows });
