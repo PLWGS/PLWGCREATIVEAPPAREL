@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { uploadProductImages, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
+const { uploadProductImages, uploadImageToCloudinary, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
 require('dotenv').config();
 
 // -----------------------------------------------------------------------------
