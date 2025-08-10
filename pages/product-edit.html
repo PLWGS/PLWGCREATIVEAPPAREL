@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Product Editor</title>
   <link rel="stylesheet" href="../css/main.css" />
+  <style>
+    .image-preview { position: relative; display: inline-block; margin: 0.25rem; }
+    .image-preview img { width: 96px; height: 96px; object-fit: cover; border-radius: 0.5rem; border: 2px solid rgba(0,188,212,0.3); }
+    .image-preview .remove { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 9999px; background:#ef4444; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; }
+    .color-swatch { width: 32px; height: 32px; border-radius: 9999px; border: 3px solid transparent; cursor: pointer; }
+    .color-swatch.selected { border-color:#00bcd4; transform: scale(1.06); }
+    .size-chip { padding: 0.25rem 0.75rem; border: 2px solid rgba(0,188,212,0.3); border-radius: 0.5rem; cursor: pointer; text-align:center; }
+    .size-chip.selected { background: rgba(0,188,212,0.2); color:#00bcd4; border-color:#00bcd4; }
+  </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
   <main class="container mx-auto px-6 py-8">
@@ -15,7 +24,8 @@
       </div>
 
       <div id="loading" class="text-center py-12 text-text-secondary">Loading product...</div>
-      <div id="form" style="display:none" class="space-y-6">
+
+      <form id="form" style="display:none" class="space-y-6" onsubmit="return false;">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-text-primary mb-2">Product Name</label>
@@ -41,19 +51,131 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-text-primary mb-2">Images (first = main)</label>
-          <div id="image-previews" class="flex flex-wrap gap-3"></div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Product Images (5 total - 1 main + 4 sub)</label>
+          <div id="image-previews" class="mt-2 flex flex-wrap"></div>
           <div class="mt-3">
             <input id="image-upload" type="file" accept="image/*" multiple class="hidden" />
-            <button id="browse" class="btn-primary">Add Images</button>
+            <button id="browse" type="button" class="btn-primary">Add Images</button>
+          </div>
+          <p class="text-xs text-text-secondary mt-1">First image is treated as the main image. Maximum 5 images.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Available Colors</label>
+            <div id="color-options" class="flex flex-wrap gap-2">
+              <div class="color-swatch" style="background:#000" data-color="Black" title="Black"></div>
+              <div class="color-swatch" style="background:#fff;border-color:#ccc" data-color="White" title="White"></div>
+              <div class="color-swatch" style="background:#808080" data-color="Gray" title="Gray"></div>
+              <div class="color-swatch" style="background:#000080" data-color="Navy" title="Navy"></div>
+              <div class="color-swatch" style="background:#800000" data-color="Maroon" title="Maroon"></div>
+              <div class="color-swatch" style="background:#006400" data-color="Dark Green" title="Dark Green"></div>
+              <div class="color-swatch" style="background:#ffa500" data-color="Orange" title="Orange"></div>
+              <div class="color-swatch" style="background:#ff0000" data-color="Red" title="Red"></div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Available Sizes & Stock</label>
+            <div id="size-options" class="space-y-3">
+              <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                <div class="size-chip" data-size="XS">XS</div>
+                <input type="number" id="stock-xs" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" min="0" placeholder="10" />
+                <span class="text-text-secondary text-sm">in stock</span>
+              </div>
+              <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                <div class="size-chip" data-size="S">S</div>
+                <input type="number" id="stock-s" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" min="0" placeholder="15" />
+                <span class="text-text-secondary text-sm">in stock</span>
+              </div>
+              <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                <div class="size-chip" data-size="M">M</div>
+                <input type="number" id="stock-m" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" min="0" placeholder="20" />
+                <span class="text-text-secondary text-sm">in stock</span>
+              </div>
+              <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                <div class="size-chip" data-size="L">L</div>
+                <input type="number" id="stock-l" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" min="0" placeholder="20" />
+                <span class="text-text-secondary text-sm">in stock</span>
+              </div>
+              <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                <div class="size-chip" data-size="XL">XL</div>
+                <input type="number" id="stock-xl" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" min="0" placeholder="15" />
+                <span class="text-text-secondary text-sm">in stock</span>
+              </div>
+              <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
+                <div class="size-chip" data-size="XXL">XXL</div>
+                <input type="number" id="stock-xxl" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" min="0" placeholder="10" />
+                <span class="text-text-secondary text-sm">in stock</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="flex space-x-4">
-          <button id="save" class="btn-primary px-8">Save Changes</button>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Stock Quantity</label>
+            <input type="number" id="stock_quantity" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Low Stock Threshold</label>
+            <input type="number" id="low_stock_threshold" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Sale Percentage</label>
+            <input type="number" id="sale_percentage" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Product Specifications</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Material</label>
+                <input type="text" id="spec_material" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Weight</label>
+                <input type="text" id="spec_weight" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Fit</label>
+                <input type="text" id="spec_fit" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Neck Style</label>
+                <input type="text" id="spec_neck" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Sleeve Length</label>
+                <input type="text" id="spec_sleeve" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Origin</label>
+                <input type="text" id="spec_origin" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Product Features</label>
+            <div class="space-y-2">
+              <label class="flex items-center space-x-2"><input type="checkbox" id="feature_preshrunk" class="rounded border-surface-light text-accent"><span>Pre-shrunk for consistent fit</span></label>
+              <label class="flex items-center space-x-2"><input type="checkbox" id="feature_double_stitched" class="rounded border-surface-light text-accent"><span>Double-stitched seams for durability</span></label>
+              <label class="flex items-center space-x-2"><input type="checkbox" id="feature_fade_resistant" class="rounded border-surface-light text-accent"><span>Fade-resistant printing technology</span></label>
+              <label class="flex items-center space-x-2"><input type="checkbox" id="feature_soft_touch" class="rounded border-surface-light text-accent"><span>Soft-touch finish for comfort</span></label>
+            </div>
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-text-primary mb-2">Tags</label>
+              <input type="text" id="tags" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg" placeholder="custom, printed, quality" />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex space-x-4 pt-2">
+          <button id="save" type="button" class="btn-primary px-8">Save Changes</button>
           <a href="admin-uploads.html" class="btn-secondary px-8">Cancel</a>
         </div>
-      </div>
+      </form>
     </div>
   </main>
 
@@ -62,30 +184,70 @@
     const productId = params.get('id');
     let productData = null;
     let uploadedImages = [];
+    let selectedColors = [];
+    let selectedSizes = ['XS','S','M','L','XL','XXL'];
 
     document.getElementById('browse').addEventListener('click', () => {
       document.getElementById('image-upload').click();
     });
+
     document.getElementById('image-upload').addEventListener('change', (e) => {
       const files = Array.from(e.target.files || []);
       files.forEach(file => {
         if (!file.type.startsWith('image/')) return;
+        if (uploadedImages.length >= 5) return;
         const reader = new FileReader();
-        reader.onload = ev => { uploadedImages.push(ev.target.result); renderPreviews(); };
+        reader.onload = ev => {
+          uploadedImages.push(ev.target.result);
+          renderPreviews();
+        };
         reader.readAsDataURL(file);
       });
+      e.target.value = '';
     });
 
     function renderPreviews(){
       const wrap = document.getElementById('image-previews');
       wrap.innerHTML = '';
-      uploadedImages.forEach((src, i) => {
+      uploadedImages.slice(0,5).forEach((src, i) => {
         const div = document.createElement('div');
-        div.className = 'relative';
-        div.innerHTML = `<img src="${src}" class="w-24 h-24 object-cover rounded"><button data-i="${i}" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6">×</button>`;
+        div.className = 'image-preview';
+        div.innerHTML = `<img src="${src}"><button type="button" class="remove" data-i="${i}">×</button>`;
         wrap.appendChild(div);
       });
-      wrap.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => { uploadedImages.splice(btn.dataset.i,1); renderPreviews(); }));
+      wrap.querySelectorAll('button.remove').forEach(btn => btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.i, 10);
+        uploadedImages.splice(idx, 1);
+        renderPreviews();
+      }));
+    }
+
+    function setupColorSelection(){
+      document.querySelectorAll('#color-options .color-swatch').forEach(el => {
+        el.addEventListener('click', () => {
+          const color = el.dataset.color;
+          const isSel = el.classList.toggle('selected');
+          if (isSel) {
+            if (!selectedColors.includes(color)) selectedColors.push(color);
+          } else {
+            selectedColors = selectedColors.filter(c => c !== color);
+          }
+        });
+      });
+    }
+
+    function setupSizeSelection(){
+      document.querySelectorAll('#size-options .size-chip').forEach(el => {
+        el.addEventListener('click', () => {
+          const size = el.dataset.size;
+          const isSel = el.classList.toggle('selected');
+          if (isSel) {
+            if (!selectedSizes.includes(size)) selectedSizes.push(size);
+          } else {
+            selectedSizes = selectedSizes.filter(s => s !== size);
+          }
+        });
+      });
     }
 
     async function fetchProduct(){
@@ -93,7 +255,7 @@
         const token = localStorage.getItem('adminToken');
         if (!token) { location.href = 'admin-login.html'; return; }
         const resp = await fetch(`/api/admin/products/${productId}`, { headers: { 'Authorization': 'Bearer ' + token } });
-        if (!resp.ok) throw new Error('failed');
+        if (!resp.ok) throw new Error('Failed to load');
         productData = await resp.json();
         hydrateForm();
       } catch(e){
@@ -101,47 +263,135 @@
       }
     }
 
+    function setChecked(el, checked){ if (checked) el.classList.add('selected'); else el.classList.remove('selected'); }
+
     function hydrateForm(){
       const p = productData || {};
       document.getElementById('pageTitle').textContent = `Edit Product: ${p.name || ''}`;
       document.getElementById('name').value = p.name || '';
       document.getElementById('category').value = p.category || '';
-      document.getElementById('price').value = p.price || '';
-      document.getElementById('original_price').value = p.original_price || '';
+      document.getElementById('price').value = p.price ?? '';
+      document.getElementById('original_price').value = p.original_price ?? '';
       document.getElementById('description').value = p.description || '';
+      document.getElementById('stock_quantity').value = p.stock_quantity ?? 50;
+      document.getElementById('low_stock_threshold').value = p.low_stock_threshold ?? 5;
+      document.getElementById('sale_percentage').value = p.sale_percentage ?? 15;
+
+      // Tags
+      const tagsVal = Array.isArray(p.tags) ? p.tags.join(', ') : (typeof p.tags === 'string' ? p.tags : '');
+      document.getElementById('tags').value = tagsVal;
+
+      // Specs
+      const specs = p.specifications || {};
+      document.getElementById('spec_material').value = specs.material || '';
+      document.getElementById('spec_weight').value = specs.weight || '';
+      document.getElementById('spec_fit').value = specs.fit || '';
+      document.getElementById('spec_neck').value = specs.neck_style || '';
+      document.getElementById('spec_sleeve').value = specs.sleeve_length || '';
+      document.getElementById('spec_origin').value = specs.origin || '';
+
+      // Features
+      const features = p.features || {};
+      document.getElementById('feature_preshrunk').checked = !!features.preshrunk;
+      document.getElementById('feature_double_stitched').checked = !!features.double_stitched;
+      document.getElementById('feature_fade_resistant').checked = !!features.fade_resistant;
+      document.getElementById('feature_soft_touch').checked = !!features.soft_touch;
+
+      // Colors
+      selectedColors = Array.isArray(p.colors) ? p.colors.slice() : [];
+      document.querySelectorAll('#color-options .color-swatch').forEach(el => {
+        setChecked(el, selectedColors.includes(el.dataset.color));
+      });
+
+      // Sizes & per-size stock
+      const sizeStock = p.size_stock || {};
+      const setIf = (id, key) => { const el = document.getElementById(id); if (el) el.value = (sizeStock[key] ?? ''); };
+      setIf('stock-xs','XS'); setIf('stock-s','S'); setIf('stock-m','M'); setIf('stock-l','L'); setIf('stock-xl','XL'); setIf('stock-xxl','XXL');
+      selectedSizes = Array.isArray(p.sizes) ? p.sizes.slice() : ['XS','S','M','L','XL','XXL'];
+      document.querySelectorAll('#size-options .size-chip').forEach(el => {
+        setChecked(el, selectedSizes.includes(el.dataset.size));
+      });
+
+      // Images
       uploadedImages = [];
       if (p.image_url) uploadedImages.push(p.image_url);
       if (Array.isArray(p.sub_images)) uploadedImages.push(...p.sub_images);
       renderPreviews();
+
       document.getElementById('loading').style.display = 'none';
       document.getElementById('form').style.display = 'block';
+    }
+
+    function buildSizeStock(){
+      const map = {};
+      [['XS','stock-xs'],['S','stock-s'],['M','stock-m'],['L','stock-l'],['XL','stock-xl'],['XXL','stock-xxl']].forEach(([size, id]) => {
+        const val = parseInt(document.getElementById(id).value, 10);
+        if (!isNaN(val)) map[size] = val;
+      });
+      return map;
     }
 
     document.getElementById('save').addEventListener('click', async () => {
       try {
         const token = localStorage.getItem('adminToken');
         if (!token) { alert('Please login'); location.href='admin-login.html'; return; }
-        let image_url = null; let sub_images = [];
-        if (uploadedImages.length){ image_url = uploadedImages[0]; sub_images = uploadedImages.slice(1); }
+
         const body = {
           name: document.getElementById('name').value.trim(),
           description: document.getElementById('description').value.trim(),
           category: document.getElementById('category').value.trim(),
           price: parseFloat(document.getElementById('price').value) || 0,
-          original_price: parseFloat(document.getElementById('original_price').value) || null,
-          image_url, sub_images,
-          sizes: productData?.sizes || [],
-          size_stock: productData?.size_stock || {},
-          colors: productData?.colors || [],
-          tags: productData?.tags || []
+          original_price: document.getElementById('original_price').value ? parseFloat(document.getElementById('original_price').value) : null,
+          stock_quantity: parseInt(document.getElementById('stock_quantity').value, 10) || 50,
+          low_stock_threshold: parseInt(document.getElementById('low_stock_threshold').value, 10) || 5,
+          sale_percentage: parseInt(document.getElementById('sale_percentage').value, 10) || 15,
+          tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean),
+          colors: selectedColors,
+          sizes: selectedSizes,
+          size_stock: buildSizeStock(),
+          specifications: {
+            material: document.getElementById('spec_material').value.trim(),
+            weight: document.getElementById('spec_weight').value.trim(),
+            fit: document.getElementById('spec_fit').value.trim(),
+            neck_style: document.getElementById('spec_neck').value.trim(),
+            sleeve_length: document.getElementById('spec_sleeve').value.trim(),
+            origin: document.getElementById('spec_origin').value.trim()
+          },
+          features: {
+            preshrunk: document.getElementById('feature_preshrunk').checked,
+            double_stitched: document.getElementById('feature_double_stitched').checked,
+            fade_resistant: document.getElementById('feature_fade_resistant').checked,
+            soft_touch: document.getElementById('feature_soft_touch').checked
+          }
         };
-        const resp = await fetch(`/api/admin/products/${productId}`, { method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body: JSON.stringify(body)});
-        if (!resp.ok) { const err = await resp.json().catch(()=>({error:'Failed'})); throw new Error(err.error || 'Failed'); }
+
+        // Images: send base64 array when present, else keep existing URLs
+        const hasBase64 = uploadedImages.some(src => typeof src === 'string' && src.startsWith('data:'));
+        if (hasBase64) {
+          body.images = uploadedImages.slice(0,5);
+        } else {
+          body.image_url = uploadedImages[0] || null;
+          body.sub_images = uploadedImages.slice(1,5);
+        }
+
+        const resp = await fetch(`/api/admin/products/${productId}`, {
+          method:'PUT',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body: JSON.stringify(body)
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(()=>({error:'Failed'}));
+          throw new Error(err.error || 'Failed');
+        }
         alert('Product updated successfully');
         location.href = 'admin-uploads.html';
-      } catch(e){ alert('Error saving: '+ e.message); }
+      } catch(e){
+        alert('Error saving: '+ e.message);
+      }
     });
 
+    setupColorSelection();
+    setupSizeSelection();
     if (!productId) { document.getElementById('loading').textContent = 'Missing product ID'; } else { fetchProduct(); }
   </script>
 </body>
