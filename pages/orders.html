@@ -15,10 +15,23 @@
 
     <div class="glass-card rounded-xl p-6">
       <div class="flex items-center justify-between mb-4">
-        <div class="space-x-2">
-          <button id="refreshOrders" class="btn-primary px-4 py-2 text-sm">Refresh</button>
+        <div class="flex items-center gap-2 flex-wrap">
+          <input id="q" class="bg-surface border border-surface-light text-text-primary px-3 py-2 rounded text-sm" placeholder="Search order # or name" />
+          <select id="status" class="bg-surface border border-surface-light text-text-primary px-3 py-2 rounded text-sm">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="completed">Completed</option>
+          </select>
+          <input type="date" id="date_from" class="bg-surface border border-surface-light text-text-primary px-3 py-2 rounded text-sm" />
+          <input type="date" id="date_to" class="bg-surface border border-surface-light text-text-primary px-3 py-2 rounded text-sm" />
+          <button id="applyFilters" class="btn-primary px-4 py-2 text-sm">Apply</button>
+          <button id="refreshOrders" class="border border-accent text-accent px-4 py-2 rounded text-sm">Reset</button>
         </div>
-        <div class="text-text-secondary text-sm">Read-only list</div>
+        <div>
+          <button id="exportOrdersLocal" class="border border-accent text-accent px-4 py-2 rounded text-sm">Export CSV</button>
+        </div>
       </div>
       <div id="ordersLoading" class="text-center py-6 hidden">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
@@ -61,7 +74,17 @@
       loading.classList.remove('hidden');
       emptyEl.classList.add('hidden');
       listEl.innerHTML = '';
-      const res = await apiRequest('/api/orders?limit=30');
+      const params = new URLSearchParams();
+      const q = document.getElementById('q').value.trim();
+      const status = document.getElementById('status').value;
+      const from = document.getElementById('date_from').value;
+      const to = document.getElementById('date_to').value;
+      params.set('limit','30');
+      if (q) params.set('q', q);
+      if (status) params.set('status', status);
+      if (from) params.set('date_from', from);
+      if (to) params.set('date_to', to);
+      const res = await apiRequest(`/api/orders?${params.toString()}`);
       if (!res) return;
       const data = await res.json();
       const orders = (data && data.orders) || [];
@@ -89,9 +112,22 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (!checkAuth()) return;
       loadOrders();
-      document.getElementById('refreshOrders').addEventListener('click', loadOrders);
+      document.getElementById('refreshOrders').addEventListener('click', () => { document.getElementById('q').value=''; document.getElementById('status').value=''; document.getElementById('date_from').value=''; document.getElementById('date_to').value=''; loadOrders(); });
+      document.getElementById('applyFilters').addEventListener('click', loadOrders);
+      document.getElementById('exportOrdersLocal').addEventListener('click', async () => {
+        const token = localStorage.getItem('adminToken');
+        if (!token) return (window.location.href = 'admin-login.html');
+        const period = '7d';
+        const res = await fetch(`/api/orders/export?period=${period}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return alert('Export failed');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `orders_${period}.csv`; a.click(); URL.revokeObjectURL(url);
+      });
     });
   </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>
 

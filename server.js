@@ -692,8 +692,8 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
   }
 
   try {
-    const { status, limit = 50, offset = 0 } = req.query;
-    
+    const { status, limit = 50, offset = 0, q, date_from, date_to } = req.query;
+
     let query = `
       SELECT o.*, 
              c.name as customer_name, 
@@ -703,26 +703,86 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
       LEFT JOIN customers c ON o.customer_id = c.id
       LEFT JOIN order_items oi ON o.id = oi.order_id
     `;
-    
+
     const params = [];
     const conditions = [];
-    
+
     if (status) {
       conditions.push(`o.status = $${params.length + 1}`);
       params.push(status);
     }
-    
+    if (q) {
+      conditions.push(`(o.order_number ILIKE $${params.length + 1} OR COALESCE(c.name,'') ILIKE $${params.length + 1})`);
+      params.push(`%${q}%`);
+    }
+    if (date_from) {
+      conditions.push(`o.created_at >= $${params.length + 1}::timestamp`);
+      params.push(date_from);
+    }
+    if (date_to) {
+      conditions.push(`o.created_at < ($${params.length + 1}::date + INTERVAL '1 day')`);
+      params.push(date_to);
+    }
+
     if (conditions.length > 0) {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
-    
+
     query += ` GROUP BY o.id, c.name, c.email ORDER BY o.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-    params.push(limit, offset);
-    
+    params.push(Math.min(parseInt(limit, 10) || 50, 200), parseInt(offset, 10) || 0);
+
     const result = await pool.query(query, params);
     res.json({ orders: result.rows });
   } catch (error) {
     console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Export orders as CSV for a given period (placed BEFORE :id route to avoid conflicts)
+app.get('/api/orders/export', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) {
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="orders_export.csv"`);
+    return res.send('order_number,status,total_amount,created_at,customer_name\n');
+  }
+  try {
+    const { period = '7d' } = req.query;
+    let dateFilter = '';
+    switch (period) {
+      case '1d': dateFilter = "WHERE o.created_at >= CURRENT_DATE"; break;
+      case '7d': dateFilter = "WHERE o.created_at >= CURRENT_DATE - INTERVAL '7 days'"; break;
+      case '30d': dateFilter = "WHERE o.created_at >= CURRENT_DATE - INTERVAL '30 days'"; break;
+      case '90d': dateFilter = "WHERE o.created_at >= CURRENT_DATE - INTERVAL '90 days'"; break;
+      default: dateFilter = "WHERE o.created_at >= CURRENT_DATE - INTERVAL '7 days'"; break;
+    }
+
+    const result = await pool.query(`
+      SELECT o.order_number, o.status, o.total_amount, o.created_at,
+             COALESCE(c.name, '') AS customer_name
+      FROM orders o
+      LEFT JOIN customers c ON c.id = o.customer_id
+      ${dateFilter}
+      ORDER BY o.created_at DESC
+    `);
+
+    const rows = result.rows;
+    const header = ['order_number','status','total_amount','created_at','customer_name'];
+    const escape = (val) => {
+      if (val === null || val === undefined) return '';
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+    const csv = [header.join(',')]
+      .concat(rows.map(r => [r.order_number, r.status, r.total_amount, (r.created_at instanceof Date ? r.created_at.toISOString() : new Date(r.created_at).toISOString()), r.customer_name].map(escape).join(',')))
+      .join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="orders_${period}.csv"`);
+    res.send(csv);
+  } catch (e) {
+    console.error('Error exporting orders:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1387,7 +1447,7 @@ app.get('/api/orders/export', authenticateToken, async (req, res) => {
       return `"${s}"`;
     };
     const csv = [header.join(',')]
-      .concat(rows.map(r => [r.order_number, r.status, r.total_amount, r.created_at.toISOString(), r.customer_name].map(escape).join(',')))
+      .concat(rows.map(r => [r.order_number, r.status, r.total_amount, (r.created_at instanceof Date ? r.created_at.toISOString() : new Date(r.created_at).toISOString()), r.customer_name].map(escape).join(',')))
       .join('\n');
 
     res.setHeader('Content-Type', 'text/csv');
@@ -1442,7 +1502,7 @@ app.get('/api/admin/activity', authenticateToken, async (req, res) => {
 
     const customReq = await pool.query(`
       SELECT 'custom_request' AS type, customer_name AS title,
-             CONCAT('Custom order: ', product_type) AS subtitle,
+             'Custom order request' AS subtitle,
              NULL::numeric AS amount, created_at,
              CONCAT('custom_request:', id) AS link
       FROM custom_requests

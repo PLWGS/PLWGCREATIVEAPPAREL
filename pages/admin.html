@@ -1028,25 +1028,31 @@
                 const orderContainer = column.querySelector('.space-y-3');
                 
                 if (orderContainer) {
-                    orderContainer.innerHTML = statusOrders.map(order => `
-                        <div class="kanban-card rounded-lg p-4" draggable="true" data-order-id="${order.id}">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-white font-medium text-sm">${order.order_number}</span>
-                                <span class="text-text-secondary text-xs">${formatTimeAgo(order.created_at)}</span>
-                            </div>
-                            <p class="text-text-secondary text-sm mb-2">${order.customer_name || 'Customer'}</p>
-                            <div class="flex items-center justify-between">
-                                <span class="text-accent font-bold text-sm">$${order.total_amount}</span>
-                                <span class="text-text-secondary text-xs">${order.customer_name || 'Customer'}</span>
-                            </div>
-                        </div>
-                    `).join('');
+                    orderContainer.innerHTML = statusOrders.map(order => {
+                        const next = getNextStatus(order.status);
+                        const actionBtn = next ? `<button class=\"text-xs border border-accent text-accent px-2 py-1 rounded hover:bg-accent hover:text-black\" onclick=\"updateOrderStatus(${order.id}, '${next}')\">${labelForStatus(next)}</button>` : '';
+                        return `
+                        <div class=\"kanban-card rounded-lg p-4\" draggable=\"true\" data-order-id=\"${order.id}\">\n                            <div class=\"flex items-center justify-between mb-2\">\n                                <span class=\"text-white font-medium text-sm\">${order.order_number}</span>\n                                <span class=\"text-text-secondary text-xs\">${formatTimeAgo(order.created_at)}</span>\n                            </div>\n                            <p class=\"text-text-secondary text-sm mb-2\">${order.customer_name || 'Customer'}</p>\n                            <div class=\"flex items-center justify-between mb-2\">\n                                <span class=\"text-accent font-bold text-sm\">$${order.total_amount}</span>\n                                <span class=\"text-text-secondary text-xs\">${order.customer_name || 'Customer'}</span>\n                            </div>\n                            <div class=\"flex justify-end\">${actionBtn}</div>\n                        </div>`;
+                    }).join('');
                 }
                 const badge = column.querySelector('.status-badge');
                 if (badge) badge.textContent = String(statusOrders.length);
             });
 
             initKanbanDnD();
+        }
+
+        function getNextStatus(current) {
+            if (current === 'pending') return 'processing';
+            if (current === 'processing') return 'shipped';
+            if (current === 'shipped') return 'completed';
+            return null;
+        }
+        function labelForStatus(status) {
+            if (status === 'processing') return 'Mark Processing';
+            if (status === 'shipped') return 'Mark Shipped';
+            if (status === 'completed') return 'Mark Completed';
+            return 'Update';
         }
 
         function initKanbanDnD() {
