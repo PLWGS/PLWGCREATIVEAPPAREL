@@ -33,7 +33,24 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-text-primary mb-2">Category</label>
-            <input id="category" type="text" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg" />
+            <select id="category" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg">
+              <option value="">Select Category</option>
+              <option value="Halloween">Halloween</option>
+              <option value="Father's Day">Father's Day</option>
+              <option value="Birthday">Birthday</option>
+              <option value="Cancer Awareness">Cancer Awareness</option>
+              <option value="Custom">Custom</option>
+              <option value="Horror Essentials">Horror Essentials</option>
+              <option value="Pop Culture">Pop Culture</option>
+              <option value="Adult Shirts">Adult Shirts</option>
+              <option value="Adult Birthday Shirts">Adult Birthday Shirts</option>
+              <option value="Adult Music Shirts">Adult Music Shirts</option>
+              <option value="Adult Tank Tops">Adult Tank Tops</option>
+              <option value="Adult Hoodies">Adult Hoodies</option>
+              <option value="Adult Jackets">Adult Jackets</option>
+              <option value="Kid Shirts">Kid Shirts</option>
+              <option value="Kid Hoodies">Kid Hoodies</option>
+            </select>
           </div>
           <div>
             <label class="block text-sm font-medium text-text-primary mb-2">Price ($)</label>
@@ -394,6 +411,7 @@
     setupSizeSelection();
     if (!productId) { document.getElementById('loading').textContent = 'Missing product ID'; } else { fetchProduct(); }
   </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>
 
