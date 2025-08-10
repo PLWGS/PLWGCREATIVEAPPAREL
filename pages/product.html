@@ -295,7 +295,7 @@
                     <!-- Main Image -->
                     <div class="image-gallery">
                         <div class="relative overflow-hidden rounded-2xl bg-surface-dark">
-                            <img id="mainImage" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Product Image" class="main-image w-full h-96 lg:h-[500px] object-cover cursor-zoom-in" loading="lazy" />
+                            <img id="mainImage" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Product Image" class="main-image w-full h-96 lg:h-[500px] object-contain cursor-zoom-in" loading="lazy" />
                             
                             <!-- Zoom Icon -->
                             <div class="absolute top-4 right-4 bg-black bg-opacity-50 rounded-full p-2">
@@ -312,20 +312,7 @@
                     </div>
 
                     <!-- Thumbnail Gallery -->
-                    <div class="grid grid-cols-4 gap-4">
-                        <div class="thumbnail active rounded-lg overflow-hidden cursor-pointer" data-image="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop">
-                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=200&auto=format&fit=crop" alt="Front View" class="w-full h-20 object-cover" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=200'; this.onerror=null;" />
-                        </div>
-                        <div class="thumbnail rounded-lg overflow-hidden cursor-pointer" data-image="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=800&auto=format&fit=crop">
-                            <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=200&auto=format&fit=crop" alt="Back View" class="w-full h-20 object-cover" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=200'; this.onerror=null;" />
-                        </div>
-                        <div class="thumbnail rounded-lg overflow-hidden cursor-pointer" data-image="https://images.pixabay.com/photo/2016/03/27/19/32/fashion-1283863_1280.jpg?q=80&w=800&auto=format&fit=crop">
-                            <img src="https://images.pixabay.com/photo/2016/03/27/19/32/fashion-1283863_1280.jpg?q=80&w=200&auto=format&fit=crop" alt="Detail Shot" class="w-full h-20 object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=200&auto=format&fit=crop'; this.onerror=null;" />
-                        </div>
-                        <div class="thumbnail rounded-lg overflow-hidden cursor-pointer" data-image="https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=800">
-                            <img src="https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Lifestyle Shot" class="w-full h-20 object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop'; this.onerror=null;" />
-                        </div>
-                    </div>
+                    <div id="thumbStrip" class="grid grid-cols-4 gap-4"></div>
                 </div>
 
                 <!-- Product Information -->
@@ -1714,6 +1701,18 @@
                 salePercentageElement.style.display = 'block';
             }
             
+            // Helper: apply Cloudinary pad transform to center any aspect ratio
+            function padTransform(url, w, h) {
+                if (!url || url.startsWith('data:')) return url;
+                try {
+                    const parts = url.split('/upload/');
+                    if (parts.length === 2) {
+                        return parts[0] + `/upload/c_pad,g_center,b_black,q_auto,f_auto,w_${w},h_${h}/` + parts[1];
+                    }
+                    return url;
+                } catch (_) { return url; }
+            }
+
             // Update main product image
             const mainImage = document.getElementById('mainImage');
             if (mainImage && product.image_url) {
@@ -1721,7 +1720,7 @@
                 console.log('🖼️ Main image element found:', mainImage);
                 console.log('🖼️ Current src before update:', mainImage.src);
                 
-                mainImage.src = product.image_url;
+                mainImage.src = padTransform(product.image_url, 800, 800);
                 mainImage.alt = product.name;
                 
                 console.log('🖼️ New src after update:', mainImage.src);
@@ -1747,26 +1746,34 @@
                 console.error('❌ product.image_url:', product.image_url);
             }
             
-            // Update thumbnail images
-            const thumbnails = document.querySelectorAll('.thumbnail');
-            if (thumbnails.length > 0 && product.sub_images && product.sub_images.length > 0) {
-                console.log('🖼️ Updating thumbnail images with sub_images:', product.sub_images);
-                
-                // Update each thumbnail with sub_images
-                product.sub_images.forEach((subImage, index) => {
-                    if (thumbnails[index]) {
-                        const thumbnailImg = thumbnails[index].querySelector('img');
-                        if (thumbnailImg) {
-                            thumbnailImg.src = subImage;
-                            thumbnailImg.alt = `${product.name} - View ${index + 1}`;
-                            thumbnails[index].setAttribute('data-image', subImage);
-                        }
-                    }
-                });
-                
-                // If we have more thumbnails than sub_images, hide the extra ones
-                for (let i = product.sub_images.length; i < thumbnails.length; i++) {
-                    thumbnails[i].style.display = 'none';
+            // Build thumbnails dynamically
+            const thumbStrip = document.getElementById('thumbStrip');
+            let subs = product.sub_images;
+            if (typeof subs === 'string') {
+                try { subs = JSON.parse(subs); } catch (_) { subs = []; }
+            }
+            const allThumbs = [];
+            if (product.image_url) allThumbs.push(product.image_url);
+            if (Array.isArray(subs)) allThumbs.push(...subs);
+            if (thumbStrip) {
+                if (allThumbs.length <= 1) {
+                    thumbStrip.style.display = 'none';
+                } else {
+                    thumbStrip.style.display = 'grid';
+                    thumbStrip.innerHTML = allThumbs.slice(0, 5).map((u, idx) => {
+                        const t = padTransform(u, 300, 120);
+                        const active = idx === 0 ? ' ring-2 ring-accent ' : '';
+                        return `<div class="thumbnail rounded-lg overflow-hidden cursor-pointer${active}" data-image="${padTransform(u,800,800)}"><img src="${t}" alt="${product.name} - View ${idx+1}" class="w-full h-20 object-contain bg-surface-dark" loading="lazy"/></div>`;
+                    }).join('');
+                    // Wire click handlers
+                    thumbStrip.querySelectorAll('.thumbnail').forEach(th => {
+                        th.addEventListener('click', () => {
+                            thumbStrip.querySelectorAll('.thumbnail').forEach(n=>n.classList.remove('ring-2','ring-accent'));
+                            th.classList.add('ring-2','ring-accent');
+                            const src = th.getAttribute('data-image');
+                            if (src) mainImage.src = src;
+                        });
+                    });
                 }
             }
             
