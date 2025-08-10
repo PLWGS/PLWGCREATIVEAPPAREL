@@ -1216,20 +1216,61 @@ app.get('/api/analytics/dashboard', authenticateToken, async (req, res) => {
     
     // Low stock products
     const lowStockResult = await pool.query(`
-      SELECT name, stock_quantity, low_stock_threshold
+      SELECT id AS product_id, name, stock_quantity, low_stock_threshold
       FROM products
       WHERE stock_quantity <= low_stock_threshold AND is_active = true
       ORDER BY stock_quantity ASC
+    `);
+
+    // Custom requests count (period-aware)
+    const customRequestsCountResult = await pool.query(`
+      SELECT COUNT(*)::int AS count
+      FROM custom_requests ${dateFilter}
     `);
     
     res.json({
       sales: salesResult.rows[0],
       topProducts: topProductsResult.rows,
       dailySales: dailySalesResult.rows,
-      lowStock: lowStockResult.rows
+      lowStock: lowStockResult.rows,
+      customRequestsCount: customRequestsCountResult.rows[0]?.count || 0
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get sales time series for chart
+app.get('/api/analytics/sales-series', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) {
+    return res.json({ series: [] });
+  }
+
+  try {
+    const { period = '7d' } = req.query;
+    let dateFilter = '';
+    switch (period) {
+      case '1d': dateFilter = "WHERE created_at >= CURRENT_DATE"; break;
+      case '7d': dateFilter = "WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'"; break;
+      case '30d': dateFilter = "WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'"; break;
+      case '90d': dateFilter = "WHERE created_at >= CURRENT_DATE - INTERVAL '90 days'"; break;
+      default: dateFilter = "WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'"; break;
+    }
+
+    const seriesResult = await pool.query(`
+      SELECT DATE(created_at) as date,
+             SUM(total_amount) as total
+      FROM orders ${dateFilter}
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+      LIMIT 90
+    `);
+
+    res.json({ series: seriesResult.rows });
+  } catch (e) {
+    console.error('Error fetching sales series:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1256,6 +1297,92 @@ app.get('/api/inventory', authenticateToken, async (req, res) => {
     res.json({ inventory: result.rows });
   } catch (error) {
     console.error('Error fetching inventory:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// =============================================================================
+// ORDERS ENDPOINTS (READ-ONLY LIST FOR DASHBOARD)
+// =============================================================================
+
+app.get('/api/orders', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) return res.json({ orders: [] });
+  try {
+    const { limit = 20 } = req.query;
+    const result = await pool.query(`
+      SELECT o.id, o.order_number, o.status, o.total_amount, o.created_at,
+             COALESCE(c.name, '') AS customer_name
+      FROM orders o
+      LEFT JOIN customers c ON c.id = o.customer_id
+      ORDER BY o.created_at DESC
+      LIMIT $1
+    `, [Math.min(parseInt(limit, 10) || 20, 100)]);
+    res.json({ orders: result.rows });
+  } catch (e) {
+    console.error('Error fetching orders:', e);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// =============================================================================
+// ADMIN ACTIVITY FEED (READ-ONLY)
+// =============================================================================
+
+app.get('/api/admin/activity', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) return res.json({ activity: [] });
+  try {
+    const { limit = 20 } = req.query;
+
+    const orders = await pool.query(`
+      SELECT 'order' AS type, order_number AS title, 
+             CONCAT('Total $', total_amount) AS subtitle,
+             total_amount AS amount, created_at, 
+             CONCAT('order:', id) AS link
+      FROM orders
+      ORDER BY created_at DESC
+      LIMIT 20
+    `);
+
+    const products = await pool.query(`
+      SELECT 'product' AS type, name AS title,
+             'New product uploaded' AS subtitle,
+             price AS amount, created_at,
+             CONCAT('product:', id) AS link
+      FROM products
+      ORDER BY created_at DESC
+      LIMIT 20
+    `);
+
+    const lowStock = await pool.query(`
+      SELECT 'inventory' AS type, name AS title,
+             CONCAT('Low stock: ', stock_quantity, ' remaining') AS subtitle,
+             NULL::numeric AS amount, NOW() AS created_at,
+             CONCAT('product:', id) AS link
+      FROM products
+      WHERE stock_quantity <= low_stock_threshold AND is_active = true
+      ORDER BY stock_quantity ASC
+      LIMIT 20
+    `);
+
+    const customReq = await pool.query(`
+      SELECT 'custom_request' AS type, customer_name AS title,
+             CONCAT('Custom order: ', product_type) AS subtitle,
+             NULL::numeric AS amount, created_at,
+             CONCAT('custom_request:', id) AS link
+      FROM custom_requests
+      ORDER BY created_at DESC
+      LIMIT 20
+    `);
+
+    const combined = [...orders.rows, ...products.rows, ...lowStock.rows, ...customReq.rows]
+      .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, Math.min(parseInt(limit, 10) || 20, 100));
+
+    res.json({ activity: combined });
+  } catch (e) {
+    console.error('Error fetching admin activity:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orders - Admin</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body class="bg-background text-text-primary">
+  <main class="max-w-6xl mx-auto p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="font-orbitron text-2xl font-bold">Orders</h1>
+      <a href="admin.html" class="text-accent">Back to Dashboard</a>
+    </div>
+
+    <div class="glass-card rounded-xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="space-x-2">
+          <button id="refreshOrders" class="btn-primary px-4 py-2 text-sm">Refresh</button>
+        </div>
+        <div class="text-text-secondary text-sm">Read-only list</div>
+      </div>
+      <div id="ordersLoading" class="text-center py-6 hidden">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+        <p class="text-text-secondary mt-2">Loading orders...</p>
+      </div>
+      <div id="ordersEmpty" class="text-center py-6 hidden text-text-secondary text-sm">No orders found</div>
+      <div id="ordersList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+  </main>
+
+  <script>
+    function checkAuth() {
+      const token = localStorage.getItem('adminToken');
+      if (!token) { window.location.href = 'admin-login.html'; return null; }
+      return token;
+    }
+
+    async function apiRequest(url, options = {}) {
+      const token = checkAuth();
+      if (!token) return null;
+      const res = await fetch(url, { ...options, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(options.headers||{}) } });
+      if (res.status === 401) { localStorage.removeItem('adminToken'); localStorage.removeItem('adminUser'); window.location.href = 'admin-login.html'; return null; }
+      return res;
+    }
+
+    function formatTimeAgo(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+      if (diffInHours < 1) return 'Just now';
+      if (diffInHours < 24) return `${diffInHours}h ago`;
+      if (diffInHours < 48) return '1d ago';
+      return `${Math.floor(diffInHours / 24)}d ago`;
+    }
+
+    async function loadOrders() {
+      const loading = document.getElementById('ordersLoading');
+      const emptyEl = document.getElementById('ordersEmpty');
+      const listEl = document.getElementById('ordersList');
+      loading.classList.remove('hidden');
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = '';
+      const res = await apiRequest('/api/orders?limit=30');
+      if (!res) return;
+      const data = await res.json();
+      const orders = (data && data.orders) || [];
+      if (orders.length === 0) { emptyEl.classList.remove('hidden'); loading.classList.add('hidden'); return; }
+      listEl.innerHTML = orders.map(renderOrder).join('');
+      loading.classList.add('hidden');
+    }
+
+    function renderOrder(order) {
+      return `
+        <div class="p-4 bg-surface-dark rounded-lg border border-surface-light">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-white font-medium text-sm">${order.order_number}</span>
+            <span class="status-badge status-${order.status || 'pending'}">${order.status || 'pending'}</span>
+          </div>
+          <div class="text-text-secondary text-xs mb-2">${formatTimeAgo(order.created_at)}</div>
+          <div class="flex items-center justify-between">
+            <span class="text-accent font-bold text-sm">$${order.total_amount}</span>
+            <span class="text-text-secondary text-xs">${order.customer_name || ''}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!checkAuth()) return;
+      loadOrders();
+      document.getElementById('refreshOrders').addEventListener('click', loadOrders);
+    });
+  </script>
+</body>
+</html>
+
+

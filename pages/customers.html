@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customers - Admin</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body class="bg-background text-text-primary">
+  <main class="max-w-6xl mx-auto p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="font-orbitron text-2xl font-bold">Customers</h1>
+      <a href="admin.html" class="text-accent">Back to Dashboard</a>
+    </div>
+
+    <div class="glass-card rounded-xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <button id="refreshCustomers" class="btn-primary px-4 py-2 text-sm">Refresh</button>
+        <div class="text-text-secondary text-sm">Read-only list</div>
+      </div>
+      <div id="customersLoading" class="text-center py-6 hidden">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+        <p class="text-text-secondary mt-2">Loading customers...</p>
+      </div>
+      <div id="customersEmpty" class="text-center py-6 hidden text-text-secondary text-sm">No customers found</div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-surface-light">
+              <th class="text-text-secondary text-sm font-medium pb-3">Name</th>
+              <th class="text-text-secondary text-sm font-medium pb-3">Email</th>
+              <th class="text-text-secondary text-sm font-medium pb-3">Orders</th>
+              <th class="text-text-secondary text-sm font-medium pb-3">Total Spent</th>
+            </tr>
+          </thead>
+          <tbody id="customersTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function checkAuth() {
+      const token = localStorage.getItem('adminToken');
+      if (!token) { window.location.href = 'admin-login.html'; return null; }
+      return token;
+    }
+    async function apiRequest(url, options = {}) {
+      const token = checkAuth();
+      if (!token) return null;
+      const res = await fetch(url, { ...options, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(options.headers||{}) } });
+      if (res.status === 401) { localStorage.removeItem('adminToken'); localStorage.removeItem('adminUser'); window.location.href = 'admin-login.html'; return null; }
+      return res;
+    }
+
+    async function loadCustomers() {
+      const loading = document.getElementById('customersLoading');
+      const emptyEl = document.getElementById('customersEmpty');
+      const table = document.getElementById('customersTable');
+      loading.classList.remove('hidden');
+      emptyEl.classList.add('hidden');
+      table.innerHTML = '';
+
+      const res = await apiRequest('/api/customers?limit=50');
+      if (!res) return;
+      const data = await res.json();
+      if (!res.ok) { loading.classList.add('hidden'); return; }
+      const customers = data.customers || data || [];
+      if (!customers.length) { emptyEl.classList.remove('hidden'); loading.classList.add('hidden'); return; }
+
+      table.innerHTML = customers.map(c => `
+        <tr class="border-b border-surface-light hover:bg-surface-dark transition-colors">
+          <td class="py-3 text-white">${c.name || '-'}</td>
+          <td class="py-3 text-text-secondary">${c.email || '-'}</td>
+          <td class="py-3 text-text-secondary">${c.total_orders || 0}</td>
+          <td class="py-3 text-accent">$${Number(c.total_spent || 0).toFixed(2)}</td>
+        </tr>
+      `).join('');
+      loading.classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!checkAuth()) return;
+      loadCustomers();
+      document.getElementById('refreshCustomers').addEventListener('click', loadCustomers);
+    });
+  </script>
+</body>
+</html>
+
+

@@ -138,7 +138,7 @@
                     <span class="font-medium">Dashboard</span>
                 </a>
 
-                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                <a href="admin-uploads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
@@ -146,7 +146,7 @@
                     <div class="notification-dot ml-auto"></div>
                 </a>
 
-                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                <a href="orders.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>
@@ -162,7 +162,7 @@
                     <span class="ml-auto bg-error text-white text-xs px-2 py-1 rounded-full">5</span>
                 </a>
 
-                <a href="account.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                <a href="customers.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                     </svg>
@@ -343,10 +343,10 @@
                 <div class="glass-card rounded-xl p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="font-orbitron text-lg font-bold text-white">Sales Overview</h3>
-                        <select class="bg-surface border border-surface-light text-text-primary px-3 py-1 rounded-lg text-sm">
-                            <option>Last 7 days</option>
-                            <option>Last 30 days</option>
-                            <option>Last 3 months</option>
+                        <select id="sales-period" class="bg-surface border border-surface-light text-text-primary px-3 py-1 rounded-lg text-sm">
+                            <option value="7d">Last 7 days</option>
+                            <option value="30d">Last 30 days</option>
+                            <option value="90d">Last 3 months</option>
                         </select>
                     </div>
                     <div class="chart-container">
@@ -669,58 +669,16 @@
             <!-- Recent Activity -->
             <section>
                 <div class="glass-card rounded-xl p-6">
-                    <h3 class="font-orbitron text-lg font-bold text-white mb-6">Recent Activity</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-start space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <div class="w-2 h-2 bg-success rounded-full mt-2"></div>
-                            <div class="flex-1">
-                                <p class="text-white text-sm">New order received: Horror Skull Tee</p>
-                                <p class="text-text-secondary text-xs">Sarah M. ordered 1x Horror Skull Tee - Size L</p>
-                                <span class="text-text-secondary text-xs">2 hours ago</span>
-                            </div>
-                            <span class="text-success font-bold text-sm">$24.99</span>
-                        </div>
-
-                        <div class="flex items-start space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <div class="w-2 h-2 bg-accent rounded-full mt-2"></div>
-                            <div class="flex-1">
-                                <p class="text-white text-sm">Custom order request submitted</p>
-                                <p class="text-text-secondary text-xs">Wedding party tees for 8 bridesmaids</p>
-                                <span class="text-text-secondary text-xs">3 hours ago</span>
-                            </div>
-                            <span class="text-accent font-bold text-sm">Quote Pending</span>
-                        </div>
-
-                        <div class="flex items-start space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <div class="w-2 h-2 bg-warning rounded-full mt-2"></div>
-                            <div class="flex-1">
-                                <p class="text-white text-sm">Low stock alert</p>
-                                <p class="text-text-secondary text-xs">Horror Skull Tee - Size L (3 remaining)</p>
-                                <span class="text-text-secondary text-xs">4 hours ago</span>
-                            </div>
-                            <button class="text-accent hover:text-accent-light text-sm">Reorder</button>
-                        </div>
-
-                        <div class="flex items-start space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <div class="w-2 h-2 bg-success rounded-full mt-2"></div>
-                            <div class="flex-1">
-                                <p class="text-white text-sm">Order shipped</p>
-                                <p class="text-text-secondary text-xs">Pop Culture Mashup shipped to Mike R.</p>
-                                <span class="text-text-secondary text-xs">6 hours ago</span>
-                            </div>
-                            <span class="text-success font-bold text-sm">Completed</span>
-                        </div>
-
-                        <div class="flex items-start space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <div class="w-2 h-2 bg-neon-purple rounded-full mt-2"></div>
-                            <div class="flex-1">
-                                <p class="text-white text-sm">New product uploaded</p>
-                                <p class="text-text-secondary text-xs">Minimalist Rebel design added to catalog</p>
-                                <span class="text-text-secondary text-xs">1 day ago</span>
-                            </div>
-                            <a href="shop.html" class="text-accent hover:text-accent-light text-sm">View</a>
-                        </div>
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-orbitron text-lg font-bold text-white">Recent Activity</h3>
+                        <button id="refreshActivity" class="text-text-secondary hover:text-accent text-sm">Refresh</button>
                     </div>
+                    <div id="activityLoading" class="text-center py-6 hidden">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+                        <p class="text-text-secondary mt-2">Loading activity...</p>
+                    </div>
+                    <div id="activityEmpty" class="text-center py-6 hidden text-text-secondary text-sm">No recent activity</div>
+                    <div id="activityList" class="space-y-4"></div>
                 </div>
             </section>
 
@@ -853,9 +811,57 @@
                     updateMetrics(data.sales);
                     updateTopProducts(data.topProducts);
                     updateLowStockAlerts(data.lowStock);
+                    // Update Custom Requests metric card (4th card)
+                    const customReqCardValue = document.querySelector('.metric-card:nth-child(4) h3');
+                    if (customReqCardValue && typeof data.customRequestsCount !== 'undefined') {
+                        customReqCardValue.textContent = (data.customRequestsCount || 0).toString();
+                    }
                 }
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
+            }
+        }
+        // Load chart series based on dropdown selection and redraw chart
+        async function loadSalesSeries(period) {
+            try {
+                const response = await apiRequest(`/api/analytics/sales-series?period=${encodeURIComponent(period)}`);
+                if (!response) return;
+                const data = await response.json();
+                if (response.ok) {
+                    redrawSalesChart(data.series || []);
+                }
+            } catch (e) { console.error('Error loading sales series:', e); }
+        }
+
+        function redrawSalesChart(series) {
+            const svg = document.querySelector('.chart-container svg');
+            if (!svg) return;
+            // Build points across width
+            const width = 400; const height = 200; const leftPad = 20; const bottom = 160;
+            const max = Math.max(1, ...series.map(p => Number(p.total)));
+            const step = series.length > 1 ? (width - 40) / (series.length - 1) : 0;
+            const points = series.map((p, i) => {
+                const x = leftPad + i * step;
+                const y = bottom - (Number(p.total) / max) * 120; // scale in 120px range
+                return `${x},${y}`;
+            }).join(' ');
+            const poly = svg.querySelector('polyline');
+            if (poly) poly.setAttribute('points', points || `${leftPad},${bottom}`);
+            // No-data hint text
+            const existingMsg = svg.querySelector('text.no-data');
+            if (series.length === 0 || series.every(p => Number(p.total) === 0)) {
+                if (!existingMsg) {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', '200');
+                    text.setAttribute('y', '100');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('class', 'no-data');
+                    text.setAttribute('fill', 'rgba(160,160,160,0.4)');
+                    text.textContent = 'No sales data for selected period';
+                    svg.appendChild(text);
+                }
+            } else if (existingMsg) {
+                existingMsg.remove();
             }
         }
 
@@ -908,9 +914,68 @@
                         <h4 class="text-white font-medium text-sm">${item.name}</h4>
                         <p class="text-text-secondary text-xs">${item.stock_quantity === 0 ? 'Out of stock' : `${item.stock_quantity} left in stock`}</p>
                     </div>
-                    <button class="text-accent hover:text-accent-light text-sm">Reorder</button>
+                    ${item.product_id ? `<a class="text-accent hover:text-accent-light text-sm" href="product-edit.html?id=${item.product_id}">Reorder</a>` : `<button class="text-accent hover:text-accent-light text-sm" disabled>Reorder</button>`}
                 </div>
             `).join('');
+        }
+
+        // Load recent activity
+        async function loadActivity() {
+            try {
+                const loading = document.getElementById('activityLoading');
+                const emptyEl = document.getElementById('activityEmpty');
+                const listEl = document.getElementById('activityList');
+                if (loading) loading.classList.remove('hidden');
+                if (emptyEl) emptyEl.classList.add('hidden');
+                if (listEl) listEl.innerHTML = '';
+
+                const response = await apiRequest('/api/admin/activity?limit=20');
+                if (!response) return;
+                const data = await response.json();
+                if (!response.ok) return;
+
+                const items = data.activity || [];
+                if (items.length === 0) {
+                    if (emptyEl) emptyEl.classList.remove('hidden');
+                    return;
+                }
+                if (listEl) listEl.innerHTML = items.map(renderActivityItem).join('');
+            } catch (e) {
+                console.error('Error loading activity:', e);
+            } finally {
+                const loading = document.getElementById('activityLoading');
+                if (loading) loading.classList.add('hidden');
+            }
+        }
+
+        function renderActivityItem(item) {
+            const colorClass = item.type === 'order' ? 'bg-success' :
+                              item.type === 'product' ? 'bg-neon-purple' :
+                              item.type === 'inventory' ? 'bg-warning' :
+                              item.type === 'custom_request' ? 'bg-accent' : 'bg-text-secondary';
+            const right = item.amount ? `<span class="text-accent font-bold text-sm">$${Number(item.amount).toFixed(2)}</span>` : (item.type === 'order' ? '<span class="text-success font-bold text-sm">Order</span>' : '');
+            const subtitle = item.subtitle ? `<p class="text-text-secondary text-xs">${item.subtitle}</p>` : '';
+            const time = item.created_at ? `<span class="text-text-secondary text-xs">${formatTimeAgo(item.created_at)}</span>` : '';
+            const link = item.link ? `<a class="text-accent hover:text-accent-light text-sm" href="${resolveActivityLink(item.link)}">View</a>` : '';
+            return `
+                <div class="flex items-start space-x-4 p-3 bg-surface-dark rounded-lg">
+                    <div class="w-2 h-2 ${colorClass} rounded-full mt-2"></div>
+                    <div class="flex-1">
+                        <p class="text-white text-sm">${item.title || 'Activity'}</p>
+                        ${subtitle}
+                        ${time}
+                    </div>
+                    ${link || right}
+                </div>
+            `;
+        }
+
+        function resolveActivityLink(link) {
+            // Link format examples from server: 'order:ID', 'product:ID'
+            if (!link) return '#';
+            if (link.startsWith('order:')) return 'orders.html';
+            if (link.startsWith('product:')) return 'admin-uploads.html';
+            return '#';
         }
 
         // Load orders data
@@ -956,6 +1021,49 @@
                     `).join('');
                 }
             });
+
+            initKanbanDnD();
+        }
+
+        function initKanbanDnD() {
+            let draggedOrderId = null;
+            document.querySelectorAll('.kanban-card').forEach(card => {
+                card.addEventListener('dragstart', (e) => {
+                    draggedOrderId = card.getAttribute('data-order-id');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                card.addEventListener('dragend', () => { draggedOrderId = null; });
+            });
+
+            document.querySelectorAll('.kanban-column').forEach(col => {
+                col.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+                col.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    const newStatus = col.getAttribute('data-status');
+                    if (!draggedOrderId || !newStatus) return;
+                    const ok = confirm(`Move order #${draggedOrderId} to ${newStatus}?`);
+                    if (!ok) return;
+                    await updateOrderStatus(draggedOrderId, newStatus);
+                });
+            });
+        }
+
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await apiRequest(`/api/orders/${orderId}/status`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ status })
+                });
+                if (response && response.ok) {
+                    showNotification('Order status updated', 'success');
+                    await loadOrders();
+                } else {
+                    showNotification('Failed to update order status', 'error');
+                }
+            } catch (e) {
+                console.error('Error updating order status:', e);
+                showNotification('Error updating order status', 'error');
+            }
         }
 
         // Format time ago
@@ -1379,6 +1487,8 @@
             loadOrders();
             loadCustomRequests();
             loadSubscribers();
+            loadActivity();
+            loadSalesSeries('7d');
             
             // Add logout functionality to profile
             const profileSection = document.querySelector('.flex.items-center.space-x-3');
@@ -1389,7 +1499,17 @@
                 logoutBtn.onclick = logout;
                 profileSection.appendChild(logoutBtn);
             }
+            // Period selector
+            const periodSel = document.getElementById('sales-period');
+            if (periodSel) {
+                periodSel.addEventListener('change', () => loadSalesSeries(periodSel.value));
+            }
         });
+
+        const refreshActivityBtn = document.getElementById('refreshActivity');
+        if (refreshActivityBtn) {
+            refreshActivityBtn.addEventListener('click', loadActivity);
+        }
     </script>
 <script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
 <script>
