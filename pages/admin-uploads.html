@@ -1034,7 +1034,16 @@
         }
 
         function editProduct(productId) {
-            window.location.href = `product-edit.html?id=${productId}`;
+            // Fallback to existing full-feature generated page for now
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) { alert(`Product ${productId} not found.`); return; }
+            const cleanName = (product.name || '')
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, '')
+                .replace(/\s+/g, '_')
+                .substring(0, 50);
+            const editPageFilename = `product-edit-product-${productId}_${cleanName}.html`;
+            window.location.href = editPageFilename;
         }
 
         async function updateProduct(productId) {

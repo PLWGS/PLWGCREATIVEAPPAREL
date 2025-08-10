@@ -40,6 +40,48 @@
           <textarea id="description" rows="3" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg"></textarea>
         </div>
 
+        <!-- Colors -->
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Available Colors</label>
+          <div id="color-options" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Sizes & per-size stock -->
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Sizes & Stock</label>
+          <div id="size-options" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- Specifications -->
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Specifications</label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input id="spec-material" placeholder="Material" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+            <input id="spec-weight" placeholder="Weight" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+            <input id="spec-fit" placeholder="Fit" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+            <input id="spec-neck" placeholder="Neck Style" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+            <input id="spec-sleeve" placeholder="Sleeve Length" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+            <input id="spec-origin" placeholder="Origin" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Features</label>
+          <div id="feature-options" class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <label class="flex items-center gap-2"><input id="feat-preshrunk" type="checkbox"/> Pre-shrunk</label>
+            <label class="flex items-center gap-2"><input id="feat-double" type="checkbox"/> Double-stitched</label>
+            <label class="flex items-center gap-2"><input id="feat-fade" type="checkbox"/> Fade-resistant</label>
+            <label class="flex items-center gap-2"><input id="feat-soft" type="checkbox"/> Soft-touch</label>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div>
+          <label class="block text-sm font-medium text-text-primary mb-2">Tags (comma-separated)</label>
+          <input id="tags" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+        </div>
+
         <div>
           <label class="block text-sm font-medium text-text-primary mb-2">Images (first = main)</label>
           <div id="image-previews" class="flex flex-wrap gap-3"></div>
@@ -109,6 +151,35 @@
       document.getElementById('price').value = p.price || '';
       document.getElementById('original_price').value = p.original_price || '';
       document.getElementById('description').value = p.description || '';
+      document.getElementById('tags').value = Array.isArray(p.tags) ? p.tags.join(', ') : '';
+      // Specs
+      const specs = p.specifications || {};
+      document.getElementById('spec-material').value = specs.material || '';
+      document.getElementById('spec-weight').value = specs.weight || '';
+      document.getElementById('spec-fit').value = specs.fit || '';
+      document.getElementById('spec-neck').value = specs.neck_style || '';
+      document.getElementById('spec-sleeve').value = specs.sleeve_length || '';
+      document.getElementById('spec-origin').value = specs.origin || '';
+      // Features
+      const feats = p.features || {};
+      document.getElementById('feat-preshrunk').checked = feats.preshrunk !== false;
+      document.getElementById('feat-double').checked = feats.double_stitched !== false;
+      document.getElementById('feat-fade').checked = feats.fade_resistant !== false;
+      document.getElementById('feat-soft').checked = feats.soft_touch !== false;
+      // Colors
+      const colors = Array.isArray(p.colors) ? p.colors : [];
+      const colorList = ['Black','White','Gray','Navy','Maroon','Dark Green','Orange','Red'];
+      const colorWrap = document.getElementById('color-options');
+      colorWrap.innerHTML = colorList.map(c => `<label class="flex items-center gap-2"><input type="checkbox" value="${c}" ${colors.includes(c)?'checked':''}/> ${c}</label>`).join('');
+      // Sizes & stock
+      const sizeOrder = ['XS','S','M','L','XL','XXL'];
+      const sizeStock = p.size_stock || {};
+      const sizeWrap = document.getElementById('size-options');
+      sizeWrap.innerHTML = sizeOrder.map(s => {
+        const checked = (Array.isArray(p.sizes) ? p.sizes : sizeOrder).includes(s);
+        const val = sizeStock[s] != null ? Number(sizeStock[s]) : 0;
+        return `<div class="flex items-center gap-3 p-3 bg-surface-light rounded"><label class="flex items-center gap-2"><input class="sz-check" data-size="${s}" type="checkbox" ${checked?'checked':''}/> ${s}</label><input class="sz-stock w-20 px-2 py-1 bg-surface border border-surface-light rounded text-sm" data-size="${s}" type="number" min="0" value="${val}"></div>`;
+      }).join('');
       uploadedImages = [];
       if (p.image_url) uploadedImages.push(p.image_url);
       if (Array.isArray(p.sub_images)) uploadedImages.push(...p.sub_images);
@@ -121,20 +192,47 @@
       try {
         const token = localStorage.getItem('adminToken');
         if (!token) { alert('Please login'); location.href='admin-login.html'; return; }
-        let image_url = null; let sub_images = [];
-        if (uploadedImages.length){ image_url = uploadedImages[0]; sub_images = uploadedImages.slice(1); }
-        const body = {
+        // Build colors
+        const colors = Array.from(document.querySelectorAll('#color-options input[type="checkbox"]:checked')).map(i=>i.value);
+        // Build sizes & stock
+        const sizeChecks = Array.from(document.querySelectorAll('.sz-check'));
+        const activeSizes = sizeChecks.filter(cb => cb.checked).map(cb => cb.dataset.size);
+        const stockInputs = Array.from(document.querySelectorAll('.sz-stock'));
+        const size_stock = {};
+        stockInputs.forEach(inp => { const s = inp.dataset.size; const v = Number(inp.value||0); if (activeSizes.includes(s)) size_stock[s] = v; });
+        // Images: if any base64, send as images[]; else keep URLs
+        let body = {
           name: document.getElementById('name').value.trim(),
           description: document.getElementById('description').value.trim(),
           category: document.getElementById('category').value.trim(),
           price: parseFloat(document.getElementById('price').value) || 0,
           original_price: parseFloat(document.getElementById('original_price').value) || null,
-          image_url, sub_images,
-          sizes: productData?.sizes || [],
-          size_stock: productData?.size_stock || {},
-          colors: productData?.colors || [],
-          tags: productData?.tags || []
+          sizes: activeSizes,
+          size_stock,
+          colors,
+          tags: document.getElementById('tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+          specifications: {
+            material: document.getElementById('spec-material').value,
+            weight: document.getElementById('spec-weight').value,
+            fit: document.getElementById('spec-fit').value,
+            neck_style: document.getElementById('spec-neck').value,
+            sleeve_length: document.getElementById('spec-sleeve').value,
+            origin: document.getElementById('spec-origin').value
+          },
+          features: {
+            preshrunk: document.getElementById('feat-preshrunk').checked,
+            double_stitched: document.getElementById('feat-double').checked,
+            fade_resistant: document.getElementById('feat-fade').checked,
+            soft_touch: document.getElementById('feat-soft').checked
+          }
         };
+        const anyBase64 = uploadedImages.some(u => typeof u === 'string' && u.startsWith('data:'));
+        if (anyBase64) {
+          body.images = uploadedImages; // server will upload these
+        } else if (uploadedImages.length) {
+          body.image_url = uploadedImages[0];
+          body.sub_images = uploadedImages.slice(1);
+        }
         const resp = await fetch(`/api/admin/products/${productId}`, { method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body: JSON.stringify(body)});
         if (!resp.ok) { const err = await resp.json().catch(()=>({error:'Failed'})); throw new Error(err.error || 'Failed'); }
         alert('Product updated successfully');
@@ -144,6 +242,7 @@
 
     if (!productId) { document.getElementById('loading').textContent = 'Missing product ID'; } else { fetchProduct(); }
   </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>
 
