@@ -68,6 +68,7 @@ async function getActiveAdminPasswordHash() {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const FEATURE_STATIC_PRODUCT_PAGES = String(process.env.FEATURE_STATIC_PRODUCT_PAGES || 'false').toLowerCase() === 'true';
 
 // Middleware
 app.use(cors({
@@ -2749,10 +2750,18 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
       console.log('⚠️ Continuing without edit page creation');
     }
 
-    res.json({ 
-      message: 'Product created successfully', 
-      product: result.rows[0] 
-    });
+    // Optionally generate static product page (feature-flagged)
+    if (FEATURE_STATIC_PRODUCT_PAGES) {
+      try {
+        const { buildStaticProductPage } = require('./tools/static_product_builder');
+        await buildStaticProductPage(result.rows[0]);
+        console.log(`🧱 Static product page generated for ID ${nextId}`);
+      } catch (e) {
+        console.error('❌ Static page build failed:', e.message || e);
+      }
+    }
+
+    res.json({ message: 'Product created successfully', product: result.rows[0] });
   } catch (error) {
     console.error('Error creating product:', error);
     res.status(500).json({ error: 'Failed to create product' });
@@ -2898,10 +2907,18 @@ app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
       console.log('⚠️ Continuing without edit page update');
     }
 
-    res.json({ 
-      message: 'Product updated successfully', 
-      product: result.rows[0] 
-    });
+    // Optionally regenerate static product page (feature-flagged)
+    if (FEATURE_STATIC_PRODUCT_PAGES) {
+      try {
+        const { buildStaticProductPage } = require('./tools/static_product_builder');
+        await buildStaticProductPage(result.rows[0]);
+        console.log(`🧱 Static product page regenerated for ID ${productId}`);
+      } catch (e) {
+        console.error('❌ Static page rebuild failed:', e.message || e);
+      }
+    }
+
+    res.json({ message: 'Product updated successfully', product: result.rows[0] });
   } catch (error) {
     console.error('Error updating product:', error);
     res.status(500).json({ error: 'Failed to update product' });
