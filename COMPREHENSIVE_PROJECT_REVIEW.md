@@ -792,3 +792,63 @@ This project has made significant progress from a feature-rich but untested code
 
 *Last Updated: December 2024*  
 *Status: Core E-commerce Functionality Working - Dynamic Product Management & Database Integration Operational* 
+
+---
+
+## August 2025 – Updates Implemented (Working in production; verify end-to-end)
+
+### Highlights
+- Feature-flagged static product page generation for mobile performance and SEO
+- Safe product deletion via soft-delete (archive) to preserve order history
+- Fully dynamic product images on product detail page (no hardcoded thumbnails)
+- Correct, non-cropping image sizing using Cloudinary pad transforms (centered/contained)
+- Stable admin editor URL that never changes: `pages/product-edit.html?id=<id>`
+
+### Backend Changes
+- Static product pages (flagged):
+  - New module: `tools/static_product_builder.js` generates `pages/products/<id>-<slug>.html`.
+  - Triggered after successful product create/update, guarded by `FEATURE_STATIC_PRODUCT_PAGES=true`.
+  - Pages include:
+    - Mobile meta, canonical pointing to `pages/product.html?id=<id>`
+    - JSON-LD Product schema
+    - Preload of main image; inline critical CSS
+    - Cloudinary transforms for images (see Frontend Changes)
+  - No behavior change unless the flag is enabled (keeps current workflow untouched).
+
+- Product delete → soft-delete:
+  - `DELETE /api/admin/products/:id` now updates `products.is_active=false` instead of removing rows.
+  - All public/admin product fetches filter `WHERE is_active=true`.
+  - Rationale: avoids FK violations with `order_items` and preserves order history.
+
+### Frontend Changes
+- Product detail page (`pages/product.html`):
+  - Main image now uses object-contain and Cloudinary pad transform to avoid cropping: `c_pad,g_center,b_black,q_auto,f_auto,w_800,h_800`.
+  - Thumbnails are rendered dynamically from `product.image_url + product.sub_images` (parses JSON string if necessary) and use `w_300,h_120` pad transforms; strip hides when there are no sub images.
+  - Removed reliance on hardcoded thumbnail URLs.
+
+- Stable editor URL:
+  - New page: `pages/product-edit.html?id=<id>` loads/saves product by ID.
+  - Updated admin links to use the stable route:
+    - `pages/admin-uploads.html` → `editProduct(productId)` now navigates to `product-edit.html?id=<id>`.
+    - `pages/product-management.js` mapping updated accordingly.
+  - Prevents “Cannot GET …” caused by filename-based edit pages when product names change.
+
+### Environment / Flags
+- `FEATURE_STATIC_PRODUCT_PAGES=true` (set in Railway & .env) enables static page generation on create/update.
+- Optional future flag (not yet added): redirect from `product.html?id=<id>` to static URL.
+
+### Issues Resolved
+- Deleting a product with historical orders failed (FK 23503). Solved via soft-delete and filtering inactive products from listings.
+- Product detail images were cropped and thumbnails were hardcoded. Now images are centered (pad) and thumbs are fully dynamic from DB.
+- Edit page 404 after renaming or regenerating. Replaced with stable ID-based editor URL.
+
+### Verification Checklist
+- Create a product → if `FEATURE_STATIC_PRODUCT_PAGES=true`, confirm `pages/products/<id>-<slug>.html` is created and loads quickly on mobile.
+- Update a product → static file regenerates; canonical remains correct.
+- Delete a product with existing orders → product disappears from admin/public lists (archived), orders remain intact.
+- Product page: main image fully visible (no crop), sub images show only when present; strip hidden otherwise.
+- Admin “Edit” opens `product-edit.html?id=<id>` consistently; repeated edits are stable.
+
+### Notes
+- Static builder uses simple Cloudinary URL rewriting to inject transforms. Real-time CDN behavior should be validated on representative devices.
+- The old filename-based edit pages remain in the repo for backward compatibility but are no longer linked from the UI.
