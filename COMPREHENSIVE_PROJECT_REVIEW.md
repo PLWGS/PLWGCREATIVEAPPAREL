@@ -821,6 +821,18 @@ This project has made significant progress from a feature-rich but untested code
   - Confirmed Cloudinary uploads succeed and URLs are persisted.
 - User validated end-to-end by deleting and re-adding images; product page and shop grid render new images correctly. Status: CONFIRMED 100% WORKING.
 
+### Product Page Enhancements — Confirmed Working
+- Dynamic Social Proof banner on `pages/product.html` rotates every 10 seconds with randomized name, city, phrase, and avatars; no backend dependency; lightweight and mobile-safe.
+- Dynamic Related Products on `pages/product.html` now renders 4 random active products from `/api/products/public`; each links to the real listing (`product.html?id=<id>`). Graceful placeholders used when catalog < 4. Status: CONFIRMED 100% WORKING.
+
+### Homepage Dynamic Content — Confirmed Working
+- `pages/homepage.html` now auto-fills all 16 placeholders from live products:
+  - Hero carousel (3 slides): populated with 3 random active products, displaying image, name, price; slides link to `product.html?id=<id>`.
+  - Featured collections (3 cards): images, titles, CTA links swap to real product data; price badges display live pricing.
+  - Customer Spotlights (4 tiles): rendered from random products; tiles link to the product pages.
+  - Instagram-style mosaic (up to 12 tiles): built from random products; each tile links to the product page.
+- All sections fetch from `/api/products/public`, shuffle, and render; gracefully degrade with placeholders when fewer products exist. Status: CONFIRMED 100% WORKING.
+
 ### Backend Changes
 - Static product pages (flagged):
   - New module: `tools/static_product_builder.js` generates `pages/products/<id>-<slug>.html`.
@@ -859,6 +871,8 @@ This project has made significant progress from a feature-rich but untested code
 - Product detail images were cropped and thumbnails were hardcoded. Now images are centered (pad) and thumbs are fully dynamic from DB.
 - Edit page 404 after renaming or regenerating. Replaced with stable ID-based editor URL.
 - Editor image re-upload cleared all images (main became null) in certain flows. Fixed mixed payload handling and ensured Cloudinary upload/import path works. Status: CONFIRMED FIX.
+- Product detail hardcoded sections (social proof, related items) replaced with dynamic logic that adapts to current catalog size. Status: CONFIRMED FIX.
+- Homepage hardcoded promos/placeholders replaced with dynamic content that scales automatically with new uploads. Status: CONFIRMED FIX.
 
 ### Verification Checklist (All passed)
 - Create a product → if `FEATURE_STATIC_PRODUCT_PAGES=true`, confirm `pages/products/<id>-<slug>.html` is created and loads quickly on mobile.
