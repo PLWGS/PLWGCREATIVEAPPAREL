@@ -1,178 +1,288 @@
-// Mobile/header injector – ensures hamburger + cart and brand abbreviation on small screens
-(function () {
-  if (window.__DHWS_INJECTOR_ACTIVE__) return; // prevent double-run
-  window.__DHWS_INJECTOR_ACTIVE__ = true;
-  window.__DHWS_INJECTOR_VERSION__ = '2025-08-09-4';
 
-  const log = (...args) => {
-    try { console.log('[dhws-data-injector]', ...args); } catch (_) {}
+(function() {
+  // Configuration
+  const CONFIG = {
+    attributePrefix: 'data-component',
+    includeContentAttribute: true,
+    maxContentLength: 1000,
+    includeLegacyAttributes: true,
+    includeElements: [],
+    excludeElements: [],
   };
 
-  function ready(fn) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', fn);
-    } else { fn(); }
+  const TAG_SHOULD_EXCLUDE = [
+  "base",
+  "object",
+  "link",
+  "meta",
+  "noscript",
+  "script",
+  "style",
+  "title",
+  "animate",
+  "animateMotion",
+  "animateTransform",
+  "circle",
+  "clipPath",
+  "defs",
+  "desc",
+  "ellipse",
+  "feBlend",
+  "feColorMatrix",
+  "feComponentTransfer",
+  "feComposite",
+  "feConvolveMatrix",
+  "feDiffuseLighting",
+  "feDisplacementMap",
+  "feDistantLight",
+  "feDropShadow",
+  "feFlood",
+  "feFuncA",
+  "feFuncB",
+  "feFuncG",
+  "feFuncR",
+  "feGaussianBlur",
+  "feImage",
+  "feMerge",
+  "feMergeNode",
+  "feMorphology",
+  "feOffset",
+  "fePointLight",
+  "feSpecularLighting",
+  "feSpotLight",
+  "feTile",
+  "feTurbulence",
+  "filter",
+  "foreignObject",
+  "g",
+  "image",
+  "line",
+  "linearGradient",
+  "marker",
+  "mask",
+  "metadata",
+  "mpath",
+  "path",
+  "pattern",
+  "polygon",
+  "polyline",
+  "radialGradient",
+  "rect",
+  "set",
+  "stop",
+  "switch",
+  "symbol",
+  "text",
+  "textPath",
+  "tspan",
+  "use",
+  "view",
+  "body",
+  "param",
+]
+
+  // Map to track per-class indices for unique component IDs
+  const classIndexMap = new Map();
+
+  /**
+   * Sanitizes attribute values to prevent XSS
+   */
+  function sanitizeAttributeValue(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
-  function ensureStyles() {
-    if (document.getElementById('dhws-injector-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'dhws-injector-styles';
-    style.textContent = `
-      /* Centered, highly visible toolbar (mobile-only; hidden on >=641px) */
-      #globalTopRightBar { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 2147483647; display: flex; gap: 12px; align-items: center; justify-content: center; pointer-events: none; }
-      #globalTopRightBar button { pointer-events: auto; font-size: 24px !important; line-height: 1; padding: 10px 12px; border-radius: 12px; border: 0; background: rgba(0,0,0,0.65); color: #fff; box-shadow: 0 0 0 2px rgba(0,188,212,0.7); }
-      @media (max-width: 360px) { #globalTopRightBar { top: 10px; } #globalTopRightBar button { font-size: 22px !important; padding: 8px 10px; } }
-      @media (min-width: 641px) { #globalTopRightBar { display: none !important; } }
-      #globalMobileDrawer { position: fixed; top: 0; right: 0; height: 100%; width: min(82vw, 320px); background: rgba(20,20,20,0.96); color: #fff; z-index: 2147483646; transform: translateX(100%); transition: transform .25s ease; padding: 20px; overflow-y: auto; box-shadow: -8px 0 24px rgba(0,0,0,0.5); }
-      #globalMobileDrawer.open { transform: translateX(0); }
-      #globalDrawerOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2147483645; display: none; }
-      #globalDrawerOverlay.show { display: block; }
-      .dhws-hide-admin-link a[href*="admin.html" i] { display: none !important; }
-      @media (min-width: 641px) { #globalMobileDrawer, #globalDrawerOverlay { display: none !important; } }
-    `;
-    document.head.appendChild(style);
+  /**
+   * Creates a component ID based on class name and index
+   */
+  function createComponentId(el) {
+
+    const path = [];
+    let current = el;
+
+    while (current && current.parentElement) {
+      const siblings = Array.from(current.parentElement.children)
+        .filter(child => child.tagName);
+      const index = siblings.indexOf(current);
+      path.unshift(index);
+      current = current.parentElement;
+
+      if (current.tagName === 'BODY') break;
+    }
+
+    const line = path.join('-')
+
+    return sanitizeAttributeValue(line);
   }
 
-  function abbreviateBrand() {
-    const width = window.innerWidth || document.documentElement.clientWidth;
-    if (width > 640) return; // never touch desktop
-
-    const candidates = Array.from(document.querySelectorAll('header a, header span, header h1'))
-      .filter(el => el.childElementCount === 0)
-      .filter(el => /plwgs\s*creative\s*apparel/i.test((el.textContent || '').trim()));
-
-    candidates.forEach(el => {
-      if (!el.dataset.fullBrandText) el.dataset.fullBrandText = el.textContent.trim();
-      if (width <= 480) {
-        el.textContent = 'PLWGS';
-        el.style.fontSize = '22px';
-        el.style.fontWeight = '800';
-        el.style.letterSpacing = '0.6px';
-        el.style.color = '#00bcd4';
-        el.style.textShadow = '0 0 8px rgba(0,188,212,0.35)';
-      } else {
-        el.textContent = el.dataset.fullBrandText;
-        el.style.textShadow = '';
+  /**
+   * Extracts text content from an element
+   */
+  function extractTextContent(element) {
+    let text = '';
+    for (const node of element.childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent.trim() + ' ';
       }
-    });
+    }
+    return text.trim();
   }
 
-  function buildDrawerFromHeaderLinks() {
-    const drawer = document.createElement('div');
-    drawer.id = 'globalMobileDrawer';
-    const overlay = document.createElement('div');
-    overlay.id = 'globalDrawerOverlay';
+  /**
+   * Extracts attributes from an element
+   */
+  function extractAttributes(element) {
+    const attributes = {};
+    const defaultAttrs = [
+      'class', 'id', 'src', 'alt', 'href', 'type', 'name', 'value'
+    ];
 
-    function close() { drawer.classList.remove('open'); overlay.classList.remove('show'); }
-    overlay.addEventListener('click', close);
-
-    const navLinks = Array.from(document.querySelectorAll('header nav a, header a, nav a'))
-      .filter(a => a.href && !/#|javascript:/i.test(a.getAttribute('href') || ''))
-      .slice(0, 12)
-      .map(a => ({ href: a.getAttribute('href'), text: (a.textContent || a.getAttribute('aria-label') || 'Link').trim() }));
-
-    const list = navLinks.map(l => `<div style="padding:12px 6px; border-bottom: 1px solid rgba(255,255,255,0.08);"><a href="${l.href}" style="color:#00bcd4; text-decoration:none; font-weight:600;">${l.text}</a></div>`).join('');
-    drawer.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><div style="font-weight:800; color:#00bcd4;">Menu</div><button id="globalDrawerClose" style="font-size:18px; background:transparent; color:#fff; border:0;">✕</button></div>${list}`;
-    drawer.querySelector('#globalDrawerClose').addEventListener('click', close);
-
-    document.body.appendChild(overlay);
-    document.body.appendChild(drawer);
-    return { drawer, overlay, open: () => { drawer.classList.add('open'); overlay.classList.add('show'); } };
-  }
-
-  function ensureToolbar() {
-    if (document.getElementById('globalTopRightBar')) return;
-    // If the page already has a native toggle, skip
-    const nativeMenu = document.querySelector('button[id*="menu" i], button[class*="menu" i], button[aria-label*="menu" i]');
-    if (nativeMenu) { log('native hamburger detected – skipping injection'); return; }
-
-    const { drawer, overlay, open } = buildDrawerFromHeaderLinks();
-
-    const bar = document.createElement('div');
-    bar.id = 'globalTopRightBar';
-    // Centered, safe-area aware, mobile-only anchor
-    bar.style.position = 'fixed';
-    bar.style.top = '10px';
-    bar.style.left = '50%';
-    bar.style.transform = 'translateX(-50%)';
-    bar.style.zIndex = '2147483647';
-    bar.style.display = 'flex';
-    bar.style.gap = '10px';
-    bar.style.pointerEvents = 'auto';
-
-    const menuBtn = document.createElement('button');
-    menuBtn.id = 'globalMenuBtn';
-    menuBtn.setAttribute('aria-label', 'Open menu');
-    menuBtn.textContent = '☰';
-    menuBtn.style.cssText = 'font-size:22px;padding:8px 10px;border-radius:10px;border:0;background:rgba(0,0,0,0.65);color:#fff;box-shadow:0 0 0 2px rgba(0,188,212,0.7)';
-    menuBtn.addEventListener('click', () => open());
-
-    // Reuse existing cart if present; otherwise add fallback
-    let cartTarget = document.querySelector('#cart-button, a[href*="cart.html" i]');
-    const cartBtn = document.createElement('button');
-    cartBtn.id = 'globalCartBtn';
-    cartBtn.setAttribute('aria-label', 'Cart');
-    cartBtn.textContent = '🛒';
-    cartBtn.style.cssText = menuBtn.style.cssText;
-    cartBtn.addEventListener('click', () => {
-      if (cartTarget && cartTarget.click) { cartTarget.click(); return; }
-      const here = window.location.pathname;
-      const target = /\/pages\//.test(here) ? 'cart.html' : '/pages/cart.html';
-      window.location.href = target;
-    });
-
-    bar.appendChild(menuBtn);
-    bar.appendChild(cartBtn);
-    document.body.appendChild(bar);
-    // Prevent horizontal clipping
-    const body = document.body;
-    try { if (getComputedStyle(body).overflowX !== 'visible') body.style.overflowX = 'visible'; } catch(_) {}
-    log('toolbar injected (centered)');
-  }
-
-  function hideAdminLinksUntilVerified() {
-    // Add a guard class that hides admin links; could be removed by your verify flow
-    document.documentElement.classList.add('dhws-hide-admin-link');
-  }
-
-  function boot() {
-    ensureStyles();
-    // Only for small screens; desktop stays untouched (and ensure any accidental debug content is cleared)
-    function maybeInject() {
-      const w = (window.innerWidth || document.documentElement.clientWidth);
-      const bar = document.getElementById('globalTopRightBar');
-      if (w <= 640 && !bar) {
-        ensureToolbar();
-      }
-      if (w > 640 && bar) {
-        bar.remove();
-      }
-      if (w <= 640) { abbreviateBrand(); }
-      // Remove any accidental text nodes that some themes inject at top-level inside header
-      const header = document.querySelector('header');
-      if (header) {
-        Array.from(header.childNodes).forEach(node => {
-          if (node.nodeType === Node.TEXT_NODE && node.textContent && node.textContent.trim().length > 0) {
-            node.textContent = ''; // clear stray text
-          }
-        });
+    // Extract default attributes
+    for (const attr of defaultAttrs) {
+      if (element.hasAttribute(attr)) {
+        if (attr === 'class') {
+          attributes['className'] = element.getAttribute(attr);
+        } else {
+          attributes[attr] = element.getAttribute(attr);
+        }
       }
     }
 
-    maybeInject();
-    // Persist if removed by other scripts
-    const mo = new MutationObserver(() => {
-      const w = (window.innerWidth || document.documentElement.clientWidth);
-      if (w <= 640 && !document.getElementById('globalTopRightBar')) {
-        ensureToolbar();
-      }
-    });
-    mo.observe(document.body, { childList: true, subtree: true });
-    window.addEventListener('resize', maybeInject);
-    hideAdminLinksUntilVerified();
-    log('Loaded v', window.__DHWS_INJECTOR_VERSION__);
+    const textContent = extractTextContent(element);
+    if (textContent) {
+      attributes['textContent'] = textContent;
+    }
+
+    return attributes;
   }
 
-  ready(boot);
+  /**
+   * Determines if an element should be tagged
+   */
+  function shouldTagElement(element) {
+    // Skip non-element nodes
+    if (element.nodeType !== Node.ELEMENT_NODE) {
+      return false;
+    }
+
+    const tagName = element.tagName.toLowerCase();
+
+    if (CONFIG.includeElements.length > 0) {
+      return CONFIG.includeElements.includes(tagName);
+    }
+
+    if (CONFIG.excludeElements.includes(tagName) || TAG_SHOULD_EXCLUDE.includes(tagName)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Tags an element with component metadata
+   */
+  function tagElement(element) {
+    // Skip if already tagged
+    if (element.hasAttribute(`${CONFIG.attributePrefix}-id`)) {
+      return;
+    }
+
+    // Get element name
+    const elementName = element.tagName.toLowerCase();
+
+    // Create component ID
+    const componentId = createComponentId(element);
+
+    // Set ID attribute
+    element.setAttribute(`${CONFIG.attributePrefix}-id`, componentId);
+
+    // Add legacy attributes if enabled
+    if (CONFIG.includeLegacyAttributes) {
+      element.setAttribute(`${CONFIG.attributePrefix}-path`, window.location.pathname);
+      element.setAttribute(`${CONFIG.attributePrefix}-name`, elementName);
+      element.setAttribute(`${CONFIG.attributePrefix}-file`, window.location.pathname.split('/').pop());
+    }
+
+    // Add content attribute if enabled
+    if (CONFIG.includeContentAttribute) {
+      const attributes = extractAttributes(element);
+      const content = {
+        elementName,
+        ...attributes
+      };
+
+      let encodedContent = encodeURIComponent(JSON.stringify(content));
+
+      // Truncate if needed
+      if (encodedContent.length > CONFIG.maxContentLength) {
+        encodedContent = encodedContent.substring(0, CONFIG.maxContentLength) + '...';
+      }
+
+      element.setAttribute(`${CONFIG.attributePrefix}-content`, encodedContent);
+    }
+  }
+
+  /**
+   * Process all elements in the document
+   */
+  function processAllElements() {
+    const elements = document.querySelectorAll('*');
+    let taggedCount = 0;
+
+    elements.forEach((element, index) => {
+      if (shouldTagElement(element)) {
+        tagElement(element, index);
+        taggedCount++;
+      }
+    });
+
+  }
+
+  /**
+   * Initialize the component tagger
+   */
+  function initialize() {
+    // Wait for DOM to be fully loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', processAllElements);
+    } else {
+      processAllElements();
+    }
+
+    // Also process on dynamic content changes
+    const observer = new MutationObserver((mutations) => {
+
+        for (const mutation of mutations) {
+        if (mutation.type === 'childList') {
+            for (const node of mutation.addedNodes) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                if (shouldTagElement(node)) {
+                tagElement(node);
+                }
+
+                // Process child elements
+                const childElements = node.querySelectorAll('*');
+                for (const child of childElements) {
+                if (shouldTagElement(child)) {
+                    tagElement(child);
+                }
+                }
+            }
+            }
+        }
+        }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  // Start the component tagger
+  initialize();
 })();
