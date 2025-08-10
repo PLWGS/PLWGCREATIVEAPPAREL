@@ -303,6 +303,9 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS features JSON`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS sub_images JSON`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS size_stock JSON`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS track_inventory BOOLEAN DEFAULT false`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS brand_preference TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS specs_notes TEXT`);
     } catch (error) {
       console.log('Some columns may already exist:', error.message);
     }
@@ -3049,15 +3052,17 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
       INSERT INTO products (
         id, name, description, price, original_price, image_url, category, subcategory, 
         tags, stock_quantity, low_stock_threshold, is_featured, is_on_sale, sale_percentage,
-        colors, sizes, specifications, features, sub_images, size_stock
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        colors, sizes, specifications, features, sub_images, size_stock,
+        track_inventory, brand_preference, specs_notes
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
       RETURNING *
     `, [
       nextId, name, description, price, original_price, image_url, category, 'Featured',
       processedTags, stock_quantity || 50, low_stock_threshold || 5,
       true, true, sale_percentage || 15, JSON.stringify(colors || []), 
       JSON.stringify(sizes || []), JSON.stringify(specifications || {}),
-      JSON.stringify(features || {}), JSON.stringify(sub_images), JSON.stringify(sizeStock)
+      JSON.stringify(features || {}), JSON.stringify(sub_images), JSON.stringify(sizeStock),
+      !!req.body.track_inventory, req.body.brand_preference || 'either', req.body.specs_notes || ''
     ]);
 
     console.log(`✅ Product created with ID ${nextId}`);
@@ -3213,15 +3218,18 @@ app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
         image_url = $5, category = $6, tags = $7, stock_quantity = $8,
         low_stock_threshold = $9, sale_percentage = $10, colors = $11,
         sizes = $12, specifications = $13, features = $14, sub_images = $15,
-        size_stock = $16, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $17
+        size_stock = $16, track_inventory = $17, brand_preference = $18, specs_notes = $19,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $20
       RETURNING *
     `, [
       name, description, price, original_price, final_image_url, category,
       processedTags, stock_quantity || 50, low_stock_threshold || 5,
       sale_percentage || 15, JSON.stringify(colors || []), JSON.stringify(sizes || []),
       JSON.stringify(specifications || {}), JSON.stringify(features || {}),
-      JSON.stringify(final_sub_images), JSON.stringify(size_stock || {}), productId
+      JSON.stringify(final_sub_images), JSON.stringify(size_stock || {}),
+      !!req.body.track_inventory, req.body.brand_preference || 'either', req.body.specs_notes || '',
+      productId
     ]);
 
     if (result.rows.length === 0) {

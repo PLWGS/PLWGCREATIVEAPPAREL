@@ -1810,24 +1810,10 @@
                     const sizeStock = product.size_stock || {};
 
                     const sizeHTML = sizes.map(size => {
-                        const stock = Number(sizeStock[size] || 0);
-                        let status = 'In Stock';
-                        let statusClass = 'text-text-secondary';
-                        let optionClass = 'size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent';
-
-                        if (stock <= 0) {
-                            status = 'Sold Out';
-                            statusClass = 'text-error';
-                            optionClass = 'size-option unavailable border border-surface-light rounded-lg p-3 text-center';
-                        } else if (stock <= 5) {
-                            status = `${stock} left`;
-                            statusClass = 'text-warning';
-                        }
-
+                        const optionClass = 'size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent';
                         return `
                             <div class="${optionClass}" data-size="${size}">
                                 <span class="font-semibold">${size}</span>
-                                <div class="text-xs ${statusClass} mt-1">${status}</div>
                             </div>
                         `;
                     }).join('');

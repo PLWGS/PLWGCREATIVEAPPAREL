@@ -410,10 +410,10 @@
                     </div>
 
                     <!-- Stock Information -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-text-primary mb-2">Stock Quantity</label>
-                            <input type="number" id="stock-quantity" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="50" value="50">
+                                <input type="number" id="stock-quantity" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="50" value="50">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-text-primary mb-2">Low Stock Threshold</label>
@@ -424,6 +424,28 @@
                             <input type="number" id="sale-percentage" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="15" value="15">
                         </div>
                     </div>
+
+                        <!-- Inventory toggle -->
+                        <div class="mt-4 flex items-center gap-3">
+                            <input type="checkbox" id="track-inventory" class="rounded border-surface-light text-accent focus:ring-accent">
+                            <label for="track-inventory" class="text-text-secondary text-sm">Track inventory for this product</label>
+                        </div>
+
+                        <!-- Brand preference -->
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-text-primary mb-2">Brand Preference</label>
+                            <select id="brand-preference" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none">
+                                <option value="either">Either (auto)</option>
+                                <option value="gildan">Gildan Softstyle 64000</option>
+                                <option value="bella">Bella+Canvas 3001</option>
+                            </select>
+                        </div>
+
+                        <!-- Specs Notes -->
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-text-primary mb-2">Notes/Specs (optional)</label>
+                            <textarea id="specs-notes" rows="3" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none" placeholder="E.g., Ships on Gildan Softstyle or Bella 3001 based on availability; sizing is the same."></textarea>
+                        </div>
 
                     <!-- Product Specifications -->
                     <div>
@@ -856,6 +878,9 @@
                 colors: selectedColors,
                 sizes: selectedSizes,
                 size_stock: sizeStock, // Add size-specific stock quantities
+                track_inventory: !!document.getElementById('track-inventory').checked,
+                brand_preference: document.getElementById('brand-preference').value,
+                specs_notes: document.getElementById('specs-notes').value,
                 images: uploadedImages,
                 specifications: {
                     material: document.getElementById('spec-material').value,
@@ -994,6 +1019,9 @@
             document.getElementById('stock-quantity').value = '50';
             document.getElementById('low-stock-threshold').value = '5';
             document.getElementById('sale-percentage').value = '15';
+            document.getElementById('track-inventory').checked = false;
+            document.getElementById('brand-preference').value = 'either';
+            document.getElementById('specs-notes').value = '';
             document.getElementById('product-tags').value = '';
             uploadedImages = [];
             updateImagePreviews();
