@@ -397,7 +397,7 @@
                                 <span id="qtyValue" class="px-4 py-2 border-x border-surface-light">1</span>
                                 <button id="qtyPlus" class="px-3 py-2 hover:bg-surface-light transition-colors">+</button>
                             </div>
-                            <span id="stockSummary" class="text-text-secondary text-sm">&nbsp;</span>
+                            <span id="stockSummary" class="text-text-secondary text-sm hidden">&nbsp;</span>
                         </div>
                         
                         <div class="space-y-3">
@@ -1359,7 +1359,7 @@
             }
         });
 
-        // Quantity selector with dynamic stock summary
+        // Quantity selector (no visible stock summary)
         const qtyMinus = document.getElementById('qtyMinus');
         const qtyPlus = document.getElementById('qtyPlus');
         const qtyValue = document.getElementById('qtyValue');
@@ -1375,14 +1375,7 @@
             } else {
                 baseStock = Object.keys(sizeStock).reduce((s,k)=>s + Number(sizeStock[k]||0), 0);
             }
-            const stockSummaryEl = document.getElementById('stockSummary');
-            if (stockSummaryEl) {
-                const q = parseInt(qtyValue?.textContent || '1');
-                const remaining = Math.max(0, baseStock - q);
-                if (remaining <= 0) stockSummaryEl.textContent = 'Sold Out';
-                else if (remaining <= 5) stockSummaryEl.textContent = `Only ${remaining} left in stock`;
-                else stockSummaryEl.textContent = `${remaining} in stock`;
-            }
+            // Intentionally not displaying stock summary per client request
         }
         if (qtyMinus && qtyPlus && qtyValue) {
             qtyMinus.addEventListener('click', () => {
@@ -1804,8 +1797,8 @@
                     let sizes = Array.isArray(product.sizes) && product.sizes.length > 0
                         ? product.sizes
                         : Object.keys(product.size_stock || {});
-                    // Sort sizes to consistent order
-                    sizes = sizes.sort((a,b) => knownOrder.indexOf(a) - knownOrder.indexOf(b));
+                    // Remove XS defensively and sort
+                    sizes = sizes.filter(s => s !== 'XS').sort((a,b) => knownOrder.indexOf(a) - knownOrder.indexOf(b));
 
                     const sizeStock = product.size_stock || {};
 

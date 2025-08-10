@@ -3045,8 +3045,12 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
     // Insert product with sequential ID
     console.log(`💾 Inserting product into database: ID ${nextId}, Name: ${name}`);
     
-    // Collect size stock quantities from the request
-    const sizeStock = req.body.size_stock || {};
+    // Collect size stock quantities from the request (sanitize: remove XS)
+    const sizeStockRaw = req.body.size_stock || {};
+    const sizeStock = Object.fromEntries(Object.entries(sizeStockRaw).filter(([k]) => k !== 'XS'));
+    // Sanitize sizes: ensure array and drop XS
+    const sizesArray = Array.isArray(sizes) ? sizes : [];
+    const sizesFiltered = sizesArray.filter(s => s !== 'XS');
     
     const result = await pool.query(`
       INSERT INTO products (
@@ -3060,7 +3064,7 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
       nextId, name, description, price, original_price, image_url, category, 'Featured',
       processedTags, stock_quantity || 50, low_stock_threshold || 5,
       true, true, sale_percentage || 15, JSON.stringify(colors || []), 
-      JSON.stringify(sizes || []), JSON.stringify(specifications || {}),
+      JSON.stringify(sizesFiltered), JSON.stringify(specifications || {}),
       JSON.stringify(features || {}), JSON.stringify(sub_images), JSON.stringify(sizeStock),
       !!req.body.track_inventory, req.body.brand_preference || 'either', req.body.specs_notes || ''
     ]);
@@ -3225,7 +3229,7 @@ app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
     `, [
       name, description, price, original_price, final_image_url, category,
       processedTags, stock_quantity || 50, low_stock_threshold || 5,
-      sale_percentage || 15, JSON.stringify(colors || []), JSON.stringify(sizes || []),
+      sale_percentage || 15, JSON.stringify(colors || []), JSON.stringify((Array.isArray(sizes) ? sizes.filter(s => s !== 'XS') : [])),
       JSON.stringify(specifications || {}), JSON.stringify(features || {}),
       JSON.stringify(final_sub_images), JSON.stringify(size_stock || {}),
       !!req.body.track_inventory, req.body.brand_preference || 'either', req.body.specs_notes || '',
