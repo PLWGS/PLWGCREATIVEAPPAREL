@@ -105,6 +105,8 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// (moved) Process all pending orders route is defined later after middleware
+
 // Helper function to check database availability
 function checkDatabase() {
   if (!pool) {
@@ -1329,6 +1331,26 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
   }
 });
 
+// Process all pending orders into processing
+app.post('/api/orders/process-all', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) {
+    return res.json({ moved: 0 });
+  }
+  try {
+    const result = await pool.query(`
+      UPDATE orders
+      SET status = 'processing', updated_at = CURRENT_TIMESTAMP
+      WHERE status = 'pending'
+      RETURNING id
+    `);
+    res.json({ moved: result.rowCount });
+  } catch (e) {
+    console.error('Error processing all orders:', e);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Export orders as CSV for a given period
 app.get('/api/orders/export', authenticateToken, async (req, res) => {
   const dbCheck = checkDatabase();
@@ -1436,6 +1458,45 @@ app.get('/api/admin/activity', authenticateToken, async (req, res) => {
   } catch (e) {
     console.error('Error fetching admin activity:', e);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// =============================================================================
+// NOTIFICATIONS (READ-ONLY + MARK READ)
+// =============================================================================
+
+app.get('/api/admin/notifications', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) return res.json({ notifications: [] });
+  try {
+    const { unread } = req.query;
+    const where = unread === 'true' ? 'WHERE is_read = false' : '';
+    const result = await pool.query(`
+      SELECT id, type, title, body, link, is_read, created_at
+      FROM notifications
+      ${where}
+      ORDER BY created_at DESC
+      LIMIT 50
+    `);
+    res.json({ notifications: result.rows });
+  } catch (e) {
+    // If table does not exist yet, return empty array safely
+    console.warn('Notifications fetch fallback:', e.message);
+    res.json({ notifications: [] });
+  }
+});
+
+app.patch('/api/admin/notifications/read', authenticateToken, async (req, res) => {
+  const dbCheck = checkDatabase();
+  if (!dbCheck.available) return res.json({ updated: 0 });
+  try {
+    const result = await pool.query(`
+      UPDATE notifications SET is_read = true WHERE is_read = false RETURNING id
+    `);
+    res.json({ updated: result.rowCount });
+  } catch (e) {
+    console.warn('Notifications mark-read fallback:', e.message);
+    res.json({ updated: 0 });
   }
 });
 

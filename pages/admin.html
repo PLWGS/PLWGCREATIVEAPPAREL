@@ -237,12 +237,22 @@
 
                 <div class="flex items-center space-x-4">
                     <!-- Notifications -->
-                    <button class="relative text-text-secondary hover:text-accent transition-colors">
+                    <div class="relative">
+                    <button id="notifBtn" class="relative text-text-secondary hover:text-accent transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM11 17H7l4 4v-4zM13 3h4l-2 14h-4L13 3zM7 3h4l-2 14H5L7 3z"/>
                         </svg>
                         <div class="notification-dot absolute -top-1 -right-1"></div>
                     </button>
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 glass-card rounded-xl p-4 z-50">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-white text-sm font-medium">Notifications</h4>
+                            <button id="markAllRead" class="text-accent text-xs">Mark all read</button>
+                        </div>
+                        <div id="notifList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                        <div id="notifEmpty" class="text-text-secondary text-sm py-2 hidden">No new notifications</div>
+                    </div>
+                    </div>
 
                     <!-- View Store -->
                     <a href="homepage.html" class="btn-primary text-sm px-4 py-2">
@@ -437,7 +447,7 @@
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="font-orbitron text-xl font-bold text-white">Order Management</h2>
                     <div class="flex space-x-3">
-                        <button class="btn-primary text-sm px-4 py-2">Process All</button>
+                        <button id="processAllOrdersBtn" class="btn-primary text-sm px-4 py-2">Process All</button>
                         <button id="exportOrdersBtn" class="border border-accent text-accent px-4 py-2 rounded-lg text-sm hover:bg-accent hover:text-black transition-all duration-300">
                             Export Orders
                         </button>
@@ -1494,9 +1504,106 @@
         const exportOrdersBtn = document.getElementById('exportOrdersBtn');
         if (exportOrdersBtn) {
             exportOrdersBtn.addEventListener('click', async () => {
+                const token = localStorage.getItem('adminToken');
+                if (!token) { return window.location.href = 'admin-login.html'; }
                 const periodSel = document.getElementById('sales-period');
                 const period = periodSel ? periodSel.value : '7d';
-                window.open(`/api/orders/export?period=${encodeURIComponent(period)}`, '_blank');
+                try {
+                    const res = await fetch(`/api/orders/export?period=${encodeURIComponent(period)}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) {
+                        showNotification('Export failed', 'error');
+                        return;
+                    }
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `orders_${period}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    showNotification('Orders exported', 'success');
+                } catch (e) {
+                    console.error('Export error', e);
+                    showNotification('Network error exporting', 'error');
+                }
+            });
+        }
+
+        const processAllOrdersBtn = document.getElementById('processAllOrdersBtn');
+        if (processAllOrdersBtn) {
+            processAllOrdersBtn.addEventListener('click', async () => {
+                const ok = confirm('Move all pending orders to processing?');
+                if (!ok) return;
+                try {
+                    const response = await apiRequest('/api/orders/process-all', { method: 'POST' });
+                    const data = response ? await response.json() : null;
+                    if (response && response.ok) {
+                        showNotification(`${data.moved || 0} orders moved to processing`, 'success');
+                        loadOrders();
+                    } else {
+                        showNotification('Failed to process orders', 'error');
+                    }
+                } catch (e) {
+                    console.error('Error processing orders:', e);
+                    showNotification('Error processing orders', 'error');
+                }
+            });
+        }
+
+        // Notifications
+        const notifBtn = document.getElementById('notifBtn');
+        const notifDropdown = document.getElementById('notifDropdown');
+        const notifList = document.getElementById('notifList');
+        const notifEmpty = document.getElementById('notifEmpty');
+        const markAllRead = document.getElementById('markAllRead');
+
+        async function loadNotifications() {
+            try {
+                const res = await apiRequest('/api/admin/notifications?unread=true');
+                if (!res) return;
+                const data = await res.json();
+                const items = (data && data.notifications) || [];
+                if (!items.length) {
+                    if (notifEmpty) notifEmpty.classList.remove('hidden');
+                    if (notifList) notifList.innerHTML = '';
+                    return;
+                }
+                if (notifEmpty) notifEmpty.classList.add('hidden');
+                if (notifList) {
+                    notifList.innerHTML = items.map(n => `
+                        <div class="p-2 bg-surface-dark rounded border border-surface-light">
+                            <div class="flex items-center justify-between">
+                                <span class="text-white text-xs font-medium">${n.title || n.type || 'Notification'}</span>
+                                <span class="text-text-secondary text-2xs">${formatTimeAgo(n.created_at)}</span>
+                            </div>
+                            ${n.body ? `<div class="text-text-secondary text-xs mt-1">${n.body}</div>` : ''}
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { console.error('Load notifications error', e); }
+        }
+
+        if (notifBtn) {
+            notifBtn.addEventListener('click', async () => {
+                notifDropdown.classList.toggle('hidden');
+                if (!notifDropdown.classList.contains('hidden')) {
+                    await loadNotifications();
+                }
+            });
+        }
+        if (markAllRead) {
+            markAllRead.addEventListener('click', async () => {
+                try {
+                    const res = await apiRequest('/api/admin/notifications/read', { method: 'PATCH' });
+                    if (res && res.ok) {
+                        await loadNotifications();
+                        showNotification('All notifications marked as read', 'success');
+                    }
+                } catch (e) { console.error('Mark all read error', e); }
             });
         }
 
