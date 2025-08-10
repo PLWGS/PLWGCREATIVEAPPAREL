@@ -2,7 +2,7 @@
 (function () {
   if (window.__DHWS_INJECTOR_ACTIVE__) return; // prevent double-run
   window.__DHWS_INJECTOR_ACTIVE__ = true;
-  window.__DHWS_INJECTOR_VERSION__ = '2025-08-09-3';
+  window.__DHWS_INJECTOR_VERSION__ = '2025-08-09-4';
 
   const log = (...args) => {
     try { console.log('[dhws-data-injector]', ...args); } catch (_) {}
@@ -83,8 +83,7 @@
 
   function ensureToolbar() {
     if (document.getElementById('globalTopRightBar')) return;
-
-    // If the page already has its own menu toggle, skip injecting ours
+    // If the page already has a native toggle, skip
     const nativeMenu = document.querySelector('button[id*="menu" i], button[class*="menu" i], button[aria-label*="menu" i]');
     if (nativeMenu) { log('native hamburger detected – skipping injection'); return; }
 
@@ -92,11 +91,21 @@
 
     const bar = document.createElement('div');
     bar.id = 'globalTopRightBar';
+    // Centered, safe-area aware, mobile-only anchor
+    bar.style.position = 'fixed';
+    bar.style.top = '10px';
+    bar.style.left = '50%';
+    bar.style.transform = 'translateX(-50%)';
+    bar.style.zIndex = '2147483647';
+    bar.style.display = 'flex';
+    bar.style.gap = '10px';
+    bar.style.pointerEvents = 'auto';
 
     const menuBtn = document.createElement('button');
     menuBtn.id = 'globalMenuBtn';
     menuBtn.setAttribute('aria-label', 'Open menu');
     menuBtn.textContent = '☰';
+    menuBtn.style.cssText = 'font-size:22px;padding:8px 10px;border-radius:10px;border:0;background:rgba(0,0,0,0.65);color:#fff;box-shadow:0 0 0 2px rgba(0,188,212,0.7)';
     menuBtn.addEventListener('click', () => open());
 
     // Reuse existing cart if present; otherwise add fallback
@@ -105,6 +114,7 @@
     cartBtn.id = 'globalCartBtn';
     cartBtn.setAttribute('aria-label', 'Cart');
     cartBtn.textContent = '🛒';
+    cartBtn.style.cssText = menuBtn.style.cssText;
     cartBtn.addEventListener('click', () => {
       if (cartTarget && cartTarget.click) { cartTarget.click(); return; }
       const here = window.location.pathname;
@@ -115,10 +125,10 @@
     bar.appendChild(menuBtn);
     bar.appendChild(cartBtn);
     document.body.appendChild(bar);
-    // Ensure toolbar not hidden by parent overflow
-    const root = document.documentElement; const body = document.body;
-    if (getComputedStyle(body).overflow !== 'visible') { body.style.overflowX = 'visible'; }
-    log('toolbar injected');
+    // Prevent horizontal clipping
+    const body = document.body;
+    try { if (getComputedStyle(body).overflowX !== 'visible') body.style.overflowX = 'visible'; } catch(_) {}
+    log('toolbar injected (centered)');
   }
 
   function hideAdminLinksUntilVerified() {
@@ -151,6 +161,14 @@
     }
 
     maybeInject();
+    // Persist if removed by other scripts
+    const mo = new MutationObserver(() => {
+      const w = (window.innerWidth || document.documentElement.clientWidth);
+      if (w <= 640 && !document.getElementById('globalTopRightBar')) {
+        ensureToolbar();
+      }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
     window.addEventListener('resize', maybeInject);
     hideAdminLinksUntilVerified();
     log('Loaded v', window.__DHWS_INJECTOR_VERSION__);
