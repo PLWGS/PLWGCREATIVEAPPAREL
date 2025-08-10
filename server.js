@@ -2592,7 +2592,7 @@ app.get('/api/admin/products', authenticateToken, async (req, res) => {
 
   try {
     const result = await pool.query(`
-      SELECT * FROM products ORDER BY created_at DESC
+      SELECT * FROM products WHERE is_active = true ORDER BY created_at DESC
     `);
     res.json(result.rows);
   } catch (error) {
@@ -2610,7 +2610,7 @@ app.get('/api/admin/products/:id', authenticateToken, async (req, res) => {
   try {
     const productId = req.params.id;
     const result = await pool.query(`
-      SELECT * FROM products WHERE id = $1
+      SELECT * FROM products WHERE id = $1 AND is_active = true
     `, [productId]);
 
     if (result.rows.length === 0) {
@@ -2968,12 +2968,12 @@ app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
       }
     }
 
-    // Delete product from database
+    // Soft-delete: mark product inactive to preserve order history
     await pool.query(`
-      DELETE FROM products WHERE id = $1
+      UPDATE products SET is_active = false, updated_at = CURRENT_TIMESTAMP WHERE id = $1
     `, [productId]);
 
-    console.log(`✅ Product ${productId} deleted successfully`);
+    console.log(`✅ Product ${productId} archived (soft-deleted) successfully`);
 
     // Delete edit page for the product
     const editPagePattern = `product-edit-product-${productId}_*.html`;
@@ -2992,7 +2992,7 @@ app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
       console.log(`⚠️ Error deleting edit page for product ${productId}:`, error.message);
     }
 
-    res.json({ message: 'Product deleted successfully' });
+    res.json({ message: 'Product archived successfully' });
   } catch (error) {
     console.error('Error deleting product:', error);
     res.status(500).json({ error: 'Failed to delete product' });
