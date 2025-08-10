@@ -769,9 +769,7 @@
                                         </thead>
                                         <tbody class="text-text-secondary">
                                             <tr class="border-b border-surface-light">
-                                                <td class="py-3 font-semibold">XS</td>
-                                                <td class="py-3">31-34</td>
-                                                <td class="py-3">27</td>
+                                                
                                                 <td class="py-3">15.5</td>
                                             </tr>
                                             <tr class="border-b border-surface-light">
@@ -1815,7 +1813,7 @@
                     console.log('📏 Updating size options with:', product.sizes, product.size_stock);
 
                     // Build size list: prefer explicit product.sizes; else derive keys from size_stock
-                    const knownOrder = ['XS','S','M','L','XL','XXL'];
+                    const knownOrder = ['S','M','L','XL','XXL'];
                     let sizes = Array.isArray(product.sizes) && product.sizes.length > 0
                         ? product.sizes
                         : Object.keys(product.size_stock || {});

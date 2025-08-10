@@ -349,11 +349,6 @@
                                 <label class="block text-sm font-medium text-text-primary mb-2">Available Sizes & Stock</label>
                                 <div class="space-y-3" id="size-options">
                                     <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
-                                        <div class="size-option selected flex-1" data-size="XS">XS</div>
-                                        <input type="number" id="stock-xs" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="10" value="10" min="0">
-                                        <span class="text-text-secondary text-sm">in stock</span>
-                                    </div>
-                                    <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
                                         <div class="size-option selected flex-1" data-size="S">S</div>
                                         <input type="number" id="stock-s" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="15" value="15" min="0">
                                         <span class="text-text-secondary text-sm">in stock</span>
@@ -478,7 +473,7 @@
         const productId = 1;
         let uploadedImages = [];
         let selectedColors = ['Black'];
-        let selectedSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+        let selectedSizes = ['S', 'M', 'L', 'XL', 'XXL'];
         let productData = null;
 
         // Initialize page
@@ -567,12 +562,12 @@
             updateColorSelection();
 
             // Sizes
-            selectedSizes = productData.sizes || ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+            selectedSizes = (productData.sizes || ['S', 'M', 'L', 'XL', 'XXL']).filter(s => s !== 'XS');
             updateSizeSelection();
             
             // Load size stock quantities
             const sizeStock = productData.size_stock || {};
-            document.getElementById('stock-xs').value = sizeStock.XS || 10;
+            
             document.getElementById('stock-s').value = sizeStock.S || 15;
             document.getElementById('stock-m').value = sizeStock.M || 20;
             document.getElementById('stock-l').value = sizeStock.L || 20;
@@ -755,9 +750,7 @@
             
             // Collect size stock quantities
             const sizeStock = {};
-            if (selectedSizes.includes('XS')) {
-                sizeStock.XS = parseInt(document.getElementById('stock-xs').value) || 0;
-            }
+            
             if (selectedSizes.includes('S')) {
                 sizeStock.S = parseInt(document.getElementById('stock-s').value) || 0;
             }

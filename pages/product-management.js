@@ -88,7 +88,7 @@ class ProductManager {
                 sale_percentage: productData.sale_percentage || 15,
                 tags: productData.tags || [],
                 colors: productData.colors || ['Black'],
-                sizes: productData.sizes || ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+                sizes: (productData.sizes || ['S', 'M', 'L', 'XL', 'XXL']).filter(s => s !== 'XS'),
                 image_url: productData.image_url || null,
                 specifications: productData.specifications || {
                     material: '100% Cotton',
@@ -194,7 +194,7 @@ class ProductManager {
                 sale_percentage: dbProduct.sale_percentage || 15,
                 tags: dbProduct.tags || [],
                 colors: dbProduct.colors || ['Black'],
-                sizes: dbProduct.sizes || ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+                sizes: (dbProduct.sizes || ['S', 'M', 'L', 'XL', 'XXL']).filter(s => s !== 'XS'),
                 image_url: dbProduct.image_url || null,
                 specifications: dbProduct.specifications || {
                     material: '100% Cotton',
@@ -534,9 +534,7 @@ class ProductManager {
                     <div class="form-group">
                         <label class="form-label">Available Sizes</label>
                         <div class="grid grid-cols-3 gap-2 mt-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" value="XS" class="mr-2" ${product.sizes.includes('XS') ? 'checked' : ''}> XS
-                            </label>
+                            
                             <label class="flex items-center">
                                 <input type="checkbox" value="S" class="mr-2" ${product.sizes.includes('S') ? 'checked' : ''}> S
                             </label>
@@ -665,7 +663,7 @@ class ProductManager {
                 sale_percentage: parseInt(document.getElementById('sale-percentage').value),
                 tags: document.getElementById('product-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag),
                 colors: Array.from(document.querySelectorAll('input[type="checkbox"][value^="Black"], input[type="checkbox"][value^="White"], input[type="checkbox"][value^="Navy"], input[type="checkbox"][value^="Gray"], input[type="checkbox"][value^="Red"], input[type="checkbox"][value^="Green"]:checked')).map(cb => cb.value),
-                sizes: Array.from(document.querySelectorAll('input[type="checkbox"][value^="XS"], input[type="checkbox"][value^="S"], input[type="checkbox"][value^="M"], input[type="checkbox"][value^="L"], input[type="checkbox"][value^="XL"], input[type="checkbox"][value^="XXL"]:checked')).map(cb => cb.value),
+                sizes: Array.from(document.querySelectorAll('input[type="checkbox"][value^="S"], input[type="checkbox"][value^="M"], input[type="checkbox"][value^="L"], input[type="checkbox"][value^="XL"], input[type="checkbox"][value^="XXL"]:checked')).map(cb => cb.value),
                 specifications: {
                     material: document.getElementById('spec-material').value,
                     weight: document.getElementById('spec-weight').value,

@@ -381,11 +381,6 @@
                             <label class="block text-sm font-medium text-text-primary mb-2">Available Sizes & Stock</label>
                             <div class="space-y-3" id="size-options">
                                 <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
-                                    <div class="size-option selected flex-1" data-size="XS">XS</div>
-                                    <input type="number" id="stock-xs" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="10" value="10" min="0">
-                                    <span class="text-text-secondary text-sm">in stock</span>
-                                </div>
-                                <div class="flex items-center space-x-3 p-3 bg-surface-light rounded-lg">
                                     <div class="size-option selected flex-1" data-size="S">S</div>
                                     <input type="number" id="stock-s" class="w-20 px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm" placeholder="15" value="15" min="0">
                                     <span class="text-text-secondary text-sm">in stock</span>
@@ -536,7 +531,7 @@
         // Global variables
         let uploadedImages = [];
         let selectedColors = ['Black'];
-        let selectedSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+        let selectedSizes = ['S', 'M', 'L', 'XL', 'XXL'];
         let allProducts = [];
 
         // Initialize page
@@ -1003,7 +998,7 @@
             uploadedImages = [];
             updateImagePreviews();
             selectedColors = ['Black'];
-            selectedSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+            selectedSizes = ['S', 'M', 'L', 'XL', 'XXL'];
             updateColorSelection();
             updateSizeSelection();
             
