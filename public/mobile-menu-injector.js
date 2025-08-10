@@ -152,6 +152,19 @@
   function init() {
     ensureToolbar();
     createMobileDrawer();
+
+    // Abbreviate brand on mobile: PlwgsCreativeApparel -> PLWGS
+    try {
+      if (isMobileViewport()) {
+        const brandNodes = Array.from(document.querySelectorAll('span, a, div, h1, h2')).filter(el => /PlwgsCreativeApparel/i.test(el.textContent || ''));
+        brandNodes.forEach(el => {
+          el.textContent = 'PLWGS';
+          el.style.fontSize = '20px';
+          el.style.fontWeight = '800';
+          el.style.letterSpacing = '0.5px';
+        });
+      }
+    } catch (_) {}
   }
 
   if (document.readyState === 'loading') {
