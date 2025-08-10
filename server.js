@@ -105,6 +105,60 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Customer wishlist endpoints
+app.get('/wishlist', authenticateCustomer, async (req, res) => {
+  if (!pool) return res.json({ wishlist: [] });
+  try {
+    const customerId = req.customer.id;
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS wishlist (
+        id SERIAL PRIMARY KEY,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE,
+        product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    const result = await pool.query(`
+      SELECT w.product_id, p.name, p.image_url, p.price
+      FROM wishlist w LEFT JOIN products p ON p.id = w.product_id
+      WHERE w.customer_id = $1
+      ORDER BY w.created_at DESC
+    `, [customerId]);
+    res.json({ wishlist: result.rows });
+  } catch (e) {
+    console.error('Error fetching wishlist:', e);
+    res.json({ wishlist: [] });
+  }
+});
+
+app.post('/wishlist', authenticateCustomer, async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  try {
+    const customerId = req.customer.id;
+    const { product_id } = req.body;
+    if (!product_id) return res.status(400).json({ error: 'product_id required' });
+    await pool.query(`INSERT INTO wishlist (customer_id, product_id)
+                      VALUES ($1, $2)
+                      ON CONFLICT DO NOTHING`, [customerId, product_id]);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Error adding to wishlist:', e);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/wishlist/:productId', authenticateCustomer, async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  try {
+    const customerId = req.customer.id;
+    const productId = req.params.productId;
+    await pool.query(`DELETE FROM wishlist WHERE customer_id = $1 AND product_id = $2`, [customerId, productId]);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Error removing from wishlist:', e);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // (moved) Process all pending orders route is defined later after middleware
 
 // Helper function to check database availability

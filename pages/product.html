@@ -298,7 +298,12 @@
                             <img id="mainImage" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Product Image" class="main-image w-full h-96 lg:h-[500px] object-contain cursor-zoom-in" loading="lazy" />
                             
                             <!-- Zoom Icon -->
-                            <div class="absolute top-4 right-4 bg-black bg-opacity-50 rounded-full p-2">
+                            <div class="absolute top-4 right-4 bg-black bg-opacity-50 rounded-full p-2 flex space-x-2">
+                                <button id="wishlistBtn" class="heart-icon">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
+                                    </svg>
+                                </button>
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
@@ -1478,6 +1483,31 @@
                     console.error('Error adding to cart:', error);
                     alert('Error adding item to cart: ' + error.message);
                 }
+            });
+        }
+
+        // Wishlist click
+        const wishlistBtn = document.getElementById('wishlistBtn');
+        if (wishlistBtn) {
+            wishlistBtn.addEventListener('click', async () => {
+                try {
+                    const token = localStorage.getItem('customerToken');
+                    if (!token) {
+                        window.location.href = 'customer-login.html';
+                        return;
+                    }
+                    // Use current product id from URL or embedded data
+                    const url = new URL(window.location.href);
+                    const productId = Number(url.searchParams.get('id')) || (productData && productData.id);
+                    if (!productId) return;
+                    const res = await apiRequest('/wishlist', { method: 'POST', body: JSON.stringify({ product_id: productId }) });
+                    if (res && res.ok) {
+                        showNotification('Added to wishlist', 'success');
+                        wishlistBtn.classList.add('active');
+                    } else {
+                        showNotification('Failed to add to wishlist', 'error');
+                    }
+                } catch (e) { console.error('Wishlist add failed', e); }
             });
         }
         
