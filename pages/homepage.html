@@ -340,7 +340,7 @@
                 <p class="text-text-secondary text-lg max-w-2xl mx-auto">See how our creative rebels style their PlwgsCreativeApparel pieces in the wild</p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div id="spotlight-grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Customer 1 -->
                 <div class="glass-card rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
                     <div class="relative">
@@ -400,7 +400,7 @@
                 <p class="text-text-secondary text-lg max-w-2xl mx-auto">Join the creative rebellion and share your style with our community</p>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div id="ig-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 <!-- Instagram Post 1 -->
                 <div class="aspect-square glass-card rounded-lg overflow-hidden group cursor-pointer">
                     <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Product Showcase" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=300'; this.onerror=null;" />
@@ -736,6 +736,75 @@
         
         // Update cart counter on page load
         updateCartCounter();
+
+        // Dynamic: Hero slides + Featured collections + Spotlights + IG grid
+        async function fetchPublicProducts(){
+          try{ const r = await fetch('/api/products/public'); if(!r.ok) return []; const d = await r.json(); return Array.isArray(d)?d:[]; }catch(e){ return []; }
+        }
+        function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+        function pickN(list, n){ return shuffle(list.slice()).slice(0,n); }
+
+        function setHero(index, p){
+          const imgEl = document.getElementById(`hero-img-${index}`);
+          const titleEl = document.getElementById(`hero-title-${index}`);
+          const subEl = document.getElementById(`hero-sub-${index}`);
+          const slideEl = document.getElementById(`hero-slide-${index}`);
+          if(!imgEl || !titleEl || !subEl || !slideEl) return;
+          if(p){
+            imgEl.src = p.image_url || imgEl.src;
+            titleEl.textContent = p.name || 'Featured Design';
+            subEl.textContent = `$${Number(p.price||0).toFixed(2)} · ${p.category||'New'}`;
+            slideEl.href = `product.html?id=${p.id}`;
+          }
+        }
+
+        function renderCollectionCards(products){
+          // Replace the three collection images with random product images and links
+          const colImgs = document.querySelectorAll('.glass-card img[loading="lazy"][alt="Featured Product"]');
+          const picks = pickN(products, Math.min(3, products.length));
+          colImgs.forEach((img, i)=>{
+            const p = picks[i]; if(!p) return; img.src = p.image_url || img.src; const container = img.closest('.glass-card'); if(container){ const a = container.querySelector('a.text-accent'); if(a){ a.href = `product.html?id=${p.id}`; a.textContent = 'View Design →'; } const h3 = container.querySelector('h3'); if(h3) h3.textContent = p.name; const priceEl = container.querySelector('.text-accent.font-bold'); if(priceEl) priceEl.textContent = `$${Number(p.price||0).toFixed(2)}`; }
+          });
+        }
+
+        function renderSpotlights(products){
+          const grid = document.getElementById('spotlight-grid'); if(!grid) return;
+          const picks = pickN(products, Math.min(4, products.length));
+          if(picks.length===0) return;
+          grid.innerHTML = picks.map(p=>`
+            <a href="product.html?id=${p.id}" class="glass-card rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
+              <div class="relative">
+                <img src="${p.image_url}" alt="${p.name}" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div class="absolute bottom-4 left-4 right-4">
+                  <p class="text-white text-sm font-medium">${p.name}</p>
+                  <p class="text-text-secondary text-xs">$${Number(p.price||0).toFixed(2)}</p>
+                </div>
+              </div>
+            </a>
+          `).join('');
+        }
+
+        function renderIGGrid(products){
+          const grid = document.getElementById('ig-grid'); if(!grid) return;
+          const picks = pickN(products, Math.min(12, products.length));
+          if(picks.length===0) return;
+          grid.innerHTML = picks.map(p=>`
+            <a href="product.html?id=${p.id}" class="aspect-square glass-card rounded-lg overflow-hidden group cursor-pointer">
+              <img src="${p.image_url}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" />
+            </a>
+          `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+          const products = await fetchPublicProducts();
+          if(products.length===0) return;
+          const heroPicks = pickN(products, Math.min(3, products.length));
+          heroPicks.forEach((p,i)=> setHero(i+1, p));
+          renderCollectionCards(products);
+          renderSpotlights(products);
+          renderIGGrid(products);
+        });
     </script>
 <script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
 <script>
