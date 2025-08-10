@@ -2824,15 +2824,49 @@ app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
     let final_image_url = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
     let final_sub_images = [];
     
-    // Handle both old format (images array) and new format (image_url + sub_images)
-    let imagesToUpload = [];
-    let hasNewImages = false;
-    
-    if (images && images.length > 0) {
-      // New images uploaded (base64 format)
-      imagesToUpload = images;
-      hasNewImages = true;
-      console.log(`📸 Found ${images.length} new images to upload`);
+    // Handle images from client. Supports three cases:
+    // 1) images: array of objects { data } (legacy create flow)
+    // 2) images: array of strings: either data URLs (base64) or http(s) URLs (mixed)
+    // 3) image_url + sub_images: keep existing URLs
+    let processedMixedImages = null; // when provided via 'images'
+
+    if (Array.isArray(images) && images.length > 0) {
+      console.log(`📸 Received ${images.length} images from client for processing`);
+      processedMixedImages = [];
+
+      for (let i = 0; i < Math.min(images.length, 5); i += 1) {
+        const item = images[i];
+        try {
+          // Case A: object with .data (base64)
+          if (item && typeof item === 'object' && typeof item.data === 'string') {
+            const url = await uploadImageToCloudinary(item.data, name, i + 1, i === 0);
+            processedMixedImages.push(url);
+            continue;
+          }
+          // Case B: string data URL (base64) → upload
+          if (typeof item === 'string' && item.startsWith('data:')) {
+            const url = await uploadImageToCloudinary(item, name, i + 1, i === 0);
+            processedMixedImages.push(url);
+            continue;
+          }
+          // Case C: string http(s) URL → keep as-is
+          if (typeof item === 'string' && /^https?:\/\//i.test(item)) {
+            processedMixedImages.push(item);
+            continue;
+          }
+        } catch (uErr) {
+          console.error(`❌ Failed processing image index ${i}:`, uErr?.message || uErr);
+        }
+      }
+
+      // Apply processed images if at least one valid
+      if (processedMixedImages.length > 0) {
+        final_image_url = processedMixedImages[0] || final_image_url;
+        final_sub_images = processedMixedImages.slice(1);
+        console.log(`✅ Final images prepared from mixed payload. main=${final_image_url}, subs=${final_sub_images.length}`);
+      } else {
+        console.warn('⚠️ No valid images processed from payload; retaining existing image_url/sub_images');
+      }
     } else if (image_url || (sub_images && sub_images.length > 0)) {
       // Existing images (URL format) - keep them as is
       if (image_url && !image_url.startsWith('data:')) {
@@ -2842,31 +2876,6 @@ app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
       if (sub_images && Array.isArray(sub_images)) {
         final_sub_images = sub_images.filter(img => img && !img.startsWith('data:'));
         console.log(`✅ Keeping ${final_sub_images.length} existing sub images`);
-      }
-    }
-    
-    if (hasNewImages && imagesToUpload.length > 0) {
-      try {
-        console.log(`☁️ Uploading ${imagesToUpload.length} new images to Cloudinary for product: ${name}`);
-        
-        // Upload new images to Cloudinary
-        const uploadedUrls = await uploadProductImages(imagesToUpload, name);
-        
-        if (uploadedUrls.mainImage) {
-          final_image_url = uploadedUrls.mainImage;
-          console.log(`✅ New main image uploaded to Cloudinary: ${final_image_url}`);
-        }
-        
-        if (uploadedUrls.subImages.length > 0) {
-          final_sub_images = uploadedUrls.subImages;
-          console.log(`✅ ${final_sub_images.length} new sub images uploaded to Cloudinary`);
-        }
-        
-        console.log(`🎉 All new images uploaded successfully to Cloudinary for product: ${name}`);
-      } catch (imageError) {
-        console.error('❌ Error uploading new images to Cloudinary:', imageError);
-        // Continue without updating images if there's an error
-        console.log('⚠️ Continuing product update without image changes');
       }
     }
 
