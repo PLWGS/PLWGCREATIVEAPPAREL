@@ -86,6 +86,7 @@ class ProductManager {
                 stock_quantity: productData.stock_quantity || 50,
                 low_stock_threshold: productData.low_stock_threshold || 5,
                 sale_percentage: productData.sale_percentage || 15,
+                // Tags retained internally for search but not shown on product page
                 tags: productData.tags || [],
                 colors: productData.colors || ['Black'],
                 sizes: (productData.sizes || ['S', 'M', 'L', 'XL', 'XXL']).filter(s => s !== 'XS'),

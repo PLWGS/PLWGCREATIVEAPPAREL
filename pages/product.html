@@ -361,18 +361,13 @@
                         </div>
                     </div>
 
-                    <!-- Design Story -->
+                    <!-- Design Story (tags hidden) -->
                     <div class="glass-card rounded-xl p-6">
                         <h3 class="font-orbitron text-xl font-bold text-white mb-4">Design Story</h3>
                         <p id="productDescription" class="product-description text-text-secondary leading-relaxed">
                             Quality printed design with custom artwork. Perfect for those who want to express their unique style.
                         </p>
-                        <div class="flex flex-wrap gap-2 mt-4 product-tags">
-                            <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#Horror</span>
-                            <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#Gothic</span>
-                            <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#StreetArt</span>
-                            <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#Vintage</span>
-                        </div>
+                        <div class="flex flex-wrap gap-2 mt-4 product-tags hidden"></div>
                     </div>
 
                     <!-- Size Selection -->
@@ -1796,15 +1791,7 @@
                 }
             }
             
-            // Update tags if available
-            if (product.tags && product.tags.length > 0) {
-                const tagsContainer = document.querySelector('.product-tags');
-                if (tagsContainer) {
-                    tagsContainer.innerHTML = product.tags.map(tag => `
-                        <span class="bg-surface-light text-accent px-3 py-1 rounded-full text-sm">#${tag}</span>
-                    `).join('');
-                }
-            }
+            // Do not render visible tags; keep container hidden intentionally
             
             // Update sizes and stock dynamically
             if ((product.sizes && product.sizes.length > 0) || product.size_stock) {
