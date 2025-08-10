@@ -983,18 +983,29 @@ app.delete('/api/products/:id', authenticateToken, async (req, res) => {
 // CUSTOMER MANAGEMENT ENDPOINTS
 // =============================================================================
 
-// Get all customers
+// Get all customers (with optional search/pagination)
 app.get('/api/customers', authenticateToken, async (req, res) => {
   try {
+    const { q, limit = 30, offset = 0 } = req.query;
+    const params = [];
+    let where = '';
+    if (q) {
+      where = `WHERE (c.email ILIKE $1 OR COALESCE(c.name,'') ILIKE $1)`;
+      params.push(`%${q}%`);
+    }
+
     const result = await pool.query(`
       SELECT c.*, 
              COUNT(o.id) as total_orders,
-             SUM(o.total_amount) as total_spent
+             COALESCE(SUM(o.total_amount),0) as total_spent
       FROM customers c
       LEFT JOIN orders o ON c.id = o.customer_id
+      ${where}
       GROUP BY c.id
       ORDER BY c.created_at DESC
-    `);
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+    `, [...params, Math.min(parseInt(limit, 10) || 30, 200), parseInt(offset, 10) || 0]);
+
     res.json({ customers: result.rows });
   } catch (error) {
     console.error('Error fetching customers:', error);

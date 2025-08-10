@@ -80,6 +80,10 @@
       const from = document.getElementById('date_from').value;
       const to = document.getElementById('date_to').value;
       params.set('limit','30');
+      // Support deep link by orderId to focus order
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('orderId');
+      if (orderId) params.set('q', orderId);
       if (q) params.set('q', q);
       if (status) params.set('status', status);
       if (from) params.set('date_from', from);

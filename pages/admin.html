@@ -1580,15 +1580,13 @@
                 }
                 if (notifEmpty) notifEmpty.classList.add('hidden');
                 if (notifList) {
-                    notifList.innerHTML = items.map(n => `
-                        <div class="p-2 bg-surface-dark rounded border border-surface-light">
-                            <div class="flex items-center justify-between">
-                                <span class="text-white text-xs font-medium">${n.title || n.type || 'Notification'}</span>
-                                <span class="text-text-secondary text-2xs">${formatTimeAgo(n.created_at)}</span>
-                            </div>
-                            ${n.body ? `<div class="text-text-secondary text-xs mt-1">${n.body}</div>` : ''}
-                        </div>
-                    `).join('');
+                    notifList.innerHTML = items.map(n => {
+                        const href = resolveNotifLink(n.link);
+                        const title = n.title || n.type || 'Notification';
+                        const body = n.body ? `<div class=\"text-text-secondary text-xs mt-1\">${n.body}</div>` : '';
+                        return `
+                        <a href=\"${href}\" class=\"block p-2 bg-surface-dark rounded border border-surface-light hover:bg-surface-light\" onclick=\"document.getElementById('notifDropdown').classList.add('hidden')\">\n                            <div class=\"flex items-center justify-between\">\n                                <span class=\"text-white text-xs font-medium\">${title}</span>\n                                <span class=\"text-text-secondary text-2xs\">${formatTimeAgo(n.created_at)}</span>\n                            </div>\n                            ${body}\n                        </a>`;
+                    }).join('');
                 }
             } catch (e) { console.error('Load notifications error', e); }
         }
@@ -1611,6 +1609,15 @@
                     }
                 } catch (e) { console.error('Mark all read error', e); }
             });
+        }
+
+        function resolveNotifLink(link) {
+            if (!link) return '#';
+            if (link.startsWith('order:')) {
+                const id = link.split(':')[1];
+                return `orders.html?orderId=${encodeURIComponent(id)}`;
+            }
+            return '#';
         }
 
         // Initialize dashboard on page load

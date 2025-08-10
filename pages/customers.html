@@ -15,7 +15,11 @@
 
     <div class="glass-card rounded-xl p-6">
       <div class="flex items-center justify-between mb-4">
-        <button id="refreshCustomers" class="btn-primary px-4 py-2 text-sm">Refresh</button>
+        <div class="flex items-center gap-2 flex-wrap">
+          <input id="q" class="bg-surface border border-surface-light text-text-primary px-3 py-2 rounded text-sm" placeholder="Search name or email" />
+          <button id="applyFilters" class="btn-primary px-4 py-2 text-sm">Search</button>
+          <button id="refreshCustomers" class="border border-accent text-accent px-4 py-2 rounded text-sm">Reset</button>
+        </div>
         <div class="text-text-secondary text-sm">Read-only list</div>
       </div>
       <div id="customersLoading" class="text-center py-6 hidden">
@@ -53,6 +57,9 @@
       return res;
     }
 
+    let pageOffset = 0;
+    const pageLimit = 30;
+
     async function loadCustomers() {
       const loading = document.getElementById('customersLoading');
       const emptyEl = document.getElementById('customersEmpty');
@@ -60,8 +67,10 @@
       loading.classList.remove('hidden');
       emptyEl.classList.add('hidden');
       table.innerHTML = '';
-
-      const res = await apiRequest('/api/customers?limit=50');
+      const q = document.getElementById('q').value.trim();
+      const params = new URLSearchParams({ limit: String(pageLimit), offset: String(pageOffset) });
+      if (q) params.set('q', q);
+      const res = await apiRequest(`/api/customers?${params.toString()}`);
       if (!res) return;
       const data = await res.json();
       if (!res.ok) { loading.classList.add('hidden'); return; }
@@ -82,9 +91,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (!checkAuth()) return;
       loadCustomers();
-      document.getElementById('refreshCustomers').addEventListener('click', loadCustomers);
+      document.getElementById('refreshCustomers').addEventListener('click', () => { document.getElementById('q').value=''; pageOffset = 0; loadCustomers(); });
+      document.getElementById('applyFilters').addEventListener('click', () => { pageOffset = 0; loadCustomers(); });
     });
   </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>
 
