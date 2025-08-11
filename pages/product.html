@@ -1728,9 +1728,14 @@
                 try {
                     const parts = url.split('/upload/');
                     if (parts.length === 2) {
-                        // Use higher base quality for thumbnails to avoid blur
-                        // and let Cloudinary handle smart compression
-                        return parts[0] + `/upload/f_auto,q_auto:good,c_pad,g_center,b_black,w_${w},h_${h}/` + parts[1];
+                        // Strip any existing transforms between /upload/ and /v###/ to avoid
+                        // stacking transforms on an already-derived low-res asset
+                        const afterUpload = parts[1];
+                        const vPos = afterUpload.indexOf('/v');
+                        const tail = vPos >= 0 ? afterUpload.slice(vPos + 1) : afterUpload;
+                        const normalized = (vPos >= 0 ? afterUpload.slice(vPos) : afterUpload);
+                        // Use high-quality delivery with padding to center
+                        return parts[0] + `/upload/f_auto,q_auto:good,c_pad,g_center,b_black,w_${w},h_${h}/` + normalized;
                     }
                     return url;
                 } catch (_) { return url; }
