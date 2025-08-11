@@ -105,62 +105,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Customer wishlist endpoints
-app.get('/wishlist', authenticateCustomer, async (req, res) => {
-  if (!pool) return res.json({ wishlist: [] });
-  try {
-    const customerId = req.customer.id;
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS wishlist (
-        id SERIAL PRIMARY KEY,
-        customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE,
-        product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    const result = await pool.query(`
-      SELECT w.product_id, p.name, p.image_url, p.price
-      FROM wishlist w LEFT JOIN products p ON p.id = w.product_id
-      WHERE w.customer_id = $1
-      ORDER BY w.created_at DESC
-    `, [customerId]);
-    res.json({ wishlist: result.rows });
-  } catch (e) {
-    console.error('Error fetching wishlist:', e);
-    res.json({ wishlist: [] });
-  }
-});
-
-app.post('/wishlist', authenticateCustomer, async (req, res) => {
-  if (!pool) return res.status(500).json({ error: 'Database not available' });
-  try {
-    const customerId = req.customer.id;
-    const { product_id } = req.body;
-    if (!product_id) return res.status(400).json({ error: 'product_id required' });
-    await pool.query(`INSERT INTO wishlist (customer_id, product_id)
-                      VALUES ($1, $2)
-                      ON CONFLICT DO NOTHING`, [customerId, product_id]);
-    res.json({ success: true });
-  } catch (e) {
-    console.error('Error adding to wishlist:', e);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.delete('/wishlist/:productId', authenticateCustomer, async (req, res) => {
-  if (!pool) return res.status(500).json({ error: 'Database not available' });
-  try {
-    const customerId = req.customer.id;
-    const productId = req.params.productId;
-    await pool.query(`DELETE FROM wishlist WHERE customer_id = $1 AND product_id = $2`, [customerId, productId]);
-    res.json({ success: true });
-  } catch (e) {
-    console.error('Error removing from wishlist:', e);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-// (moved) Process all pending orders route is defined later after middleware
-
 // Helper function to check database availability
 function checkDatabase() {
   if (!pool) {
@@ -1452,28 +1396,8 @@ app.get('/api/inventory', authenticateToken, async (req, res) => {
 });
 
 // =============================================================================
-// ORDERS ENDPOINTS (READ-ONLY LIST FOR DASHBOARD)
+// ORDERS HELPERS
 // =============================================================================
-
-app.get('/api/orders', authenticateToken, async (req, res) => {
-  const dbCheck = checkDatabase();
-  if (!dbCheck.available) return res.json({ orders: [] });
-  try {
-    const { limit = 20 } = req.query;
-    const result = await pool.query(`
-      SELECT o.id, o.order_number, o.status, o.total_amount, o.created_at,
-             COALESCE(c.name, '') AS customer_name
-      FROM orders o
-      LEFT JOIN customers c ON c.id = o.customer_id
-      ORDER BY o.created_at DESC
-      LIMIT $1
-    `, [Math.min(parseInt(limit, 10) || 20, 100)]);
-    res.json({ orders: result.rows });
-  } catch (e) {
-    console.error('Error fetching orders:', e);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 // Process all pending orders into processing
 app.post('/api/orders/process-all', authenticateToken, async (req, res) => {
@@ -2185,7 +2109,7 @@ async function sendCustomRequestEmail(customRequest) {
 }
 
 // Get all subscribers (admin endpoint)
-app.get('/api/subscribers', async (req, res) => {
+app.get('/api/subscribers', authenticateToken, async (req, res) => {
   const dbCheck = checkDatabase();
   if (!dbCheck.available) {
     // Return mock data for development
