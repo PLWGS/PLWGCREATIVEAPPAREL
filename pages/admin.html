@@ -1402,7 +1402,8 @@
                 subscribersTableBody.innerHTML = '';
                 subscribersEmpty.classList.add('hidden');
 
-                const response = await fetch('/api/subscribers');
+                const response = await apiRequest('/api/subscribers');
+                if (!response) { subscribersLoading.classList.add('hidden'); return; }
                 const data = await response.json();
 
                 if (response.ok) {
