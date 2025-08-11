@@ -1728,7 +1728,9 @@
                 try {
                     const parts = url.split('/upload/');
                     if (parts.length === 2) {
-                        return parts[0] + `/upload/c_pad,g_center,b_black,q_auto,f_auto,w_${w},h_${h}/` + parts[1];
+                        // Use higher base quality for thumbnails to avoid blur
+                        // and let Cloudinary handle smart compression
+                        return parts[0] + `/upload/f_auto,q_auto:good,c_pad,g_center,b_black,w_${w},h_${h}/` + parts[1];
                     }
                     return url;
                 } catch (_) { return url; }
@@ -1782,7 +1784,7 @@
                 } else {
                     thumbStrip.style.display = 'grid';
                     thumbStrip.innerHTML = allThumbs.slice(0, 5).map((u, idx) => {
-                        const t = padTransform(u, 300, 120);
+                        const t = padTransform(u, 400, 400);
                         const active = idx === 0 ? ' ring-2 ring-accent ' : '';
                         return `<div class="thumbnail rounded-lg overflow-hidden cursor-pointer${active}" data-image="${padTransform(u,800,800)}"><img src="${t}" alt="${product.name} - View ${idx+1}" class="w-full h-20 object-contain bg-surface-dark" loading="lazy"/></div>`;
                     }).join('');

@@ -34,32 +34,16 @@ async function uploadImageToCloudinary(base64Image, productName, imageIndex = 1,
     
     console.log(`☁️ Uploading image ${imageIndex} to Cloudinary for product: ${productName} (${isMainImage ? 'MAIN' : 'THUMBNAIL'})`);
     
-    // Set transformation based on image type
-    let transformation;
-    if (isMainImage) {
-      // Main image: 800x800px for high quality, then let CSS handle display
-      transformation = [
-        { width: 800, height: 800, crop: 'fill', gravity: 'auto' },
-        { quality: 'auto:best' }, // Use best quality
-        { format: 'auto' }
-      ];
-    } else {
-      // Thumbnail: 300x120px for better quality thumbnails
-      transformation = [
-        { width: 300, height: 120, crop: 'fill', gravity: 'auto' },
-        { quality: 'auto:good' },
-        { format: 'auto' }
-      ];
-    }
-    
-    // Upload to Cloudinary with correct sizing
+    // Upload original asset without transformations so we can derive
+    // high-quality, size-appropriate variants on delivery
     const result = await cloudinary.uploader.upload(
       base64Image, // Use the original base64 data URL
       {
         public_id: publicId,
         folder: 'plwg-creative-apparel',
         resource_type: 'image',
-        transformation: transformation
+        overwrite: true,
+        use_filename: false
       }
     );
     
