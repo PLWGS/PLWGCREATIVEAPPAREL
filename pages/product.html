@@ -1500,7 +1500,14 @@
                     const url = new URL(window.location.href);
                     const productId = Number(url.searchParams.get('id')) || (productData && productData.id);
                     if (!productId) return;
-                    const res = await apiRequest('/wishlist', { method: 'POST', body: JSON.stringify({ product_id: productId }) });
+                    const res = await fetch('/api/customer/wishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ product_id: productId })
+                    });
                     if (res && res.ok) {
                         showNotification('Added to wishlist', 'success');
                         wishlistBtn.classList.add('active');
