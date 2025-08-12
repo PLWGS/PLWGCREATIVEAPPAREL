@@ -1816,10 +1816,15 @@
                 return;
             }
 
-            container.innerHTML = list.map(addr => `
+            container.innerHTML = list.map((addr, idx) => `
                 <div class="p-4 bg-surface rounded-lg ${addr.is_default ? 'border-2 border-accent' : 'border border-surface'}">
                     <div class="flex items-center justify-between mb-2">
                         <span class="${addr.is_default ? 'text-accent' : 'text-text-secondary'} text-sm font-bold">${addr.is_default ? 'DEFAULT' : (addr.address_type || 'ADDRESS')}</span>
+                        <div class="flex items-center gap-3 text-sm">
+                            <button class="text-accent" onclick="openEditAddressModal(${idx})">Edit</button>
+                            <button class="text-text-secondary hover:text-error" onclick="deleteAddress(${idx})">Delete</button>
+                            <button class="${addr.is_default ? 'text-text-secondary cursor-not-allowed opacity-50' : 'text-accent'}" ${addr.is_default ? 'disabled' : ''} onclick="setDefaultAddress(${idx})">Set default</button>
+                        </div>
                     </div>
                     <p class="text-white font-medium">${addr.first_name || ''} ${addr.last_name || ''}</p>
                     <p class="text-text-secondary text-sm">${addr.address_line1 || ''}${addr.address_line2 ? (', ' + addr.address_line2) : ''}</p>
@@ -1827,6 +1832,55 @@
                     <p class="text-text-secondary text-sm">${addr.country || 'United States'}</p>
                 </div>
             `).join('');
+        }
+
+        function getCurrentAddresses() {
+            const data = (window.customerData && window.customerData.addresses) || [];
+            return Array.isArray(data) ? JSON.parse(JSON.stringify(data)) : [];
+        }
+
+        async function saveAddresses(updatedAddresses) {
+            const resp = await apiRequest('/profile', {
+                method: 'PUT',
+                body: JSON.stringify({ addresses: updatedAddresses })
+            });
+            return resp && resp.ok;
+        }
+
+        async function setDefaultAddress(index) {
+            try {
+                const addresses = getCurrentAddresses();
+                if (index < 0 || index >= addresses.length) return;
+                const updated = addresses.map((a, i) => ({ ...a, is_default: i === index }));
+                const ok = await saveAddresses(updated);
+                if (ok) {
+                    showNotification('Default address set', 'success');
+                    await loadCustomerProfile();
+                } else {
+                    showNotification('Failed to set default address', 'error');
+                }
+            } catch (e) {
+                console.error('setDefaultAddress error', e);
+                showNotification('Network error setting default', 'error');
+            }
+        }
+
+        async function deleteAddress(index) {
+            try {
+                const addresses = getCurrentAddresses();
+                if (index < 0 || index >= addresses.length) return;
+                addresses.splice(index, 1);
+                const ok = await saveAddresses(addresses);
+                if (ok) {
+                    showNotification('Address deleted', 'success');
+                    await loadCustomerProfile();
+                } else {
+                    showNotification('Failed to delete address', 'error');
+                }
+            } catch (e) {
+                console.error('deleteAddress error', e);
+                showNotification('Network error deleting address', 'error');
+            }
         }
 
         // Minimal Add Address modal (non-destructive; saves single address)
@@ -1875,7 +1929,7 @@
 
                 const resp = await apiRequest('/profile', {
                     method: 'PUT',
-                    body: JSON.stringify({ addresses: [address] })
+                    body: JSON.stringify({ addresses: [...getCurrentAddresses(), address] })
                 });
 
                 if (resp && resp.ok) {
@@ -1886,6 +1940,70 @@
                 } else if (resp) {
                     const e = await resp.json().catch(()=>({error:'Failed to save address'}));
                     showNotification(e.error || 'Failed to save address', 'error');
+                }
+            };
+        }
+
+        // Edit address modal
+        function openEditAddressModal(index) {
+            const addresses = getCurrentAddresses();
+            if (index < 0 || index >= addresses.length) return;
+            const a = addresses[index];
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="glass-card rounded-2xl p-6 w-full max-w-lg">
+                    <h3 class="font-orbitron text-xl font-bold text-white mb-4">Edit Address</h3>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <input id="editFirst" class="input-field" placeholder="First name" value="${a.first_name || ''}" />
+                        <input id="editLast" class="input-field" placeholder="Last name" value="${a.last_name || ''}" />
+                        <input id="editLine1" class="input-field col-span-2" placeholder="Address line 1" value="${a.address_line1 || ''}" />
+                        <input id="editLine2" class="input-field col-span-2" placeholder="Address line 2 (optional)" value="${a.address_line2 || ''}" />
+                        <input id="editCity" class="input-field" placeholder="City" value="${a.city || ''}" />
+                        <input id="editState" class="input-field" placeholder="State" value="${a.state || ''}" />
+                        <input id="editPostal" class="input-field" placeholder="Postal code" value="${a.postal_code || ''}" />
+                        <input id="editCountry" class="input-field" placeholder="Country" value="${a.country || 'United States'}" />
+                        <label class="col-span-2 flex items-center gap-2 text-sm text-text-secondary">
+                            <input id="editDefault" type="checkbox" class="accent-current" ${a.is_default ? 'checked' : ''} /> Set as default
+                        </label>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button id="editCancel" class="border border-text-secondary text-text-secondary px-4 py-2 rounded-lg">Cancel</button>
+                        <button id="editSave" class="btn-primary px-4 py-2 rounded-lg">Save Changes</button>
+                    </div>
+                </div>`;
+
+            document.body.appendChild(modal);
+            modal.querySelector('#editCancel').onclick = () => modal.remove();
+            modal.querySelector('#editSave').onclick = async () => {
+                const updated = getCurrentAddresses();
+                if (index < 0 || index >= updated.length) return;
+                const edited = {
+                    ...updated[index],
+                    address_type: document.getElementById('editDefault').checked ? 'DEFAULT' : (updated[index].address_type || 'ADDRESS'),
+                    first_name: document.getElementById('editFirst').value.trim(),
+                    last_name: document.getElementById('editLast').value.trim(),
+                    address_line1: document.getElementById('editLine1').value.trim(),
+                    address_line2: document.getElementById('editLine2').value.trim(),
+                    city: document.getElementById('editCity').value.trim(),
+                    state: document.getElementById('editState').value.trim(),
+                    postal_code: document.getElementById('editPostal').value.trim(),
+                    country: document.getElementById('editCountry').value.trim() || 'United States',
+                    is_default: document.getElementById('editDefault').checked
+                };
+                let next = updated.slice();
+                next[index] = edited;
+                if (edited.is_default) {
+                    next = next.map((a, i) => ({ ...a, is_default: i === index }));
+                }
+                const ok = await saveAddresses(next);
+                if (ok) {
+                    showNotification('Address updated', 'success');
+                    modal.remove();
+                    await loadCustomerProfile();
+                } else {
+                    showNotification('Failed to update address', 'error');
                 }
             };
         }
