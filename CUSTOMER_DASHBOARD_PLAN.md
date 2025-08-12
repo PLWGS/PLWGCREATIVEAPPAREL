@@ -103,3 +103,41 @@ Completion Criteria
 - Wishlist add/remove works site‑wide
 - All flows verified locally and on Railway [[memory:5758909]]
 
+What’s DONE (implemented and tested)
+- Authentication/session: localStorage `customerToken` bootstrap; 401 redirects to `customer-login.html`.
+- API helper: `apiRequest` prefixes `/api/customer`, attaches `Authorization: Bearer <token>`, handles 401.
+- Profile: Loads from GET `/profile`; dynamic form fields (first, last, email, phone, birthday). Save via PUT `/profile` sending only changed fields (to avoid overwriting addresses/preferences). Roundtrip verified locally.
+- Orders: Loads recent via GET `/orders?limit=5`; renders items (name, size, quantity, price, image_url). Added "Reorder" action that re-adds items to cart using POST `/api/cart/add` per line item.
+- Wishlist: Account page GET `/wishlist` renders grid; remove via DELETE `/wishlist/:product_id`; stat card updates count. Product page button now POSTs `/api/customer/wishlist` with redirect to login on 401.
+- Loyalty: GET `/loyalty` renders points, tier, rewards, and points history. Redeem via POST `/loyalty/redeem`; UI refreshes after success. History uses `points_change` sign-correct display.
+- Style Profile UI: Added sliders for Horror/Pop/Humor and favorite-colors checkboxes. Ring labels and progress animate live from saved values; save button sends PUT `/style-profile`.
+- Recommendations: GET `/recommendations` displayed; price formatted in USD; description guarded when empty.
+- Health checks: `/api/health` returns 200 healthy; verified locally before push.
+
+How it works (key wiring)
+- `pages/account.html` initializes tabs, bootstrap token, and loads: profile, orders, wishlist, loyalty, recommendations.
+- Profile PUT sends a focused payload: `{ first_name, last_name, phone, birthday }`. Addresses/preferences preserved unless explicitly sent.
+- Orders reorder: client-side helper replays items into cart via `/api/cart/add` (idempotent per item).
+- Wishlist grid updates stat counter after load and after removals.
+- Style profile save prefers slider values; falls back to ring label text if sliders absent.
+
+Backend adjustments
+- Added a unique index for `customer_style_profile(customer_id)` to support upsert.
+- Note: Current PUT `/api/customer/style-profile` shows a 42P10 error (no matching unique/exclusion constraint) in server logs due to ON CONFLICT target; the index has now been added but the handler still needs to reference the correct conflict target column.
+
+Pending/fixes (to complete 100% verification)
+- Style profile PUT: Update server handler to use `ON CONFLICT (customer_id)` (or UPSERT pattern referencing the unique index) and to store `favorite_colors TEXT[]`, `preferred_sizes JSONB` properly; then re-verify roundtrip via GET `/profile`.
+- Recommendations: add empty-state card and loading skeletons (optional polish).
+- Orders: optional "View All" navigates to a dedicated orders page in a future pass.
+- Tests: add small automated checks for profile save, wishlist add/remove, loyalty redeem, and style-profile PUT.
+
+Suggested enhancements (future)
+- Address book management (add/edit/remove) via dedicated endpoints.
+- Communication preferences persisted to `customer_preferences` (toggle mapping by keys).
+- Cart UI on account page (mini-view) powered by `/api/cart`.
+- Order detail modal pulling `/api/orders/:id` for richer history.
+
+Verification status
+- Health: verified locally.
+- Auth/Profile/Orders/Wishlist/Loyalty: verified locally happy-path.
+- Style Profile: UI operational; server-side upsert pending minor fix, then re-test end-to-end.
