@@ -1199,18 +1199,22 @@
             };
 
             try {
-                const response = await fetch(`/api/customer${endpoint}`, {
+                // Route cart endpoints to /api/cart/*, everything else to /api/customer/*
+                const isCartEndpoint = endpoint.startsWith('/cart');
+                const url = isCartEndpoint ? `/api${endpoint}` : `/api/customer${endpoint}`;
+
+                const response = await fetch(url, {
                     ...defaultOptions,
                     ...options
                 });
-
+ 
                 if (response.status === 401) {
                     localStorage.removeItem('customerToken');
                     localStorage.removeItem('customerData');
                     redirectToLogin();
                     return null;
                 }
-
+ 
                 return response;
             } catch (error) {
                 console.error('API request error:', error);
