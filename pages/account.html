@@ -292,7 +292,7 @@
                         </div>
 
                         <div class="flex flex-col sm:flex-row gap-4 mt-6">
-                            <button class="btn-primary flex-1 neon-glow">Reorder All Items</button>
+                            <button id="reorderRecentButton" class="btn-primary flex-1 neon-glow">Reorder All Items</button>
                             <button class="border border-accent text-accent px-6 py-3 rounded-lg font-semibold hover:bg-accent hover:text-black transition-all duration-300">
                                 View Details
                             </button>
@@ -1432,6 +1432,7 @@
             const recentOrderNumberElement = document.getElementById('recentOrderNumber');
             const recentOrderDetailsElement = document.getElementById('recentOrderDetails');
             const recentOrderItemsElement = document.getElementById('recentOrderItems');
+            const reorderRecentButton = document.getElementById('reorderRecentButton');
             const previousOrdersListElement = document.getElementById('previousOrdersList');
             
             if (orders && orders.length > 0) {
@@ -1442,6 +1443,10 @@
                 if (recentOrderDetailsElement) {
                     const orderDate = new Date(recentOrder.created_at).toLocaleDateString();
                     recentOrderDetailsElement.textContent = `Placed on ${orderDate} • Total: ${formatUSD(recentOrder.total_amount)}`;
+                }
+                // Wire up the "Reorder All Items" button for the most recent order
+                if (reorderRecentButton) {
+                    reorderRecentButton.onclick = () => reorderOrderById(recentOrder.id);
                 }
                 
                 // Update recent order items
@@ -1499,6 +1504,9 @@
                 }
                 if (recentOrderItemsElement) {
                     recentOrderItemsElement.innerHTML = '';
+                }
+                if (reorderRecentButton) {
+                    reorderRecentButton.onclick = null;
                 }
                 if (previousOrdersListElement) {
                     previousOrdersListElement.innerHTML = '';
