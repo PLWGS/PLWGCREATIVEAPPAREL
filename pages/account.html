@@ -57,14 +57,16 @@
             border: 1px solid rgba(0, 188, 212, 0.2);
         }
         
-        /* Tab Animation */
+        /* Tabs: hide inactive content so it doesn't occupy vertical space */
         .tab-content {
+            display: none;
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.3s ease-out;
         }
         
         .tab-content.active {
+            display: block;
             opacity: 1;
             transform: translateY(0);
         }
@@ -1011,7 +1013,9 @@
             const tabContents = document.querySelectorAll('.tab-content');
 
             tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     const targetTab = button.getAttribute('data-tab');
 
                     // Remove active class from all buttons and contents
@@ -1031,6 +1035,8 @@
                     const targetContent = document.getElementById(targetTab);
                     if (targetContent) {
                         targetContent.classList.add('active');
+                        // Ensure the active tab is scrolled into view near the top
+                        targetContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 });
             });
