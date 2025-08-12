@@ -443,45 +443,15 @@
                     <div class="glass-card rounded-2xl p-6">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="font-orbitron text-xl font-bold text-white">Shipping Addresses</h3>
-                            <button class="text-accent hover:text-accent-light transition-colors">
+                            <button id="addAddressBtn" class="text-accent hover:text-accent-light transition-colors" title="Add Address">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                 </svg>
                             </button>
                         </div>
                         
-                        <div class="space-y-4">
-                            <!-- Default Address -->
-                            <div class="p-4 bg-surface rounded-lg border-2 border-accent">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-accent text-sm font-bold">DEFAULT</span>
-                                    <button class="text-text-secondary hover:text-accent transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <p class="text-white font-medium" id="addressName1">Loading...</p>
-                                <p class="text-text-secondary text-sm">123 Gothic Street</p>
-                                <p class="text-text-secondary text-sm">Dark City, DC 12345</p>
-                                <p class="text-text-secondary text-sm">United States</p>
-                            </div>
-                            
-                            <!-- Secondary Address -->
-                            <div class="p-4 bg-surface rounded-lg">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-text-secondary text-sm">WORK ADDRESS</span>
-                                    <button class="text-text-secondary hover:text-accent transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <p class="text-white font-medium" id="addressName2">Loading...</p>
-                                <p class="text-text-secondary text-sm">456 Creative Avenue</p>
-                                <p class="text-text-secondary text-sm">Art District, AD 67890</p>
-                                <p class="text-text-secondary text-sm">United States</p>
-                            </div>
+                        <div id="addressesList" class="space-y-4">
+                            <!-- Addresses will render here -->
                         </div>
                     </div>
 
@@ -1173,6 +1143,14 @@
                     if (labels[idx]) { labels[idx].textContent = `${parseInt(el.value,10)}%`; animateProgressRings(); }
                 });
             });
+            // Wire Add Address button
+            const addBtn = document.getElementById('addAddressBtn');
+            if (addBtn) {
+                addBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openAddAddressModal();
+                });
+            }
         });
 
         // Customer Dashboard API Integration
@@ -1826,24 +1804,90 @@
 
         // Update addresses section
         function updateAddressesSection(addresses) {
-            // Update address names with customer name from customerData
-            const addressNameElements = document.querySelectorAll('[id^="addressName"]');
-            if (addressNameElements.length > 0) {
-                let customerName = 'Customer';
-                
-                if (window.customerData && window.customerData.customer) {
-                    const customer = window.customerData.customer;
-                    if (customer.first_name && customer.last_name) {
-                        customerName = `${customer.first_name} ${customer.last_name}`;
-                    } else if (customer.name) {
-                        customerName = customer.name;
-                    }
-                }
-                
-                addressNameElements.forEach(element => {
-                    element.textContent = customerName;
-                });
+            const container = document.getElementById('addressesList');
+            if (!container) return;
+            const list = Array.isArray(addresses) ? addresses : [];
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 bg-surface rounded-lg border border-dashed border-accent/40 text-text-secondary">
+                        No saved addresses yet. Click the plus button to add your first address.
+                    </div>`;
+                return;
             }
+
+            container.innerHTML = list.map(addr => `
+                <div class="p-4 bg-surface rounded-lg ${addr.is_default ? 'border-2 border-accent' : 'border border-surface'}">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="${addr.is_default ? 'text-accent' : 'text-text-secondary'} text-sm font-bold">${addr.is_default ? 'DEFAULT' : (addr.address_type || 'ADDRESS')}</span>
+                    </div>
+                    <p class="text-white font-medium">${addr.first_name || ''} ${addr.last_name || ''}</p>
+                    <p class="text-text-secondary text-sm">${addr.address_line1 || ''}${addr.address_line2 ? (', ' + addr.address_line2) : ''}</p>
+                    <p class="text-text-secondary text-sm">${addr.city || ''}${addr.state ? (', ' + addr.state) : ''} ${addr.postal_code || ''}</p>
+                    <p class="text-text-secondary text-sm">${addr.country || 'United States'}</p>
+                </div>
+            `).join('');
+        }
+
+        // Minimal Add Address modal (non-destructive; saves single address)
+        function openAddAddressModal() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="glass-card rounded-2xl p-6 w-full max-w-lg">
+                    <h3 class="font-orbitron text-xl font-bold text-white mb-4">Add Address</h3>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <input id="addrFirst" class="input-field" placeholder="First name" />
+                        <input id="addrLast" class="input-field" placeholder="Last name" />
+                        <input id="addrLine1" class="input-field col-span-2" placeholder="Address line 1" />
+                        <input id="addrLine2" class="input-field col-span-2" placeholder="Address line 2 (optional)" />
+                        <input id="addrCity" class="input-field" placeholder="City" />
+                        <input id="addrState" class="input-field" placeholder="State" />
+                        <input id="addrPostal" class="input-field" placeholder="Postal code" />
+                        <input id="addrCountry" class="input-field" placeholder="Country" value="United States" />
+                        <label class="col-span-2 flex items-center gap-2 text-sm text-text-secondary">
+                            <input id="addrDefault" type="checkbox" class="accent-current" /> Set as default
+                        </label>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button id="addrCancel" class="border border-text-secondary text-text-secondary px-4 py-2 rounded-lg">Cancel</button>
+                        <button id="addrSave" class="btn-primary px-4 py-2 rounded-lg">Save Address</button>
+                    </div>
+                </div>`;
+
+            document.body.appendChild(modal);
+
+            modal.querySelector('#addrCancel').onclick = () => modal.remove();
+            modal.querySelector('#addrSave').onclick = async () => {
+                // Build a single-address array and submit via PUT /profile
+                const address = {
+                    address_type: document.getElementById('addrDefault').checked ? 'DEFAULT' : 'ADDRESS',
+                    first_name: document.getElementById('addrFirst').value.trim(),
+                    last_name: document.getElementById('addrLast').value.trim(),
+                    address_line1: document.getElementById('addrLine1').value.trim(),
+                    address_line2: document.getElementById('addrLine2').value.trim(),
+                    city: document.getElementById('addrCity').value.trim(),
+                    state: document.getElementById('addrState').value.trim(),
+                    postal_code: document.getElementById('addrPostal').value.trim(),
+                    country: document.getElementById('addrCountry').value.trim() || 'United States',
+                    is_default: document.getElementById('addrDefault').checked
+                };
+
+                const resp = await apiRequest('/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify({ addresses: [address] })
+                });
+
+                if (resp && resp.ok) {
+                    showNotification('Address saved', 'success');
+                    modal.remove();
+                    // Reload profile to refresh addresses
+                    await loadCustomerProfile();
+                } else if (resp) {
+                    const e = await resp.json().catch(()=>({error:'Failed to save address'}));
+                    showNotification(e.error || 'Failed to save address', 'error');
+                }
+            };
         }
 
         // Update preferences section
