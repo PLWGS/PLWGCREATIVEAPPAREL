@@ -176,6 +176,13 @@ async function initializeDatabase() {
       )
     `);
 
+    // Ensure backward compatibility for older databases (add missing columns if needed)
+    try {
+      await pool.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS birthday DATE`);
+    } catch (error) {
+      console.log('Customers: birthday column check failed:', error.message);
+    }
+
     // Create customer_addresses table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS customer_addresses (
@@ -2289,12 +2296,21 @@ app.put('/api/customer/profile', authenticateCustomer, async (req, res) => {
     const customerId = req.customer.id;
     const { first_name, last_name, phone, birthday, addresses, preferences } = req.body;
     
-    // Update customer info
+    // Update customer info (preserve existing values when null/undefined)
     await pool.query(`
       UPDATE customers 
-      SET first_name = $1, last_name = $2, phone = $3, birthday = $4, name = $5, updated_at = CURRENT_TIMESTAMP
+      SET 
+        first_name = COALESCE($1, first_name),
+        last_name = COALESCE($2, last_name),
+        phone = COALESCE($3, phone),
+        birthday = COALESCE($4, birthday),
+        name = CASE 
+          WHEN $1 IS NOT NULL OR $2 IS NOT NULL THEN CONCAT(COALESCE($1, ''), ' ', COALESCE($2, ''))
+          ELSE name
+        END,
+        updated_at = CURRENT_TIMESTAMP
       WHERE id = $6
-    `, [first_name, last_name, phone, birthday, `${first_name} ${last_name}`, customerId]);
+    `, [first_name ?? null, last_name ?? null, phone ?? null, birthday ?? null, /* name computed */ null, customerId]);
     
     // Update addresses if provided
     if (addresses && Array.isArray(addresses)) {
