@@ -226,6 +226,18 @@ async function initializeDatabase() {
       )
     `);
 
+    // Ensure a unique index on customer_id to support upsert by customer
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_indexes WHERE schemaname = 'public' AND indexname = 'idx_customer_style_profile_customer_id'
+        ) THEN
+          CREATE UNIQUE INDEX idx_customer_style_profile_customer_id ON customer_style_profile(customer_id);
+        END IF;
+      END$$;
+    `);
+
     // Create wishlist table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS wishlist (

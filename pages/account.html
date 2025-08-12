@@ -615,12 +615,12 @@
                             <div class="space-y-4">
                                 <div>
                                     <h4 class="font-semibold text-white mb-2">Favorite Colors</h4>
-                                    <div class="flex space-x-2">
-                                        <div class="w-8 h-8 bg-black rounded-full border-2 border-accent"></div>
-                                        <div class="w-8 h-8 bg-red-600 rounded-full"></div>
-                                        <div class="w-8 h-8 bg-purple-600 rounded-full"></div>
-                                        <div class="w-8 h-8 bg-gray-800 rounded-full"></div>
-                                        <div class="w-8 h-8 bg-white rounded-full"></div>
+                                    <div class="flex flex-wrap gap-3 text-sm" id="style-favcolors">
+                                        <label class="flex items-center gap-2"><input type="checkbox" value="Black" class="accent-accent"> <span>Black</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" value="White" class="accent-accent"> <span>White</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" value="Red" class="accent-accent"> <span>Red</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" value="Purple" class="accent-accent"> <span>Purple</span></label>
+                                        <label class="flex items-center gap-2"><input type="checkbox" value="Green" class="accent-accent"> <span>Green</span></label>
                                     </div>
                                 </div>
                                 
@@ -631,6 +631,21 @@
                                         <span class="px-3 py-1 bg-accent text-black rounded-full text-sm font-bold">M: 80%</span>
                                         <span class="px-3 py-1 bg-surface rounded-full text-text-secondary text-sm">L: 10%</span>
                                     </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 grid md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-text-secondary text-sm mb-2">Horror Aesthetic %</label>
+                                    <input id="style-horror" type="range" min="0" max="100" value="80" class="w-full" />
+                                </div>
+                                <div>
+                                    <label class="block text-text-secondary text-sm mb-2">Pop Culture %</label>
+                                    <input id="style-pop" type="range" min="0" max="100" value="60" class="w-full" />
+                                </div>
+                                <div>
+                                    <label class="block text-text-secondary text-sm mb-2">Humor & Sass %</label>
+                                    <input id="style-humor" type="range" min="0" max="100" value="40" class="w-full" />
                                 </div>
                             </div>
                         </div>
@@ -1112,10 +1127,10 @@
                         const email = (document.getElementById('profileEmail') || {}).value || '';
                         const phone = (document.getElementById('profilePhone') || {}).value || '';
                         const birthday = (document.getElementById('profileBirthday') || {}).value || null;
-
+                        const payload = { first_name, last_name, phone, birthday };
                         const resp = await apiRequest('/profile', {
                             method: 'PUT',
-                            body: JSON.stringify({ first_name, last_name, phone, birthday, preferences: [], addresses: [] })
+                            body: JSON.stringify(payload)
                         });
                         if (resp && resp.ok) {
                             showNotification('Profile updated successfully', 'success');
@@ -1140,6 +1155,18 @@
                     saveStyleProfileFromUI();
                 });
             }
+
+            // Keep style sliders and labels in sync visually
+            const horrorEl = document.getElementById('style-horror');
+            const popEl = document.getElementById('style-pop');
+            const humorEl = document.getElementById('style-humor');
+            [horrorEl,popEl,humorEl].forEach((el, idx) => {
+                if (!el) return;
+                el.addEventListener('input', ()=>{
+                    const labels = document.querySelectorAll('#style .font-orbitron.text-lg.font-bold');
+                    if (labels[idx]) { labels[idx].textContent = `${parseInt(el.value,10)}%`; animateProgressRings(); }
+                });
+            });
         });
 
         // Customer Dashboard API Integration
@@ -1222,13 +1249,13 @@
                 const token = getAuthToken();
                 if(!token) { redirectToLogin(); return; }
 
-                // Example: read percentages from the rings' text labels
-                const texts = Array.from(document.querySelectorAll('#style .progress-ring').closest ? [] : []);
-                // Fallback: direct ids are not present; use static demo values updated later by UI
-                const horror = 80; // replace if UI provides sliders/inputs
-                const pop = 60;
-                const humor = 40;
-                const favorite_colors = ['Black','Red','Purple'];
+                // Prefer slider values if present; fallback to ring labels
+                const horror = document.getElementById('style-horror') ? parseInt(document.getElementById('style-horror').value,10) : (parseInt(((document.querySelectorAll('#style .font-orbitron.text-lg.font-bold')[0]||{}).textContent||'0').replace(/[^0-9]/g,''),10)||0);
+                const pop = document.getElementById('style-pop') ? parseInt(document.getElementById('style-pop').value,10) : (parseInt(((document.querySelectorAll('#style .font-orbitron.text-lg.font-bold')[1]||{}).textContent||'0').replace(/[^0-9]/g,''),10)||0);
+                const humor = document.getElementById('style-humor') ? parseInt(document.getElementById('style-humor').value,10) : (parseInt(((document.querySelectorAll('#style .font-orbitron.text-lg.font-bold')[2]||{}).textContent||'0').replace(/[^0-9]/g,''),10)||0);
+
+                // Favorite colors from checkboxes
+                const favorite_colors = Array.from(document.querySelectorAll('#style-favcolors input[type="checkbox"]:checked')).map(el=>el.value);
                 const preferred_sizes = { S: 10, M: 80, L: 10 };
                 const fit_preference = 'Regular Fit';
                 const length_preference = 'Standard';
@@ -1770,9 +1797,9 @@
                     <div class="glass-card rounded-xl p-6">
                         <img src="${product.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='}" alt="${product.name}" class="w-full h-32 object-cover rounded-lg mb-4" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='; this.onerror=null;" />
                         <h3 class="font-semibold text-white mb-2">${product.name}</h3>
-                        <p class="text-text-secondary text-sm mb-4">${product.description}</p>
+                        <p class="text-text-secondary text-sm mb-4">${product.description || ''}</p>
                         <div class="flex items-center justify-between">
-                            <span class="text-accent font-bold">$${product.price}</span>
+                            <span class="text-accent font-bold">${formatUSD(product.price)}</span>
                             <button class="btn-primary text-xs px-3 py-1" onclick="addToWishlist(${product.id})">Add to Wishlist</button>
                         </div>
                     </div>
@@ -1816,15 +1843,18 @@
         // Update style profile section
         function updateStyleProfileSection(style_profile) {
             if (!style_profile) return;
-            
-            // Update style preferences if they exist
-            const styleElements = document.querySelectorAll('[data-style-preference]');
-            styleElements.forEach(element => {
-                const preference = element.getAttribute('data-style-preference');
-                if (style_profile[preference]) {
-                    element.textContent = style_profile[preference];
-                }
+            const values = [
+              style_profile.horror_aesthetic_percentage || 0,
+              style_profile.pop_culture_percentage || 0,
+              style_profile.humor_sass_percentage || 0
+            ];
+            const labels = document.querySelectorAll('#style .font-orbitron.text-lg.font-bold');
+            labels.forEach((el, idx) => {
+              if (typeof values[idx] === 'number') {
+                el.textContent = `${values[idx]}%`;
+              }
             });
+            animateProgressRings();
         }
 
         // Update points history section
