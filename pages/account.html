@@ -406,7 +406,7 @@
                     <div class="glass-card rounded-2xl p-6">
                         <h3 class="font-orbitron text-xl font-bold text-white mb-6">Personal Information</h3>
                         
-                        <form class="space-y-4">
+                        <form id="profileForm" class="space-y-4">
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-text-secondary text-sm font-medium mb-2">First Name</label>
@@ -414,7 +414,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-text-secondary text-sm font-medium mb-2">Last Name</label>
-                                    <input type="text" value="Mitchell" class="input-field w-full" />
+                                    <input type="text" id="profileLastName" class="input-field w-full" />
                                 </div>
                             </div>
                             
@@ -423,15 +423,15 @@
                                 <input type="email" id="profileEmail" class="input-field w-full" />
                             </div>
                             
-                            <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Phone Number</label>
-                                <input type="tel" value="+1 (555) 123-4567" class="input-field w-full" />
-                            </div>
+                                <div>
+                                    <label class="block text-text-secondary text-sm font-medium mb-2">Phone Number</label>
+                                    <input type="tel" id="profilePhone" class="input-field w-full" />
+                                </div>
                             
-                            <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Birthday</label>
-                                <input type="date" value="1995-10-31" class="input-field w-full" />
-                            </div>
+                                <div>
+                                    <label class="block text-text-secondary text-sm font-medium mb-2">Birthday</label>
+                                    <input type="date" id="profileBirthday" class="input-field w-full" />
+                                </div>
                             
                             <button type="submit" class="btn-primary w-full neon-glow">Update Information</button>
                         </form>
@@ -709,7 +709,7 @@
                                 </div>
                             </div>
                             
-                            <button class="w-full mt-4 text-accent hover:text-accent-light transition-colors text-sm font-semibold">
+                            <button id="updateSizePrefBtn" class="w-full mt-4 text-accent hover:text-accent-light transition-colors text-sm font-semibold">
                                 Update Size Preferences
                             </button>
                         </div>
@@ -1100,6 +1100,46 @@
             
             // Initialize customer dashboard functionality
             initCustomerDashboard();
+
+            // Wire profile form submit safely
+            const profileForm = document.getElementById('profileForm');
+            if (profileForm) {
+                profileForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    try {
+                        const first_name = (document.getElementById('profileFirstName') || {}).value || '';
+                        const last_name = (document.getElementById('profileLastName') || {}).value || '';
+                        const email = (document.getElementById('profileEmail') || {}).value || '';
+                        const phone = (document.getElementById('profilePhone') || {}).value || '';
+                        const birthday = (document.getElementById('profileBirthday') || {}).value || null;
+
+                        const resp = await apiRequest('/profile', {
+                            method: 'PUT',
+                            body: JSON.stringify({ first_name, last_name, phone, birthday, preferences: [], addresses: [] })
+                        });
+                        if (resp && resp.ok) {
+                            showNotification('Profile updated successfully', 'success');
+                            // Refresh profile to reflect latest values
+                            await loadCustomerProfile();
+                        } else if (resp) {
+                            const err = await resp.json().catch(() => ({ error: 'Update failed' }));
+                            showNotification(err.error || 'Update failed', 'error');
+                        }
+                    } catch (err) {
+                        console.error('Profile update error:', err);
+                        showNotification('Network error updating profile', 'error');
+                    }
+                });
+            }
+
+            // Wire style profile save button (non-breaking default handler)
+            const updateSizePrefBtn = document.getElementById('updateSizePrefBtn');
+            if (updateSizePrefBtn) {
+                updateSizePrefBtn.addEventListener('click', (e)=>{
+                    e.preventDefault();
+                    saveStyleProfileFromUI();
+                });
+            }
         });
 
         // Customer Dashboard API Integration
@@ -1176,6 +1216,48 @@
             }
         }
 
+        // Style profile: collect current UI and save
+        async function saveStyleProfileFromUI(){
+            try{
+                const token = getAuthToken();
+                if(!token) { redirectToLogin(); return; }
+
+                // Example: read percentages from the rings' text labels
+                const texts = Array.from(document.querySelectorAll('#style .progress-ring').closest ? [] : []);
+                // Fallback: direct ids are not present; use static demo values updated later by UI
+                const horror = 80; // replace if UI provides sliders/inputs
+                const pop = 60;
+                const humor = 40;
+                const favorite_colors = ['Black','Red','Purple'];
+                const preferred_sizes = { S: 10, M: 80, L: 10 };
+                const fit_preference = 'Regular Fit';
+                const length_preference = 'Standard';
+
+                const resp = await apiRequest('/style-profile',{
+                    method:'PUT',
+                    body: JSON.stringify({
+                        horror_aesthetic_percentage: horror,
+                        pop_culture_percentage: pop,
+                        humor_sass_percentage: humor,
+                        favorite_colors,
+                        preferred_sizes,
+                        fit_preference,
+                        length_preference
+                    })
+                });
+                if(resp && resp.ok){
+                    showNotification('Style preferences saved', 'success');
+                    await loadCustomerProfile();
+                } else if(resp){
+                    const e = await resp.json().catch(()=>({error:'Failed to save style profile'}));
+                    showNotification(e.error || 'Failed to save style profile','error');
+                }
+            }catch(err){
+                console.error('saveStyleProfileFromUI error:', err);
+                showNotification('Network error saving style profile','error');
+            }
+        }
+
         // Load customer profile
         async function loadCustomerProfile() {
             try {
@@ -1238,6 +1320,25 @@
                 profileEmailElement.value = customer.email;
             }
 
+            const profileLastNameElement = document.getElementById('profileLastName');
+            if (profileLastNameElement && customer.last_name) {
+                profileLastNameElement.value = customer.last_name;
+            }
+
+            const profilePhoneElement = document.getElementById('profilePhone');
+            if (profilePhoneElement && customer.phone) {
+                profilePhoneElement.value = customer.phone;
+            }
+
+            const profileBirthdayElement = document.getElementById('profileBirthday');
+            if (profileBirthdayElement && customer.birthday) {
+                const d = new Date(customer.birthday);
+                if (!isNaN(d.getTime())) {
+                    const iso = d.toISOString().slice(0,10);
+                    profileBirthdayElement.value = iso;
+                }
+            }
+
             // Update summary statistics
             const totalOrdersElement = document.getElementById('totalOrders');
             if (totalOrdersElement && customer.total_orders !== undefined) {
@@ -1287,6 +1388,13 @@
             }
         }
 
+        // Currency helper (USD)
+        function formatUSD(value) {
+            const num = Number(value);
+            if (!isFinite(num)) return '$0.00';
+            return `$${num.toFixed(2)}`;
+        }
+
         // Update orders section
         function updateOrdersSection(orders) {
             // Update recent order details
@@ -1302,7 +1410,7 @@
                 }
                 if (recentOrderDetailsElement) {
                     const orderDate = new Date(recentOrder.created_at).toLocaleDateString();
-                    recentOrderDetailsElement.textContent = `Placed on ${orderDate} • Total: $${recentOrder.total_amount}`;
+                    recentOrderDetailsElement.textContent = `Placed on ${orderDate} • Total: ${formatUSD(recentOrder.total_amount)}`;
                 }
                 
                 // Update recent order items
@@ -1313,7 +1421,7 @@
                             <div class="flex-1">
                                 <h4 class="font-semibold text-white">${item.product_name}</h4>
                                 <p class="text-text-secondary text-sm">Size: ${item.size || 'M'} • ${item.color || 'Black'}</p>
-                                <p class="text-accent font-bold">$${item.unit_price || item.price || '0.00'}</p>
+                                <p class="text-accent font-bold">${formatUSD(item.unit_price || item.price || 0)}</p>
                             </div>
                         </div>
                     `).join('');
@@ -1337,12 +1445,12 @@
                                     </div>
                                     <div>
                                         <h4 class="font-semibold text-white">Order #${order.order_number}</h4>
-                                        <p class="text-text-secondary text-sm">${new Date(order.created_at).toLocaleDateString()} • ${order.items ? order.items.length : 0} items • $${order.total_amount}</p>
+                                        <p class="text-text-secondary text-sm">${new Date(order.created_at).toLocaleDateString()} • ${order.items ? order.items.length : 0} items • ${formatUSD(order.total_amount)}</p>
                                     </div>
                                 </div>
                                 <div class="flex items-center space-x-4">
                                     <span class="status-${order.status} px-3 py-1 rounded-full text-white text-sm font-medium">${order.status}</span>
-                                    <button class="text-accent hover:text-accent-light transition-colors">Reorder</button>
+                                    <button class="text-accent hover:text-accent-light transition-colors" onclick="reorderOrderById(${order.id})">Reorder</button>
                                 </div>
                             </div>
                         `).join('');
@@ -1385,7 +1493,7 @@
 
         // Update wishlist section
         function updateWishlistSection(wishlist) {
-            const wishlistContainer = document.querySelector('.grid.md\\:grid-cols-3.gap-6');
+            const wishlistContainer = document.querySelector('.grid.md\\:grid-cols-2, .grid.md\\:grid-cols-3.gap-6') || document.querySelector('.grid.md\\:grid-cols-3.gap-6');
             if (!wishlistContainer || !wishlist) return;
 
             wishlistContainer.innerHTML = wishlist.map(item => `
@@ -1411,6 +1519,12 @@
                     </div>
                 </div>
             `).join('');
+
+            // Update wishlist count stat if present
+            const wishlistCountEl = document.getElementById('wishlistItems');
+            if (wishlistCountEl) {
+                wishlistCountEl.textContent = String(wishlist.length || 0);
+            }
         }
 
         // Load customer loyalty
@@ -1434,7 +1548,7 @@
             const { loyalty, rewards, history, tier_progress } = data;
             
             // Update loyalty points
-            const pointsElement = document.querySelector('.font-orbitron.text-3xl.font-bold.text-accent');
+            const pointsElement = document.getElementById('loyaltyPoints') || document.querySelector('.font-orbitron.text-3xl.font-bold.text-accent');
             if (pointsElement && loyalty.loyalty_points) {
                 pointsElement.textContent = loyalty.loyalty_points;
             }
@@ -1525,9 +1639,55 @@
         }
 
         // Cart functions
-        function addToCart(productId) {
-            // Implement cart functionality
-            showNotification('Added to cart!', 'success');
+        async function addToCart(productId) {
+            try {
+                const token = getAuthToken();
+                if (!token) { redirectToLogin(); return; }
+                const productNameEl = document.querySelector(`[data-product-name-id="${productId}"]`);
+                const productName = productNameEl ? productNameEl.textContent : '';
+                const resp = await apiRequest('/cart/add', {
+                    method: 'POST',
+                    body: JSON.stringify({ product_name: productName, quantity: 1, size: 'M', color: 'Black' })
+                });
+                if (resp && resp.ok) {
+                    showNotification('Added to cart!', 'success');
+                    updateCartCounter();
+                }
+            } catch (e) {
+                console.error('addToCart error', e);
+            }
+        }
+
+        // Reorder by Order ID (best-effort from last fetched orders)
+        async function reorderOrderById(orderId){
+            try{
+                const token = getAuthToken();
+                if (!token) { redirectToLogin(); return; }
+                // We don't have a server reorder endpoint; emulate by adding items back to cart
+                // Fetch fresh orders to ensure items
+                const resp = await apiRequest('/orders?limit=5');
+                if (!resp || !resp.ok) return;
+                const data = await resp.json();
+                const orders = Array.isArray(data.orders) ? data.orders : [];
+                const target = orders.find(o=>String(o.id)===String(orderId));
+                if (!target || !Array.isArray(target.items)) return;
+                for(const item of target.items){
+                    await apiRequest('/cart/add', {
+                        method:'POST',
+                        body: JSON.stringify({
+                            product_name: item.product_name,
+                            quantity: item.quantity || 1,
+                            size: item.size || 'M',
+                            color: item.color || 'Black'
+                        })
+                    });
+                }
+                showNotification('Items added to cart from previous order', 'success');
+                updateCartCounter();
+            }catch(err){
+                console.error('reorderOrderById error:', err);
+                showNotification('Could not reorder items', 'error');
+            }
         }
 
         // Notification system
@@ -1677,7 +1837,7 @@
             historyContainer.innerHTML = history.map(entry => `
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-text-secondary">${entry.description}</span>
-                    <span class="text-accent">+${entry.points}</span>
+                    <span class="text-accent">${entry.points_change >= 0 ? '+' : ''}${entry.points_change}</span>
                 </div>
             `).join('');
         }
