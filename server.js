@@ -2309,8 +2309,8 @@ app.put('/api/customer/profile', authenticateCustomer, async (req, res) => {
           ELSE name
         END,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $6
-    `, [first_name ?? null, last_name ?? null, phone ?? null, birthday ?? null, /* name computed */ null, customerId]);
+      WHERE id = $5
+    `, [first_name ?? null, last_name ?? null, phone ?? null, birthday ?? null, customerId]);
     
     // Update addresses if provided
     if (addresses && Array.isArray(addresses)) {
