@@ -1917,8 +1917,8 @@
                     const date = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
                     const title = r.title ? `<span class="text-white font-semibold">${r.title}</span>` : '';
                     const fallbackFromEmail = (r.email || '').split('@')[0];
-                    const firstName = (r.first_name || (r.full_name || '').split(' ')[0] || fallbackFromEmail || '').trim();
-                    const lastInitial = (r.last_name || (r.full_name || '').split(' ')[1] || '').trim().charAt(0);
+                    const firstName = (r.first_name || r.addr_first_name || (r.full_name || '').split(' ')[0] || fallbackFromEmail || '').trim();
+                    const lastInitial = (r.last_name || r.addr_last_name || (r.full_name || '').split(' ')[1] || '').trim().charAt(0);
                     const displayName = (r.display_name || ((firstName || lastInitial) ? `${firstName}${lastInitial ? ' ' + lastInitial + '.' : ''}` : 'Customer'));
                     const nameForAvatar = (firstName || 'Alex');
                     const avatarId = 1 + (nameForAvatar.charCodeAt(0) % 70);
