@@ -1916,12 +1916,18 @@
                     const stars = Array.from({length: rStars}).map(()=>starSvg).join('');
                     const date = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
                     const title = r.title ? `<span class="text-white font-semibold">${r.title}</span>` : '';
-                    const firstName = (r.first_name || '').trim();
-                    const lastInitial = (r.last_name || '').trim().charAt(0);
-                    const displayName = firstName || lastInitial ? `${firstName}${lastInitial ? ' ' + lastInitial + '.' : ''}` : 'Customer';
+                    const firstName = (r.first_name || (r.full_name || '').split(' ')[0] || '').trim();
+                    const lastInitial = (r.last_name || (r.full_name || '').split(' ')[1] || '').trim().charAt(0);
+                    const displayName = (firstName || lastInitial) ? `${firstName}${lastInitial ? ' ' + lastInitial + '.' : ''}` : 'Customer';
                     const nameForAvatar = (firstName || 'Alex');
                     const avatarId = 1 + (nameForAvatar.charCodeAt(0) % 70);
-                    const avatarUrl = `https://i.pravatar.cc/48?img=${avatarId}`;
+                    // Simple gender-leaning avatar choice: common female name hints
+                    const lowerName = nameForAvatar.toLowerCase();
+                    const femaleHints = ['a','e','i','y'];
+                    const looksFemale = femaleHints.includes(lowerName.slice(-1));
+                    const avatarUrl = looksFemale
+                        ? `https://i.pravatar.cc/48?img=${(avatarId % 35) + 35}`
+                        : `https://i.pravatar.cc/48?img=${avatarId}`;
                     return `
                     <div class="glass-card rounded-xl p-6">
                         <div class="flex items-start space-x-4">

@@ -2960,7 +2960,7 @@ app.get('/api/products/public/:id', async (req, res) => {
 
     const itemsResult = await pool.query(`
       SELECT pr.id, pr.rating, pr.title, pr.body, pr.created_at,
-             c.first_name, c.last_name
+             c.first_name, c.last_name, c.name AS full_name, c.email
       FROM product_reviews pr
       LEFT JOIN customers c ON pr.customer_id = c.id
       WHERE pr.product_id = $1 AND pr.status = 'approved'
