@@ -1772,16 +1772,26 @@
                 if (Array.isArray(productColors) && productColors.length > 0) {
                     const colorContainer = document.querySelector('.color-options');
                     if (colorContainer) {
+                        // Map normalized color names (lowercase, no spaces/hyphens) to hex
                         const colorHexMap = {
-                            'White':'#ffffff','Natural':'#eee8d8','Ice Grey':'#d3d1cf','Brown':'#352d2c','Black':'#000000','Navy':'#252432','Aqua':'#088dbb','Royal Blue':'#17489b','RoyalBlue':'#17489b','Teal':'#00a69c','Gold':'#f1b83e','Army':'#585244','Military Green':'#495443','Evergreen':'#2b4d35','Olive Green':'#595624','Kelly Green':'#0d572c','Mint':'#b2ddc4','Sunset':'#f8a790','Orange':'#f3703b','Autumn':'#993f21','Mustard':'#caa235','Purple':'#472b7a','Lilac':'#dab2d0','Charity Pink':'#f27da0','Fushsia':'#ec3f77','Soft Pink':'#fae1df','Pink':'#f0bebf','Berry':'#cd4f7f','Red':'#d32621','Maroon':'#6c2232'
+                            white:'#ffffff', natural:'#eee8d8', icegrey:'#d3d1cf', brown:'#352d2c', black:'#000000',
+                            navy:'#252432', aqua:'#088dbb', royalblue:'#17489b', teal:'#00a69c', gold:'#f1b83e',
+                            army:'#585244', armygreen:'#585244', militarygreen:'#495443', evergreen:'#2b4d35',
                         };
+                        // extend with more greens and others
+                        Object.assign(colorHexMap, {
+                            olivegreen:'#595624', kellygreen:'#0d572c', mint:'#b2ddc4', sunset:'#f8a790', orange:'#f3703b',
+                            autumn:'#993f21', mustard:'#caa235', purple:'#472b7a', lilac:'#dab2d0', charitypink:'#f27da0',
+                            fushsia:'#ec3f77', softpink:'#fae1df', pink:'#f0bebf', berry:'#cd4f7f', red:'#d32621', maroon:'#6c2232'
+                        });
                         const resolveColor = (c) => {
                             if (!c) return '#000000';
                             if (typeof c === 'string' && c.trim().startsWith('#')) return c.trim();
                             const name = String(c).trim();
-                            if (colorHexMap[name]) return colorHexMap[name];
-                            const compact = name.replace(/\s+/g,'');
-                            if (colorHexMap[compact]) return colorHexMap[compact];
+                            // Try exact CSS color first (browser may support)
+                            // Then normalize for our map: lowercase and remove non-alphanumerics
+                            const normalized = name.toLowerCase().replace(/[^a-z0-9]/g,'');
+                            if (colorHexMap[normalized]) return colorHexMap[normalized];
                             return name; // Let browser try CSS named color
                         };
                         colorContainer.innerHTML = productColors.map((color, idx) => {
