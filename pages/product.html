@@ -354,7 +354,7 @@
                                         <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                                     </svg>
                                 </div>
-                                <span class="text-text-secondary text-sm">(127 reviews)</span>
+                                <span id="reviewsCountHeader" class="text-text-secondary text-sm">(0 reviews)</span>
                             </div>
                             <span class="text-accent text-sm">★ Trending Design</span>
                         </div>
@@ -540,8 +540,8 @@
                     <button class="tab-button active px-6 py-3 font-semibold text-accent border-b-2 border-accent" data-tab="details">
                         Product Details
                     </button>
-                    <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="reviews">
-                        Reviews (127)
+                    <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="reviews" id="reviewsTabButton">
+                        Reviews (0)
                     </button>
                     <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="sizing">
                         Size & Care
@@ -645,7 +645,7 @@
                             <div class="glass-card rounded-xl p-8">
                                 <div class="grid md:grid-cols-2 gap-8">
                                     <div class="text-center">
-                                        <div class="text-4xl font-bold text-accent mb-2">4.2</div>
+                                        <div id="reviewsAverageValue" class="text-4xl font-bold text-accent mb-2">0.0</div>
                                         <div class="star-rating flex justify-center mb-2">
                                             <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
                                                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
@@ -663,7 +663,7 @@
                                                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                                             </svg>
                                         </div>
-                                        <div class="text-text-secondary">Based on 127 reviews</div>
+                                        <div id="reviewsBasedOnText" class="text-text-secondary">Based on 0 reviews</div>
                                     </div>
                                     
                                     <div class="space-y-2">
@@ -707,7 +707,7 @@
                             </div>
 
                             <!-- Individual Reviews -->
-                            <div class="space-y-4">
+                            <div id="reviewsList" class="space-y-4">
                                 <!-- Review 1 -->
                                 <div class="glass-card rounded-xl p-6">
                                     <div class="flex items-start space-x-4">
@@ -1679,14 +1679,17 @@
                     throw new Error(`Failed to fetch product: ${response.status}`);
                 }
                 
-                const product = await response.json();
-                console.log('📦 Loaded product data:', product);
+                const apiData = await response.json();
+                console.log('📦 Loaded product data:', apiData);
+                const product = apiData.product || apiData;
+                const reviews = apiData.reviews || { count: 0, average: 0, items: [] };
                 // Store globally for cart actions
                 productData = product;
                 console.log('📦 Product image_url:', product.image_url);
                 
                 // Update page content with product data
                 updateProductDisplay(product);
+                updateProductReviews(reviews);
                 
             } catch (error) {
                 console.error('❌ Error loading product data:', error);
@@ -1962,6 +1965,52 @@
             }
             
             console.log('✅ Product display updated successfully');
+        }
+
+        function updateProductReviews(reviews){
+            try{
+                const count = Number(reviews.count || 0);
+                const avg = Number(reviews.average || 0);
+                const items = Array.isArray(reviews.items) ? reviews.items : [];
+
+                const headerCount = document.getElementById('reviewsCountHeader');
+                if (headerCount) headerCount.textContent = `(${count} review${count===1?'':'s'})`;
+                const tabBtn = document.getElementById('reviewsTabButton');
+                if (tabBtn) tabBtn.textContent = `Reviews (${count})`;
+                const avgEl = document.getElementById('reviewsAverageValue');
+                if (avgEl) avgEl.textContent = (Math.round(avg*10)/10).toFixed(1);
+                const basedOnEl = document.getElementById('reviewsBasedOnText');
+                if (basedOnEl) basedOnEl.textContent = `Based on ${count} review${count===1?'':'s'}`;
+
+                const list = document.getElementById('reviewsList');
+                if (!list) return;
+                if (items.length === 0){
+                    list.innerHTML = `<div class="p-4 bg-surface rounded-lg text-text-secondary">No reviews yet. Be the first to review this product from your account after purchase.</div>`;
+                    return;
+                }
+                const starSvg = '<svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
+                list.innerHTML = items.map(r => {
+                    const rStars = Math.max(1, Math.min(5, Number(r.rating||0)));
+                    const stars = Array.from({length: rStars}).map(()=>starSvg).join('');
+                    const date = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
+                    const title = r.title ? `<span class="text-white font-semibold">${r.title}</span>` : '';
+                    return `
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <div class="star-rating flex text-sm">${stars}</div>
+                                        ${title}
+                                    </div>
+                                    <span class="text-text-secondary text-sm">${date}</span>
+                                </div>
+                                <p class="text-text-secondary mb-1">${r.body || ''}</p>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }catch(e){ console.error('updateProductReviews error', e); }
         }
         
         // Load product data when page loads

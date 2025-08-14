@@ -2948,7 +2948,25 @@ app.get('/api/products/public/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    res.json(result.rows[0]);
+    const product = result.rows[0];
+
+    // Reviews aggregate and items for public display
+    const agg = await pool.query(`
+      SELECT COUNT(*)::int AS count, COALESCE(AVG(rating),0)::float AS average
+      FROM product_reviews
+      WHERE product_id = $1 AND status = 'approved'
+    `, [productId]);
+    const { count, average } = agg.rows[0] || { count: 0, average: 0 };
+
+    const itemsResult = await pool.query(`
+      SELECT id, rating, title, body, created_at
+      FROM product_reviews
+      WHERE product_id = $1 AND status = 'approved'
+      ORDER BY created_at DESC
+      LIMIT 20 OFFSET 0
+    `, [productId]);
+
+    res.json({ product, reviews: { count, average, items: itemsResult.rows } });
   } catch (error) {
     console.error('Error fetching product:', error);
     res.status(500).json({ error: 'Failed to fetch product' });
