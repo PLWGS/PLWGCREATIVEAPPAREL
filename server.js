@@ -340,6 +340,7 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS size_stock JSON`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS track_inventory BOOLEAN DEFAULT false`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS brand_preference TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS feature_rank INTEGER`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS specs_notes TEXT`);
     } catch (error) {
       console.log('Some columns may already exist:', error.message);
@@ -2988,6 +2989,46 @@ app.get('/api/products/public/:id', async (req, res) => {
   }
 });
 
+// Get homepage hero products (up to 3, ordered by feature_rank)
+app.get('/api/products/hero', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT * FROM products 
+      WHERE is_active = true AND feature_rank IS NOT NULL
+      ORDER BY feature_rank ASC
+      LIMIT 3
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching hero products:', error);
+    res.status(500).json({ error: 'Failed to fetch hero products' });
+  }
+});
+
+// Set or clear a product's hero feature (admin)
+app.put('/api/admin/products/:id/feature', authenticateToken, async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  const productId = req.params.id;
+  const { in_hero, rank } = req.body || {};
+  try {
+    await pool.query('BEGIN');
+    if (in_hero && [1,2,3].includes(Number(rank))) {
+      // Clear any existing product at this rank
+      await pool.query('UPDATE products SET feature_rank = NULL WHERE feature_rank = $1', [rank]);
+      // Set this product's rank and mark featured
+      await pool.query('UPDATE products SET feature_rank = $1, is_featured = true WHERE id = $2', [rank, productId]);
+    } else {
+      // Clear hero flag for this product
+      await pool.query('UPDATE products SET feature_rank = NULL WHERE id = $1', [productId]);
+    }
+    await pool.query('COMMIT');
+    res.json({ success: true });
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    console.error('Error updating product hero feature:', error);
+    res.status(500).json({ error: 'Failed to update hero feature' });
+  }
+});
 // Search product by name
 app.get('/api/products/search', async (req, res) => {
   if (!pool) {

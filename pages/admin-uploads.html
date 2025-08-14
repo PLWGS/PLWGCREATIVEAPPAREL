@@ -565,6 +565,23 @@
                     <div id="products-grid" class="product-grid">
                         <!-- Products will be loaded here -->
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-text-primary mb-2">Homepage Hero</label>
+                        <div class="flex items-center gap-4">
+                            <label class="flex items-center gap-2 text-text-secondary">
+                                <input type="checkbox" id="inHero" class="form-checkbox">
+                                Show in homepage hero
+                            </label>
+                            <select id="heroRank" class="input-field w-32">
+                                <option value="">Rank</option>
+                                <option value="1">Slide 1</option>
+                                <option value="2">Slide 2</option>
+                                <option value="3">Slide 3</option>
+                            </select>
+                            <button id="saveHeroBtn" class="btn-primary">Save</button>
+                        </div>
+                        <p class="text-xs text-text-secondary mt-2">Setting a rank replaces any product currently at that slide.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -754,6 +771,33 @@
                 });
             });
         }
+
+        // --- Homepage Hero wiring ---
+        function getCurrentEditingProductId(){
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            return id || window.currentEditingProductId; // fallback if page uses internal state
+        }
+        async function saveHeroSettings(){
+            const id = getCurrentEditingProductId();
+            if(!id){ alert('No product id.'); return; }
+            const inHero = document.getElementById('inHero').checked;
+            const rankStr = document.getElementById('heroRank').value;
+            const rank = rankStr ? Number(rankStr) : null;
+            try{
+                const resp = await fetch(`/api/admin/products/${id}/feature`,{
+                    method:'PUT',
+                    headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${localStorage.getItem('adminToken')||''}` },
+                    body: JSON.stringify({ in_hero: inHero, rank })
+                });
+                if(!resp.ok){ const e = await resp.json().catch(()=>({error:'Failed'})); throw new Error(e.error||'Failed'); }
+                alert('Homepage hero updated.');
+            }catch(e){ console.error(e); alert('Could not update homepage hero: '+e.message); }
+        }
+        document.addEventListener('DOMContentLoaded',()=>{
+            const btn = document.getElementById('saveHeroBtn');
+            if(btn) btn.addEventListener('click', saveHeroSettings);
+        });
 
         function setupSizeSelection() {
             document.querySelectorAll('.size-option').forEach(option => {
