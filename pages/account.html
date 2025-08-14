@@ -466,7 +466,7 @@
                                     <p class="text-text-secondary text-sm">Get notified about fresh drops</p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked class="sr-only peer" />
+                                    <input id="pref-new-design" type="checkbox" data-pref-key="new_design_releases" class="sr-only peer" />
                                     <div class="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
                                 </label>
                             </div>
@@ -488,7 +488,7 @@
                                     <p class="text-text-secondary text-sm">Behind-the-scenes creative content</p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked class="sr-only peer" />
+                                    <input id="pref-bts" type="checkbox" data-pref-key="behind_the_scenes" class="sr-only peer" />
                                     <div class="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
                                 </label>
                             </div>
@@ -499,7 +499,7 @@
                                     <p class="text-text-secondary text-sm">Special discounts and early access</p>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" />
+                                    <input id="pref-offers" type="checkbox" data-pref-key="exclusive_offers" class="sr-only peer" />
                                     <div class="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
                                 </label>
                             </div>
@@ -1151,7 +1151,42 @@
                     openAddAddressModal();
                 });
             }
+            // Wire preference toggles (debounced save)
+            const savePrefsDebounced = debounce(async () => {
+                try {
+                    const prefs = Array.from(document.querySelectorAll('input[data-pref-key]')).map(el => ({
+                        preference_type: el.getAttribute('data-pref-key'),
+                        preference_value: String(!!el.checked)
+                    }));
+                    const resp = await apiRequest('/profile', {
+                        method: 'PUT',
+                        body: JSON.stringify({ preferences: prefs })
+                    });
+                    if (resp && resp.ok) {
+                        showNotification('Preferences saved', 'success');
+                    } else if (resp) {
+                        const e = await resp.json().catch(()=>({error:'Failed to save preferences'}));
+                        showNotification(e.error || 'Failed to save preferences','error');
+                    }
+                } catch (e) {
+                    console.error('save preferences error', e);
+                    showNotification('Network error saving preferences','error');
+                }
+            }, 400);
+
+            document.querySelectorAll('input[data-pref-key]').forEach(el => {
+                el.addEventListener('change', savePrefsDebounced);
+            });
         });
+
+        // Small debounce helper
+        function debounce(fn, wait) {
+            let t;
+            return function(...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
 
         // Customer Dashboard API Integration
         function getAuthToken() {
@@ -2010,13 +2045,11 @@
 
         // Update preferences section
         function updatePreferencesSection(preferences) {
-            if (!preferences) return;
-            
-            // Update communication preferences based on customer data
-            const preferenceCheckboxes = document.querySelectorAll('input[type="checkbox"]');
-            preferenceCheckboxes.forEach(checkbox => {
-                // Set default checked state based on preferences
-                checkbox.checked = true; // Default to checked for demo
+            if (!Array.isArray(preferences)) preferences = [];
+            const map = new Map(preferences.map(p => [p.preference_type, String(p.preference_value).toLowerCase() === 'true']));
+            document.querySelectorAll('input[data-pref-key]').forEach(el => {
+                const key = el.getAttribute('data-pref-key');
+                el.checked = map.has(key) ? !!map.get(key) : false;
             });
         }
 
