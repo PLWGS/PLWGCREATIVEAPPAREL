@@ -256,6 +256,24 @@ async function initializeDatabase() {
       )
     `);
 
+    // Create product_reviews table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS product_reviews (
+        id SERIAL PRIMARY KEY,
+        product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+        customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE,
+        order_id INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+        rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        title VARCHAR(120),
+        body TEXT,
+        images JSONB,
+        status VARCHAR(20) DEFAULT 'approved',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (customer_id, product_id)
+      )
+    `);
+
     // Create loyalty_rewards table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS loyalty_rewards (
@@ -2383,6 +2401,97 @@ app.get('/api/customer/orders', authenticateCustomer, async (req, res) => {
   }
 });
 
+// Get a specific customer order with items and review flags
+app.get('/api/customer/orders/:id', authenticateCustomer, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const { id } = req.params;
+
+    // Fetch order and ensure ownership
+    const orderResult = await pool.query(`
+      SELECT * FROM orders WHERE id = $1 AND customer_id = $2
+    `, [id, customerId]);
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    const order = orderResult.rows[0];
+
+    // Items
+    const itemsResult = await pool.query(`
+      SELECT * FROM order_items WHERE order_id = $1
+    `, [id]);
+    const items = itemsResult.rows;
+
+    // Reviews by product for this customer
+    const productIds = items.map(i => i.product_id).filter(Boolean);
+    let reviewsByProduct = {};
+    if (productIds.length > 0) {
+      const r = await pool.query(`
+        SELECT product_id, id, rating, status
+        FROM product_reviews
+        WHERE customer_id = $1 AND product_id = ANY($2::int[])
+      `, [customerId, productIds]);
+      for (const row of r.rows) {
+        reviewsByProduct[row.product_id] = { id: row.id, rating: row.rating, status: row.status };
+      }
+    }
+
+    res.json({ order, items, reviewsByProduct });
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create or update a product review by a customer
+app.post('/api/customer/reviews', authenticateCustomer, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const { product_id, order_id, rating, title, body, images } = req.body || {};
+
+    if (!product_id || !rating) {
+      return res.status(400).json({ error: 'product_id and rating are required' });
+    }
+    if (Number(rating) < 1 || Number(rating) > 5) {
+      return res.status(400).json({ error: 'rating must be between 1 and 5' });
+    }
+
+    // If order_id provided, verify ownership and product inclusion
+    if (order_id) {
+      const ownOrder = await pool.query(`SELECT 1 FROM orders WHERE id = $1 AND customer_id = $2`, [order_id, customerId]);
+      if (ownOrder.rows.length === 0) {
+        return res.status(403).json({ error: 'Order does not belong to customer' });
+      }
+      const hasProduct = await pool.query(`SELECT 1 FROM order_items WHERE order_id = $1 AND product_id = $2`, [order_id, product_id]);
+      if (hasProduct.rows.length === 0) {
+        return res.status(400).json({ error: 'Product not found in given order' });
+      }
+    }
+
+    // Upsert one review per product per customer
+    const upsert = await pool.query(`
+      INSERT INTO product_reviews (product_id, customer_id, order_id, rating, title, body, images)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT (customer_id, product_id)
+      DO UPDATE SET
+        order_id = EXCLUDED.order_id,
+        rating = EXCLUDED.rating,
+        title = EXCLUDED.title,
+        body = EXCLUDED.body,
+        images = EXCLUDED.images,
+        updated_at = CURRENT_TIMESTAMP
+      RETURNING id
+    `, [product_id, customerId, order_id || null, rating, title || null, body || null, images ? JSON.stringify(images) : null]);
+
+    res.json({ success: true, id: upsert.rows[0].id });
+  } catch (error) {
+    if (error && error.code === '23514') { // CHECK violation
+      return res.status(400).json({ error: 'Invalid rating' });
+    }
+    console.error('Error creating review:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // Get customer wishlist
 app.get('/api/customer/wishlist', authenticateCustomer, async (req, res) => {
   try {
