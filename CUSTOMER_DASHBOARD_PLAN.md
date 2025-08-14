@@ -141,3 +141,54 @@ Verification status
 - Health: verified locally.
 - Auth/Profile/Orders/Wishlist/Loyalty: verified locally happy-path.
 - Style Profile: UI operational; server-side upsert pending minor fix, then re-test end-to-end.
+
+---
+
+August 2025 – Updates Implemented (Incremental, Live-Verified)
+
+What’s implemented and verified (live)
+- Account page UX fixes
+  - Tabs: hide inactive sections with `display: none`; click now prevents default and scrolls the active section into view. Verified no vertical gaps between tabs and content.
+  - Recent Orders: “Reorder All Items” button wired to `reorderOrderById(recentOrder.id)`; adds items back to cart via `/api/cart/add`. Verified reorder works for both recent and previous orders.
+- Cart API routing
+  - `apiRequest()` special-cases endpoints starting with `/cart` to call `/api/cart/*` instead of `/api/customer/cart/*`. Verified live add-to-cart from Account actions.
+- Shipping Addresses (Profile Settings)
+  - Render live addresses from `GET /api/customer/profile` into `#addressesList`. Empty-state shown when none exist.
+  - Add Address modal: appends to existing list and persists via `PUT /api/customer/profile { addresses: [...] }`. Verified live roundtrip.
+  - Edit/Delete/Set Default: inline controls update the addresses array and persist via the same PUT; default toggles ensure only one address has `is_default=true`. Verified live.
+- Backend stability fixes
+  - Safe migration: ensure `customers.birthday` column exists (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`). Applied to live DB.
+  - `PUT /api/customer/profile` hardened: null‑safe updates using COALESCE; fixed parameter mismatch that caused `42P18`. Verified address saves return 200.
+- Data reset for clean testing
+  - Cleared `order_items` and `orders`; reset customer aggregate counters (`total_orders/total_spent/average_order_value`) to 0 for fresh purchase tests. Verified counts at 0, then new orders populate correctly.
+
+Implemented (needs broader verification)
+- Reorder UX states: button disabling and explicit toasts on empty/failed reorder are partially present; confirmed success toasts on happy path. Error/empty edge cases to be re‑checked.
+- Recommendations: list renders; needs loading skeleton and empty-state polish.
+
+Still to do
+- Preferences: persist toggle values into `customer_preferences` and reflect on load (currently placeholders default to checked).
+- Style Profile: confirm server upsert path fully references `ON CONFLICT (customer_id)` and re‑verify GET roundtrip across sessions.
+- Optional: dedicated Orders page ("View All") and order detail modal.
+- Optional: change‑password flow (current/new/confirm) with basic validation.
+
+How everything was done (high‑level)
+- Frontend (`pages/account.html`)
+  - Tabs: CSS change to `display: none` for `.tab-content`, JS handler prevents default and calls `scrollIntoView` for smooth alignment.
+  - Cart routing: `apiRequest()` detects `/cart` prefix and targets `/api/cart/*` directly, preserving JWT header as needed.
+  - Reorder: UI wires Recent Order button to `reorderOrderById(recentOrder.id)`; client fetches `/api/customer/orders` then replays items via `/api/cart/add`.
+  - Addresses: `updateAddressesSection()` renders; add/edit/delete/default handlers construct a full `addresses` array and `PUT /api/customer/profile` to persist. Add modal appends to the current list to avoid clearing.
+- Backend (`server.js`)
+  - DB safety: executed `ALTER TABLE customers ADD COLUMN IF NOT EXISTS birthday DATE`; also added the same safeguard in app startup initialization.
+  - Profile update: switched to `COALESCE` to avoid null overwrites; corrected SQL parameter numbering; retained address replace‑strategy (delete then insert) which is made safe by the frontend assembling a complete array.
+  - No destructive migrations; all changes are IF NOT EXISTS and compatible with existing data.
+
+Verification checklist (pass/fail)
+- Login → token stored → profile/orders/wishlist load: PASS (live)
+- Add address → appears immediately and after refresh: PASS (live)
+- Edit/Delete/Set default → persists and re-renders: PASS (live)
+- Reorder from Recent/Previous → items added to cart; counter updates: PASS (live)
+- Tabs spacing/alignment across sections: PASS (live)
+- Recommendations render: PASS (basic); skeleton/empty-state: PENDING
+- Preferences toggles persist/reflect: PENDING
+- Style Profile upsert roundtrip (server conflict target): PENDING
