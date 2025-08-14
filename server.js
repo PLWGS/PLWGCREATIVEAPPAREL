@@ -2960,7 +2960,17 @@ app.get('/api/products/public/:id', async (req, res) => {
 
     const itemsResult = await pool.query(`
       SELECT pr.id, pr.rating, pr.title, pr.body, pr.created_at,
-             c.first_name, c.last_name, c.name AS full_name, c.email
+             c.first_name, c.last_name, c.name AS full_name, c.email,
+             CASE 
+               WHEN COALESCE(NULLIF(TRIM(c.first_name), ''), '') <> ''
+                    OR COALESCE(NULLIF(TRIM(c.last_name), ''), '') <> ''
+                 THEN CONCAT(COALESCE(NULLIF(TRIM(c.first_name), ''), ''), ' ', LEFT(COALESCE(NULLIF(TRIM(c.last_name), ''), ''), 1))
+               WHEN COALESCE(NULLIF(TRIM(c.name), ''), '') <> ''
+                 THEN c.name
+               WHEN c.email IS NOT NULL AND POSITION('@' IN c.email) > 1
+                 THEN SPLIT_PART(c.email, '@', 1)
+               ELSE 'Customer'
+             END AS display_name
       FROM product_reviews pr
       LEFT JOIN customers c ON pr.customer_id = c.id
       WHERE pr.product_id = $1 AND pr.status = 'approved'

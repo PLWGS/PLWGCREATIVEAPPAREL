@@ -1916,9 +1916,10 @@
                     const stars = Array.from({length: rStars}).map(()=>starSvg).join('');
                     const date = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
                     const title = r.title ? `<span class="text-white font-semibold">${r.title}</span>` : '';
-                    const firstName = (r.first_name || (r.full_name || '').split(' ')[0] || '').trim();
+                    const fallbackFromEmail = (r.email || '').split('@')[0];
+                    const firstName = (r.first_name || (r.full_name || '').split(' ')[0] || fallbackFromEmail || '').trim();
                     const lastInitial = (r.last_name || (r.full_name || '').split(' ')[1] || '').trim().charAt(0);
-                    const displayName = (firstName || lastInitial) ? `${firstName}${lastInitial ? ' ' + lastInitial + '.' : ''}` : 'Customer';
+                    const displayName = (r.display_name || ((firstName || lastInitial) ? `${firstName}${lastInitial ? ' ' + lastInitial + '.' : ''}` : 'Customer'));
                     const nameForAvatar = (firstName || 'Alex');
                     const avatarId = 1 + (nameForAvatar.charCodeAt(0) % 70);
                     // Simple gender-leaning avatar choice: common female name hints
