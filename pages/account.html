@@ -1932,13 +1932,13 @@
                 <div class="glass-card rounded-2xl p-6 w-full max-w-lg">
                     <h3 class="font-orbitron text-xl font-bold text-white mb-4">Add Address</h3>
                     <div class="grid grid-cols-2 gap-3 mb-4">
-                        <input id="addrFirst" class="input-field" placeholder="First name" />
-                        <input id="addrLast" class="input-field" placeholder="Last name" />
-                        <input id="addrLine1" class="input-field col-span-2" placeholder="Address line 1" />
+                        <div class='col-span-1'><input id="addrFirst" class="input-field w-full" placeholder="First name" /><p id='errFirst' class='text-error text-xs mt-1 hidden'>First name is required</p></div>
+                        <div class='col-span-1'><input id="addrLast" class="input-field w-full" placeholder="Last name" /><p id='errLast' class='text-error text-xs mt-1 hidden'>Last name is required</p></div>
+                        <div class='col-span-2'><input id="addrLine1" class="input-field w-full" placeholder="Address line 1" /><p id='errLine1' class='text-error text-xs mt-1 hidden'>Address line 1 is required</p></div>
                         <input id="addrLine2" class="input-field col-span-2" placeholder="Address line 2 (optional)" />
-                        <input id="addrCity" class="input-field" placeholder="City" />
-                        <input id="addrState" class="input-field" placeholder="State" />
-                        <input id="addrPostal" class="input-field" placeholder="Postal code" />
+                        <div><input id="addrCity" class="input-field w-full" placeholder="City" /><p id='errCity' class='text-error text-xs mt-1 hidden'>City is required</p></div>
+                        <div><input id="addrState" class="input-field w-full" placeholder="State" /><p id='errState' class='text-error text-xs mt-1 hidden'>State is required</p></div>
+                        <div><input id="addrPostal" class="input-field w-full" placeholder="Postal code" /><p id='errPostal' class='text-error text-xs mt-1 hidden'>Postal code is required</p></div>
                         <input id="addrCountry" class="input-field" placeholder="Country" value="United States" />
                         <label class="col-span-2 flex items-center gap-2 text-sm text-text-secondary">
                             <input id="addrDefault" type="checkbox" class="accent-current" /> Set as default
@@ -1946,14 +1946,37 @@
                     </div>
                     <div class="flex justify-end gap-3">
                         <button id="addrCancel" class="border border-text-secondary text-text-secondary px-4 py-2 rounded-lg">Cancel</button>
-                        <button id="addrSave" class="btn-primary px-4 py-2 rounded-lg">Save Address</button>
+                        <button id="addrSave" class="btn-primary px-4 py-2 rounded-lg" disabled>Save Address</button>
                     </div>
                 </div>`;
 
             document.body.appendChild(modal);
 
             modal.querySelector('#addrCancel').onclick = () => modal.remove();
-            modal.querySelector('#addrSave').onclick = async () => {
+            const saveBtn = modal.querySelector('#addrSave');
+            const inputs = ['addrFirst','addrLast','addrLine1','addrCity','addrState','addrPostal'].map(id=>modal.querySelector(`#${id}`));
+            const errs = {
+                addrFirst: modal.querySelector('#errFirst'),
+                addrLast: modal.querySelector('#errLast'),
+                addrLine1: modal.querySelector('#errLine1'),
+                addrCity: modal.querySelector('#errCity'),
+                addrState: modal.querySelector('#errState'),
+                addrPostal: modal.querySelector('#errPostal')
+            };
+            function validate(){
+                let ok=true;
+                for(const el of inputs){
+                    const id=el.id; const val=el.value.trim();
+                    if(!val){ ok=false; errs[id]?.classList.remove('hidden'); }
+                    else { errs[id]?.classList.add('hidden'); }
+                }
+                saveBtn.disabled = !ok;
+                return ok;
+            }
+            inputs.forEach(el=>el.addEventListener('input', validate));
+            validate();
+
+            saveBtn.onclick = async () => {
                 // Build a single-address array and submit via PUT /profile
                 const address = {
                     address_type: document.getElementById('addrDefault').checked ? 'DEFAULT' : 'ADDRESS',
@@ -1967,6 +1990,7 @@
                     country: document.getElementById('addrCountry').value.trim() || 'United States',
                     is_default: document.getElementById('addrDefault').checked
                 };
+                if(!validate()) { showNotification('Please fix required fields','error'); return; }
 
                 const resp = await apiRequest('/profile', {
                     method: 'PUT',
@@ -1997,13 +2021,13 @@
                 <div class="glass-card rounded-2xl p-6 w-full max-w-lg">
                     <h3 class="font-orbitron text-xl font-bold text-white mb-4">Edit Address</h3>
                     <div class="grid grid-cols-2 gap-3 mb-4">
-                        <input id="editFirst" class="input-field" placeholder="First name" value="${a.first_name || ''}" />
-                        <input id="editLast" class="input-field" placeholder="Last name" value="${a.last_name || ''}" />
-                        <input id="editLine1" class="input-field col-span-2" placeholder="Address line 1" value="${a.address_line1 || ''}" />
+                        <div class='col-span-1'><input id="editFirst" class="input-field w-full" placeholder="First name" value="${a.first_name || ''}" /><p id='errEFirst' class='text-error text-xs mt-1 hidden'>First name is required</p></div>
+                        <div class='col-span-1'><input id="editLast" class="input-field w-full" placeholder="Last name" value="${a.last_name || ''}" /><p id='errELast' class='text-error text-xs mt-1 hidden'>Last name is required</p></div>
+                        <div class='col-span-2'><input id="editLine1" class="input-field w-full" placeholder="Address line 1" value="${a.address_line1 || ''}" /><p id='errELine1' class='text-error text-xs mt-1 hidden'>Address line 1 is required</p></div>
                         <input id="editLine2" class="input-field col-span-2" placeholder="Address line 2 (optional)" value="${a.address_line2 || ''}" />
-                        <input id="editCity" class="input-field" placeholder="City" value="${a.city || ''}" />
-                        <input id="editState" class="input-field" placeholder="State" value="${a.state || ''}" />
-                        <input id="editPostal" class="input-field" placeholder="Postal code" value="${a.postal_code || ''}" />
+                        <div><input id="editCity" class="input-field w-full" placeholder="City" value="${a.city || ''}" /><p id='errECity' class='text-error text-xs mt-1 hidden'>City is required</p></div>
+                        <div><input id="editState" class="input-field w-full" placeholder="State" value="${a.state || ''}" /><p id='errEState' class='text-error text-xs mt-1 hidden'>State is required</p></div>
+                        <div><input id="editPostal" class="input-field w-full" placeholder="Postal code" value="${a.postal_code || ''}" /><p id='errEPostal' class='text-error text-xs mt-1 hidden'>Postal code is required</p></div>
                         <input id="editCountry" class="input-field" placeholder="Country" value="${a.country || 'United States'}" />
                         <label class="col-span-2 flex items-center gap-2 text-sm text-text-secondary">
                             <input id="editDefault" type="checkbox" class="accent-current" ${a.is_default ? 'checked' : ''} /> Set as default
@@ -2011,13 +2035,31 @@
                     </div>
                     <div class="flex justify-end gap-3">
                         <button id="editCancel" class="border border-text-secondary text-text-secondary px-4 py-2 rounded-lg">Cancel</button>
-                        <button id="editSave" class="btn-primary px-4 py-2 rounded-lg">Save Changes</button>
+                        <button id="editSave" class="btn-primary px-4 py-2 rounded-lg" disabled>Save Changes</button>
                     </div>
                 </div>`;
 
             document.body.appendChild(modal);
             modal.querySelector('#editCancel').onclick = () => modal.remove();
-            modal.querySelector('#editSave').onclick = async () => {
+            const eSave = modal.querySelector('#editSave');
+            const eInputs = ['editFirst','editLast','editLine1','editCity','editState','editPostal'].map(id=>modal.querySelector(`#${id}`));
+            const eErrs = {
+                editFirst: modal.querySelector('#errEFirst'),
+                editLast: modal.querySelector('#errELast'),
+                editLine1: modal.querySelector('#errELine1'),
+                editCity: modal.querySelector('#errECity'),
+                editState: modal.querySelector('#errEState'),
+                editPostal: modal.querySelector('#errEPostal')
+            };
+            function eValidate(){
+                let ok=true;
+                for(const el of eInputs){ const id=el.id; const val=el.value.trim(); if(!val){ ok=false; eErrs[id]?.classList.remove('hidden'); } else { eErrs[id]?.classList.add('hidden'); } }
+                eSave.disabled = !ok; return ok;
+            }
+            eInputs.forEach(el=>el.addEventListener('input', eValidate));
+            eValidate();
+
+            eSave.onclick = async () => {
                 const updated = getCurrentAddresses();
                 if (index < 0 || index >= updated.length) return;
                 const edited = {
@@ -2033,6 +2075,7 @@
                     country: document.getElementById('editCountry').value.trim() || 'United States',
                     is_default: document.getElementById('editDefault').checked
                 };
+                if(!eValidate()) { showNotification('Please fix required fields','error'); return; }
                 let next = updated.slice();
                 next[index] = edited;
                 if (edited.is_default) {
