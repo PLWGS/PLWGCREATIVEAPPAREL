@@ -1465,7 +1465,7 @@
                 }
                 // Wire up the "Reorder All Items" button for the most recent order
                 if (reorderRecentButton) {
-                    reorderRecentButton.onclick = () => reorderOrderById(recentOrder.id);
+                    reorderRecentButton.onclick = () => reorderOrderById(recentOrder.id, reorderRecentButton);
                 }
                 
                 // Update recent order items
@@ -1505,7 +1505,7 @@
                                 </div>
                                 <div class="flex items-center space-x-4">
                                     <span class="status-${order.status} px-3 py-1 rounded-full text-white text-sm font-medium">${order.status}</span>
-                                    <button class="text-accent hover:text-accent-light transition-colors" onclick="reorderOrderById(${order.id})">Reorder</button>
+                                    <button class="text-accent hover:text-accent-light transition-colors" onclick="reorderOrderById(${order.id}, this)">Reorder</button>
                                 </div>
                             </div>
                         `).join('');
@@ -1717,10 +1717,11 @@
         }
 
         // Reorder by Order ID (best-effort from last fetched orders)
-        async function reorderOrderById(orderId){
+        async function reorderOrderById(orderId, btn){
             try{
                 const token = getAuthToken();
                 if (!token) { redirectToLogin(); return; }
+                if (btn) { btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed'); }
                 // We don't have a server reorder endpoint; emulate by adding items back to cart
                 // Fetch fresh orders to ensure items
                 const resp = await apiRequest('/orders?limit=5');
@@ -1728,7 +1729,10 @@
                 const data = await resp.json();
                 const orders = Array.isArray(data.orders) ? data.orders : [];
                 const target = orders.find(o=>String(o.id)===String(orderId));
-                if (!target || !Array.isArray(target.items)) return;
+                if (!target || !Array.isArray(target.items) || target.items.length === 0) {
+                    showNotification('No items found in this order', 'error');
+                    return;
+                }
                 for(const item of target.items){
                     await apiRequest('/cart/add', {
                         method:'POST',
@@ -1745,6 +1749,8 @@
             }catch(err){
                 console.error('reorderOrderById error:', err);
                 showNotification('Could not reorder items', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.classList.remove('opacity-50','cursor-not-allowed'); }
             }
         }
 
