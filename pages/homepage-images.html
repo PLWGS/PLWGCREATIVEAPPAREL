@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage Images - PlwgsCreativeApparel Admin</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .glass-nav {
+            backdrop-filter: blur(10px);
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(15px);
+            background: rgba(42, 42, 42, 0.6);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00bcd4, #0097a7);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 188, 212, 0.3);
+        }
+        
+        .input-field {
+            background: rgba(59, 69, 89, 0.8);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+        
+        .form-checkbox {
+            accent-color: #00bcd4;
+            width: 18px;
+            height: 18px;
+        }
+    </style>
+</head>
+<body class="bg-background text-text-primary min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-nav fixed top-0 left-0 right-0 z-50 border-b border-surface-light">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl font-bold text-accent">P PlwgsCreative</div>
+                    <div class="text-text-secondary">Admin Dashboard</div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="btn-primary">View Store</a>
+                    <div class="text-text-secondary">
+                        <span class="font-medium">Lori Nelton</span>
+                        <span class="text-sm">Store Owner</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="flex pt-20">
+        <aside class="w-64 bg-surface min-h-screen p-6 border-r border-surface-light">
+            <nav class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4">Navigation</h3>
+                    <ul class="space-y-2">
+                        <li><a href="admin.html" class="text-text-secondary hover:text-accent transition-colors">Dashboard</a></li>
+                        <li><a href="admin-uploads.html" class="text-text-secondary hover:text-accent transition-colors">Products</a></li>
+                        <li><a href="orders.html" class="text-text-secondary hover:text-accent transition-colors">Orders</a></li>
+                        <li><a href="custom.html" class="text-text-secondary hover:text-accent transition-colors">Custom Orders</a></li>
+                        <li><a href="customers.html" class="text-text-secondary hover:text-accent transition-colors">Customers</a></li>
+                        <li><a href="analytics.html" class="text-text-secondary hover:text-accent transition-colors">Analytics</a></li>
+                        <li><a href="marketing.html" class="text-text-secondary hover:text-accent transition-colors">Marketing</a></li>
+                        <li><a href="financials.html" class="text-text-secondary hover:text-accent transition-colors">Financials</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4">Content Management</h3>
+                    <ul class="space-y-2">
+                        <li><a href="admin-uploads.html" class="text-text-secondary hover:text-accent transition-colors">Product Uploads</a></li>
+                        <li><a href="homepage-images.html" class="text-accent bg-accent bg-opacity-20 px-3 py-2 rounded-lg border border-accent border-opacity-30">Homepage Images</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="container mx-auto">
+                <header class="glass-card border-0 border-b border-surface-light p-6 mb-8">
+                    <h1 class="text-3xl font-bold text-white mb-2">Homepage Images Management</h1>
+                    <p class="text-text-secondary">Manage hero carousel and featured sections for your homepage</p>
+                </header>
+
+                <!-- Hero Manager Section -->
+                <div class="glass-card rounded-xl p-6 mb-8">
+                    <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Hero Carousel Manager</h2>
+                    <p class="text-text-secondary text-sm mb-6">Select which products appear in your homepage hero carousel (3 slides). Each rank can only have one product.</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Hero Assignment Controls -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-white mb-4">Assign Products to Hero</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-text-primary mb-2">Product</label>
+                                    <select id="heroProductSelect" class="input-field w-full">
+                                        <option value="">Loading products…</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-text-primary mb-2">Hero Rank</label>
+                                    <select id="heroRankMgr" class="input-field w-full">
+                                        <option value="">Select Rank</option>
+                                        <option value="1">Slide 1 (Primary)</option>
+                                        <option value="2">Slide 2 (Secondary)</option>
+                                        <option value="3">Slide 3 (Tertiary)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" id="inHeroMgr" class="form-checkbox">
+                                    <label for="inHeroMgr" class="text-text-primary">Show in homepage hero</label>
+                                </div>
+                                
+                                <button id="saveHeroMgrBtn" class="btn-primary w-full">Save Hero Assignment</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Hero Status -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-white mb-4">Current Hero Status</h3>
+                            <div id="heroCurrent" class="space-y-3">
+                                <div class="text-text-secondary text-sm">Loading current assignments...</div>
+                            </div>
+                            
+                            <div class="mt-6 p-4 bg-surface-light rounded-lg">
+                                <h4 class="font-medium text-white mb-2">How it works:</h4>
+                                <ul class="text-text-secondary text-sm space-y-1">
+                                    <li>• Slide 1: Primary hero product (most prominent)</li>
+                                    <li>• Slide 2: Secondary hero product</li>
+                                    <li>• Slide 3: Tertiary hero product</li>
+                                    <li>• Assigning a product to a rank replaces any existing product at that rank</li>
+                                    <li>• Uncheck "Show in homepage hero" to remove a product from hero</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Section Manager (Future) -->
+                <div class="glass-card rounded-xl p-6 mb-8">
+                    <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Featured Collections Manager</h2>
+                    <p class="text-text-secondary text-sm mb-4">Coming soon: Manage which products appear in your homepage featured collections section.</p>
+                    <div class="p-8 text-center border-2 border-dashed border-surface-light rounded-lg">
+                        <div class="text-text-secondary">
+                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            <p class="text-lg font-medium">Featured Collections Manager</p>
+                            <p class="text-sm">This section will allow you to manage homepage featured collections, spotlights, and other promotional content.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Homepage Hero Manager JS ---
+        async function loadHeroProductsList(){
+            const select = document.getElementById('heroProductSelect');
+            if(!select) return;
+            try{
+                const resp = await fetch('/api/admin/products', { 
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')||''}` }
+                });
+                const list = resp.ok ? await resp.json() : [];
+                select.innerHTML = '<option value="">Select Product…</option>' + 
+                    list.map(p=>`<option value="${p.id}">${p.id} — ${p.name}</option>`).join('');
+            }catch(e){ 
+                select.innerHTML = '<option value="">Failed to load</option>'; 
+            }
+            
+            // Load current hero assignments
+            await loadCurrentHeroStatus();
+        }
+        
+        async function loadCurrentHeroStatus(){
+            try{
+                const heroResp = await fetch('/api/products/hero');
+                const hero = heroResp.ok ? await heroResp.json() : [];
+                const cur = document.getElementById('heroCurrent');
+                if(cur){
+                    if(hero.length === 0) {
+                        cur.innerHTML = '<div class="text-text-secondary text-sm">No products currently assigned to hero</div>';
+                    } else {
+                        const statusHtml = [1,2,3].map(r=>{
+                            const p = hero.find(h=>Number(h.feature_rank)===r);
+                            if(p) {
+                                return `<div class="flex items-center justify-between p-3 bg-surface-light rounded-lg">
+                                    <div>
+                                        <span class="font-medium text-white">Slide ${r}</span>
+                                        <span class="text-text-secondary text-sm block">${p.id} — ${p.name}</span>
+                                    </div>
+                                    <button onclick="removeFromHero(${p.id})" class="text-red-400 hover:text-red-300 text-sm">Remove</button>
+                                </div>`;
+                            } else {
+                                return `<div class="p-3 bg-surface-light rounded-lg">
+                                    <span class="text-text-secondary text-sm">Slide ${r}: Empty</span>
+                                </div>`;
+                            }
+                        }).join('');
+                        cur.innerHTML = statusHtml;
+                    }
+                }
+            }catch(e){ 
+                const cur = document.getElementById('heroCurrent');
+                if(cur) cur.innerHTML = '<div class="text-red-400 text-sm">Failed to load current status</div>';
+            }
+        }
+        
+        async function removeFromHero(productId){
+            if(!confirm('Remove this product from hero?')) return;
+            try{
+                const resp = await fetch(`/api/admin/products/${productId}/feature`,{
+                    method:'PUT',
+                    headers:{ 
+                        'Content-Type':'application/json', 
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')||''}` 
+                    },
+                    body: JSON.stringify({ in_hero: false, rank: null })
+                });
+                if(!resp.ok){ 
+                    const e = await resp.json().catch(()=>({error:'Failed'})); 
+                    throw new Error(e.error||'Failed'); 
+                }
+                await loadCurrentHeroStatus();
+                alert('Product removed from hero');
+            }catch(e){ 
+                alert('Could not remove: '+e.message); 
+            }
+        }
+        
+        async function saveHeroManager(){
+            const id = document.getElementById('heroProductSelect').value;
+            const rankStr = document.getElementById('heroRankMgr').value;
+            const inHero = document.getElementById('inHeroMgr').checked;
+            
+            if(!id){ 
+                alert('Please select a product'); 
+                return; 
+            }
+            if(!rankStr && inHero){ 
+                alert('Please select a rank when showing in hero'); 
+                return; 
+            }
+            
+            try{
+                const resp = await fetch(`/api/admin/products/${id}/feature`,{
+                    method:'PUT',
+                    headers:{ 
+                        'Content-Type':'application/json', 
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')||''}` 
+                    },
+                    body: JSON.stringify({ 
+                        in_hero: inHero, 
+                        rank: rankStr ? Number(rankStr) : null 
+                    })
+                });
+                
+                if(!resp.ok){ 
+                    const e = await resp.json().catch(()=>({error:'Failed'})); 
+                    throw new Error(e.error||'Failed'); 
+                }
+                
+                // Reset form
+                document.getElementById('heroProductSelect').value = '';
+                document.getElementById('heroRankMgr').value = '';
+                document.getElementById('inHeroMgr').checked = false;
+                
+                // Reload status
+                await loadCurrentHeroStatus();
+                alert('Hero assignment saved successfully!');
+            }catch(e){ 
+                alert('Could not save: '+e.message); 
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', ()=>{
+            const btn = document.getElementById('saveHeroMgrBtn');
+            if(btn){ 
+                btn.addEventListener('click', saveHeroManager); 
+                loadHeroProductsList(); 
+            }
+        });
+    </script>
+</body>
+</html>
