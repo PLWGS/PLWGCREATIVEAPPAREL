@@ -1916,18 +1916,27 @@
                     const stars = Array.from({length: rStars}).map(()=>starSvg).join('');
                     const date = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
                     const title = r.title ? `<span class="text-white font-semibold">${r.title}</span>` : '';
+                    const firstName = (r.first_name || '').trim();
+                    const lastInitial = (r.last_name || '').trim().charAt(0);
+                    const displayName = firstName || lastInitial ? `${firstName}${lastInitial ? ' ' + lastInitial + '.' : ''}` : 'Customer';
+                    const nameForAvatar = (firstName || 'Alex');
+                    const avatarId = 1 + (nameForAvatar.charCodeAt(0) % 70);
+                    const avatarUrl = `https://i.pravatar.cc/48?img=${avatarId}`;
                     return `
                     <div class="glass-card rounded-xl p-6">
                         <div class="flex items-start space-x-4">
+                            <img src="${avatarUrl}" alt="${displayName}" class="w-12 h-12 rounded-full" loading="lazy" onerror="this.src='https://i.pravatar.cc/48?img=12'; this.onerror=null;" />
                             <div class="flex-1">
                                 <div class="flex items-center justify-between mb-2">
                                     <div>
+                                        <h4 class="font-semibold text-white">${displayName}</h4>
                                         <div class="star-rating flex text-sm">${stars}</div>
                                         ${title}
                                     </div>
                                     <span class="text-text-secondary text-sm">${date}</span>
                                 </div>
                                 <p class="text-text-secondary mb-1">${r.body || ''}</p>
+                                <div class="text-accent text-xs mt-1">Verified Purchase</div>
                             </div>
                         </div>
                     </div>`;

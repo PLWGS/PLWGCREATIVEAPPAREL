@@ -2959,10 +2959,12 @@ app.get('/api/products/public/:id', async (req, res) => {
     const { count, average } = agg.rows[0] || { count: 0, average: 0 };
 
     const itemsResult = await pool.query(`
-      SELECT id, rating, title, body, created_at
-      FROM product_reviews
-      WHERE product_id = $1 AND status = 'approved'
-      ORDER BY created_at DESC
+      SELECT pr.id, pr.rating, pr.title, pr.body, pr.created_at,
+             c.first_name, c.last_name
+      FROM product_reviews pr
+      LEFT JOIN customers c ON pr.customer_id = c.id
+      WHERE pr.product_id = $1 AND pr.status = 'approved'
+      ORDER BY pr.created_at DESC
       LIMIT 20 OFFSET 0
     `, [productId]);
 
