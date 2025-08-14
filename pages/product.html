@@ -1763,33 +1763,55 @@
             }
             
             // Update colors if available
-            if (product.colors && product.colors.length > 0) {
-                const colorContainer = document.querySelector('.color-options');
-                if (colorContainer) {
-                    colorContainer.innerHTML = product.colors.map((color, idx) => `
-                        <div class="color-swatch w-12 h-12 rounded-full border-2 border-surface-light hover:border-accent cursor-pointer transition-colors ${idx===0 ? 'ring-2 ring-accent border-accent' : ''}"
-                             data-color="${color}"
-                             style="background-color: ${color.toLowerCase()}"
-                             title="${color}"></div>
-                    `).join('');
+            {
+                // Normalize colors: may be JSON string, names, or hexes
+                let productColors = product.colors;
+                if (typeof productColors === 'string') {
+                    try { productColors = JSON.parse(productColors); } catch(_) { productColors = []; }
+                }
+                if (Array.isArray(productColors) && productColors.length > 0) {
+                    const colorContainer = document.querySelector('.color-options');
+                    if (colorContainer) {
+                        const colorHexMap = {
+                            'White':'#ffffff','Natural':'#eee8d8','Ice Grey':'#d3d1cf','Brown':'#352d2c','Black':'#000000','Navy':'#252432','Aqua':'#088dbb','Royal Blue':'#17489b','RoyalBlue':'#17489b','Teal':'#00a69c','Gold':'#f1b83e','Army':'#585244','Military Green':'#495443','Evergreen':'#2b4d35','Olive Green':'#595624','Kelly Green':'#0d572c','Mint':'#b2ddc4','Sunset':'#f8a790','Orange':'#f3703b','Autumn':'#993f21','Mustard':'#caa235','Purple':'#472b7a','Lilac':'#dab2d0','Charity Pink':'#f27da0','Fushsia':'#ec3f77','Soft Pink':'#fae1df','Pink':'#f0bebf','Berry':'#cd4f7f','Red':'#d32621','Maroon':'#6c2232'
+                        };
+                        const resolveColor = (c) => {
+                            if (!c) return '#000000';
+                            if (typeof c === 'string' && c.trim().startsWith('#')) return c.trim();
+                            const name = String(c).trim();
+                            if (colorHexMap[name]) return colorHexMap[name];
+                            const compact = name.replace(/\s+/g,'');
+                            if (colorHexMap[compact]) return colorHexMap[compact];
+                            return name; // Let browser try CSS named color
+                        };
+                        colorContainer.innerHTML = productColors.map((color, idx) => {
+                            const cssColor = resolveColor(color);
+                            const selected = idx === 0 ? 'ring-2 ring-accent border-accent' : '';
+                            return `
+                                <div class="color-swatch w-12 h-12 rounded-full border-2 border-surface-light hover:border-accent cursor-pointer transition-colors ${selected}"
+                                     data-color="${String(color).replace(/"/g,'&quot;')}"
+                                     style="background-color: ${cssColor}"
+                                     title="${color}"></div>
+                            `;
+                        }).join('');
 
-                    // Default selected color = first
-                    const firstSwatch = colorContainer.querySelector('.color-swatch');
-                    if (firstSwatch) {
-                        selectedColor = firstSwatch.getAttribute('data-color');
-                        firstSwatch.classList.add('selected');
-                    }
+                        // Default selected color = first
+                        const firstSwatch = colorContainer.querySelector('.color-swatch');
+                        if (firstSwatch) {
+                            selectedColor = firstSwatch.getAttribute('data-color');
+                            firstSwatch.classList.add('selected');
+                        }
 
-                    // Selection handlers
-                    colorContainer.querySelectorAll('.color-swatch').forEach(swatch => {
-                        swatch.addEventListener('click', () => {
-                            colorContainer.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected','ring-2','ring-accent','border-accent'));
-                            swatch.classList.add('selected','ring-2','ring-accent','border-accent');
-                            selectedColor = swatch.getAttribute('data-color');
-                            console.log('🎨 Selected color:', selectedColor);
-                            // Optional: update main image tint or border to give feedback visually
+                        // Selection handlers
+                        colorContainer.querySelectorAll('.color-swatch').forEach(swatch => {
+                            swatch.addEventListener('click', () => {
+                                colorContainer.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected','ring-2','ring-accent','border-accent'));
+                                swatch.classList.add('selected','ring-2','ring-accent','border-accent');
+                                selectedColor = swatch.getAttribute('data-color');
+                                console.log('🎨 Selected color:', selectedColor);
+                            });
                         });
-                    });
+                    }
                 }
             }
             
