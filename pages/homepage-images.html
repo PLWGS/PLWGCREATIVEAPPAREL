@@ -170,17 +170,63 @@
                     </div>
                 </div>
 
-                <!-- Featured Section Manager (Future) -->
+                <!-- Featured Collections Manager -->
                 <div class="glass-card rounded-xl p-6 mb-8">
                     <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Featured Collections Manager</h2>
-                    <p class="text-text-secondary text-sm mb-4">Coming soon: Manage which products appear in your homepage featured collections section.</p>
-                    <div class="p-8 text-center border-2 border-dashed border-surface-light rounded-lg">
-                        <div class="text-text-secondary">
-                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                            </svg>
-                            <p class="text-lg font-medium">Featured Collections Manager</p>
-                            <p class="text-sm">This section will allow you to manage homepage featured collections, spotlights, and other promotional content.</p>
+                    <p class="text-text-secondary text-sm mb-6">Select which products appear in your homepage featured collections section. You can add up to 6 products in any order you want.</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Featured Assignment Controls -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-white mb-4">Add Products to Featured</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-text-primary mb-2">Product</label>
+                                    <select id="featuredProductSelect" class="input-field w-full">
+                                        <option value="">Loading products…</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-text-primary mb-2">Display Order</label>
+                                    <select id="featuredOrder" class="input-field w-full">
+                                        <option value="">Select Position</option>
+                                        <option value="1">Position 1 (First)</option>
+                                        <option value="2">Position 2</option>
+                                        <option value="3">Position 3</option>
+                                        <option value="4">Position 4</option>
+                                        <option value="5">Position 5</option>
+                                        <option value="6">Position 6 (Last)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" id="inFeatured" class="form-checkbox">
+                                    <label for="inFeatured" class="text-text-primary">Show in featured collections</label>
+                                </div>
+                                
+                                <button id="saveFeaturedBtn" class="btn-primary w-full">Save Featured Assignment</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Featured Status -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-white mb-4">Current Featured Status</h3>
+                            <div id="featuredCurrent" class="space-y-3">
+                                <div class="text-text-secondary text-sm">Loading current assignments...</div>
+                            </div>
+                            
+                            <div class="mt-6 p-4 bg-surface-light rounded-lg">
+                                <h4 class="font-medium text-white mb-2">How it works:</h4>
+                                <ul class="text-text-secondary text-sm space-y-1">
+                                    <li>• Position 1: First product shown (leftmost)</li>
+                                    <li>• Position 2-6: Sequential order from left to right</li>
+                                    <li>• Assigning a product to a position replaces any existing product at that position</li>
+                                    <li>• Uncheck "Show in featured collections" to remove a product</li>
+                                    <li>• Maximum of 6 products can be featured</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -206,6 +252,25 @@
             
             // Load current hero assignments
             await loadCurrentHeroStatus();
+        }
+        
+        // --- Featured Collections Manager JS ---
+        async function loadFeaturedProductsList(){
+            const select = document.getElementById('featuredProductSelect');
+            if(!select) return;
+            try{
+                const resp = await fetch('/api/admin/products', { 
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')||''}` }
+                });
+                const list = resp.ok ? await resp.json() : [];
+                select.innerHTML = '<option value="">Select Product…</option>' + 
+                    list.map(p=>`<option value="${p.id}">${p.id} — ${p.name}</option>`).join('');
+            }catch(e){ 
+                select.innerHTML = '<option value="">Failed to load</option>'; 
+            }
+            
+            // Load current featured assignments
+            await loadCurrentFeaturedStatus();
         }
         
         async function loadCurrentHeroStatus(){
@@ -264,6 +329,62 @@
             }
         }
         
+        async function loadCurrentFeaturedStatus(){
+            try{
+                const featuredResp = await fetch('/api/products/featured');
+                const featured = featuredResp.ok ? await featuredResp.json() : [];
+                const cur = document.getElementById('featuredCurrent');
+                if(cur){
+                    if(featured.length === 0) {
+                        cur.innerHTML = '<div class="text-text-secondary text-sm">No products currently assigned to featured collections</div>';
+                    } else {
+                        const statusHtml = [1,2,3,4,5,6].map(r=>{
+                            const p = featured.find(h=>Number(h.featured_order)===r);
+                            if(p) {
+                                return `<div class="flex items-center justify-between p-3 bg-surface-light rounded-lg">
+                                    <div>
+                                        <span class="font-medium text-white">Position ${r}</span>
+                                        <span class="text-text-secondary text-sm block">${p.id} — ${p.name}</span>
+                                    </div>
+                                    <button onclick="removeFromFeatured(${p.id})" class="text-red-400 hover:text-red-300 text-sm">Remove</button>
+                                </div>`;
+                            } else {
+                                return `<div class="p-3 bg-surface-light rounded-lg">
+                                    <span class="text-text-secondary text-sm">Position ${r}: Empty</span>
+                                </div>`;
+                            }
+                        }).join('');
+                        cur.innerHTML = statusHtml;
+                    }
+                }
+            }catch(e){ 
+                const cur = document.getElementById('featuredCurrent');
+                if(cur) cur.innerHTML = '<div class="text-red-400 text-sm">Failed to load current status</div>';
+            }
+        }
+        
+        async function removeFromFeatured(productId){
+            if(!confirm('Remove this product from featured collections?')) return;
+            try{
+                const resp = await fetch(`/api/admin/products/${productId}/feature`,{
+                    method:'PUT',
+                    headers:{ 
+                        'Content-Type':'application/json', 
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')||''}` 
+                    },
+                    body: JSON.stringify({ in_featured: false, featured_order: null })
+                });
+                if(!resp.ok){ 
+                    const e = await resp.json().catch(()=>({error:'Failed'})); 
+                    throw new Error(e.error||'Failed'); 
+                }
+                await loadCurrentFeaturedStatus();
+                alert('Product removed from featured collections');
+            }catch(e){ 
+                alert('Could not remove: '+e.message); 
+            }
+        }
+        
         async function saveHeroManager(){
             const id = document.getElementById('heroProductSelect').value;
             const rankStr = document.getElementById('heroRankMgr').value;
@@ -309,12 +430,66 @@
             }
         }
         
+        async function saveFeaturedManager(){
+            const id = document.getElementById('featuredProductSelect').value;
+            const orderStr = document.getElementById('featuredOrder').value;
+            const inFeatured = document.getElementById('inFeatured').checked;
+            
+            if(!id){ 
+                alert('Please select a product'); 
+                return; 
+            }
+            if(!orderStr && inFeatured){ 
+                alert('Please select a position when showing in featured collections'); 
+                return; 
+            }
+            
+            try{
+                const resp = await fetch(`/api/admin/products/${id}/feature`,{
+                    method:'PUT',
+                    headers:{ 
+                        'Content-Type':'application/json', 
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')||''}` 
+                    },
+                    body: JSON.stringify({ 
+                        in_featured: inFeatured, 
+                        featured_order: orderStr ? Number(orderStr) : null 
+                    })
+                });
+                
+                if(!resp.ok){ 
+                    const e = await resp.json().catch(()=>({error:'Failed'})); 
+                    throw new Error(e.error||'Failed'); 
+                }
+                
+                // Reset form
+                document.getElementById('featuredProductSelect').value = '';
+                document.getElementById('featuredOrder').value = '';
+                document.getElementById('inFeatured').checked = false;
+                
+                // Refresh current status
+                await loadCurrentFeaturedStatus();
+                
+                alert('Featured collection assignment saved successfully!');
+            }catch(e){ 
+                alert('Could not save: '+e.message); 
+            }
+        }
+        
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', ()=>{
-            const btn = document.getElementById('saveHeroMgrBtn');
-            if(btn){ 
-                btn.addEventListener('click', saveHeroManager); 
+            // Hero Manager
+            const heroBtn = document.getElementById('saveHeroMgrBtn');
+            if(heroBtn){ 
+                heroBtn.addEventListener('click', saveHeroManager); 
                 loadHeroProductsList(); 
+            }
+            
+            // Featured Collections Manager
+            const featuredBtn = document.getElementById('saveFeaturedBtn');
+            if(featuredBtn){ 
+                featuredBtn.addEventListener('click', saveFeaturedManager); 
+                loadFeaturedProductsList(); 
             }
         });
     </script>

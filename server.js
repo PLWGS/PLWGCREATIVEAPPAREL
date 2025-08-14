@@ -341,6 +341,8 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS track_inventory BOOLEAN DEFAULT false`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS brand_preference TEXT`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS feature_rank INTEGER`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS in_featured BOOLEAN DEFAULT false`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS featured_order INTEGER`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS specs_notes TEXT`);
     } catch (error) {
       console.log('Some columns may already exist:', error.message);
@@ -3005,28 +3007,62 @@ app.get('/api/products/hero', async (req, res) => {
   }
 });
 
-// Set or clear a product's hero feature (admin)
+// Get homepage featured collections products (up to 6, ordered by featured_order)
+app.get('/api/products/featured', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT * FROM products 
+      WHERE is_active = true AND in_featured = true AND featured_order IS NOT NULL
+      ORDER BY featured_order ASC
+      LIMIT 6
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching featured products:', error);
+    res.status(500).json({ error: 'Failed to fetch featured products' });
+  }
+});
+
+// Set or clear a product's hero or featured feature (admin)
 app.put('/api/admin/products/:id/feature', authenticateToken, async (req, res) => {
   if (!pool) return res.status(500).json({ error: 'Database not available' });
   const productId = req.params.id;
-  const { in_hero, rank } = req.body || {};
+  const { in_hero, rank, in_featured, featured_order } = req.body || {};
   try {
     await pool.query('BEGIN');
-    if (in_hero && [1,2,3].includes(Number(rank))) {
-      // Clear any existing product at this rank
-      await pool.query('UPDATE products SET feature_rank = NULL WHERE feature_rank = $1', [rank]);
-      // Set this product's rank and mark featured
-      await pool.query('UPDATE products SET feature_rank = $1, is_featured = true WHERE id = $2', [rank, productId]);
-    } else {
-      // Clear hero flag for this product
-      await pool.query('UPDATE products SET feature_rank = NULL WHERE id = $1', [productId]);
+    
+    // Handle hero carousel updates
+    if (in_hero !== undefined) {
+      if (in_hero && [1,2,3].includes(Number(rank))) {
+        // Clear any existing product at this rank
+        await pool.query('UPDATE products SET feature_rank = NULL WHERE feature_rank = $1', [rank]);
+        // Set this product's rank
+        await pool.query('UPDATE products SET feature_rank = $1 WHERE id = $2', [rank, productId]);
+      } else {
+        // Clear hero flag for this product
+        await pool.query('UPDATE products SET feature_rank = NULL WHERE id = $1', [productId]);
+      }
     }
+    
+    // Handle featured collections updates
+    if (in_featured !== undefined) {
+      if (in_featured && [1,2,3,4,5,6].includes(Number(featured_order))) {
+        // Clear any existing product at this position
+        await pool.query('UPDATE products SET featured_order = NULL WHERE featured_order = $1', [featured_order]);
+        // Set this product's position
+        await pool.query('UPDATE products SET in_featured = true, featured_order = $1 WHERE id = $2', [featured_order, productId]);
+      } else {
+        // Clear featured flag for this product
+        await pool.query('UPDATE products SET in_featured = false, featured_order = NULL WHERE id = $1', [productId]);
+      }
+    }
+    
     await pool.query('COMMIT');
     res.json({ success: true });
   } catch (error) {
     await pool.query('ROLLBACK');
-    console.error('Error updating product hero feature:', error);
-    res.status(500).json({ error: 'Failed to update hero feature' });
+    console.error('Error updating product feature:', error);
+    res.status(500).json({ error: 'Failed to update product feature' });
   }
 });
 // Search product by name
