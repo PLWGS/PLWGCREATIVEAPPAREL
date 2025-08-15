@@ -860,29 +860,52 @@
           `).join('');
         }
 
-        // Customer Reviews Data
-        const etsyReviews = [
-            {"reviewer":"Michelle","date_reviewed":"07/21/2025","star_rating":5,"message":"Shop owner went out of her way to help me and make sure I was completely with my order","order_id":3708435983},
-            {"reviewer":"Shelley","date_reviewed":"07/21/2025","star_rating":5,"message":"Lori is awesome to work with!","order_id":3734586064},
-            {"reviewer":"Raelynn","date_reviewed":"07/18/2025","star_rating":5,"message":"Always a pleasure working together!","order_id":3687820975},
-            {"reviewer":"dlmartin66","date_reviewed":"06/21/2025","star_rating":5,"message":"Great service. Beautiful hoodie as ordered.","order_id":3702969716},
-            {"reviewer":"Eileen A Slusarczyk","date_reviewed":"06/20/2025","star_rating":5,"message":"My hubby is one that doesn't say much about anything but he was really excited when he opened the sweatshirt. Please tell Lori how much he loves it & thank her for her messages.","order_id":3714981537},
-            {"reviewer":"Lea","date_reviewed":"06/12/2025","star_rating":5,"message":"Beautiful shirt and timely delivery!","order_id":3627566827},
-            {"reviewer":"Brooke","date_reviewed":"06/11/2025","star_rating":5,"message":"Perfect for my WWE loving boy! Customer service was great- thank you!","order_id":3705437241},
-            {"reviewer":"Amy","date_reviewed":"06/04/2025","star_rating":5,"message":"Thanks so much! My son loved this shirt for his birthday!","order_id":3624410547},
-            {"reviewer":"Traci","date_reviewed":"05/29/2025","star_rating":5,"message":"Perfect shirt to wear to the AC/DC concert in Nashville 🤘 I got so many compliments on it!","order_id":3674037222},
-            {"reviewer":"Brandy","date_reviewed":"05/23/2025","star_rating":5,"message":"I ABSOLUTELY the graphic on this shirt!!","order_id":3671361990},
-            {"reviewer":"Laura","date_reviewed":"05/23/2025","star_rating":5,"message":"High quality shirt. Highly recommend. Will reorder from this site again","order_id":3689711467},
-            {"reviewer":"pabbi","date_reviewed":"05/14/2025","star_rating":5,"message":"Once again, superb merchandise ♥️. The quality and colors of the shirts are Top Notch. Super fast delivery also.","order_id":3659758315},
-            {"reviewer":"Kaitlyn","date_reviewed":"05/12/2025","star_rating":5,"message":"The shirt was just as it was described","order_id":3669626135},
-            {"reviewer":"Laura","date_reviewed":"05/10/2025","star_rating":5,"message":"Seller was extremely helpful with questions I had.","order_id":3668360092},
-            {"reviewer":"Tami","date_reviewed":"05/08/2025","star_rating":5,"message":"Great quality! My friend loved it!","order_id":3644657486},
-            {"reviewer":"Joyce","date_reviewed":"05/06/2025","star_rating":5,"message":"This hoodie is stylish and comfy. It's definitely a conversation starter and is just plain fun to wear. Love it at my age (77), or any age!","order_id":3654695926},
-            {"reviewer":"niki","date_reviewed":"05/05/2025","star_rating":5,"message":"Seller replied fast & was helpful when post office messed up order. They were very on top of things & product was just as described! :) Would recommend!","order_id":3658439730},
-            {"reviewer":"beachaddict31","date_reviewed":"05/05/2025","star_rating":5,"message":"Everything was great! The sirt was the best quality I've purchased. Definitely will be a repeat buyer.","order_id":3629425956},
-            {"reviewer":"pabbi","date_reviewed":"05/04/2025","star_rating":4,"message":"Once again. Amazingly vibrant colors and the quality and job...well done ♥️♥️","order_id":3664597485},
-            {"reviewer":"Carla","date_reviewed":"05/01/2025","star_rating":5,"message":"My husband loves the shirt. Great fit. Very neatly packaged with care instruction card and thank you sticker attached. Also business cards were enclosed. The owner sent me a message before shipping which was clear and polite which I appreciate. I will definitely order from this business again.","order_id":3663673873}
-        ];
+        // Customer Reviews Data - Load from JSON file
+        let etsyReviews = [];
+
+        // Load all reviews from the JSON file
+        async function loadEtsyReviews() {
+            try {
+                const response = await fetch('/etsy_reviews.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                etsyReviews = await response.json();
+                console.log(`Loaded ${etsyReviews.length} reviews from etsy_reviews.json`);
+                
+                // Re-render everything after loading reviews
+                renderRatingSummary();
+                renderReviews();
+            } catch (error) {
+                console.error('Error loading Etsy reviews:', error);
+                // Fallback to hardcoded reviews if JSON loading fails
+                etsyReviews = [
+                    {"reviewer":"Michelle","date_reviewed":"07/21/2025","star_rating":5,"message":"Shop owner went out of her way to help me and make sure I was completely with my order","order_id":3708435983},
+                    {"reviewer":"Shelley","date_reviewed":"07/21/2025","star_rating":5,"message":"Lori is awesome to work with!","order_id":3734586064},
+                    {"reviewer":"Raelynn","date_reviewed":"07/18/2025","star_rating":5,"message":"Always a pleasure working together!","order_id":3687820975},
+                    {"reviewer":"dlmartin66","date_reviewed":"06/21/2025","star_rating":5,"message":"Great service. Beautiful hoodie as ordered.","order_id":3702969716},
+                    {"reviewer":"Eileen A Slusarczyk","date_reviewed":"06/20/2025","star_rating":5,"message":"My hubby is one that doesn't say much about anything but he was really excited when he opened the sweatshirt. Please tell Lori how much he loves it & thank her for her messages.","order_id":3714981537},
+                    {"reviewer":"Lea","date_reviewed":"06/12/2025","star_rating":5,"message":"Beautiful shirt and timely delivery!","order_id":3627566827},
+                    {"reviewer":"Brooke","date_reviewed":"06/11/2025","star_rating":5,"message":"Perfect for my WWE loving boy! Customer service was great- thank you!","order_id":3705437241},
+                    {"reviewer":"Amy","date_reviewed":"06/04/2025","star_rating":5,"message":"Thanks so much! My son loved this shirt for his birthday!","order_id":3624410547},
+                    {"reviewer":"Traci","date_reviewed":"05/29/2025","star_rating":5,"message":"Perfect shirt to wear to the AC/DC concert in Nashville 🤘 I got so many compliments on it!","order_id":3674037222},
+                    {"reviewer":"Brandy","date_reviewed":"05/23/2025","star_rating":5,"message":"I ABSOLUTELY the graphic on this shirt!!","order_id":3671361990},
+                    {"reviewer":"Laura","date_reviewed":"05/23/2025","star_rating":5,"message":"High quality shirt. Highly recommend. Will reorder from this site again","order_id":3689711467},
+                    {"reviewer":"pabbi","date_reviewed":"05/14/2025","star_rating":5,"message":"Once again, superb merchandise ♥️. The quality and colors of the shirts are Top Notch. Super fast delivery also.","order_id":3659758315},
+                    {"reviewer":"Kaitlyn","date_reviewed":"05/12/2025","star_rating":5,"message":"The shirt was just as it was described","order_id":3669626135},
+                    {"reviewer":"Laura","date_reviewed":"05/10/2025","star_rating":5,"message":"Seller was extremely helpful with questions I had.","order_id":3668360092},
+                    {"reviewer":"Tami","date_reviewed":"05/08/2025","star_rating":5,"message":"Great quality! My friend loved it!","order_id":3644657486},
+                    {"reviewer":"Joyce","date_reviewed":"05/06/2025","star_rating":5,"message":"This hoodie is stylish and comfy. It's definitely a conversation starter and is just plain fun to wear. Love it at my age (77), or any age!","order_id":3654695926},
+                    {"reviewer":"niki","date_reviewed":"05/05/2025","star_rating":5,"message":"Seller replied fast & was helpful when post office messed up order. They were very on top of things & product was just as described! :) Would recommend!","order_id":3658439730},
+                    {"reviewer":"beachaddict31","date_reviewed":"05/05/2025","star_rating":5,"message":"Everything was great! The sirt was the best quality I've purchased. Definitely will be a repeat buyer.","order_id":3629425956},
+                    {"reviewer":"pabbi","date_reviewed":"05/04/2025","star_rating":4,"message":"Once again. Amazingly vibrant colors and the quality and job...well done ♥️♥️","order_id":3664597485},
+                    {"reviewer":"Carla","date_reviewed":"05/01/2025","star_rating":5,"message":"My husband loves the shirt. Great fit. Very neatly packaged with care instruction card and thank you sticker attached. Also business cards were enclosed. The owner sent me a message before shipping which was clear and polite which I appreciate. I will definitely order from this business again.","order_id":3663673873}
+                ];
+                console.log('Using fallback reviews:', etsyReviews.length);
+                renderRatingSummary();
+                renderReviews();
+            }
+        }
 
         // Reviews functionality
         let currentReviewIndex = 0;
@@ -903,6 +926,13 @@
             'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
@@ -1063,11 +1093,31 @@
                     </div>
                 `;
             }).join('');
+            
+            // Update button text to show current position
+            const showMoreBtn = document.getElementById('showMoreReviewsBtn');
+            if (showMoreBtn) {
+                const btnText = showMoreBtn.querySelector('.btn-text');
+                if (btnText) {
+                    btnText.textContent = `Show More Reviews (${endIndex} of ${etsyReviews.length})`;
+                }
+            }
         }
 
         function showMoreReviews() {
             currentReviewIndex = (currentReviewIndex + reviewsPerPage) % etsyReviews.length;
             renderReviews();
+            
+            // Update button text to show current position
+            const showMoreBtn = document.getElementById('showMoreReviewsBtn');
+            if (showMoreBtn) {
+                const startIndex = currentReviewIndex + 1;
+                const endIndex = Math.min(currentReviewIndex + reviewsPerPage, etsyReviews.length);
+                const btnText = showMoreBtn.querySelector('.btn-text');
+                if (btnText) {
+                    btnText.textContent = `Show More Reviews (${endIndex} of ${etsyReviews.length})`;
+                }
+            }
         }
 
         function isFemaleName(name) {
@@ -1093,9 +1143,8 @@
           renderSpotlights(products);
           renderIGGrid(products);
 
-          // Initialize reviews and rating summary
-          renderRatingSummary();
-          renderReviews();
+          // Load all 755 Etsy reviews from JSON file
+          await loadEtsyReviews();
           
           // Add event listener for show more reviews button
           const showMoreBtn = document.getElementById('showMoreReviewsBtn');
