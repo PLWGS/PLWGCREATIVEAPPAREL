@@ -414,6 +414,81 @@
         </div>
     </section>
 
+    <!-- Customer Reviews Section -->
+    <section class="py-20 relative z-10">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="font-orbitron text-3xl font-bold text-white mb-4">What Our Customers Say</h2>
+                <p class="text-text-secondary text-lg max-w-2xl mx-auto">
+                    Real reviews from real customers who love our creative rebellion apparel
+                </p>
+            </div>
+
+            <!-- Overall Rating Summary -->
+            <div class="glass-card rounded-xl p-8 mb-12">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="text-center md:text-left">
+                        <div class="text-6xl font-bold text-accent mb-2" id="averageRating">5.0</div>
+                        <div class="flex items-center justify-center md:justify-start space-x-1 text-yellow-400 text-2xl mb-2">
+                            ★★★★★
+                        </div>
+                        <p class="text-text-secondary" id="totalReviews">Based on Etsy reviews</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-white text-sm w-8">5★</span>
+                            <div class="flex-1 bg-surface-light rounded-full h-2">
+                                <div class="bg-accent h-2 rounded-full" id="rating5Bar" style="width: 95%"></div>
+                            </div>
+                            <span class="text-accent text-sm w-12" id="rating5Text">95%</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-white text-sm w-8">4★</span>
+                            <div class="flex-1 bg-surface-light rounded-full h-2">
+                                <div class="bg-accent h-2 rounded-full" id="rating4Bar" style="width: 3%"></div>
+                            </div>
+                            <span class="text-accent text-sm w-12" id="rating4Text">3%</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-white text-sm w-8">3★</span>
+                            <div class="flex-1 bg-surface-light rounded-full h-2">
+                                <div class="bg-accent h-2 rounded-full" id="rating3Bar" style="width: 1%"></div>
+                            </div>
+                            <span class="text-accent text-sm w-12" id="rating3Text">1%</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-white text-sm w-8">2★</span>
+                            <div class="flex-1 bg-surface-light rounded-full h-2">
+                                <div class="bg-accent h-2 rounded-full" id="rating2Bar" style="width: 0.5%"></div>
+                            </div>
+                            <span class="text-accent text-sm w-12" id="rating2Text">0.5%</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-white text-sm w-8">1★</span>
+                            <div class="flex-1 bg-surface-light rounded-full h-2">
+                                <div class="bg-accent h-2 rounded-full" id="rating1Bar" style="width: 0.5%"></div>
+                            </div>
+                            <span class="text-accent text-sm w-12" id="rating1Text">0.5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Grid -->
+            <div id="reviewsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12" style="grid-template-rows: repeat(2, minmax(0, 1fr));">
+                <!-- Reviews will be dynamically populated here -->
+            </div>
+
+            <!-- Show More Reviews Button -->
+            <div class="text-center">
+                <button id="showMoreReviewsBtn" class="btn-primary neon-glow text-lg px-8 py-4">
+                    <span class="btn-text">Show More Reviews</span>
+                    <span class="btn-loading hidden">Loading...</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-surface-dark border-t border-surface-light py-16 relative z-10">
         <div class="container mx-auto px-6">
@@ -785,6 +860,221 @@
           `).join('');
         }
 
+        // Customer Reviews Data
+        const etsyReviews = [
+            {"reviewer":"Michelle","date_reviewed":"07/21/2025","star_rating":5,"message":"Shop owner went out of her way to help me and make sure I was completely with my order","order_id":3708435983},
+            {"reviewer":"Shelley","date_reviewed":"07/21/2025","star_rating":5,"message":"Lori is awesome to work with!","order_id":3734586064},
+            {"reviewer":"Raelynn","date_reviewed":"07/18/2025","star_rating":5,"message":"Always a pleasure working together!","order_id":3687820975},
+            {"reviewer":"dlmartin66","date_reviewed":"06/21/2025","star_rating":5,"message":"Great service. Beautiful hoodie as ordered.","order_id":3702969716},
+            {"reviewer":"Eileen A Slusarczyk","date_reviewed":"06/20/2025","star_rating":5,"message":"My hubby is one that doesn't say much about anything but he was really excited when he opened the sweatshirt. Please tell Lori how much he loves it & thank her for her messages.","order_id":3714981537},
+            {"reviewer":"Lea","date_reviewed":"06/12/2025","star_rating":5,"message":"Beautiful shirt and timely delivery!","order_id":3627566827},
+            {"reviewer":"Brooke","date_reviewed":"06/11/2025","star_rating":5,"message":"Perfect for my WWE loving boy! Customer service was great- thank you!","order_id":3705437241},
+            {"reviewer":"Amy","date_reviewed":"06/04/2025","star_rating":5,"message":"Thanks so much! My son loved this shirt for his birthday!","order_id":3624410547},
+            {"reviewer":"Traci","date_reviewed":"05/29/2025","star_rating":5,"message":"Perfect shirt to wear to the AC/DC concert in Nashville 🤘 I got so many compliments on it!","order_id":3674037222},
+            {"reviewer":"Brandy","date_reviewed":"05/23/2025","star_rating":5,"message":"I ABSOLUTELY the graphic on this shirt!!","order_id":3671361990},
+            {"reviewer":"Laura","date_reviewed":"05/23/2025","star_rating":5,"message":"High quality shirt. Highly recommend. Will reorder from this site again","order_id":3689711467},
+            {"reviewer":"pabbi","date_reviewed":"05/14/2025","star_rating":5,"message":"Once again, superb merchandise ♥️. The quality and colors of the shirts are Top Notch. Super fast delivery also.","order_id":3659758315},
+            {"reviewer":"Kaitlyn","date_reviewed":"05/12/2025","star_rating":5,"message":"The shirt was just as it was described","order_id":3669626135},
+            {"reviewer":"Laura","date_reviewed":"05/10/2025","star_rating":5,"message":"Seller was extremely helpful with questions I had.","order_id":3668360092},
+            {"reviewer":"Tami","date_reviewed":"05/08/2025","star_rating":5,"message":"Great quality! My friend loved it!","order_id":3644657486},
+            {"reviewer":"Joyce","date_reviewed":"05/06/2025","star_rating":5,"message":"This hoodie is stylish and comfy. It's definitely a conversation starter and is just plain fun to wear. Love it at my age (77), or any age!","order_id":3654695926},
+            {"reviewer":"niki","date_reviewed":"05/05/2025","star_rating":5,"message":"Seller replied fast & was helpful when post office messed up order. They were very on top of things & product was just as described! :) Would recommend!","order_id":3658439730},
+            {"reviewer":"beachaddict31","date_reviewed":"05/05/2025","star_rating":5,"message":"Everything was great! The sirt was the best quality I've purchased. Definitely will be a repeat buyer.","order_id":3629425956},
+            {"reviewer":"pabbi","date_reviewed":"05/04/2025","star_rating":4,"message":"Once again. Amazingly vibrant colors and the quality and job...well done ♥️♥️","order_id":3664597485},
+            {"reviewer":"Carla","date_reviewed":"05/01/2025","star_rating":5,"message":"My husband loves the shirt. Great fit. Very neatly packaged with care instruction card and thank you sticker attached. Also business cards were enclosed. The owner sent me a message before shipping which was clear and polite which I appreciate. I will definitely order from this business again.","order_id":3663673873}
+        ];
+
+        // Reviews functionality
+        let currentReviewIndex = 0;
+        const reviewsPerPage = 8; // Show 2 rows of 4 reviews each
+
+        // Create a mapping of reviewers to unique avatars to ensure no repetition
+        const avatarMapping = new Map();
+        let femaleAvatarIndex = 0;
+        let maleAvatarIndex = 0;
+
+        // Comprehensive collection of unique avatars
+        const femaleAvatars = [
+            'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face'
+        ];
+        
+        const maleAvatars = [
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face'
+        ];
+
+        function generateAvatar(name, isFemale) {
+            // Check if we already have an avatar assigned for this reviewer
+            if (avatarMapping.has(name)) {
+                return avatarMapping.get(name);
+            }
+
+            // Assign a new unique avatar
+            let avatar;
+            if (isFemale) {
+                avatar = femaleAvatars[femaleAvatarIndex % femaleAvatars.length];
+                femaleAvatarIndex++;
+            } else {
+                avatar = maleAvatars[maleAvatarIndex % maleAvatars.length];
+                maleAvatarIndex++;
+            }
+
+            // Store the mapping so this reviewer always gets the same avatar
+            avatarMapping.set(name, avatar);
+            return avatar;
+        }
+
+        function renderStars(rating) {
+            return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+        }
+
+        function calculateRatingStats() {
+            const totalReviews = etsyReviews.length;
+            const ratingCounts = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
+            
+            etsyReviews.forEach(review => {
+                ratingCounts[review.star_rating]++;
+            });
+            
+            const averageRating = etsyReviews.reduce((sum, review) => sum + review.star_rating, 0) / totalReviews;
+            
+            return {
+                average: averageRating.toFixed(1),
+                total: totalReviews,
+                percentages: {
+                    5: Math.round((ratingCounts[5] / totalReviews) * 100),
+                    4: Math.round((ratingCounts[4] / totalReviews) * 100),
+                    3: Math.round((ratingCounts[3] / totalReviews) * 100),
+                    2: Math.round((ratingCounts[2] / totalReviews) * 100),
+                    1: Math.round((ratingCounts[1] / totalReviews) * 100)
+                }
+            };
+        }
+
+        function renderRatingSummary() {
+            const stats = calculateRatingStats();
+            const summaryElement = document.getElementById('averageRating');
+            const totalElement = document.getElementById('totalReviews');
+            
+            if (summaryElement) summaryElement.textContent = stats.average;
+            if (totalElement) totalElement.textContent = `Based on ${stats.total} reviews`;
+            
+            // Update percentage bars and text
+            const ratings = [5, 4, 3, 2, 1];
+            ratings.forEach((rating) => {
+                const barElement = document.getElementById(`rating${rating}Bar`);
+                const textElement = document.getElementById(`rating${rating}Text`);
+                
+                if (barElement) {
+                    barElement.style.width = `${stats.percentages[rating]}%`;
+                }
+                if (textElement) {
+                    textElement.textContent = `${stats.percentages[rating]}%`;
+                }
+            });
+        }
+
+        function renderReviews() {
+            const grid = document.getElementById('reviewsGrid');
+            if (!grid) return;
+
+            const startIndex = currentReviewIndex;
+            const endIndex = Math.min(startIndex + reviewsPerPage, etsyReviews.length);
+            const reviewsToShow = etsyReviews.slice(startIndex, endIndex);
+
+            grid.innerHTML = reviewsToShow.map((review, index) => {
+                const isFemale = isFemaleName(review.reviewer);
+                const avatar = generateAvatar(review.reviewer, isFemale);
+                const stars = renderStars(review.star_rating);
+                
+                return `
+                    <div class="glass-card rounded-xl p-6 transition-all duration-300 hover:scale-105">
+                        <div class="flex items-start space-x-4 mb-4">
+                            <img src="${avatar}" alt="${review.reviewer}" class="w-12 h-12 rounded-full object-cover" />
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-white">${review.reviewer}</h4>
+                                <div class="flex items-center space-x-1 text-yellow-400 text-sm">
+                                    ${stars}
+                                </div>
+                                <span class="text-accent text-xs">Verified Purchase</span>
+                            </div>
+                            <span class="text-text-secondary text-xs">${review.date_reviewed}</span>
+                        </div>
+                        <p class="text-text-secondary text-sm leading-relaxed">${review.message}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showMoreReviews() {
+            currentReviewIndex = (currentReviewIndex + reviewsPerPage) % etsyReviews.length;
+            renderReviews();
+        }
+
+        function isFemaleName(name) {
+            const femaleNames = ['Michelle', 'Shelley', 'Raelynn', 'Eileen', 'Lea', 'Brooke', 'Amy', 'Traci', 'Brandy', 'Laura', 'Kaitlyn', 'Tami', 'Joyce', 'niki', 'Carla', 'Nancy', 'Angela', 'Patricia', 'Brittani', 'Katherine', 'Jen', 'andrea', 'Jane', 'Alison', 'Emily', 'Claudia', 'Charlotte', 'Cathryn', 'Lisa', 'laurie', 'Jenna', 'Susan', 'amanda', 'Hillary', 'Gabriella', 'Vanessa', 'Tracey', 'Tammy', 'Michelle', 'maryann', 'Jolene', 'Leah', 'Jennifer', 'Armani', 'Jessica', 'Rachel', 'Sheila', 'sheila119', 'Jacqueline', 'Kayla', 'Amber', 'Sandra', 'Alicia', 'Dawn', 'jaceyv', 'Heather', 'Samijo', 'Dawn', 'latinchino0502', 'Nancy', 'jandi', 'spookytune70', 'Aricca', 'Cindy', 'Renée', 'Cheyenne', 'Debbe', 'Cindy', 'Maya', 'Anna', 'Marivee', 'Dawn', 'Linda', 'earlinepugh53', 'Stephanie', 'Kimberly', 'Kimberly Gade', 'vicki', 'Jessenia', 'Kathy1026', 'Marisol', 'Jenny', 'lovelyangelwest', 'Letty Ronquillo', 'Cathy', 'Angela', 'Holly', 'Heather', 'Crystal', 'Ashley', 'Tom', 'Terry', 'Jennifer', 'Ester', 'Robin', 'lovey', 'sharond1025', 'Vickie', 'Judy', 'Jennifer', 'Ahnastasia', 'Traci', 'odanigirl', 'Chelsea', 'Jamie', 'Doyle', 'Kathy', 'Tylet', 'Kristen Nichole Johnson', 'Tina', 'Margarita', 'KAREN', 'Andrea', 'Kira', 'pinkmonkeybird66', 'Gary', 'Nancy', 'OTOOLE', 'Inactive Etsy Member', 'Roberta Bledsoe', 'roxanne', 'Vanessa', 'Krystle helton', 'clara fetuu', 'Dallas', 'Jenni', 'Katherine', 'Vicki', 'Emily', 'Jess', 'Tonya', 'cindy', 'Brenda', 'Chloe', 'Ricki', 'Cathy', 'Elise', 'Cheryl', 'teresairene', 'Crystal', 'Terri', 'Michele', 'Diana Rohini', 'Michelle', 'Debbie', 'Diana Slade', 'Pamela', 'Kelly Ashley', 'Pamela', 'Heather', 'Chloe', 'SC', 'marikodoll', 'Brittney', 'Diana Slade', 'N', 'Kendale', 'Richard', 'Karen', 'Kendale', 'Cynthia', 'Coetta', 'Jessica', 'Isadora', 'Denise', 'mponce722', 'Nadia', 'Jacqueline', 'boo143lopez', 'Angela', 'Douglas', 'Ben', 'Angel', 'Erin', 'Leticia', 'Michelle', 'wvnoel29', 'Amy', 'Tegan', 'Katherine', 'tractorgirl1985', 'Wendy legas', 'Stacy', 'Julie', 'Lynn', 'Lana', 'Dawn', 'tigerbaby1027', 'Kohl', 'Maurice', 'Jacklyn', 'Shaylin', 'Cynthia', 'Sheree', 'martharestrepo431', 'Karen', 'Heidi', 'Katy', 'Melanie', 'Alexis', 'Sarah', 'Donna Tonelli', 'Carrie', 'Colleen', 'Melissa', 'christianscalf0518', 'Priscilla', 'April', 'Antoinette', 'Amy', 'jeremy', 'Jennifer', 'ann', 'Diane', 'Melissa', 'Angel', 'Alicia', 'acg621', 'Angela', 'Kathy', 'Ashlea', 'Sarah', 'Brandon', 'Erica', 'Hope', 'Connie', 'Haley', 'Jacquelin Valencia', 'Kristie', 'Tony', 'Britny', 'Jamie', 'Audrey', 'Karlye', 'NeyaHarris', 'Laura', 'Cindel', 'Kaitlyn', 'diem5290', 'Gabriela', 'jalejandro2', 'Michelle', 'Tracie', 'Delores Howington', 'Stephanie', 'Sarah', 'Melanie', 'Kristin', 'Jennifer', 'Ciara', 'Tera', 'megan crump', 'Jamie Lauren', 'Erica', 'Libby', 'chaven08', 'Alyssa', 'Sarah Bray', 'Vicki', 'Lauren', 'Juliana M DeMarco', 'Kim', 'Kristin', 'Kombucha', 'Carolyn', 'Aubrey', 'Monica', 'Tina', 'caflores8534', 'Corey', 'Jesselyn', 'Raelynn', 'Julie', 'dk21parker', 'Pam', 'Amy', 'Kristin', 'Lydia', 'andiemiles2', 'Breana', 'Barbie', 'Melissa', 'Tracy', 'Katrina', 'Chavez', 'Hannah', 'breeana', 'Shelley', 'Amanda', 'Elizabeth', 'katie', 'Kelli', 'Vanessa', 'Katarzyna', 'n27abel', 'Britton', 'Emily', 'Torun', 'Jo-Beth', 'Robin', 'Inactive Etsy Member', 'kar12611', 'Kimberly', 'Linda', 'Lindsay', 'kim', 'Denise', 'Joshua', 'Disney Dreamer', 'Sally', 'Alicia', 'Anna', 'Kathleen', 'Monica', 'Vincent', 'Amber', 'Jenmitchell01', 'Holly', 'bethwilber', 'Sophia', 'Makala', 'Nicholas', 'Anna', 'Amber', 'Paulette', 'Anabel', 'krystle', 'William', 'Lily', 'Angie', 'WOODROW SCARBRO', 'Megan', 'Kayla', 'Cathy', 'ROSSINA', 'Mary', 'Norma', 'Tammy', 'anndoc1', 'Kailey', 'Norma', 'Amanda', 'Makayla Turner', 'Collette Williams', 'Tracy', 'Eva', 'Jessica', 'Erika', 'Candi', 'Jennifer', 'Tina', 'Sherilyn', 'martharestrepo431', 'Karen', 'Heidi', 'Katy', 'Melanie', 'Alexis', 'Sarah', 'Donna Tonelli', 'Carrie', 'Colleen', 'Melissa', 'christianscalf0518', 'Priscilla', 'April', 'Antoinette', 'Amy', 'jeremy', 'Jennifer', 'ann', 'Diane', 'Melissa', 'Angel', 'Alicia', 'acg621', 'Angela', 'Kathy', 'Ashlea', 'Sarah', 'Brandon', 'Erica', 'Hope', 'Connie', 'Haley', 'Jacquelin Valencia', 'Kristie', 'Tony', 'Britny', 'Jamie', 'Audrey', 'Karlye', 'NeyaHarris', 'Laura', 'Cindel', 'Kaitlyn', 'diem5290', 'Gabriela', 'jalejandro2', 'Michelle', 'Tracie', 'Delores Howington', 'Stephanie', 'Sarah', 'Melanie', 'Kristin', 'Jennifer', 'Ciara', 'Tera', 'megan crump', 'Jamie Lauren', 'Erica', 'Libby', 'chaven08', 'Alyssa', 'Sarah Bray', 'Vicki', 'Lauren', 'Juliana M DeMarco', 'Kim', 'Kristin', 'Kombucha', 'Carolyn', 'Aubrey', 'Monica', 'Tina', 'caflores8534', 'Corey', 'Jesselyn', 'Raelynn', 'Julie', 'dk21parker', 'Pam', 'Amy', 'Kristin', 'Lydia', 'andiemiles2', 'Breana', 'Barbie', 'Melissa', 'Tracy', 'Katrina', 'Chavez', 'Hannah', 'breeana', 'Shelley', 'Amanda', 'Elizabeth', 'katie', 'Kelli', 'Vanessa', 'Katarzyna', 'n27abel', 'Britton', 'Emily', 'Torun', 'Jo-Beth', 'Robin', 'Inactive Etsy Member', 'kar12611', 'Kimberly', 'Linda', 'Lindsay', 'kim', 'Denise', 'Joshua', 'Disney Dreamer', 'Sally', 'Alicia', 'Anna', 'Kathleen', 'Monica', 'Vincent', 'Amber', 'Jenmitchell01', 'Holly', 'bethwilber', 'Sophia', 'Makala', 'Nicholas', 'Anna', 'Amber', 'Paulette', 'Anabel', 'krystle', 'William', 'Lily', 'Angie', 'WOODROW SCARBRO', 'Megan', 'Kayla', 'Cathy', 'ROSSINA', 'Mary', 'Norma', 'Tammy', 'anndoc1', 'Kailey', 'Norma', 'Amanda', 'Makayla Turner', 'Collette Williams', 'Tracy', 'Eva', 'Jessica', 'Erika', 'Candi', 'Jennifer', 'Tina', 'Sherilyn'];
+            return femaleNames.includes(name.split(' ')[0]);
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
           const [hero, featured, products] = await Promise.all([fetchHero(), fetchFeatured(), fetchPublicProducts()]);
           
@@ -802,6 +1092,16 @@
           // Render other sections
           renderSpotlights(products);
           renderIGGrid(products);
+
+          // Initialize reviews and rating summary
+          renderRatingSummary();
+          renderReviews();
+          
+          // Add event listener for show more reviews button
+          const showMoreBtn = document.getElementById('showMoreReviewsBtn');
+          if (showMoreBtn) {
+            showMoreBtn.addEventListener('click', showMoreReviews);
+          }
         });
     </script>
 <script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
