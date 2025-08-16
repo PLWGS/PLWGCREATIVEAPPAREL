@@ -1186,6 +1186,62 @@ app.post('/api/custom-requests', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.log('❌ Invalid email format');
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Validate timeline
+    const validTimelines = ['standard', 'rush', 'express'];
+    if (timeline && !validTimelines.includes(timeline)) {
+      console.log('❌ Invalid timeline');
+      return res.status(400).json({ error: 'Invalid timeline. Must be standard, rush, or express.' });
+    }
+
+    // Validate budget
+    const budgetNum = parseFloat(budget);
+    if (isNaN(budgetNum) || budgetNum < 50 || budgetNum > 10000) {
+      console.log('❌ Invalid budget range');
+      return res.status(400).json({ error: 'Budget must be between $50 and $10,000.' });
+    }
+
+    // Validate quantity
+    const quantityNum = parseInt(quantity);
+    if (isNaN(quantityNum) || quantityNum < 1 || quantityNum > 1000) {
+      console.log('❌ Invalid quantity');
+      return res.status(400).json({ error: 'Quantity must be between 1 and 1,000.' });
+    }
+
+    // Process reference images if provided
+    let processedReferenceImages = null;
+    if (referenceImages && referenceImages.length > 0) {
+      try {
+        console.log('🖼️ Processing reference images...');
+        processedReferenceImages = [];
+        
+        for (const image of referenceImages) {
+          if (image.data && image.data.startsWith('data:image/')) {
+            // Upload to Cloudinary
+            const cloudinaryResult = await uploadImageToCloudinary(image.data, 'custom-requests');
+            processedReferenceImages.push({
+              originalName: image.name,
+              cloudinaryUrl: cloudinaryResult.secure_url,
+              thumbnailUrl: cloudinaryResult.secure_url.replace('/upload/', '/upload/w_300,h_200,c_fill/'),
+              size: image.size,
+              type: image.type
+            });
+          }
+        }
+        console.log(`✅ Processed ${processedReferenceImages.length} reference images`);
+      } catch (imageError) {
+        console.error('❌ Error processing reference images:', imageError);
+        // Don't fail the request if image processing fails
+        processedReferenceImages = null;
+      }
+    }
+
     console.log('✅ Required fields validated');
 
     // Check if database is available
@@ -1199,30 +1255,35 @@ app.post('/api/custom-requests', async (req, res) => {
       const mockCustomRequest = {
         id: Date.now(),
         customer_name: fullName,
-        email: email,
-        phone: phone || null,
+        customer_email: email,
+        customer_phone: phone || null,
         timeline: timeline,
         concept_description: concept,
         style_preferences: styles ? JSON.stringify(styles) : null,
-        product_type: productType,
+        request_type: productType,
         quantity: quantity,
         size_requirements: sizes ? JSON.stringify(sizes) : null,
         color_preferences: colors || null,
-        budget_range: budget,
+        estimated_budget: budget,
         additional_notes: notes || null,
-        reference_images: referenceImages ? JSON.stringify(referenceImages) : null,
+        reference_images: processedReferenceImages ? JSON.stringify(processedReferenceImages) : null,
         status: 'pending',
         created_at: new Date()
       };
 
       console.log('📧 Sending email for mock request...');
 
-      // Send email notification to admin
+      // Send email notifications
       try {
+        // Send admin notification
         await sendCustomRequestEmail(mockCustomRequest);
-        console.log('✅ Email sent successfully');
+        console.log('✅ Admin notification email sent successfully');
+        
+        // Send customer confirmation
+        await sendCustomerConfirmationEmail(mockCustomRequest);
+        console.log('✅ Customer confirmation email sent successfully');
       } catch (emailError) {
-        console.error('❌ Error sending custom request email:', emailError);
+        console.error('❌ Error sending emails:', emailError);
         // Don't fail the request if email fails
       }
 
@@ -1239,27 +1300,32 @@ app.post('/api/custom-requests', async (req, res) => {
     // Insert into database
     const result = await pool.query(`
       INSERT INTO custom_requests (
-        customer_name, email, phone, timeline, concept_description, 
-        style_preferences, product_type, quantity, size_requirements, 
-        color_preferences, budget_range, additional_notes, reference_images, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'pending')
+        customer_name, customer_email, customer_phone, timeline, concept_description, 
+        style_preferences, request_type, quantity, size_requirements, 
+        color_preferences, estimated_budget, additional_notes, reference_images, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *
     `, [
       fullName, email, phone || null, timeline, concept,
       styles ? JSON.stringify(styles) : null, productType, quantity,
       sizes ? JSON.stringify(sizes) : null, colors || null, budget,
-      notes || null, referenceImages ? JSON.stringify(referenceImages) : null
+      notes || null, processedReferenceImages ? JSON.stringify(processedReferenceImages) : null, 'pending'
     ]);
 
     const customRequest = result.rows[0];
     console.log('✅ Database insert successful');
 
-    // Send email notification to admin
+    // Send email notifications
     try {
+      // Send admin notification
       await sendCustomRequestEmail(customRequest);
-      console.log('✅ Email sent successfully');
+      console.log('✅ Admin notification email sent successfully');
+      
+      // Send customer confirmation
+      await sendCustomerConfirmationEmail(customRequest);
+      console.log('✅ Customer confirmation email sent successfully');
     } catch (emailError) {
-      console.error('❌ Error sending custom request email:', emailError);
+      console.error('❌ Error sending emails:', emailError);
       // Don't fail the request if email fails
     }
 
@@ -1273,6 +1339,40 @@ app.post('/api/custom-requests', async (req, res) => {
   } catch (error) {
     console.error('❌ Error creating custom request:', error);
     console.error('❌ Error stack:', error.stack);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// =============================================================================
+// CUSTOM REQUESTS CUSTOMER ENDPOINTS
+// =============================================================================
+
+// Get custom requests for a customer by email (no auth required)
+app.get('/api/custom-requests/customer/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const result = await pool.query(`
+      SELECT 
+        id, customer_name, timeline, concept_description, 
+        style_preferences, request_type, quantity, size_requirements, 
+        color_preferences, estimated_budget, additional_notes, 
+        status, created_at, updated_at
+      FROM custom_requests 
+      WHERE customer_email = $1 
+      ORDER BY created_at DESC
+    `, [email]);
+    
+    res.json({ 
+      requests: result.rows,
+      count: result.rows.length 
+    });
+  } catch (error) {
+    console.error('Error fetching customer custom requests:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1875,6 +1975,189 @@ async function sendWelcomeEmail(email, name) {
   }
 }
 
+// Send customer confirmation email function
+async function sendCustomerConfirmationEmail(customRequest) {
+  const customerEmailHTML = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Custom Design Request Confirmation - PlwgsCreativeApparel</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .container {
+                max-width: 700px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }
+            .header p {
+                margin: 10px 0 0 0;
+                font-size: 16px;
+                opacity: 0.9;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+            .request-summary {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 25px;
+                margin: 25px 0;
+            }
+            .detail-row {
+                display: flex;
+                justify-content: space-between;
+                margin: 10px 0;
+                padding: 8px 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+            .detail-label {
+                font-weight: bold;
+                color: #495057;
+            }
+            .detail-value {
+                color: #333;
+                text-align: right;
+            }
+            .next-steps {
+                background: #e3f2fd;
+                border-left: 4px solid #2196f3;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 5px;
+            }
+            .cta-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 30px;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: bold;
+                margin: 20px 0;
+            }
+            .footer {
+                background: #f8f9fa;
+                padding: 30px;
+                text-align: center;
+                color: #6c757d;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎨 Request Received!</h1>
+                <p>Thank you for choosing PlwgsCreativeApparel for your custom design</p>
+            </div>
+
+            <div class="content">
+                <p>Hi ${customRequest.customer_name},</p>
+                
+                <p>We're excited to work on your custom design! We've received your request and our team is already reviewing the details.</p>
+
+                <div class="request-summary">
+                    <h3>📋 Request Summary</h3>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Request ID:</span>
+                        <span class="detail-value">#${customRequest.id}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Product Type:</span>
+                        <span class="detail-value">${customRequest.request_type}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Quantity:</span>
+                        <span class="detail-value">${customRequest.quantity}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Timeline:</span>
+                        <span class="detail-value">${customRequest.timeline || 'Standard'}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">Budget Range:</span>
+                        <span class="detail-value">$${customRequest.estimated_budget}</span>
+                    </div>
+                </div>
+
+                <div class="next-steps">
+                    <h4>⏰ What Happens Next?</h4>
+                    <ul style="text-align: left;">
+                        <li><strong>Within 24 hours:</strong> You'll receive a detailed quote and timeline</li>
+                        <li><strong>Within 2-3 days:</strong> Initial concept sketches and mockups</li>
+                        <li><strong>Ongoing:</strong> Regular updates and collaboration throughout the process</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://plwgscreativeapparel.com/pages/custom.html" class="cta-button">
+                        📊 Check Request Status
+                    </a>
+                </div>
+
+                <p><strong>Questions?</strong> Don't hesitate to reply to this email or contact us directly.</p>
+                
+                <p>We can't wait to bring your vision to life!</p>
+                
+                <p>Best regards,<br>
+                <strong>Lori & The PlwgsCreativeApparel Team</strong></p>
+            </div>
+
+            <div class="footer">
+                <p><strong>PlwgsCreativeApparel</strong></p>
+                <p>Custom Design Request #${customRequest.id}</p>
+                <p>Submitted: ${new Date(customRequest.created_at).toLocaleString()}</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
+    to: customRequest.customer_email,
+    subject: `🎨 Custom Design Request #${customRequest.id} Received - PlwgsCreativeApparel`,
+    html: customerEmailHTML
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Customer confirmation email sent for request ${customRequest.id}`);
+  } catch (error) {
+    console.error(`❌ Error sending customer confirmation email:`, error);
+  }
+}
+
 // Send custom request email function
 async function sendCustomRequestEmail(customRequest) {
   const customRequestEmailHTML = `
@@ -1995,13 +2278,13 @@ async function sendCustomRequestEmail(customRequest) {
                     
                     <div class="detail-row">
                         <span class="detail-label">Email:</span>
-                        <span class="detail-value">${customRequest.email}</span>
+                        <span class="detail-value">${customRequest.customer_email}</span>
                     </div>
                     
-                    ${customRequest.phone ? `
+                    ${customRequest.customer_phone ? `
                     <div class="detail-row">
                         <span class="detail-label">Phone:</span>
-                        <span class="detail-value">${customRequest.phone}</span>
+                        <span class="detail-value">${customRequest.customer_phone}</span>
                     </div>
                     ` : ''}
                     
@@ -2012,7 +2295,7 @@ async function sendCustomRequestEmail(customRequest) {
                     
                     <div class="detail-row">
                         <span class="detail-label">Product Type:</span>
-                        <span class="detail-value">${customRequest.product_type}</span>
+                        <span class="detail-value">${customRequest.request_type}</span>
                     </div>
                     
                     <div class="detail-row">
@@ -2022,13 +2305,13 @@ async function sendCustomRequestEmail(customRequest) {
                     
                     <div class="detail-row">
                         <span class="detail-label">Budget Range:</span>
-                        <span class="detail-value">${customRequest.budget_range}</span>
+                        <span class="detail-value">$${customRequest.estimated_budget}</span>
                     </div>
                     
                     ${customRequest.size_requirements ? `
                     <div class="detail-row">
                         <span class="detail-label">Size Requirements:</span>
-                        <span class="detail-value">${JSON.parse(customRequest.size_requirements).join(', ')}</span>
+                        <span class="detail-value">${Array.isArray(customRequest.size_requirements) ? customRequest.size_requirements.join(', ') : customRequest.size_requirements}</span>
                     </div>
                     ` : ''}
                     
@@ -2042,7 +2325,7 @@ async function sendCustomRequestEmail(customRequest) {
                     ${customRequest.style_preferences ? `
                     <div class="detail-row">
                         <span class="detail-label">Style Preferences:</span>
-                        <span class="detail-value">${JSON.parse(customRequest.style_preferences).join(', ')}</span>
+                        <span class="detail-value">${Array.isArray(customRequest.style_preferences) ? customRequest.style_preferences.join(', ') : customRequest.style_preferences}</span>
                     </div>
                     ` : ''}
                 </div>
@@ -2087,18 +2370,23 @@ async function sendCustomRequestEmail(customRequest) {
     </html>
   `;
 
-  const mailOptions = {
-    from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
-    to: process.env.ADMIN_EMAIL,
-    subject: `🎨 New Custom Design Request from ${customRequest.customer_name}`,
-    html: customRequestEmailHTML
-  };
+  // Send to both admin emails
+  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com'].filter(Boolean);
+  
+  for (const adminEmail of adminEmails) {
+    const mailOptions = {
+      from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
+      to: adminEmail,
+      subject: `🎨 New Custom Design Request from ${customRequest.customer_name}`,
+      html: customRequestEmailHTML
+    };
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Custom request email sent to admin for request ${customRequest.id}`);
-  } catch (error) {
-    console.error(`❌ Error sending custom request email:`, error);
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Custom request email sent to ${adminEmail} for request ${customRequest.id}`);
+    } catch (error) {
+      console.error(`❌ Error sending custom request email to ${adminEmail}:`, error);
+    }
   }
 }
 

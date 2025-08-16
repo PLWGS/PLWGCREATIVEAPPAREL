@@ -483,11 +483,11 @@
                         <h3 class="font-orbitron text-lg font-bold text-white mb-1">Basic Information</h3>
                         <div class="grid md:grid-cols-2 gap-1">
                             <div>
-                                <label class="block text-text-secondary text-xs font-medium mb-1">Full Name *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Full Name <span class="text-red-400">*</span></label>
                                 <input type="text" name="fullName" class="input-field w-full" placeholder="Enter your full name" required />
                             </div>
                             <div>
-                                <label class="block text-text-secondary text-xs font-medium mb-1">Email Address *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Email Address <span class="text-red-400">*</span></label>
                                 <input type="email" name="email" class="input-field w-full" placeholder="your@email.com" required />
                             </div>
                             <div>
@@ -495,7 +495,7 @@
                                 <input type="tel" name="phone" class="input-field w-full" placeholder="(555) 123-4567" />
                             </div>
                             <div>
-                                <label class="block text-text-secondary text-xs font-medium mb-1">Project Timeline *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Project Timeline <span class="text-red-400">*</span></label>
                                 <select name="timeline" class="input-field w-full" required>
                                     <option value>Select timeline</option>
                                     <option value="standard">Standard (14-21 days)</option>
@@ -738,6 +738,42 @@
                     </div>
                     <p class="text-text-secondary mb-4">"The communication throughout the process was fantastic. Lori kept me updated at every step and the final product was exactly what I envisioned!"</p>
                     <div class="text-accent text-sm font-bold">Wedding Party Custom Designs</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Status Check Section -->
+    <section class="py-12 relative z-10">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-8">
+                <h2 class="font-orbitron text-4xl font-bold text-white mb-4">Check Your Request Status</h2>
+                <p class="text-text-secondary text-lg max-w-2xl mx-auto">Already submitted a custom request? Check its progress here</p>
+            </div>
+            
+            <div class="max-w-2xl mx-auto">
+                <div class="glass-card rounded-2xl p-8">
+                    <div class="mb-6">
+                        <label for="status-email" class="block text-white font-semibold mb-2">Enter your email address</label>
+                        <div class="flex space-x-4">
+                            <input 
+                                type="email" 
+                                id="status-email" 
+                                placeholder="your@email.com" 
+                                class="flex-1 bg-surface-light border border-surface-light text-white placeholder-text-secondary rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                            />
+                            <button 
+                                onclick="checkCustomerStatus(document.getElementById('status-email').value)"
+                                class="bg-accent hover:bg-accent-dark text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+                            >
+                                Check Status
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="status-check-section">
+                        <!-- Status results will be displayed here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -1035,14 +1071,85 @@
             });
         });
 
+        // Form validation function
+        function validateForm(formObject) {
+            const errors = [];
+            
+            if (!formObject.fullName || formObject.fullName.trim().length < 2) {
+                errors.push('Full name must be at least 2 characters long');
+            }
+            
+            if (!formObject.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formObject.email)) {
+                errors.push('Please enter a valid email address');
+            }
+            
+            if (!formObject.concept || formObject.concept.trim().length < 10) {
+                errors.push('Design concept must be at least 10 characters long');
+            }
+            
+            if (!formObject.productType) {
+                errors.push('Please select a product type');
+            }
+            
+            if (!formObject.quantity || parseInt(formObject.quantity) < 1) {
+                errors.push('Quantity must be at least 1');
+            }
+            
+            if (!formObject.budget || parseFloat(formObject.budget) < 50) {
+                errors.push('Budget must be at least $50');
+            }
+            
+            return errors;
+        }
+
+        // Show error message function
+        function showError(message) {
+            const errorDiv = document.getElementById('form-error') || createErrorElement();
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Show success message function
+        function showSuccess(message) {
+            const successDiv = document.getElementById('form-success') || createSuccessElement();
+            successDiv.textContent = message;
+            successDiv.classList.remove('hidden');
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Create error element if it doesn't exist
+        function createErrorElement() {
+            const errorDiv = document.createElement('div');
+            errorDiv.id = 'form-error';
+            errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 hidden';
+            document.getElementById('custom-order-form').insertBefore(errorDiv, document.getElementById('submit-btn'));
+            return errorDiv;
+        }
+
+        // Create success element if it doesn't exist
+        function createSuccessElement() {
+            const successDiv = document.createElement('div');
+            successDiv.id = 'form-success';
+            successDiv.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 hidden';
+            document.getElementById('custom-order-form').insertBefore(successDiv, document.getElementById('submit-btn'));
+            return successDiv;
+        }
+
         // Form submission
         document.getElementById('custom-order-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // Hide any previous messages
+            const errorDiv = document.getElementById('form-error');
+            const successDiv = document.getElementById('form-success');
+            if (errorDiv) errorDiv.classList.add('hidden');
+            if (successDiv) successDiv.classList.add('hidden');
+            
             // Show loading state
             const submitBtn = document.getElementById('submit-btn');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = 'Submitting...';
+            submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Submitting...';
             submitBtn.disabled = true;
             
             try {
@@ -1060,6 +1167,13 @@
                     } else {
                         formObject[key] = value;
                     }
+                }
+
+                // Validate form data
+                const validationErrors = validateForm(formObject);
+                if (validationErrors.length > 0) {
+                    showError(validationErrors.join('. '));
+                    return;
                 }
                 
                 // Handle file uploads
@@ -1115,7 +1229,7 @@
                 
                 if (response.ok) {
                     // Show success message
-                    alert(result.message || 'Thank you for your custom design request! We\'ll review your submission and get back to you within 24 hours with a detailed quote and timeline.');
+                    showSuccess(result.message || 'Thank you for your custom design request! We\'ll review your submission and get back to you within 24 hours with a detailed quote and timeline.');
                     
                     // Reset form
                     document.getElementById('custom-order-form').reset();
@@ -1132,12 +1246,14 @@
                     const uploadText = fileUploadArea.querySelector('p');
                     uploadText.textContent = 'Drag and drop your reference images here';
                 } else {
-                    throw new Error(result.error || 'Failed to submit request');
+                    const errorMessage = result.error || 'Failed to submit request';
+                    showError(errorMessage);
+                    console.error('Server error:', result);
                 }
                 
             } catch (error) {
                 console.error('Error submitting custom request:', error);
-                alert('Sorry, there was an error submitting your request. Please try again or contact us directly.');
+                showError('Sorry, there was an error submitting your request. Please try again or contact us directly.');
             } finally {
                 // Reset button state
                 submitBtn.innerHTML = originalText;
@@ -1174,6 +1290,93 @@
                 particle.style.transform = `translate(${x}px, ${y}px)`;
             });
         });
+
+        // Customer status check function
+        async function checkCustomerStatus(email) {
+            try {
+                const response = await fetch(`/api/custom-requests/customer/${encodeURIComponent(email)}`);
+                const result = await response.json();
+                
+                if (response.ok && result.requests.length > 0) {
+                    displayCustomerStatus(result.requests);
+                } else {
+                    showStatusMessage('No custom requests found for this email address.', 'info');
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+                showStatusMessage('Error checking status. Please try again.', 'error');
+            }
+        }
+
+        // Display customer status
+        function displayCustomerStatus(requests) {
+            const statusContainer = document.getElementById('status-results') || createStatusContainer();
+            statusContainer.innerHTML = '';
+            
+            requests.forEach(request => {
+                const requestCard = document.createElement('div');
+                requestCard.className = 'bg-gray-800 border border-gray-700 rounded-lg p-6 mb-4';
+                requestCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-semibold text-white">Request #${request.id}</h3>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                            request.status === 'pending' ? 'bg-yellow-600 text-yellow-100' :
+                            request.status === 'in-progress' ? 'bg-blue-600 text-blue-100' :
+                            request.status === 'completed' ? 'bg-green-600 text-green-100' :
+                            'bg-gray-600 text-gray-100'
+                        }">${request.status}</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
+                        <div>
+                            <p><strong>Product:</strong> ${request.request_type}</p>
+                            <p><strong>Quantity:</strong> ${request.quantity}</p>
+                            <p><strong>Timeline:</strong> ${request.timeline || 'Standard'}</p>
+                            <p><strong>Budget:</strong> $${request.estimated_budget}</p>
+                        </div>
+                        <div>
+                            <p><strong>Submitted:</strong> ${new Date(request.created_at).toLocaleDateString()}</p>
+                            <p><strong>Last Updated:</strong> ${new Date(request.updated_at).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p><strong>Concept:</strong> ${request.concept_description}</p>
+                    </div>
+                `;
+                statusContainer.appendChild(requestCard);
+            });
+            
+            showStatusMessage(`Found ${requests.length} request(s) for this email.`, 'success');
+        }
+
+        // Show status message
+        function showStatusMessage(message, type) {
+            const messageDiv = document.getElementById('status-message') || createStatusMessageElement();
+            messageDiv.textContent = message;
+            messageDiv.className = `px-4 py-3 rounded mb-4 ${
+                type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
+                type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
+                'bg-blue-100 border border-blue-400 text-blue-700'
+            }`;
+            messageDiv.classList.remove('hidden');
+        }
+
+        // Create status container
+        function createStatusContainer() {
+            const container = document.createElement('div');
+            container.id = 'status-results';
+            container.className = 'mt-6';
+            document.getElementById('status-check-section').appendChild(container);
+            return container;
+        }
+
+        // Create status message element
+        function createStatusMessageElement() {
+            const messageDiv = document.createElement('div');
+            messageDiv.id = 'status-message';
+            messageDiv.className = 'px-4 py-3 rounded mb-4 hidden';
+            document.getElementById('status-check-section').appendChild(messageDiv);
+            return messageDiv;
+        }
 
         // Initialize particles on load
         document.addEventListener('DOMContentLoaded', () => {
