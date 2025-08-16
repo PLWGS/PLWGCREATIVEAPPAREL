@@ -58,9 +58,10 @@
         
         /* Form Animations */
         .form-step {
-            opacity: 0;
-            transform: translateX(20px);
+            opacity: 1;
+            transform: translateX(0);
             transition: all 0.5s ease;
+            margin-bottom: 1rem;
         }
         
         .form-step.active {
@@ -97,6 +98,33 @@
         .file-upload-area.dragover {
             border-color: #00bcd4;
             background: rgba(0, 188, 212, 0.1);
+        }
+        
+        /* Form Spacing */
+        .form-step {
+            margin-bottom: 0.5rem !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+        
+        .form-step > div {
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .form-step > div:last-child {
+            margin-bottom: 0 !important;
+        }
+        
+        .form-step h3 {
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .form-step .grid {
+            gap: 0.5rem !important;
+        }
+        
+        .form-step .space-y-3 > div {
+            margin-bottom: 0.5rem !important;
         }
         
         /* Custom Scrollbar */
@@ -213,7 +241,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="relative min-h-screen flex items-center justify-center pt-20 z-10">
+    <section class="relative min-h-screen flex items-center justify-center pt-16 z-10">
         <div class="container mx-auto px-6">
             <div class="text-center max-w-4xl mx-auto">
                 <h1 class="font-orbitron text-5xl lg:text-7xl font-black leading-tight mb-6">
@@ -224,7 +252,7 @@
                     Collaborate with Lori to create a one-of-a-kind design that perfectly captures your creative vision. From concept to creation, let's make something extraordinary together.
                 </p>
                 
-                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                     <button onclick="scrollToForm()" class="btn-primary neon-glow">
                         Start Your Custom Design
                     </button>
@@ -257,14 +285,14 @@
     </section>
 
     <!-- Custom Work Examples -->
-    <section id="examples" class="py-20 relative z-10">
+    <section id="examples" class="py-12 relative z-10">
         <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
+            <div class="text-center mb-8">
                 <h2 class="font-orbitron text-4xl font-bold text-white mb-4">Previous Custom Creations</h2>
                 <p class="text-text-secondary text-lg max-w-2xl mx-auto">Explore Lori's versatility across different themes and styles while maintaining brand consistency</p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
                 <!-- Custom Example 1 -->
                 <div class="glass-card rounded-2xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
                     <div class="relative">
@@ -324,9 +352,9 @@
             </div>
 
             <!-- Before/After Showcase -->
-            <div class="glass-card rounded-2xl p-8">
+            <div class="glass-card rounded-2xl p-6">
                 <h3 class="font-orbitron text-2xl font-bold text-white mb-6 text-center">From Concept to Creation</h3>
-                <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="grid md:grid-cols-2 gap-6 items-center">
                     <div class="space-y-4">
                         <h4 class="font-orbitron text-lg font-bold text-accent">Customer Brief:</h4>
                         <p class="text-text-secondary italic">"I want something that combines my love for vintage horror movies with my cat obsession. Think classic monster movies but with cats as the main characters. Maybe a play on 'The Cat-thing' or 'Dracula's Cat'?"</p>
@@ -348,19 +376,19 @@
     </section>
 
     <!-- Design Process Timeline -->
-    <section class="py-20 relative z-10">
+    <section class="py-12 relative z-10">
         <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="font-orbitron text-4xl font-bold text-white mb-4">Our Creative Process</h2>
+            <div class="text-center mb-8">
+                <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Our Creative Process</h2>
                 <p class="text-text-secondary text-lg max-w-2xl mx-auto">From initial consultation to final product, here's how we bring your vision to life</p>
             </div>
 
             <div class="max-w-4xl mx-auto">
-                <div class="space-y-8">
+                <div class="space-y-6">
                     <!-- Step 1 -->
                     <div class="timeline-item relative pl-16">
                         <div class="absolute left-0 top-0 w-8 h-8 bg-accent rounded-full flex items-center justify-center text-black font-bold text-sm">1</div>
-                        <div class="glass-card rounded-lg p-6">
+                        <div class="glass-card rounded-lg p-4">
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                                 <h3 class="font-orbitron text-xl font-bold text-white">Initial Consultation</h3>
                                 <span class="text-accent font-bold">2-3 Days</span>
@@ -377,7 +405,7 @@
                     <!-- Step 2 -->
                     <div class="timeline-item relative pl-16">
                         <div class="absolute left-0 top-0 w-8 h-8 bg-accent rounded-full flex items-center justify-center text-black font-bold text-sm">2</div>
-                        <div class="glass-card rounded-lg p-6">
+                        <div class="glass-card rounded-lg p-4">
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                                 <h3 class="font-orbitron text-xl font-bold text-white">Design Creation</h3>
                                 <span class="text-accent font-bold">5-7 Days</span>
@@ -394,7 +422,7 @@
                     <!-- Step 3 -->
                     <div class="timeline-item relative pl-16">
                         <div class="absolute left-0 top-0 w-8 h-8 bg-accent rounded-full flex items-center justify-center text-black font-bold text-sm">3</div>
-                        <div class="glass-card rounded-lg p-6">
+                        <div class="glass-card rounded-lg p-4">
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                                 <h3 class="font-orbitron text-xl font-bold text-white">Revisions & Refinement</h3>
                                 <span class="text-accent font-bold">3-5 Days</span>
@@ -411,7 +439,7 @@
                     <!-- Step 4 -->
                     <div class="timeline-item relative pl-16">
                         <div class="absolute left-0 top-0 w-8 h-8 bg-accent rounded-full flex items-center justify-center text-black font-bold text-sm">4</div>
-                        <div class="glass-card rounded-lg p-6">
+                        <div class="glass-card rounded-lg p-4">
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                                 <h3 class="font-orbitron text-xl font-bold text-white">Production & Delivery</h3>
                                 <span class="text-accent font-bold">7-10 Days</span>
@@ -430,17 +458,17 @@
     </section>
 
     <!-- Custom Order Form -->
-    <section id="order-form" class="py-20 relative z-10">
+    <section id="order-form" class="py-2 relative z-10">
         <div class="container mx-auto px-6">
             <div class="max-w-4xl mx-auto">
-                <div class="text-center mb-12">
-                    <h2 class="font-orbitron text-4xl font-bold text-white mb-4">Start Your Custom Design</h2>
-                    <p class="text-text-secondary text-lg">Tell us about your vision and let's create something amazing together</p>
+                <div class="text-center mb-2">
+                    <h2 class="font-orbitron text-2xl font-bold text-white mb-1">Start Your Custom Design</h2>
+                    <p class="text-text-secondary text-sm">Tell us about your vision and let's create something amazing together</p>
                 </div>
 
                 <!-- Progress Bar -->
-                <div class="mb-8">
-                    <div class="flex justify-between items-center mb-2">
+                <div class="mb-2">
+                    <div class="flex justify-between items-center mb-1">
                         <span class="text-text-secondary text-sm">Step <span id="current-step">1</span> of 4</span>
                         <span class="text-text-secondary text-sm"><span id="progress-percent">25</span>% Complete</span>
                     </div>
@@ -449,25 +477,25 @@
                     </div>
                 </div>
 
-                <form id="custom-order-form" class="glass-card rounded-2xl p-8">
+                <form id="custom-order-form" class="glass-card rounded-2xl p-2">
                     <!-- Step 1: Basic Information -->
                     <div class="form-step active" id="step-1">
-                        <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Basic Information</h3>
-                        <div class="grid md:grid-cols-2 gap-6">
+                        <h3 class="font-orbitron text-lg font-bold text-white mb-1">Basic Information</h3>
+                        <div class="grid md:grid-cols-2 gap-1">
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Full Name *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Full Name *</label>
                                 <input type="text" name="fullName" class="input-field w-full" placeholder="Enter your full name" required />
                             </div>
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Email Address *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Email Address *</label>
                                 <input type="email" name="email" class="input-field w-full" placeholder="your@email.com" required />
                             </div>
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Phone Number</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Phone Number</label>
                                 <input type="tel" name="phone" class="input-field w-full" placeholder="(555) 123-4567" />
                             </div>
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Project Timeline *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Project Timeline *</label>
                                 <select name="timeline" class="input-field w-full" required>
                                     <option value>Select timeline</option>
                                     <option value="standard">Standard (14-21 days)</option>
@@ -480,16 +508,16 @@
 
                     <!-- Step 2: Design Concept -->
                     <div class="form-step" id="step-2">
-                        <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Design Concept</h3>
-                        <div class="space-y-6">
+                        <h3 class="font-orbitron text-lg font-bold text-white mb-1">Design Concept</h3>
+                        <div class="space-y-1">
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Design Concept Description *</label>
-                                <textarea name="concept" rows="4" class="input-field w-full" placeholder="Describe your design idea in detail. Include themes, style preferences, colors, and any specific elements you want included..." required></textarea>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Design Concept Description *</label>
+                                <textarea name="concept" rows="3" class="input-field w-full" placeholder="Describe your design idea in detail. Include themes, style preferences, colors, and any specific elements you want included..." required></textarea>
                             </div>
                             
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-4">Style Inspiration (Select all that apply)</label>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <label class="block text-text-secondary text-xs font-medium mb-2">Style Inspiration (Select all that apply)</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                     <label class="mood-board-item cursor-pointer border border-surface-light rounded-lg p-4 text-center transition-all duration-300 hover:border-accent">
                                         <input type="checkbox" name="styles[]" value="horror" class="sr-only" />
                                         <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=200&auto=format&fit=crop" alt="Horror Style" class="w-full h-20 object-cover rounded mb-2" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=200'; this.onerror=null;" />
@@ -514,13 +542,13 @@
                             </div>
 
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Reference Images</label>
-                                <div class="file-upload-area border-2 border-dashed border-surface-light rounded-lg p-8 text-center">
-                                    <svg class="w-12 h-12 text-text-secondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Reference Images</label>
+                                <div class="file-upload-area border-2 border-dashed border-surface-light rounded-lg p-2 text-center">
+                                    <svg class="w-6 h-6 text-text-secondary mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                     </svg>
-                                    <p class="text-text-secondary mb-2">Drag and drop your reference images here</p>
-                                    <p class="text-text-secondary text-sm">or <button type="button" class="text-accent hover:underline">browse files</button></p>
+                                    <p class="text-text-secondary text-xs mb-1">Drag and drop your reference images here</p>
+                                    <p class="text-text-secondary text-xs">or <button type="button" class="text-accent hover:underline">browse files</button></p>
                                     <input type="file" name="references" multiple accept="image/*" class="hidden" />
                                 </div>
                             </div>
@@ -529,10 +557,10 @@
 
                     <!-- Step 3: Product Details -->
                     <div class="form-step" id="step-3">
-                        <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Product Details</h3>
-                        <div class="grid md:grid-cols-2 gap-6">
+                        <h3 class="font-orbitron text-lg font-bold text-white mb-1">Product Details</h3>
+                        <div class="grid md:grid-cols-2 gap-1">
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Product Type *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Product Type *</label>
                                 <select name="productType" class="input-field w-full" required>
                                     <option value>Select product type</option>
                                     <option value="t-shirt">T-Shirt</option>
@@ -543,7 +571,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Quantity *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Quantity *</label>
                                 <select name="quantity" class="input-field w-full" required>
                                     <option value>Select quantity</option>
                                     <option value="1">1 piece</option>
@@ -554,8 +582,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Size Requirements</label>
-                                <div class="grid grid-cols-3 gap-2">
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Size Requirements</label>
+                                <div class="grid grid-cols-3 gap-1">
                                     <label class="flex items-center">
                                         <input type="checkbox" name="sizes[]" value="S" class="mr-2" />
                                         <span class="text-text-secondary">Small</span>
@@ -591,10 +619,10 @@
 
                     <!-- Step 4: Budget & Final Details -->
                     <div class="form-step" id="step-4">
-                        <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Budget & Final Details</h3>
-                        <div class="space-y-6">
+                        <h3 class="font-orbitron text-lg font-bold text-white mb-1">Budget & Final Details</h3>
+                        <div class="space-y-1">
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Budget Range *</label>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Budget Range *</label>
                                 <select name="budget" class="input-field w-full" required>
                                     <option value>Select budget range</option>
                                     <option value="50-100">$50 - $100</option>
@@ -606,12 +634,12 @@
                             </div>
                             
                             <div>
-                                <label class="block text-text-secondary text-sm font-medium mb-2">Additional Notes</label>
-                                <textarea name="notes" rows="4" class="input-field w-full" placeholder="Any additional details, special requirements, or questions you'd like to share..."></textarea>
+                                <label class="block text-text-secondary text-xs font-medium mb-1">Additional Notes</label>
+                                <textarea name="notes" rows="3" class="input-field w-full" placeholder="Any additional details, special requirements, or questions you'd like to share..."></textarea>
                             </div>
 
-                            <div class="bg-surface-light rounded-lg p-6">
-                                <h4 class="font-orbitron text-lg font-bold text-white mb-4">Pricing Guidelines</h4>
+                            <div class="bg-surface-light rounded-lg p-2">
+                                <h4 class="font-orbitron text-base font-bold text-white mb-2">Pricing Guidelines</h4>
                                 <div class="grid md:grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <p class="text-accent font-bold mb-2">Design Complexity:</p>
@@ -642,8 +670,8 @@
                     </div>
 
                     <!-- Form Navigation -->
-                    <div class="flex justify-between items-center mt-8 pt-6 border-t border-surface-light">
-                        <button type="button" id="prev-btn" class="border border-surface-light text-text-secondary px-6 py-3 rounded-lg font-semibold hover:border-accent hover:text-accent transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <div class="flex justify-between items-center mt-3 pt-2 border-t border-surface-light">
+                        <button type="button" id="prev-btn" class="border border-surface-light text-text-secondary px-4 py-2 rounded-lg font-semibold hover:border-accent hover:text-accent transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                             Previous
                         </button>
                         <button type="button" id="next-btn" class="btn-primary">
@@ -659,16 +687,16 @@
     </section>
 
     <!-- Customer Testimonials -->
-    <section class="py-20 relative z-10">
+    <section class="py-12 relative z-10">
         <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
+            <div class="text-center mb-8">
                 <h2 class="font-orbitron text-4xl font-bold text-white mb-4">What Our Customers Say</h2>
                 <p class="text-text-secondary text-lg max-w-2xl mx-auto">Real experiences from customers who brought their creative visions to life</p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Testimonial 1 -->
-                <div class="glass-card rounded-2xl p-6">
+                <div class="glass-card rounded-2xl p-4">
                     <div class="flex items-center mb-4">
                         <img src="https://images.unsplash.com/photo-1494790108755-2616c0763c5c?q=80&w=100&auto=format&fit=crop" alt="Sarah M." class="w-12 h-12 rounded-full object-cover mr-4" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;" />
                         <div>
@@ -683,7 +711,7 @@
                 </div>
 
                 <!-- Testimonial 2 -->
-                <div class="glass-card rounded-2xl p-6">
+                <div class="glass-card rounded-2xl p-4">
                     <div class="flex items-center mb-4">
                         <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop" alt="Mike R." class="w-12 h-12 rounded-full object-cover mr-4" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;" />
                         <div>
@@ -698,7 +726,7 @@
                 </div>
 
                 <!-- Testimonial 3 -->
-                <div class="glass-card rounded-2xl p-6">
+                <div class="glass-card rounded-2xl p-4">
                     <div class="flex items-center mb-4">
                         <img src="https://images.pixabay.com/photo/2016/11/29/20/22/girl-1871104_1280.jpg?q=80&w=100&auto=format&fit=crop" alt="Jessica L." class="w-12 h-12 rounded-full object-cover mr-4" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=100&auto=format&fit=crop'; this.onerror=null;" />
                         <div>
@@ -716,9 +744,9 @@
     </section>
 
     <!-- FAQ Section -->
-    <section class="py-20 relative z-10">
+    <section class="py-12 relative z-10">
         <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
+            <div class="text-center mb-8">
                 <h2 class="font-orbitron text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
                 <p class="text-text-secondary text-lg max-w-2xl mx-auto">Everything you need to know about our custom design process</p>
             </div>
@@ -726,65 +754,65 @@
             <div class="max-w-4xl mx-auto space-y-4">
                 <!-- FAQ Item 1 -->
                 <div class="glass-card rounded-lg">
-                    <button class="faq-toggle w-full text-left p-6 flex justify-between items-center">
+                    <button class="faq-toggle w-full text-left p-4 flex justify-between items-center">
                         <h3 class="font-orbitron text-lg font-bold text-white">Do I own the rights to my custom design?</h3>
                         <svg class="w-5 h-5 text-accent transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div class="faq-content hidden px-6 pb-6">
+                    <div class="faq-content hidden px-4 pb-4">
                         <p class="text-text-secondary">Yes! Once you've paid in full, you own the exclusive rights to your custom design. We retain the right to showcase the work in our portfolio unless you specifically request otherwise.</p>
                     </div>
                 </div>
 
                 <!-- FAQ Item 2 -->
                 <div class="glass-card rounded-lg">
-                    <button class="faq-toggle w-full text-left p-6 flex justify-between items-center">
+                    <button class="faq-toggle w-full text-left p-4 flex justify-between items-center">
                         <h3 class="font-orbitron text-lg font-bold text-white">How many revisions are included?</h3>
                         <svg class="w-5 h-5 text-accent transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div class="faq-content hidden px-6 pb-6">
+                    <div class="faq-content hidden px-4 pb-4">
                         <p class="text-text-secondary">We include up to 3 rounds of revisions in our standard pricing. Additional revisions are available for $25 each. We want to make sure you're completely happy with your design!</p>
                     </div>
                 </div>
 
                 <!-- FAQ Item 3 -->
                 <div class="glass-card rounded-lg">
-                    <button class="faq-toggle w-full text-left p-6 flex justify-between items-center">
+                    <button class="faq-toggle w-full text-left p-4 flex justify-between items-center">
                         <h3 class="font-orbitron text-lg font-bold text-white">What's the minimum order quantity?</h3>
                         <svg class="w-5 h-5 text-accent transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div class="faq-content hidden px-6 pb-6">
+                    <div class="faq-content hidden px-4 pb-4">
                         <p class="text-text-secondary">We accept orders starting from just 1 piece! Whether you need a single custom shirt or hundreds for an event, we can accommodate your needs.</p>
                     </div>
                 </div>
 
                 <!-- FAQ Item 4 -->
                 <div class="glass-card rounded-lg">
-                    <button class="faq-toggle w-full text-left p-6 flex justify-between items-center">
+                    <button class="faq-toggle w-full text-left p-4 flex justify-between items-center">
                         <h3 class="font-orbitron text-lg font-bold text-white">Can you work with copyrighted material?</h3>
                         <svg class="w-5 h-5 text-accent transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div class="faq-content hidden px-6 pb-6">
+                    <div class="faq-content hidden px-4 pb-4">
                         <p class="text-text-secondary">We can create designs inspired by your favorite characters or franchises, but we'll always ensure our work is transformative and falls under fair use. We'll discuss any copyright concerns during the consultation phase.</p>
                     </div>
                 </div>
 
                 <!-- FAQ Item 5 -->
                 <div class="glass-card rounded-lg">
-                    <button class="faq-toggle w-full text-left p-6 flex justify-between items-center">
+                    <button class="faq-toggle w-full text-left p-4 flex justify-between items-center">
                         <h3 class="font-orbitron text-lg font-bold text-white">What if I'm not satisfied with the final design?</h3>
                         <svg class="w-5 h-5 text-accent transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
-                    <div class="faq-content hidden px-6 pb-6">
+                    <div class="faq-content hidden px-4 pb-4">
                         <p class="text-text-secondary">Your satisfaction is our priority. If you're not happy with the final design after all revisions, we'll work with you to find a solution or provide a full refund of your design fee (production costs may still apply).</p>
                     </div>
                 </div>
@@ -793,7 +821,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-surface-dark border-t border-surface-light py-16 relative z-10">
+    <footer class="bg-surface-dark border-t border-surface-light py-12 relative z-10">
         <div class="container mx-auto px-6">
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                 <!-- Brand -->
@@ -901,13 +929,10 @@
         }
 
         function showStep(step) {
-            // Hide all steps
+            // Show all steps by default
             document.querySelectorAll('.form-step').forEach(stepEl => {
-                stepEl.classList.remove('active');
+                stepEl.classList.add('active');
             });
-            
-            // Show current step
-            document.getElementById(`step-${step}`).classList.add('active');
             
             // Update navigation buttons
             const prevBtn = document.getElementById('prev-btn');
