@@ -1200,18 +1200,16 @@ app.post('/api/custom-requests', async (req, res) => {
       return res.status(400).json({ error: 'Invalid timeline. Must be standard, rush, or express.' });
     }
 
-    // Validate budget
-    const budgetNum = parseFloat(budget);
-    if (isNaN(budgetNum) || budgetNum < 50 || budgetNum > 10000) {
+    // Validate budget (budget is a range string like "50-100", not a number)
+    if (!budget || !['50-100', '100-250', '250-500', '500-1000', '1000+'].includes(budget)) {
       console.log('❌ Invalid budget range');
-      return res.status(400).json({ error: 'Budget must be between $50 and $10,000.' });
+      return res.status(400).json({ error: 'Please select a valid budget range.' });
     }
 
-    // Validate quantity
-    const quantityNum = parseInt(quantity);
-    if (isNaN(quantityNum) || quantityNum < 1 || quantityNum > 1000) {
+    // Validate quantity (quantity is a range string like "2-5", not a number)
+    if (!quantity || !['1', '2-5', '6-10', '11-25', '25+'].includes(quantity)) {
       console.log('❌ Invalid quantity');
-      return res.status(400).json({ error: 'Quantity must be between 1 and 1,000.' });
+      return res.status(400).json({ error: 'Please select a valid quantity range.' });
     }
 
     // Process reference images if provided
@@ -1224,11 +1222,11 @@ app.post('/api/custom-requests', async (req, res) => {
         for (const image of referenceImages) {
           if (image.data && image.data.startsWith('data:image/')) {
             // Upload to Cloudinary
-            const cloudinaryResult = await uploadImageToCloudinary(image.data, 'custom-requests');
+            const cloudinaryUrl = await uploadImageToCloudinary(image.data, 'custom-requests');
             processedReferenceImages.push({
               originalName: image.name,
-              cloudinaryUrl: cloudinaryResult.secure_url,
-              thumbnailUrl: cloudinaryResult.secure_url.replace('/upload/', '/upload/w_300,h_200,c_fill/'),
+              cloudinaryUrl: cloudinaryUrl,
+              thumbnailUrl: cloudinaryUrl.replace('/upload/', '/upload/w_300,h_200,c_fill/'),
               size: image.size,
               type: image.type
             });
@@ -1251,23 +1249,24 @@ app.post('/api/custom-requests', async (req, res) => {
     if (!dbCheck.available) {
       console.log('⚠️ Database not available, using mock request');
       
-      // Create mock custom request object for email
+      // Create mock custom request object for email - using existing table structure exactly
       const mockCustomRequest = {
         id: Date.now(),
         customer_name: fullName,
         customer_email: email,
         customer_phone: phone || null,
-        timeline: timeline,
-        concept_description: concept,
-        style_preferences: styles ? JSON.stringify(styles) : null,
         request_type: productType,
-        quantity: quantity,
+        description: concept,
+        quantity: parseInt(quantity.split('-')[0]) || 1,
+        estimated_budget: parseFloat(budget.split('-')[0]) || 50,
+        status: 'pending',
+        timeline: timeline,
+        style_preferences: styles ? JSON.stringify(styles) : null,
         size_requirements: sizes ? JSON.stringify(sizes) : null,
         color_preferences: colors || null,
-        estimated_budget: budget,
         additional_notes: notes || null,
         reference_images: processedReferenceImages ? JSON.stringify(processedReferenceImages) : null,
-        status: 'pending',
+        concept_description: concept,
         created_at: new Date()
       };
 
@@ -1297,19 +1296,27 @@ app.post('/api/custom-requests', async (req, res) => {
 
     console.log('🗄️ Database available, inserting into database...');
 
-    // Insert into database
+    // Insert into database - using existing table structure exactly
     const result = await pool.query(`
       INSERT INTO custom_requests (
-        customer_name, customer_email, customer_phone, timeline, concept_description, 
-        style_preferences, request_type, quantity, size_requirements, 
-        color_preferences, estimated_budget, additional_notes, reference_images, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        customer_name, customer_email, customer_phone, request_type, description, 
+        quantity, estimated_budget, status, timeline, style_preferences, 
+        size_requirements, color_preferences, additional_notes, reference_images, 
+        concept_description, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *
     `, [
-      fullName, email, phone || null, timeline, concept,
-      styles ? JSON.stringify(styles) : null, productType, quantity,
-      sizes ? JSON.stringify(sizes) : null, colors || null, budget,
-      notes || null, processedReferenceImages ? JSON.stringify(processedReferenceImages) : null, 'pending'
+      fullName, email, phone || null, productType, concept,
+      // Convert quantity string to integer (take first number from range like "2-5" -> 2)
+      parseInt(quantity.split('-')[0]) || 1,
+      // Convert budget string to numeric (take first number from range like "50-100" -> 50)
+      parseFloat(budget.split('-')[0]) || 50,
+      'pending', timeline, 
+      styles ? JSON.stringify(styles) : null, 
+      sizes ? JSON.stringify(sizes) : null, 
+      colors || null, notes || null, 
+      processedReferenceImages ? JSON.stringify(processedReferenceImages) : null,
+      concept, new Date()
     ]);
 
     const customRequest = result.rows[0];
