@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { uploadProductImages, uploadImageToCloudinary, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
+const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
 // -----------------------------------------------------------------------------
@@ -498,8 +499,16 @@ async function sendEmail(to, subject, html) {
 }
 
 // Admin login
-app.post('/api/admin/login', async (req, res) => {
+app.post('/api/admin/login',
+  body('email').notEmpty().withMessage('Email is required.'),
+  body('password').notEmpty().withMessage('Password is required.'),
+  async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { email, password } = req.body;
 
     console.log('🔍 DEBUG LOGIN ATTEMPT:');
@@ -2470,13 +2479,24 @@ const authenticateCustomer = async (req, res, next) => {
 };
 
 // Customer registration/login
-app.post('/api/customer/auth', async (req, res) => {
+const validateRegistration = [
+  body('email').isEmail().withMessage('Please enter a valid email address.'),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long.'),
+  (req, res, next) => {
+    if (req.body.action !== 'register') {
+      return next();
+    }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+app.post('/api/customer/auth', validateRegistration, async (req, res) => {
   try {
     const { email, password, action = 'login', first_name, last_name } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
-    }
 
     if (action === 'register') {
       // Check if customer already exists
