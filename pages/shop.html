@@ -147,6 +147,24 @@
             100% { background-position: -200% 0; }
         }
         
+        /* Size Selector Styles */
+        .size-selector {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            color: #f9fafb;
+            transition: all 0.3s ease;
+        }
+        
+        .size-selector:focus {
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+        
+        .size-selector option {
+            background-color: #1f2937;
+            color: #f9fafb;
+        }
+        
         /* Mobile Filter Chips */
         .filter-chip {
             display: inline-flex;
@@ -337,11 +355,12 @@
             <div class="container mx-auto px-6">
                 <div class="flex space-x-3 overflow-x-auto pb-2">
                     <button class="filter-chip active" data-category="all">All Designs</button>
-                    <button class="filter-chip" data-category="horror">Horror</button>
-                    <button class="filter-chip" data-category="pop-culture">Pop Culture</button>
-                    <button class="filter-chip" data-category="humor">Humor</button>
-                    <button class="filter-chip" data-category="custom">Custom</button>
-                    <button class="filter-chip" data-filter="price">Price</button>
+                    <button class="filter-chip" data-category="adult-shirts">Adult Shirts</button>
+                    <button class="filter-chip" data-category="adult-hoodies">Adult Hoodies</button>
+                    <button class="filter-chip" data-category="youth-shirts">Youth Shirts</button>
+                    <button class="filter-chip" data-category="youth-hoodies">Youth Hoodies</button>
+                    <button class="filter-chip" data-category="family-team">Family/Team</button>
+                    <button class="filter-chip" data-category="holidays">Holidays</button>
                     <button class="filter-chip" data-filter="size">Size</button>
                 </div>
             </div>
@@ -363,51 +382,78 @@
                                         <span class="text-text-primary">All Designs</span>
                                         <span class="text-text-secondary text-sm ml-auto" id="all-designs-count">(0)</span>
                                     </label>
+                                    
+                                    <!-- Adult Categories -->
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
-                                        <span class="text-text-primary">Horror Essentials</span>
-                                        <span class="text-text-secondary text-sm ml-auto" id="horror-essentials-count">(0)</span>
+                                        <span class="text-text-primary">Adult Shirts</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="adult-shirts-count">(0)</span>
                                     </label>
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
-                                        <span class="text-text-primary">Pop Culture Rebels</span>
-                                        <span class="text-text-secondary text-sm ml-auto" id="pop-culture-count">(0)</span>
+                                        <span class="text-text-primary">Adult Hoodies</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="adult-hoodies-count">(0)</span>
                                     </label>
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
-                                        <span class="text-text-primary">Humor & Sass</span>
-                                        <span class="text-text-secondary text-sm ml-auto" id="humor-sass-count">(0)</span>
+                                        <span class="text-text-primary">Adult Birthday</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="adult-birthday-count">(0)</span>
+                                    </label>
+                                    
+                                    <!-- Youth Categories -->
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
+                                        <span class="text-text-primary">Youth Shirts</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="youth-shirts-count">(0)</span>
                                     </label>
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
-                                        <span class="text-text-primary">Custom Creations</span>
-                                        <span class="text-text-secondary text-sm ml-auto" id="custom-creations-count">(0)</span>
+                                        <span class="text-text-primary">Youth Hoodies</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="youth-hoodies-count">(0)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
+                                        <span class="text-text-primary">Youth Birthday</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="youth-birthday-count">(0)</span>
+                                    </label>
+                                    
+                                    <!-- Family & Team -->
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
+                                        <span class="text-text-primary">Family/Team Shirts</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="family-team-count">(0)</span>
+                                    </label>
+                                    
+                                    <!-- Holiday Categories -->
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
+                                        <span class="text-text-primary">Mother's Day</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="mothers-day-count">(0)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
+                                        <span class="text-text-primary">Father's Day</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="fathers-day-count">(0)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
+                                        <span class="text-text-primary">Halloween</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="halloween-count">(0)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
+                                        <span class="text-text-primary">Christmas</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="christmas-count">(0)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
+                                        <span class="text-text-primary">Other Holidays</span>
+                                        <span class="text-text-secondary text-sm ml-auto" id="other-holidays-count">(0)</span>
                                     </label>
                                 </div>
                             </div>
 
-                            <!-- Price Range -->
-                            <div>
-                                <h3 class="font-orbitron text-lg font-bold text-white mb-4">Price Range</h3>
-                                <div class="space-y-3">
-                                    <label class="flex items-center space-x-3 cursor-pointer">
-                                        <input type="radio" name="price" class="w-4 h-4 text-accent bg-surface border-surface-light focus:ring-accent" />
-                                        <span class="text-text-primary">Under $22.00</span>
-                                    </label>
-                                    <label class="flex items-center space-x-3 cursor-pointer">
-                                        <input type="radio" name="price" class="w-4 h-4 text-accent bg-surface border-surface-light focus:ring-accent" checked />
-                                        <span class="text-text-primary">$22.00 - $22.00</span>
-                                    </label>
-                                                                          <label class="flex items-center space-x-3 cursor-pointer">
-                                          <input type="radio" name="price" class="w-4 h-4 text-accent bg-surface border-surface-light focus:ring-accent" />
-                                          <span class="text-text-primary">$22.00 - $34.00</span>
-                                      </label>
-                                    <label class="flex items-center space-x-3 cursor-pointer">
-                                        <input type="radio" name="price" class="w-4 h-4 text-accent bg-surface border-surface-light focus:ring-accent" />
-                                        <span class="text-text-primary">Over $34.00</span>
-                                    </label>
-                                </div>
-                            </div>
+
 
                             <!-- Size Options -->
                             <div>
@@ -846,15 +892,31 @@
             }
             
             // Update other category counts (for now, set to 0 since we don't have category filtering yet)
-            const horrorCount = document.getElementById('horror-essentials-count');
-            const popCultureCount = document.getElementById('pop-culture-count');
-            const humorCount = document.getElementById('humor-sass-count');
-            const customCount = document.getElementById('custom-creations-count');
+            const adultShirtsCount = document.getElementById('adult-shirts-count');
+            const adultHoodiesCount = document.getElementById('adult-hoodies-count');
+            const adultBirthdayCount = document.getElementById('adult-birthday-count');
+            const youthShirtsCount = document.getElementById('youth-shirts-count');
+            const youthHoodiesCount = document.getElementById('youth-hoodies-count');
+            const youthBirthdayCount = document.getElementById('youth-birthday-count');
+            const familyTeamCount = document.getElementById('family-team-count');
+            const mothersDayCount = document.getElementById('mothers-day-count');
+            const fathersDayCount = document.getElementById('fathers-day-count');
+            const halloweenCount = document.getElementById('halloween-count');
+            const christmasCount = document.getElementById('christmas-count');
+            const otherHolidaysCount = document.getElementById('other-holidays-count');
             
-            if (horrorCount) horrorCount.textContent = '(0)';
-            if (popCultureCount) popCultureCount.textContent = '(0)';
-            if (humorCount) humorCount.textContent = '(0)';
-            if (customCount) customCount.textContent = '(0)';
+            if (adultShirtsCount) adultShirtsCount.textContent = '(0)';
+            if (adultHoodiesCount) adultHoodiesCount.textContent = '(0)';
+            if (adultBirthdayCount) adultBirthdayCount.textContent = '(0)';
+            if (youthShirtsCount) youthShirtsCount.textContent = '(0)';
+            if (youthHoodiesCount) youthHoodiesCount.textContent = '(0)';
+            if (youthBirthdayCount) youthBirthdayCount.textContent = '(0)';
+            if (familyTeamCount) familyTeamCount.textContent = '(0)';
+            if (mothersDayCount) mothersDayCount.textContent = '(0)';
+            if (fathersDayCount) fathersDayCount.textContent = '(0)';
+            if (halloweenCount) halloweenCount.textContent = '(0)';
+            if (christmasCount) christmasCount.textContent = '(0)';
+            if (otherHolidaysCount) otherHolidaysCount.textContent = '(0)';
             
             console.log('✅ Updated all category counts');
         }
@@ -870,9 +932,15 @@
             const productImage = product.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
             const productTitle = product.name || 'Product';
             const productCategory = product.category || 'Custom Design';
-            const productPrice = product.price ? `$${product.price}` : '$0.00';
+            
+            // Get size pricing from product data
+            const sizePricing = product.size_pricing || {};
+            const defaultSize = 'M';
+            const defaultPrice = sizePricing[defaultSize]?.price || product.price || 22.00;
+            const productPrice = `$${defaultPrice.toFixed(2)}`;
             
             console.log('🖼️ Final image URL being used:', productImage);
+            console.log('💰 Size pricing data:', sizePricing);
             
             productCard.innerHTML = `
                 <div class="relative">
@@ -880,13 +948,29 @@
                     <div class="product-overlay"></div>
                     <div class="product-info">
                         <button class="btn-primary w-full text-sm view-details-btn" data-product="${encodeURIComponent(JSON.stringify(product))}">View Details</button>
+                        <button class="btn-secondary w-full text-sm mt-2 add-to-cart-btn" data-product="${encodeURIComponent(JSON.stringify(product))}">Add to Cart</button>
                     </div>
                 </div>
                 <div class="p-6">
                     <h3 class="font-orbitron text-lg font-bold text-white mb-2">${productTitle}</h3>
                     <p class="text-text-secondary text-sm mb-3">${productCategory}</p>
+                    
+                    <!-- Size Selection -->
+                    <div class="mb-3">
+                        <label class="block text-text-secondary text-sm mb-2">Size:</label>
+                        <select class="size-selector w-full px-3 py-2 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none text-sm" data-product-id="${product.id}">
+                            <option value="S" data-price="${sizePricing.S?.price || 22.00}">S - $${(sizePricing.S?.price || 22.00).toFixed(2)}</option>
+                            <option value="M" data-price="${sizePricing.M?.price || 22.00}" selected>M - $${(sizePricing.M?.price || 22.00).toFixed(2)}</option>
+                            <option value="L" data-price="${sizePricing.L?.price || 22.00}">L - $${(sizePricing.L?.price || 22.00).toFixed(2)}</option>
+                            <option value="XL" data-price="${sizePricing.XL?.price || 22.00}">XL - $${(sizePricing.XL?.price || 22.00).toFixed(2)}</option>
+                            <option value="2X" data-price="${sizePricing['2X']?.price || 26.00}">2X - $${(sizePricing['2X']?.price || 26.00).toFixed(2)}</option>
+                            <option value="3X" data-price="${sizePricing['3X']?.price || 28.00}">3X - $${(sizePricing['3X']?.price || 28.00).toFixed(2)}</option>
+                            <option value="4X" data-price="${sizePricing['4X']?.price || 30.00}">4X - $${(sizePricing['4X']?.price || 30.00).toFixed(2)}</option>
+                        </select>
+                    </div>
+                    
                     <div class="flex items-center justify-between">
-                        <span class="text-accent font-bold text-xl">${productPrice}</span>
+                        <span class="text-accent font-bold text-xl product-price-display">${productPrice}</span>
                         <div class="flex items-center space-x-1">
                             <svg class="w-4 h-4 text-warning fill-current" viewBox="0 0 20 20">
                                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
@@ -922,11 +1006,62 @@
                 }
             });
             
+            // Add event listener for Add to Cart button
+            const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation(); // Prevent card click
+                    
+                    try {
+                        const productData = JSON.parse(decodeURIComponent(addToCartBtn.dataset.product));
+                        const selectedSize = sizeSelector ? sizeSelector.value : 'M';
+                        
+                        console.log('🛒 Adding to cart:', productData.name, 'Size:', selectedSize);
+                        await addToCartAPI(productData, selectedSize);
+                    } catch (error) {
+                        console.error('Error adding to cart:', error);
+                        alert('Error adding product to cart. Please try again.');
+                    }
+                });
+            }
+            
+            // Add event listener for size selector to update price
+            const sizeSelector = productCard.querySelector('.size-selector');
+            if (sizeSelector) {
+                sizeSelector.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const newPrice = parseFloat(selectedOption.dataset.price);
+                    const priceDisplay = productCard.querySelector('.product-price-display');
+                    
+                    if (priceDisplay && !isNaN(newPrice)) {
+                        priceDisplay.textContent = `$${newPrice.toFixed(2)}`;
+                        console.log(`💰 Price updated to $${newPrice.toFixed(2)} for size ${this.value}`);
+                    }
+                });
+            }
+            
             return productCard;
         }
 
+        // Function to handle size changes and price updates
+        function updateProductPrice(productCard, selectedSize) {
+            const sizeSelector = productCard.querySelector('.size-selector');
+            if (!sizeSelector) return;
+            
+            const selectedOption = sizeSelector.querySelector(`option[value="${selectedSize}"]`);
+            if (selectedOption) {
+                const newPrice = parseFloat(selectedOption.dataset.price);
+                const priceDisplay = productCard.querySelector('.product-price-display');
+                
+                if (priceDisplay && !isNaN(newPrice)) {
+                    priceDisplay.textContent = `$${newPrice.toFixed(2)}`;
+                    console.log(`💰 Price updated to $${newPrice.toFixed(2)} for size ${selectedSize}`);
+                }
+            }
+        }
+
         // Function to add item to cart via API
-        async function addToCartAPI(productData) {
+        async function addToCartAPI(productData, selectedSize = 'M') {
             try {
                 const token = localStorage.getItem('customerToken');
                 if (!token) {
@@ -935,14 +1070,17 @@
                     return;
                 }
 
-                // Extract price as number
-                const unitPrice = productData.price || 0;
+                // Get the price for the selected size
+                let unitPrice = productData.price || 0;
+                if (productData.size_pricing && productData.size_pricing[selectedSize]) {
+                    unitPrice = productData.size_pricing[selectedSize].price;
+                }
 
                 const cartData = {
                     product_name: productData.name,
                     quantity: 1,
                     unit_price: unitPrice,
-                    size: 'M', // Default size
+                    size: selectedSize,
                     color: 'Black', // Default color
                     image_url: productData.image_url
                 };
