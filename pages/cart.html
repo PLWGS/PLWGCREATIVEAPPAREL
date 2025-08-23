@@ -316,6 +316,9 @@
         <img id="zoomedImage" src alt="Zoomed Product Image" />
     </div>
 
+    <!-- Frontend Enhancements -->
+    <script src="../public/frontend-enhancements.js"></script>
+    
     <!-- JavaScript -->
     <script>
         // Global variables
@@ -339,6 +342,17 @@
                     return;
                 }
 
+                // Show loading state
+                const cartContainer = document.getElementById('cart-items');
+                if (cartContainer) {
+                    cartContainer.innerHTML = `
+                        <div class="glass-card rounded-xl p-8 text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+                            <p class="text-text-secondary">Loading your cart...</p>
+                        </div>
+                    `;
+                }
+
                 const response = await fetch('/api/cart', {
                     method: 'GET',
                     headers: {
@@ -352,16 +366,28 @@
                     
                     if (data.items && data.items.length > 0) {
                         displayCartItems(data.items);
+                        // Show success toast
+                        if (window.frontendEnhancements) {
+                            window.frontendEnhancements.showToast(`Cart loaded with ${data.items.length} items`, 'success');
+                        }
                     } else {
                         displayEmptyCart();
                     }
                 } else {
                     console.error('Failed to load cart items');
                     displayEmptyCart();
+                    // Show error toast
+                    if (window.frontendEnhancements) {
+                        window.frontendEnhancements.showToast('Failed to load cart', 'error');
+                    }
                 }
             } catch (error) {
                 console.error('Error loading cart items:', error);
                 displayEmptyCart();
+                // Show error toast
+                if (window.frontendEnhancements) {
+                    window.frontendEnhancements.showToast('Error loading cart', 'error');
+                }
             }
         }
 

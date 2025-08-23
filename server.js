@@ -597,13 +597,23 @@ app.post('/api/admin/login',
   }
 });
 
+// 2FA verification validation
+const validate2FAVerification = [
+  body('twoFactorToken').notEmpty().withMessage('2FA token is required'),
+  body('code').isLength({ min: 6, max: 6 }).withMessage('2FA code must be 6 digits'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Verify 2FA code and issue final admin JWT
-app.post('/api/admin/2fa/verify', async (req, res) => {
+app.post('/api/admin/2fa/verify', validate2FAVerification, async (req, res) => {
   try {
     const { twoFactorToken, code } = req.body || {};
-    if (!twoFactorToken || !code) {
-      return res.status(400).json({ error: 'Missing 2FA token or code' });
-    }
     const record = twoFactorStore.get(twoFactorToken);
     if (!record) {
       return res.status(400).json({ error: 'Invalid or expired 2FA token' });
@@ -629,8 +639,43 @@ app.post('/api/admin/2fa/verify', async (req, res) => {
   }
 });
 
+// Admin password reset validation
+const validatePasswordResetRequest = [
+  body('email').isEmail().withMessage('Please enter a valid email address'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+const validatePasswordReset = [
+  body('token').notEmpty().withMessage('Reset token is required'),
+  body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters long'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+const validatePasswordBootstrap = [
+  body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters long'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Request admin password reset (sends a token link/code to email)
-app.post('/api/admin/password/request-reset', async (req, res) => {
+app.post('/api/admin/password/request-reset', validatePasswordResetRequest, async (req, res) => {
   try {
     const { email } = req.body || {};
     const targetEmail = process.env.ADMIN_EMAIL;
@@ -658,12 +703,9 @@ app.post('/api/admin/password/request-reset', async (req, res) => {
 });
 
 // Perform admin password reset using token
-app.post('/api/admin/password/reset', async (req, res) => {
+app.post('/api/admin/password/reset', validatePasswordReset, async (req, res) => {
   try {
     const { token, newPassword } = req.body || {};
-    if (!token || !newPassword || String(newPassword).length < 8) {
-      return res.status(400).json({ error: 'Invalid token or password too short' });
-    }
     const record = passwordResetStore.get(token);
     if (!record) {
       return res.status(400).json({ error: 'Invalid or expired token' });
@@ -694,7 +736,7 @@ app.post('/api/admin/password/reset', async (req, res) => {
 
 // One-time bootstrap endpoint to set admin password without email (for emergencies)
 // Requires ADMIN_BOOTSTRAP_TOKEN to be set in env and provided via header or body
-app.post('/api/admin/password/bootstrap', async (req, res) => {
+app.post('/api/admin/password/bootstrap', validatePasswordBootstrap, async (req, res) => {
   try {
     const provided = req.headers['x-admin-bootstrap-token'] || (req.body && req.body.bootstrapToken);
     const expected = process.env.ADMIN_BOOTSTRAP_TOKEN;
@@ -705,9 +747,6 @@ app.post('/api/admin/password/bootstrap', async (req, res) => {
       return res.status(403).json({ error: 'Invalid bootstrap token' });
     }
     const { newPassword } = req.body || {};
-    if (!newPassword || String(newPassword).length < 8) {
-      return res.status(400).json({ error: 'Password too short' });
-    }
     const newHash = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10));
     if (pool) {
       await pool.query(
@@ -867,8 +906,21 @@ app.get('/api/orders/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Order status update validation
+const validateOrderStatusUpdate = [
+  body('status').isIn(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).withMessage('Invalid order status'),
+  body('tracking_number').optional().isString().trim().withMessage('Tracking number must be a string'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Update order status
-app.patch('/api/orders/:id/status', authenticateToken, async (req, res) => {
+app.patch('/api/orders/:id/status', authenticateToken, validateOrderStatusUpdate, async (req, res) => {
   try {
     const { id } = req.params;
     const { status, tracking_number } = req.body;
@@ -906,8 +958,28 @@ app.patch('/api/orders/:id/status', authenticateToken, async (req, res) => {
   }
 });
 
+// Order validation
+const validateOrder = [
+  body('customer_email').isEmail().withMessage('Please enter a valid customer email'),
+  body('customer_name').notEmpty().trim().withMessage('Customer name is required'),
+  body('items').isArray({ min: 1 }).withMessage('Order must contain at least one item'),
+  body('total_amount').isFloat({ min: 0 }).withMessage('Total amount must be a positive number'),
+  body('shipping_address').notEmpty().trim().withMessage('Shipping address is required'),
+  body('items.*.product_id').isInt({ min: 1 }).withMessage('Product ID must be a positive integer'),
+  body('items.*.product_name').notEmpty().trim().withMessage('Product name is required'),
+  body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer'),
+  body('items.*.unit_price').isFloat({ min: 0 }).withMessage('Unit price must be a positive number'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Create new order
-app.post('/api/orders', async (req, res) => {
+app.post('/api/orders', validateOrder, async (req, res) => {
   try {
     const { customer_email, customer_name, items, total_amount, shipping_address } = req.body;
     
@@ -971,8 +1043,25 @@ app.get('/api/products', authenticateToken, async (req, res) => {
   }
 });
 
+// Public product validation
+const validatePublicProduct = [
+  body('name').notEmpty().trim().withMessage('Product name is required'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number'),
+  body('image_url').optional().isURL().withMessage('Image URL must be a valid URL'),
+  body('category').notEmpty().trim().withMessage('Category is required'),
+  body('stock_quantity').optional().isInt({ min: 0 }).withMessage('Stock quantity must be a non-negative integer'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Create new product
-app.post('/api/products', authenticateToken, async (req, res) => {
+app.post('/api/products', authenticateToken, validatePublicProduct, async (req, res) => {
   try {
     const { name, description, price, image_url, category, stock_quantity } = req.body;
     
@@ -989,7 +1078,7 @@ app.post('/api/products', authenticateToken, async (req, res) => {
 });
 
 // Update product
-app.put('/api/products/:id', authenticateToken, async (req, res) => {
+app.put('/api/products/:id', authenticateToken, validatePublicProduct, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, price, image_url, category, stock_quantity, is_active } = req.body;
@@ -1168,8 +1257,31 @@ app.patch('/api/custom-requests/:id/status', authenticateToken, async (req, res)
   }
 });
 
+// Custom request validation middleware
+const validateCustomRequest = [
+  body('fullName').notEmpty().trim().withMessage('Full name is required'),
+  body('email').isEmail().withMessage('Please enter a valid email address'),
+  body('phone').optional().isMobilePhone().withMessage('Please enter a valid phone number'),
+  body('concept').notEmpty().trim().withMessage('Concept description is required'),
+  body('productType').notEmpty().trim().withMessage('Product type is required'),
+  body('quantity').isIn(['1', '2-5', '6-10', '11-25', '25+']).withMessage('Please select a valid quantity range'),
+  body('budget').isIn(['50-100', '100-250', '250-500', '500-1000', '1000+']).withMessage('Please select a valid budget range'),
+  body('timeline').optional().isIn(['standard', 'rush', 'express']).withMessage('Timeline must be standard, rush, or express'),
+  body('styles').optional().isArray().withMessage('Styles must be an array'),
+  body('sizes').optional().isArray().withMessage('Sizes must be an array'),
+  body('colors').optional().isString().withMessage('Colors must be a string'),
+  body('notes').optional().isString().withMessage('Notes must be a string'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Create new custom request
-app.post('/api/custom-requests', async (req, res) => {
+app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
   try {
     console.log('📝 Custom request received:', req.body);
     
@@ -1188,38 +1300,6 @@ app.post('/api/custom-requests', async (req, res) => {
       notes,
       referenceImages
     } = req.body;
-
-    // Validate required fields
-    if (!fullName || !email || !concept || !productType || !quantity || !budget) {
-      console.log('❌ Missing required fields');
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      console.log('❌ Invalid email format');
-      return res.status(400).json({ error: 'Invalid email format' });
-    }
-
-    // Validate timeline
-    const validTimelines = ['standard', 'rush', 'express'];
-    if (timeline && !validTimelines.includes(timeline)) {
-      console.log('❌ Invalid timeline');
-      return res.status(400).json({ error: 'Invalid timeline. Must be standard, rush, or express.' });
-    }
-
-    // Validate budget (budget is a range string like "50-100", not a number)
-    if (!budget || !['50-100', '100-250', '250-500', '500-1000', '1000+'].includes(budget)) {
-      console.log('❌ Invalid budget range');
-      return res.status(400).json({ error: 'Please select a valid budget range.' });
-    }
-
-    // Validate quantity (quantity is a range string like "2-5", not a number)
-    if (!quantity || !['1', '2-5', '6-10', '11-25', '25+'].includes(quantity)) {
-      console.log('❌ Invalid quantity');
-      return res.status(400).json({ error: 'Please select a valid quantity range.' });
-    }
 
     // Process reference images if provided
     let processedReferenceImages = null;
@@ -1555,8 +1635,20 @@ app.get('/api/inventory', authenticateToken, async (req, res) => {
 // ORDERS HELPERS
 // =============================================================================
 
+// Process all orders validation
+const validateProcessAllOrders = [
+  body('status').optional().isIn(['processing', 'shipped']).withMessage('Status must be processing or shipped'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Process all pending orders into processing
-app.post('/api/orders/process-all', authenticateToken, async (req, res) => {
+app.post('/api/orders/process-all', authenticateToken, validateProcessAllOrders, async (req, res) => {
   const dbCheck = checkDatabase();
   if (!dbCheck.available) {
     return res.json({ moved: 0 });
@@ -1705,14 +1797,23 @@ app.patch('/api/products/:id/stock', authenticateToken, async (req, res) => {
 // EXISTING NEWSLETTER ENDPOINTS
 // =============================================================================
 
+// Newsletter subscription validation
+const validateNewsletterSubscription = [
+  body('email').isEmail().withMessage('Please enter a valid email address'),
+  body('name').optional().isString().trim().withMessage('Name must be a string'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Newsletter subscription endpoint
-app.post('/api/subscribe', async (req, res) => {
+app.post('/api/subscribe', validateNewsletterSubscription, async (req, res) => {
   try {
     const { email, name } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
 
     // Check if subscriber already exists
     const existingSubscriber = await pool.query(
@@ -2423,14 +2524,22 @@ app.get('/api/subscribers', authenticateToken, async (req, res) => {
   }
 });
 
+// Unsubscribe validation
+const validateUnsubscribe = [
+  body('email').isEmail().withMessage('Please enter a valid email address'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Unsubscribe endpoint
-app.post('/api/unsubscribe', async (req, res) => {
+app.post('/api/unsubscribe', validateUnsubscribe, async (req, res) => {
   try {
     const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
 
     const result = await pool.query(
       'UPDATE subscribers SET is_active = false WHERE email = $1 RETURNING *',
@@ -2482,6 +2591,8 @@ const authenticateCustomer = async (req, res, next) => {
 const validateRegistration = [
   body('email').isEmail().withMessage('Please enter a valid email address.'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long.'),
+  body('first_name').if(body('action').equals('register')).notEmpty().trim().withMessage('First name is required for registration'),
+  body('last_name').if(body('action').equals('register')).notEmpty().trim().withMessage('Last name is required for registration'),
   (req, res, next) => {
     if (req.body.action !== 'register') {
       return next();
@@ -2761,18 +2872,27 @@ app.get('/api/customer/orders/:id', authenticateCustomer, async (req, res) => {
   }
 });
 
+// Customer review validation
+const validateCustomerReview = [
+  body('product_id').isInt({ min: 1 }).withMessage('Product ID must be a positive integer'),
+  body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
+  body('order_id').optional().isInt({ min: 1 }).withMessage('Order ID must be a positive integer'),
+  body('title').optional().isString().trim().isLength({ max: 200 }).withMessage('Title must be a string with maximum 200 characters'),
+  body('body').optional().isString().trim().isLength({ max: 1000 }).withMessage('Review body must be a string with maximum 1000 characters'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Create or update a product review by a customer
-app.post('/api/customer/reviews', authenticateCustomer, async (req, res) => {
+app.post('/api/customer/reviews', authenticateCustomer, validateCustomerReview, async (req, res) => {
   try {
     const customerId = req.customer.id;
     const { product_id, order_id, rating, title, body, images } = req.body || {};
-
-    if (!product_id || !rating) {
-      return res.status(400).json({ error: 'product_id and rating are required' });
-    }
-    if (Number(rating) < 1 || Number(rating) > 5) {
-      return res.status(400).json({ error: 'rating must be between 1 and 5' });
-    }
 
     // If order_id provided, verify ownership and product inclusion
     if (order_id) {
@@ -2830,15 +2950,23 @@ app.get('/api/customer/wishlist', authenticateCustomer, async (req, res) => {
   }
 });
 
+// Wishlist validation
+const validateWishlistAdd = [
+  body('product_id').isInt({ min: 1 }).withMessage('Product ID must be a positive integer'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Add to wishlist
-app.post('/api/customer/wishlist', authenticateCustomer, async (req, res) => {
+app.post('/api/customer/wishlist', authenticateCustomer, validateWishlistAdd, async (req, res) => {
   try {
     const customerId = req.customer.id;
     const { product_id } = req.body;
-    
-    if (!product_id) {
-      return res.status(400).json({ error: 'Product ID required' });
-    }
     
     // Check if product exists
     const productResult = await pool.query('SELECT * FROM products WHERE id = $1', [product_id]);
@@ -2924,8 +3052,20 @@ app.get('/api/customer/loyalty', authenticateCustomer, async (req, res) => {
   }
 });
 
+// Loyalty redemption validation
+const validateLoyaltyRedemption = [
+  body('reward_id').isInt({ min: 1 }).withMessage('Reward ID must be a positive integer'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Redeem loyalty reward
-app.post('/api/customer/loyalty/redeem', authenticateCustomer, async (req, res) => {
+app.post('/api/customer/loyalty/redeem', authenticateCustomer, validateLoyaltyRedemption, async (req, res) => {
   try {
     const customerId = req.customer.id;
     const { reward_id } = req.body;
@@ -2973,8 +3113,26 @@ app.post('/api/customer/loyalty/redeem', authenticateCustomer, async (req, res) 
   }
 });
 
+// Style profile validation
+const validateStyleProfile = [
+  body('horror_aesthetic_percentage').optional().isFloat({ min: 0, max: 100 }).withMessage('Horror aesthetic percentage must be between 0 and 100'),
+  body('pop_culture_percentage').optional().isFloat({ min: 0, max: 100 }).withMessage('Pop culture percentage must be between 0 and 100'),
+  body('humor_sass_percentage').optional().isFloat({ min: 0, max: 100 }).withMessage('Humor sass percentage must be between 0 and 100'),
+  body('favorite_colors').optional().isArray().withMessage('Favorite colors must be an array'),
+  body('preferred_sizes').optional().isArray().withMessage('Preferred sizes must be an array'),
+  body('fit_preference').optional().isString().withMessage('Fit preference must be a string'),
+  body('length_preference').optional().isString().withMessage('Length preference must be a string'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Update customer style profile
-app.put('/api/customer/style-profile', authenticateCustomer, async (req, res) => {
+app.put('/api/customer/style-profile', authenticateCustomer, validateStyleProfile, async (req, res) => {
   try {
     const customerId = req.customer.id;
     const { horror_aesthetic_percentage, pop_culture_percentage, humor_sass_percentage, favorite_colors, preferred_sizes, fit_preference, length_preference } = req.body;
@@ -3094,8 +3252,34 @@ app.get('/api/cart', authenticateCustomer, async (req, res) => {
   }
 });
 
+// Cart validation middleware
+const validateCartAdd = [
+  body('product_name').notEmpty().trim().withMessage('Product name is required'),
+  body('quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer'),
+  body('size').optional().isString().withMessage('Size must be a string'),
+  body('color').optional().isString().withMessage('Color must be a string'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+const validateCartUpdate = [
+  body('quantity').isInt({ min: 0 }).withMessage('Quantity must be a non-negative integer'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Add item to cart
-app.post('/api/cart/add', authenticateCustomer, async (req, res) => {
+app.post('/api/cart/add', authenticateCustomer, validateCartAdd, async (req, res) => {
   if (!pool) {
     return res.status(500).json({ error: 'Database not available' });
   }
@@ -3150,7 +3334,7 @@ app.post('/api/cart/add', authenticateCustomer, async (req, res) => {
 });
 
 // Update cart item quantity
-app.put('/api/cart/update/:id', authenticateCustomer, async (req, res) => {
+app.put('/api/cart/update/:id', authenticateCustomer, validateCartUpdate, async (req, res) => {
   if (!pool) {
     return res.status(500).json({ error: 'Database not available' });
   }
@@ -3339,7 +3523,19 @@ app.get('/api/products/featured', async (req, res) => {
 });
 
 // Set or clear a product's hero or featured feature (admin)
-app.put('/api/admin/products/:id/feature', authenticateToken, async (req, res) => {
+// Feature product validation
+const validateFeatureProduct = [
+  body('featured').isBoolean().withMessage('Featured must be a boolean value'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+app.put('/api/admin/products/:id/feature', authenticateToken, validateFeatureProduct, async (req, res) => {
   if (!pool) return res.status(500).json({ error: 'Database not available' });
   const productId = req.params.id;
   const { in_hero, rank, in_featured, featured_order } = req.body || {};
@@ -3448,7 +3644,27 @@ app.get('/api/admin/products/:id', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/admin/products', authenticateToken, async (req, res) => {
+// Product validation middleware
+const validateProduct = [
+  body('name').notEmpty().trim().withMessage('Product name is required'),
+  body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number'),
+  body('category').notEmpty().trim().withMessage('Category is required'),
+  body('description').optional().isString().withMessage('Description must be a string'),
+  body('stock_quantity').optional().isInt({ min: 0 }).withMessage('Stock quantity must be a non-negative integer'),
+  body('sale_percentage').optional().isFloat({ min: 0, max: 100 }).withMessage('Sale percentage must be between 0 and 100'),
+  body('tags').optional().isArray().withMessage('Tags must be an array'),
+  body('colors').optional().isArray().withMessage('Colors must be an array'),
+  body('sizes').optional().isArray().withMessage('Sizes must be an array'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+app.post('/api/admin/products', authenticateToken, validateProduct, async (req, res) => {
   if (!pool) {
     return res.status(500).json({ error: 'Database not available' });
   }
@@ -3489,11 +3705,6 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
         // If JSON parsing fails, treat as comma-separated string
         processedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
       }
-    }
-
-    // Validate required fields
-    if (!name || !price || !category) {
-      return res.status(400).json({ error: 'Name, price, and category are required' });
     }
 
     // Get the next sequential ID
@@ -3598,7 +3809,7 @@ app.post('/api/admin/products', authenticateToken, async (req, res) => {
   }
 });
 
-app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
+app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (req, res) => {
   if (!pool) {
     return res.status(500).json({ error: 'Database not available' });
   }
@@ -3841,8 +4052,20 @@ app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Checkout validation middleware
+const validateCheckout = [
+  body('shipping_address').notEmpty().trim().withMessage('Shipping address is required'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
 // Checkout - convert cart to order
-app.post('/api/cart/checkout', authenticateCustomer, async (req, res) => {
+app.post('/api/cart/checkout', authenticateCustomer, validateCheckout, async (req, res) => {
   if (!pool) {
     return res.status(500).json({ error: 'Database not available' });
   }
