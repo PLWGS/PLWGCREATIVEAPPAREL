@@ -3424,9 +3424,23 @@ app.get('/api/products/public', async (req, res) => {
   }
 
   try {
-    const result = await pool.query(`
-      SELECT * FROM products WHERE is_active = true ORDER BY created_at DESC
-    `);
+    const { category } = req.query;
+    
+    let query = `
+      SELECT * FROM products 
+      WHERE is_active = true
+    `;
+    
+    const queryParams = [];
+    
+    if (category && category !== 'All Designs') {
+      query += ` AND category = $1`;
+      queryParams.push(category);
+    }
+    
+    query += ` ORDER BY created_at DESC`;
+    
+    const result = await pool.query(query, queryParams);
     res.json(result.rows);
   } catch (error) {
     console.error('Error fetching products:', error);

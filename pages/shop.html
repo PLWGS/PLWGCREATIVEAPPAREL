@@ -891,32 +891,8 @@
                 console.log('❌ All designs count element not found');
             }
             
-            // Update other category counts (for now, set to 0 since we don't have category filtering yet)
-            const adultShirtsCount = document.getElementById('adult-shirts-count');
-            const adultHoodiesCount = document.getElementById('adult-hoodies-count');
-            const adultBirthdayCount = document.getElementById('adult-birthday-count');
-            const youthShirtsCount = document.getElementById('youth-shirts-count');
-            const youthHoodiesCount = document.getElementById('youth-hoodies-count');
-            const youthBirthdayCount = document.getElementById('youth-birthday-count');
-            const familyTeamCount = document.getElementById('family-team-count');
-            const mothersDayCount = document.getElementById('mothers-day-count');
-            const fathersDayCount = document.getElementById('fathers-day-count');
-            const halloweenCount = document.getElementById('halloween-count');
-            const christmasCount = document.getElementById('christmas-count');
-            const otherHolidaysCount = document.getElementById('other-holidays-count');
-            
-            if (adultShirtsCount) adultShirtsCount.textContent = '(0)';
-            if (adultHoodiesCount) adultHoodiesCount.textContent = '(0)';
-            if (adultBirthdayCount) adultBirthdayCount.textContent = '(0)';
-            if (youthShirtsCount) youthShirtsCount.textContent = '(0)';
-            if (youthHoodiesCount) youthHoodiesCount.textContent = '(0)';
-            if (youthBirthdayCount) youthBirthdayCount.textContent = '(0)';
-            if (familyTeamCount) familyTeamCount.textContent = '(0)';
-            if (mothersDayCount) mothersDayCount.textContent = '(0)';
-            if (fathersDayCount) fathersDayCount.textContent = '(0)';
-            if (halloweenCount) halloweenCount.textContent = '(0)';
-            if (christmasCount) christmasCount.textContent = '(0)';
-            if (otherHolidaysCount) otherHolidaysCount.textContent = '(0)';
+            // Update category counts based on actual product data
+            updateCategoryCounts();
             
             console.log('✅ Updated all category counts');
         }
@@ -1143,9 +1119,10 @@
             }, 3000);
         }
 
-        function displayProducts(page = 0) {
+        function displayProducts(page = 0, productsToDisplay = null) {
+            const products = productsToDisplay || allProducts;
             console.log('🎨 Displaying products for page:', page);
-            console.log('📦 Total products:', allProducts.length);
+            console.log('📦 Total products:', products.length);
             console.log('📄 Products per page:', productsPerPage);
             
             // Check if productsGrid exists
@@ -1159,12 +1136,12 @@
             
             // Calculate start and end indices for current page
             const startIndex = page * productsPerPage;
-            const endIndex = Math.min(startIndex + productsPerPage, allProducts.length);
+            const endIndex = Math.min(startIndex + productsPerPage, products.length);
             console.log('📋 Showing products from index', startIndex, 'to', endIndex);
             
             // Add products for current page
             for (let i = startIndex; i < endIndex; i++) {
-                const product = allProducts[i];
+                const product = products[i];
                 console.log('🎯 Creating card for product:', product.name);
                 const productCard = createProductCard(product);
                 productsGrid.appendChild(productCard);
@@ -1250,12 +1227,110 @@
             }
         });
 
-        // Filter functionality (simplified for demo)
+        // Category filtering functionality
+        let selectedCategories = ['All Designs'];
+        
+        function updateCategoryCounts() {
+            const categoryCounts = {};
+            
+            // Count products in each category
+            allProducts.forEach(product => {
+                const category = product.category || 'Adult Shirts'; // Default category
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+            
+            // Update category count displays
+            const categoryElements = {
+                'all-designs-count': allProducts.length,
+                'adult-shirts-count': categoryCounts['Adult Shirts'] || 0,
+                'adult-hoodies-count': categoryCounts['Adult Hoodies'] || 0,
+                'adult-birthday-count': categoryCounts['Adult Birthday'] || 0,
+                'youth-shirts-count': categoryCounts['Youth Shirts'] || 0,
+                'youth-hoodies-count': categoryCounts['Youth Hoodies'] || 0,
+                'youth-birthday-count': categoryCounts['Youth Birthday'] || 0,
+                'family-team-count': categoryCounts['Family/Team Shirts'] || 0,
+                'mothers-day-count': categoryCounts['Mother\'s Day'] || 0,
+                'fathers-day-count': categoryCounts['Father\'s Day'] || 0,
+                'halloween-count': categoryCounts['Halloween'] || 0,
+                'christmas-count': categoryCounts['Christmas'] || 0,
+                'other-holidays-count': categoryCounts['Other Holidays'] || 0
+            };
+            
+            Object.keys(categoryElements).forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = `(${categoryElements[elementId]})`;
+                }
+            });
+            
+            console.log('✅ Category counts updated:', categoryCounts);
+        }
+        
+        async function filterProductsByCategory() {
+            try {
+                let apiUrl = '/api/products/public';
+                
+                if (!selectedCategories.includes('All Designs') && selectedCategories.length > 0) {
+                    // Use the first selected category for API filtering
+                    const category = selectedCategories[0];
+                    apiUrl += `?category=${encodeURIComponent(category)}`;
+                }
+                
+                console.log('🔍 Fetching products for category:', selectedCategories);
+                console.log('📡 API URL:', apiUrl);
+                
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const filteredProducts = await response.json();
+                    
+                    // Reset pagination
+                    currentPage = 0;
+                    totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+                    
+                    // Display filtered products
+                    displayProducts(0, filteredProducts);
+                    updateProductCounts();
+                    
+                    console.log(`🔍 Filtered products: ${filteredProducts.length} of ${allProducts.length} total`);
+                } else {
+                    console.error('❌ Failed to fetch filtered products');
+                }
+            } catch (error) {
+                console.error('❌ Error filtering products:', error);
+            }
+        }
+        
+        // Set up category filter event listeners
         const categoryFilters = document.querySelectorAll('input[type="checkbox"]');
         categoryFilters.forEach(filter => {
             filter.addEventListener('change', () => {
-                // In a real app, this would filter the products
-                console.log('Filter changed:', filter.parentElement.textContent.trim());
+                const categoryName = filter.parentElement.textContent.trim().split('(')[0].trim();
+                
+                if (filter.checked) {
+                    if (categoryName === 'All Designs') {
+                        // If "All Designs" is selected, uncheck others
+                        categoryFilters.forEach(f => {
+                            if (f !== filter) f.checked = false;
+                        });
+                        selectedCategories = ['All Designs'];
+                    } else {
+                        // Remove "All Designs" and add specific category
+                        selectedCategories = selectedCategories.filter(cat => cat !== 'All Designs');
+                        selectedCategories.push(categoryName);
+                    }
+                } else {
+                    // Remove category from selection
+                    selectedCategories = selectedCategories.filter(cat => cat !== categoryName);
+                    
+                    // If no categories selected, default to "All Designs"
+                    if (selectedCategories.length === 0) {
+                        selectedCategories = ['All Designs'];
+                        document.querySelector('input[value="all-designs"]').checked = true;
+                    }
+                }
+                
+                console.log('🎯 Selected categories:', selectedCategories);
+                filterProductsByCategory();
             });
         });
 
