@@ -1268,33 +1268,38 @@
         
         async function filterProductsByCategory() {
             try {
-                let apiUrl = '/api/products/public';
+                let allFilteredProducts = [];
                 
-                if (!selectedCategories.includes('All Designs') && selectedCategories.length > 0) {
-                    // Use the first selected category for API filtering
-                    const category = selectedCategories[0];
-                    apiUrl += `?category=${encodeURIComponent(category)}`;
+                if (selectedCategories.includes('All Designs')) {
+                    // If "All Designs" is selected, get all products
+                    const response = await fetch('/api/products/public');
+                    if (response.ok) {
+                        allFilteredProducts = await response.json();
+                    }
+                } else if (selectedCategories.length > 0) {
+                    // Get products from each selected category and combine them
+                    for (const category of selectedCategories) {
+                        const apiUrl = `/api/products/public?category=${encodeURIComponent(category)}`;
+                        const response = await fetch(apiUrl);
+                        if (response.ok) {
+                            const categoryProducts = await response.json();
+                            allFilteredProducts = [...allFilteredProducts, ...categoryProducts];
+                        }
+                    }
                 }
                 
-                console.log('🔍 Fetching products for category:', selectedCategories);
-                console.log('📡 API URL:', apiUrl);
+                console.log('🔍 Fetching products for categories:', selectedCategories);
+                console.log(`🔍 Total filtered products: ${allFilteredProducts.length}`);
                 
-                const response = await fetch(apiUrl);
-                if (response.ok) {
-                    const filteredProducts = await response.json();
-                    
-                    // Reset pagination
-                    currentPage = 0;
-                    totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-                    
-                    // Display filtered products
-                    displayProducts(0, filteredProducts);
-                    updateProductCounts();
-                    
-                    console.log(`🔍 Filtered products: ${filteredProducts.length} of ${allProducts.length} total`);
-                } else {
-                    console.error('❌ Failed to fetch filtered products');
-                }
+                // Reset pagination
+                currentPage = 0;
+                totalPages = Math.ceil(allFilteredProducts.length / productsPerPage);
+                
+                // Display filtered products
+                displayProducts(0, allFilteredProducts);
+                updateProductCounts();
+                
+                console.log(`🔍 Filtered products: ${allFilteredProducts.length} of ${allProducts.length} total`);
             } catch (error) {
                 console.error('❌ Error filtering products:', error);
             }
