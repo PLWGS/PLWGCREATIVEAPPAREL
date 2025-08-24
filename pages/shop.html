@@ -388,6 +388,7 @@
                     <button class="filter-chip" data-category="family-team">Family/Team</button>
                     <button class="filter-chip" data-category="holidays">Holidays</button>
                     <button class="filter-chip" data-filter="size">Size</button>
+                    <button class="filter-chip" data-filter="color">Color</button>
                 </div>
             </div>
         </section>
@@ -484,30 +485,60 @@
                             <!-- Size Options -->
                             <div>
                                 <h3 class="font-orbitron text-lg font-bold text-white mb-4">Size</h3>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <button class="border border-surface-light text-text-primary py-2 px-3 rounded hover:border-accent transition-colors">S</button>
-                                    <button class="border border-accent text-accent py-2 px-3 rounded bg-accent bg-opacity-10">M</button>
-                                    <button class="border border-surface-light text-text-primary py-2 px-3 rounded hover:border-accent transition-colors">L</button>
-                                    <button class="border border-surface-light text-text-primary py-2 px-3 rounded hover:border-accent transition-colors">XL</button>
-                                    <button class="border border-surface-light text-text-primary py-2 px-3 rounded hover:border-accent transition-colors">XXL</button>
-                                </div>
+                                <select id="size-filter" class="w-full px-3 py-2 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none text-sm">
+                                    <option value="">All Sizes</option>
+                                    <option value="S">S</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                    <option value="XL">XL</option>
+                                    <option value="2X">2X/XXL</option>
+                                    <option value="3X">3X/XXXL</option>
+                                    <option value="4X">4X/XXXXL</option>
+                                </select>
                             </div>
 
                             <!-- Color Options -->
                             <div>
                                 <h3 class="font-orbitron text-lg font-bold text-white mb-4">Colors</h3>
-                                <div class="flex flex-wrap gap-3">
-                                    <button class="w-8 h-8 rounded-full bg-black border-2 border-accent"></button>
-                                    <button class="w-8 h-8 rounded-full bg-white border-2 border-surface-light"></button>
-                                    <button class="w-8 h-8 rounded-full bg-gray-600 border-2 border-surface-light"></button>
-                                    <button class="w-8 h-8 rounded-full bg-red-600 border-2 border-surface-light"></button>
-                                    <button class="w-8 h-8 rounded-full bg-blue-600 border-2 border-surface-light"></button>
-                                    <button class="w-8 h-8 rounded-full bg-green-600 border-2 border-surface-light"></button>
-                                </div>
+                                <select id="color-filter" class="w-full px-3 py-2 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none text-sm">
+                                    <option value="">All Colors</option>
+                                    <option value="Black">Black</option>
+                                    <option value="White">White</option>
+                                    <option value="Natural">Natural</option>
+                                    <option value="Ice Grey">Ice Grey</option>
+                                    <option value="Brown">Brown</option>
+                                    <option value="Navy">Navy</option>
+                                    <option value="Aqua">Aqua</option>
+                                    <option value="Royal Blue">Royal Blue</option>
+                                    <option value="Teal">Teal</option>
+                                    <option value="Gold">Gold</option>
+                                    <option value="Army">Army</option>
+                                    <option value="Army Green">Army Green</option>
+                                    <option value="Military Green">Military Green</option>
+                                    <option value="Evergreen">Evergreen</option>
+                                    <option value="Olive Green">Olive Green</option>
+                                    <option value="Kelly Green">Kelly Green</option>
+                                    <option value="Mint">Mint</option>
+                                    <option value="Sunset">Sunset</option>
+                                    <option value="Orange">Orange</option>
+                                    <option value="Autumn">Autumn</option>
+                                    <option value="Mustard">Mustard</option>
+                                    <option value="Purple">Purple</option>
+                                    <option value="Lilac">Lilac</option>
+                                    <option value="Charity Pink">Charity Pink</option>
+                                    <option value="Fushsia">Fushsia</option>
+                                    <option value="Soft Pink">Soft Pink</option>
+                                    <option value="Pink">Pink</option>
+                                    <option value="Berry">Berry</option>
+                                    <option value="Red">Red</option>
+                                    <option value="Maroon">Maroon</option>
+                                    <option value="Gray">Gray</option>
+                                    <option value="Green">Green</option>
+                                </select>
                             </div>
 
                             <!-- Clear Filters -->
-                            <button class="w-full border border-accent text-accent py-2 px-4 rounded-lg hover:bg-accent hover:text-black transition-all duration-300">
+                            <button id="clear-filters-btn" class="w-full border border-accent text-accent py-2 px-4 rounded-lg hover:bg-accent hover:text-black transition-all duration-300">
                                 Clear All Filters
                             </button>
                         </div>
@@ -805,12 +836,62 @@
         const filterChips = document.querySelectorAll('.filter-chip');
         filterChips.forEach(chip => {
             chip.addEventListener('click', () => {
-                // Remove active class from all chips
-                filterChips.forEach(c => c.classList.remove('active'));
-                // Add active class to clicked chip
-                chip.classList.add('active');
+                const filterType = chip.dataset.filter;
+                const category = chip.dataset.category;
+                
+                if (filterType === 'size') {
+                    // Show size filter modal or dropdown for mobile
+                    showMobileSizeFilter();
+                } else if (filterType === 'color') {
+                    // Show color filter modal or dropdown for mobile
+                    showMobileColorFilter();
+                } else if (category) {
+                    // Handle category filtering (existing functionality)
+                    // Remove active class from all chips
+                    filterChips.forEach(c => c.classList.remove('active'));
+                    // Add active class to clicked chip
+                    chip.classList.add('active');
+                }
             });
         });
+        
+        // Mobile filter functions
+        function showMobileSizeFilter() {
+            // Create a simple mobile-friendly size filter
+            const sizeOptions = ['All Sizes', 'S', 'M', 'L', 'XL', '2X/XXL', '3X/XXXL', '4X/XXXXL'];
+            const selectedSize = prompt('Select a size:\n' + sizeOptions.map((size, index) => `${index}: ${size}`).join('\n'));
+            
+            if (selectedSize !== null && !isNaN(selectedSize) && selectedSize >= 0 && selectedSize < sizeOptions.length) {
+                const sizeFilter = document.getElementById('size-filter');
+                if (sizeFilter) {
+                    sizeFilter.value = selectedSize === '0' ? '' : sizeOptions[selectedSize];
+                    // Trigger the change event
+                    sizeFilter.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+        
+        function showMobileColorFilter() {
+            // Create a simple mobile-friendly color filter
+            const colorOptions = [
+                'All Colors', 'Black', 'White', 'Natural', 'Ice Grey', 'Brown', 'Navy', 
+                'Aqua', 'Royal Blue', 'Teal', 'Gold', 'Army', 'Army Green', 'Military Green', 
+                'Evergreen', 'Olive Green', 'Kelly Green', 'Mint', 'Sunset', 'Orange', 
+                'Autumn', 'Mustard', 'Purple', 'Lilac', 'Charity Pink', 'Fushsia', 
+                'Soft Pink', 'Pink', 'Berry', 'Red', 'Maroon', 'Gray', 'Green'
+            ];
+            
+            const selectedColor = prompt('Select a color:\n' + colorOptions.map((color, index) => `${index}: ${color}`).join('\n'));
+            
+            if (selectedColor !== null && !isNaN(selectedColor) && selectedColor >= 0 && selectedColor < colorOptions.length) {
+                const colorFilter = document.getElementById('color-filter');
+                if (colorFilter) {
+                    colorFilter.value = selectedColor === '0' ? '' : colorOptions[selectedColor];
+                    // Trigger the change event
+                    colorFilter.dispatchEvent(new Event('change'));
+                }
+            }
+        }
 
         // Recently Viewed Bar
         const recentlyViewed = document.getElementById('recently-viewed');
@@ -2018,10 +2099,132 @@
             `;
         }
 
-
-
-
-
+        // Size and Color filtering functionality
+        let selectedSize = '';
+        let selectedColor = '';
+        
+        // Add event listeners for size and color filters
+        document.addEventListener('DOMContentLoaded', () => {
+            const sizeFilter = document.getElementById('size-filter');
+            const colorFilter = document.getElementById('color-filter');
+            const clearFiltersBtn = document.getElementById('clear-filters-btn');
+            
+            if (sizeFilter) {
+                sizeFilter.addEventListener('change', () => {
+                    selectedSize = sizeFilter.value;
+                    console.log('🎯 Selected size filter:', selectedSize);
+                    applyAllFilters();
+                });
+            }
+            
+            if (colorFilter) {
+                colorFilter.addEventListener('change', () => {
+                    selectedColor = colorFilter.value;
+                    console.log('🎨 Selected color filter:', selectedColor);
+                    applyAllFilters();
+                });
+            }
+            
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', () => {
+                    // Reset all filters
+                    selectedSize = '';
+                    selectedColor = '';
+                    selectedCategories = ['All Designs'];
+                    
+                    // Reset UI
+                    if (sizeFilter) sizeFilter.value = '';
+                    if (colorFilter) colorFilter.value = '';
+                    
+                    // Reset category checkboxes
+                    document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+                        checkbox.checked = checkbox.dataset.category === 'All Designs';
+                    });
+                    
+                    console.log('🧹 All filters cleared');
+                    applyAllFilters();
+                });
+            }
+        });
+        
+        // Function to apply all filters (category, size, color)
+        async function applyAllFilters() {
+            try {
+                let allFilteredProducts = [];
+                
+                // First, get products based on category filter
+                if (selectedCategories.includes('All Designs')) {
+                    const response = await fetch('/api/products/public');
+                    if (response.ok) {
+                        allFilteredProducts = await response.json();
+                    }
+                } else if (selectedCategories.length > 0) {
+                    for (const category of selectedCategories) {
+                        const apiUrl = `/api/products/public?category=${encodeURIComponent(category)}`;
+                        const response = await fetch(apiUrl);
+                        if (response.ok) {
+                            const categoryProducts = await response.json();
+                            allFilteredProducts = [...allFilteredProducts, ...categoryProducts];
+                        }
+                    }
+                }
+                
+                // Then apply size and color filters to the results
+                let finalFilteredProducts = allFilteredProducts.filter(product => {
+                    let matchesSize = true;
+                    let matchesColor = true;
+                    
+                    // Size filtering
+                    if (selectedSize && selectedSize !== '') {
+                        // Check if product has the selected size available
+                        if (product.sizes && Array.isArray(product.sizes)) {
+                            matchesSize = product.sizes.includes(selectedSize);
+                        } else if (product.size_stock && typeof product.size_stock === 'object') {
+                            matchesSize = product.size_stock.hasOwnProperty(selectedSize);
+                        } else {
+                            // If no size data, assume it matches (fallback)
+                            matchesSize = true;
+                        }
+                    }
+                    
+                    // Color filtering
+                    if (selectedColor && selectedColor !== '') {
+                        // Check if product has the selected color available
+                        if (product.colors && Array.isArray(product.colors)) {
+                            matchesColor = product.colors.includes(selectedColor);
+                        } else {
+                            // If no color data, assume it matches (fallback)
+                            matchesColor = true;
+                        }
+                    }
+                    
+                    return matchesSize && matchesColor;
+                });
+                
+                console.log('🔍 Applying all filters:');
+                console.log('   Categories:', selectedCategories);
+                console.log('   Size:', selectedSize || 'All');
+                console.log('   Color:', selectedColor || 'All');
+                console.log(`   Results: ${finalFilteredProducts.length} of ${allFilteredProducts.length} products`);
+                
+                // Reset pagination
+                currentPage = 0;
+                totalPages = Math.ceil(finalFilteredProducts.length / productsPerPage);
+                
+                // Display filtered products
+                displayProducts(0, finalFilteredProducts);
+                updateProductCounts();
+                
+            } catch (error) {
+                console.error('❌ Error applying filters:', error);
+            }
+        }
+        
+        // Update the existing filterProductsByCategory function to use the new filtering system
+        async function filterProductsByCategory() {
+            // Now use the comprehensive filtering function
+            await applyAllFilters();
+        }
 
     </script>
 <script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
