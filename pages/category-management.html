@@ -454,9 +454,14 @@
         // Load categories from database
         async function loadCategories() {
             try {
+                console.log('Loading categories...');
                 const response = await fetch('/api/admin/categories');
+                console.log('Categories response status:', response.status);
+                
                 if (response.ok) {
                     categories = await response.json();
+                    console.log('Categories loaded:', categories.length, 'categories');
+                    console.log('Categories data:', categories);
                     updateCategoriesDisplay();
                     updateStats();
                 } else {
@@ -533,12 +538,18 @@
 
         // Update statistics
         function updateStats() {
+            console.log('Updating stats...');
+            console.log('Categories count:', categories.length);
+            console.log('Products count:', products.length);
+            
             document.getElementById('total-categories').textContent = categories.length;
             document.getElementById('active-categories').textContent = categories.length;
             document.getElementById('total-products').textContent = products.length;
             
             const uncategorizedCount = products.filter(p => !p.category || p.category === '').length;
             document.getElementById('uncategorized-products').textContent = uncategorizedCount;
+            
+            console.log('Stats updated. Total categories:', document.getElementById('total-categories').textContent);
         }
 
         // Filter categories
@@ -606,6 +617,8 @@
                 description: document.getElementById('category-description').value.trim()
             };
             
+            console.log('Creating category with data:', formData);
+            
             try {
                 const response = await fetch('/api/admin/categories', {
                     method: 'POST',
@@ -613,12 +626,23 @@
                     body: JSON.stringify(formData)
                 });
                 
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
                 if (response.ok) {
+                    const newCategory = await response.json();
+                    console.log('New category created:', newCategory);
                     showNotification('Category created successfully!', 'success');
                     hideAddCategoryForm();
-                    loadCategories();
+                    
+                    // Force refresh of data
+                    console.log('Refreshing categories...');
+                    await loadCategories();
+                    await loadProducts();
+                    console.log('Refresh complete. Categories count:', categories.length);
                 } else {
                     const error = await response.json();
+                    console.error('API error:', error);
                     showNotification(error.message || 'Failed to create category', 'error');
                 }
             } catch (error) {
