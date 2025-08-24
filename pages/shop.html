@@ -1513,42 +1513,8 @@
         }
         
         async function filterProductsByCategory() {
-            try {
-                let allFilteredProducts = [];
-                
-                if (selectedCategories.includes('All Designs')) {
-                    // If "All Designs" is selected, get all products
-                    const response = await fetch('/api/products/public');
-                    if (response.ok) {
-                        allFilteredProducts = await response.json();
-                    }
-                } else if (selectedCategories.length > 0) {
-                    // Get products from each selected category and combine them
-                    for (const category of selectedCategories) {
-                        const apiUrl = `/api/products/public?category=${encodeURIComponent(category)}`;
-                        const response = await fetch(apiUrl);
-                        if (response.ok) {
-                            const categoryProducts = await response.json();
-                            allFilteredProducts = [...allFilteredProducts, ...categoryProducts];
-                        }
-                    }
-                }
-                
-                console.log('🔍 Fetching products for categories:', selectedCategories);
-                console.log(`🔍 Total filtered products: ${allFilteredProducts.length}`);
-                
-                // Reset pagination
-                currentPage = 0;
-                totalPages = Math.ceil(allFilteredProducts.length / productsPerPage);
-                
-                // Display filtered products
-                displayProducts(0, allFilteredProducts);
-                updateProductCounts();
-                
-                console.log(`🔍 Filtered products: ${allFilteredProducts.length} of ${allProducts.length} total`);
-            } catch (error) {
-                console.error('❌ Error filtering products:', error);
-            }
+            // Now use the comprehensive filtering function that handles categories, size, and color
+            await applyAllFilters();
         }
         
         // Load categories when page loads, then load products
@@ -2214,12 +2180,6 @@
             } catch (error) {
                 console.error('❌ Error applying filters:', error);
             }
-        }
-        
-        // Update the existing filterProductsByCategory function to use the new filtering system
-        async function filterProductsByCategory() {
-            // Now use the comprehensive filtering function
-            await applyAllFilters();
         }
 
     </script>

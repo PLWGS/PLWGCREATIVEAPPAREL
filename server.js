@@ -908,7 +908,7 @@ app.get('/api/orders/:id', authenticateToken, async (req, res) => {
 
 // Order status update validation
 const validateOrderStatusUpdate = [
-  body('status').isIn(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).withMessage('Invalid order status'),
+  body('status').isIn(['pending', 'processing', 'shipped', 'completed', 'delivered', 'cancelled']).withMessage('Invalid order status'),
   body('tracking_number').optional().isString().trim().withMessage('Tracking number must be a string'),
   (req, res, next) => {
     const errors = validationResult(req);
