@@ -1095,6 +1095,9 @@
         let quantity = 1;
         let productData = null;
         
+        // Make productData globally accessible for price updates
+        window.productData = null;
+        
         // Load product data from URL parameter
         function loadProductData() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1240,7 +1243,15 @@
             const addToCartBtn = document.getElementById('addToCartBtn');
             
             if (currentPriceElement && addToCartBtn) {
-                const basePrice = parseFloat(currentPriceElement.dataset.basePrice) || 22.00;
+                // Get base price from product data or fallback to default
+                let basePrice = 22.00;
+                
+                // Try to get base price from global productData first
+                if (window.productData && window.productData.price) {
+                    basePrice = parseFloat(window.productData.price);
+                } else if (currentPriceElement.dataset.basePrice) {
+                    basePrice = parseFloat(currentPriceElement.dataset.basePrice);
+                }
                 
                 // Apply size-based pricing
                 let finalPrice = basePrice;
@@ -1260,7 +1271,7 @@
                 addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
                 addToCartBtn.dataset.selectedSize = selectedSize;
                 
-                console.log(`💰 Price updated to $${finalPrice.toFixed(2)} for size ${selectedSize}`);
+                console.log(`💰 Price updated to $${finalPrice.toFixed(2)} for size ${selectedSize} (base: $${basePrice.toFixed(2)})`);
             }
         }
 
@@ -1700,6 +1711,7 @@
                 const reviews = apiData.reviews || { count: 0, average: 0, items: [] };
                 // Store globally for cart actions
                 productData = product;
+                window.productData = product; // Make globally accessible for price updates
                 console.log('📦 Product image_url:', product.image_url);
                 
                 // Update page content with product data
@@ -2015,6 +2027,8 @@
                     sizeContainer.querySelectorAll('.size-option').forEach(option => {
                         if (!option.classList.contains('unavailable')) {
                             option.addEventListener('click', () => {
+                                console.log('🎯 Size clicked:', option.dataset.size);
+                                
                                 sizeContainer.querySelectorAll('.size-option').forEach(opt => {
                                     opt.classList.remove('selected', 'border-accent');
                                     opt.classList.add('border-surface-light');
@@ -2022,6 +2036,7 @@
                                 option.classList.add('selected', 'border-accent');
                                 option.classList.remove('border-surface-light');
                                 
+                                console.log('✅ Size selection updated, calling updatePriceForSize with:', option.dataset.size);
                                 // Update price when size changes
                                 updatePriceForSize(option.dataset.size);
                             });
