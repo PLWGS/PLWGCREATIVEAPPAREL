@@ -860,7 +860,254 @@
         }
 
         // Load products when page loads
-        loadProductsFromDatabase();
+        // loadProductsFromDatabase(); // Moved to after categories are loaded
+
+        // Load products from database
+        async function loadProductsFromDatabase() {
+            console.log('🔄 Loading products from database...');
+            try {
+                const response = await fetch('/api/products/public');
+                console.log('📡 API Response status:', response.status);
+                if (response.ok) {
+                    const products = await response.json();
+                    console.log('📦 Loaded products:', products);
+                    console.log('📦 Raw products data:', JSON.stringify(products, null, 2));
+                    
+                    // Check each product's image URL
+                    products.forEach((product, index) => {
+                        console.log(`📸 Product ${index + 1}: ${product.name}`);
+                        console.log(`   Image URL: ${product.image_url}`);
+                        console.log(`   Has Cloudinary URL: ${product.image_url && product.image_url.startsWith('https://res.cloudinary.com')}`);
+                    });
+                    
+                    allProducts = Array.isArray(products) ? products : [];
+                    console.log('📦 Processed products array:', allProducts);
+                    totalPages = Math.ceil(allProducts.length / productsPerPage);
+                    console.log('📄 Total pages:', totalPages);
+                    displayProducts(0);
+                    updateProductCounts();
+                } else {
+                    console.log('❌ No products found in database');
+                    allProducts = [];
+                    totalPages = 0;
+                    displayProducts(0);
+                    updateProductCounts();
+                }
+            } catch (error) {
+                console.error('❌ Error loading products:', error);
+                allProducts = [];
+                totalPages = 0;
+                displayProducts(0);
+                updateProductCounts();
+            }
+        }
+
+        // Function to create product cards
+        function createProductCard(product) {
+            console.log('🎯 Creating product card for:', product.name);
+            console.log('📸 Product image_url:', product.image_url);
+            
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card glass-card rounded-2xl overflow-hidden group';
+            
+            // Use database product fields
+            const productImage = product.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
+            const productTitle = product.name || 'Product';
+            const productCategory = product.category || 'Custom Design';
+            
+            // Get size pricing from product data
+            const sizePricing = product.size_pricing || {};
+            const defaultSize = 'M';
+            const defaultPrice = sizePricing[defaultSize]?.price || product.price || 22.00;
+            const productPrice = `$${defaultPrice.toFixed(2)}`;
+            
+            console.log('🖼️ Final image URL being used:', productImage);
+            console.log('💰 Size pricing data:', sizePricing);
+            
+            productCard.innerHTML = `
+                <div class="relative">
+                    <img src="${productImage}" alt="${productTitle}" class="w-full h-64 object-cover" loading="lazy" onerror="console.error('❌ Image failed to load:', this.src); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='; this.onerror=null;" onload="console.log('✅ Image loaded successfully:', this.src);">
+                    <div class="product-overlay"></div>
+                    <div class="product-info">
+                        <button class="btn-primary w-full text-sm view-details-btn" data-product="${encodeURIComponent(JSON.stringify(product))}">View Details</button>
+                        <button class="btn-secondary w-full text-sm mt-2 add-to-cart-btn" data-product="${encodeURIComponent(JSON.stringify(product))}">Add to Cart</button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="font-orbitron text-lg font-bold text-white mb-2">${productTitle}</h3>
+                    <p class="text-text-secondary text-sm mb-3">${productCategory}</p>
+                    
+                    <!-- Size Selection -->
+                    <div class="mb-3">
+                        <label class="block text-text-secondary text-sm mb-2">Size:</label>
+                        <select class="size-selector w-full px-3 py-2 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none text-sm" data-product-id="${product.id}">
+                            <option value="S" data-price="${sizePricing.S?.price || 22.00}">S - $${(sizePricing.S?.price || 22.00).toFixed(2)}</option>
+                            <option value="M" data-price="${sizePricing.M?.price || 22.00}" selected>M - $${(sizePricing.M?.price || 22.00).toFixed(2)}</option>
+                            <option value="L" data-price="${sizePricing.L?.price || 22.00}">L - $${(sizePricing.L?.price || 22.00).toFixed(2)}</option>
+                            <option value="XL" data-price="${sizePricing.XL?.price || 22.00}">XL - $${(sizePricing.XL?.price || 22.00).toFixed(2)}</option>
+                            <option value="2X" data-price="${sizePricing['2X']?.price || 26.00}">2X - $${(sizePricing['2X']?.price || 26.00).toFixed(2)}</option>
+                            <option value="3X" data-price="${sizePricing['3X']?.price || 28.00}">3X - $${(sizePricing['3X']?.price || 28.00).toFixed(2)}</option>
+                            <option value="4X" data-price="${sizePricing['4X']?.price || 30.00}">4X - $${(sizePricing['4X']?.price || 30.00).toFixed(2)}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-accent font-bold text-xl product-price-display">${productPrice}</span>
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4 text-warning fill-current" viewBox="0 0 20 20">
+                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                            </svg>
+                            <span class="text-text-secondary text-sm">4.8 (145)</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listener for View Details button
+            const viewDetailsBtn = productCard.querySelector('.view-details-btn');
+            viewDetailsBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent card click
+                
+                try {
+                    const productData = JSON.parse(decodeURIComponent(viewDetailsBtn.dataset.product));
+                    
+                    // Debug logging
+                    console.log('=== SHOP PAGE DEBUG ===');
+                    console.log('Product data for details page:', productData);
+                    console.log('Product name:', productData.name);
+                    console.log('Product price:', productData.price);
+                    console.log('Product image:', productData.image_url);
+                    
+                    // Redirect to product detail page with product ID
+                    const productId = productData.id || encodeURIComponent(productData.name);
+                    window.location.href = `product.html?id=${productId}`;
+                } catch (error) {
+                    console.error('Error processing product data:', error);
+                    console.error('Product data string:', viewDetailsBtn.dataset.product);
+                    alert('Error loading product details. Please try again.');
+                }
+            });
+            
+            // Add event listener for Add to Cart button
+            const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+            if (addToCartBtn) {
+                addToCartBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation(); // Prevent card click
+                    
+                    try {
+                        const productData = JSON.parse(decodeURIComponent(addToCartBtn.dataset.product));
+                        const sizeSelector = productCard.querySelector('.size-selector');
+                        const selectedSize = sizeSelector ? sizeSelector.value : 'M';
+                        
+                        console.log('🛒 Adding to cart:', productData.name, 'Size:', selectedSize);
+                        await addToCartAPI(productData, selectedSize);
+                    } catch (error) {
+                        console.error('Error adding to cart:', error);
+                        alert('Error adding product to cart. Please try again.');
+                    }
+                });
+            }
+            
+            // Add event listener for size selector to update price
+            const sizeSelector = productCard.querySelector('.size-selector');
+            if (sizeSelector) {
+                sizeSelector.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const newPrice = parseFloat(selectedOption.dataset.price);
+                    const priceDisplay = productCard.querySelector('.product-price-display');
+                    
+                    if (priceDisplay && !isNaN(newPrice)) {
+                        priceDisplay.textContent = `$${newPrice.toFixed(2)}`;
+                        console.log(`💰 Price updated to $${newPrice.toFixed(2)} for size ${this.value}`);
+                    }
+                });
+            }
+            
+            return productCard;
+        }
+
+        // Function to add item to cart via API
+        async function addToCartAPI(productData, selectedSize = 'M') {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    alert('Please log in to add items to cart');
+                    window.location.href = 'customer-login.html';
+                    return;
+                }
+
+                // Get the price for the selected size
+                let unitPrice = productData.price || 0;
+                if (productData.size_pricing && productData.size_pricing[selectedSize]) {
+                    unitPrice = productData.size_pricing[selectedSize].price;
+                }
+
+                const cartData = {
+                    product_name: productData.name,
+                    quantity: 1,
+                    unit_price: unitPrice,
+                    size: selectedSize,
+                    color: 'Black', // Default color
+                    image_url: productData.image_url
+                };
+
+                console.log('Sending cart data to API:', cartData);
+
+                const response = await fetch('/api/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(cartData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Cart API response:', result);
+                    
+                    // Show success message
+                    showNotification('Added to cart!', 'success');
+                    
+                    // Update cart counter
+                    updateCartCounter();
+                    
+                    // Optionally redirect to cart page
+                    setTimeout(() => {
+                        if (confirm('Item added to cart! Would you like to view your cart?')) {
+                            window.location.href = 'cart.html';
+                        }
+                    }, 1000);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Cart API error:', errorData);
+                    alert('Error adding to cart: ' + (errorData.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Error adding product to cart. Please try again.');
+            }
+        }
+
+        // Function to show notifications
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
 
         // Function to update product counts and display
         function updateProductCounts() {
@@ -1099,6 +1346,69 @@
             }
         }
 
+        // Function to add item to cart via API
+        async function addToCartAPI(productData, selectedSize = 'M') {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    alert('Please log in to add items to cart');
+                    window.location.href = 'customer-login.html';
+                    return;
+                }
+
+                // Get the price for the selected size
+                let unitPrice = productData.price || 0;
+                if (productData.size_pricing && productData.size_pricing[selectedSize]) {
+                    unitPrice = productData.size_pricing[selectedSize].price;
+                }
+
+                const cartData = {
+                    product_name: productData.name,
+                    quantity: 1,
+                    unit_price: unitPrice,
+                    size: selectedSize,
+                    color: 'Black', // Default color
+                    image_url: productData.image_url
+                };
+
+                console.log('Sending cart data to API:', cartData);
+
+                const response = await fetch('/api/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(cartData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Cart API response:', result);
+                    
+                    // Show success message
+                    showNotification('Added to cart!', 'success');
+                    
+                    // Update cart counter
+                    updateCartCounter();
+                    
+                    // Optionally redirect to cart page
+                    setTimeout(() => {
+                        if (confirm('Item added to cart! Would you like to view your cart?')) {
+                            window.location.href = 'cart.html';
+                        }
+                    }, 1000);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Cart API error:', errorData);
+                    alert('Error adding to cart: ' + (errorData.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Error adding product to cart. Please try again.');
+            }
+        }
+
         // Function to show notifications
         function showNotification(message, type = 'info') {
             // Create notification element
@@ -1119,6 +1429,53 @@
             }, 3000);
         }
 
+        function displayProducts(page = 0, productsToDisplay = null) {
+            const products = productsToDisplay || allProducts;
+            console.log('🎨 Displaying products for page:', page);
+            console.log('📦 Total products:', products.length);
+            console.log('📄 Products per page:', productsPerPage);
+            
+            // Check if productsGrid exists
+            if (!productsGrid) {
+                console.error('❌ productsGrid element not found!');
+                return;
+            }
+            
+            // Clear current products
+            productsGrid.innerHTML = '';
+            
+            // Calculate start and end indices for current page
+            const startIndex = page * productsPerPage;
+            const endIndex = Math.min(startIndex + productsPerPage, products.length);
+            console.log('📋 Showing products from index', startIndex, 'to', endIndex);
+            
+            // Add products for current page
+            for (let i = startIndex; i < endIndex; i++) {
+                const product = products[i];
+                console.log('🎯 Creating card for product:', product.name);
+                const productCard = createProductCard(product);
+                productsGrid.appendChild(productCard);
+            }
+            
+            // Update button text
+            if (loadMoreBtn) {
+                loadMoreBtn.textContent = `Load More Designs (${page + 1}/${totalPages})`;
+                
+                // Hide button if we're on the last page
+                if (page >= totalPages - 1) {
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    loadMoreBtn.style.display = 'block';
+                }
+            } else {
+                console.log('⚠️ loadMoreBtn element not found');
+            }
+            
+            // Update product counts display
+            updateProductCounts();
+        }
+
+        // Function to display products
         function displayProducts(page = 0, productsToDisplay = null) {
             const products = productsToDisplay || allProducts;
             console.log('🎨 Displaying products for page:', page);
@@ -1234,21 +1591,28 @@
         // Load categories dynamically from database
         async function loadCategories() {
             try {
+                console.log('🔄 Loading categories from API...');
                 const response = await fetch('/api/admin/categories');
+                console.log('📡 Categories API response status:', response.status);
                 if (response.ok) {
                     allCategories = await response.json();
+                    console.log('📋 Categories loaded:', allCategories.length, 'categories');
+                    console.log('📋 Categories data:', allCategories);
                     updateCategoryFilterSidebar();
                     updateCategoryCounts();
                 } else {
-                    console.error('Failed to load categories');
+                    console.error('❌ Failed to load categories, status:', response.status);
                 }
             } catch (error) {
-                console.error('Error loading categories:', error);
+                console.error('❌ Error loading categories:', error);
             }
         }
         
         // Update category filter sidebar dynamically
         function updateCategoryFilterSidebar() {
+            console.log('🔄 Updating category filter sidebar...');
+            console.log('📋 Current allCategories:', allCategories);
+            
             // Update main category filter section
             const categorySection = document.querySelector('.filter-sidebar .space-y-8 > div:first-child');
             if (categorySection) {
@@ -1279,7 +1643,9 @@
                 });
                 
                 filterHTML += '</div>';
+                console.log('📝 Generated filter HTML:', filterHTML);
                 categorySection.innerHTML = filterHTML;
+                console.log('✅ Category filter sidebar updated');
             }
             
             // Update mobile filter chips
@@ -1410,10 +1776,206 @@
             }
         }
         
-        // Load categories when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCategories();
+        // Load categories when page loads, then load products
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 DOM loaded, starting initialization...');
+            await loadCategories();
+            console.log('✅ Categories loaded, now loading products...');
+            await loadProductsFromDatabase();
+            console.log('✅ Initialization complete!');
         });
+
+        // Category filtering functionality
+        let selectedCategories = ['All Designs'];
+        let allCategories = [];
+        
+        // Load categories dynamically from database
+        async function loadCategories() {
+            try {
+                console.log('🔄 Loading categories from API...');
+                const response = await fetch('/api/admin/categories');
+                console.log('📡 Categories API response status:', response.status);
+                if (response.ok) {
+                    allCategories = await response.json();
+                    console.log('📋 Categories loaded:', allCategories.length, 'categories');
+                    console.log('📋 Categories data:', allCategories);
+                    updateCategoryFilterSidebar();
+                    updateCategoryCounts();
+                } else {
+                    console.error('❌ Failed to load categories, status:', response.status);
+                }
+            } catch (error) {
+                console.error('❌ Error loading categories:', error);
+            }
+        }
+        
+        // Update category filter sidebar dynamically
+        function updateCategoryFilterSidebar() {
+            console.log('🔄 Updating category filter sidebar...');
+            console.log('📋 Current allCategories:', allCategories);
+            
+            // Update main category filter section
+            const categorySection = document.querySelector('.filter-sidebar .space-y-8 > div:first-child');
+            if (categorySection) {
+                let filterHTML = '<h3 class="font-orbitron text-lg font-bold text-white mb-4">Categories</h3>';
+                filterHTML += '<div class="space-y-3">';
+                
+                // Add "All Designs" option
+                filterHTML += `
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent category-checkbox" checked data-category="All Designs" />
+                        <span class="text-text-primary">All Designs</span>
+                        <span class="text-text-secondary text-sm ml-auto" id="all-designs-count">(0)</span>
+                    </label>
+                `;
+                
+                // Add dynamic categories
+                allCategories.forEach(category => {
+                    if (category.name !== 'Uncategorized') {
+                        const categoryId = category.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                        filterHTML += `
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent category-checkbox" data-category="${category.name}" />
+                                <span class="text-text-primary">${category.name}</span>
+                                <span class="text-text-secondary text-sm ml-auto" id="${categoryId}-count">(0)</span>
+                            </label>
+                        `;
+                    }
+                });
+                
+                filterHTML += '</div>';
+                console.log('📝 Generated filter HTML:', filterHTML);
+                categorySection.innerHTML = filterHTML;
+                console.log('✅ Category filter sidebar updated');
+            }
+            
+            // Update mobile filter chips
+            const mobileChipsSection = document.querySelector('.mobile-filter-chips');
+            if (mobileChipsSection) {
+                let chipsHTML = '';
+                chipsHTML += '<button class="filter-chip active" data-category="all">All Designs</button>';
+                
+                allCategories.forEach(category => {
+                    if (category.name !== 'Uncategorized') {
+                        const categoryId = category.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                        chipsHTML += `
+                            <button class="filter-chip" data-category="${categoryId}">
+                                ${category.name}
+                            </button>
+                        `;
+                    }
+                });
+                
+                mobileChipsSection.innerHTML = chipsHTML;
+            }
+            
+            // Re-attach event listeners
+            setupCategoryEventListeners();
+        }
+        
+        // Setup category event listeners
+        function setupCategoryEventListeners() {
+            // Remove old listeners
+            const oldCheckboxes = document.querySelectorAll('.category-checkbox');
+            oldCheckboxes.forEach(checkbox => {
+                checkbox.removeEventListener('change', handleCategoryChange);
+            });
+            
+            // Add new listeners
+            const newCheckboxes = document.querySelectorAll('.category-checkbox');
+            newCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', handleCategoryChange);
+            });
+        }
+        
+        // Handle category checkbox changes
+        function handleCategoryChange() {
+            const selectedCheckboxes = document.querySelectorAll('.category-checkbox:checked');
+            selectedCategories = Array.from(selectedCheckboxes).map(checkbox => checkbox.dataset.category);
+            
+            if (selectedCategories.includes('All Designs')) {
+                // If "All Designs" is selected, uncheck others
+                document.querySelectorAll('.category-checkbox:not([data-category="All Designs"])').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectedCategories = ['All Designs'];
+            } else {
+                // Remove "All Designs" if specific categories are selected
+                const allDesignsCheckbox = document.querySelector('.category-checkbox[data-category="All Designs"]');
+                if (allDesignsCheckbox) allDesignsCheckbox.checked = false;
+            }
+            
+            console.log('🎯 Selected categories:', selectedCategories);
+            filterProductsByCategory();
+        }
+        
+        function updateCategoryCounts() {
+            const categoryCounts = {};
+            
+            // Count products in each category
+            allProducts.forEach(product => {
+                const category = product.category || 'Adult Shirts'; // Default category
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+            
+            // Update "All Designs" count
+            const allDesignsElement = document.getElementById('all-designs-count');
+            if (allDesignsElement) {
+                allDesignsElement.textContent = `(${allProducts.length})`;
+            }
+            
+            // Update all category count displays
+            allCategories.forEach(category => {
+                if (category.name !== 'Uncategorized') {
+                    const categoryId = category.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    const element = document.getElementById(`${categoryId}-count`);
+                    if (element) {
+                        element.textContent = `(${categoryCounts[category.name] || 0})`;
+                    }
+                }
+            });
+            
+            console.log('✅ Category counts updated:', categoryCounts);
+        }
+        
+        async function filterProductsByCategory() {
+            try {
+                let allFilteredProducts = [];
+                
+                if (selectedCategories.includes('All Designs')) {
+                    // If "All Designs" is selected, get all products
+                    const response = await fetch('/api/products/public');
+                    if (response.ok) {
+                        allFilteredProducts = await response.json();
+                    }
+                } else if (selectedCategories.length > 0) {
+                    // Get products from each selected category and combine them
+                    for (const category of selectedCategories) {
+                        const apiUrl = `/api/products/public?category=${encodeURIComponent(category)}`;
+                        const response = await fetch(apiUrl);
+                        if (response.ok) {
+                            const categoryProducts = await response.json();
+                            allFilteredProducts = [...allFilteredProducts, ...categoryProducts];
+                        }
+                    }
+                }
+                
+                console.log('🔍 Fetching products for categories:', selectedCategories);
+                console.log(`🔍 Total filtered products: ${allFilteredProducts.length}`);
+                
+                // Reset pagination
+                currentPage = 0;
+                totalPages = Math.ceil(allFilteredProducts.length / productsPerPage);
+                
+                // Display filtered products
+                displayProducts(0, allFilteredProducts);
+                updateProductCounts();
+                
+                console.log(`🔍 Filtered products: ${allFilteredProducts.length} of ${allProducts.length} total`);
+            } catch (error) {
+                console.error('❌ Error filtering products:', error);
+            }
+        }
 
         // Size filter functionality
         const sizeButtons = document.querySelectorAll('button[class*="border-"]');
@@ -1499,6 +2061,35 @@
             setTimeout(() => {
                 newsletterMessage.classList.add('hidden');
             }, 5000);
+        }
+
+        // Cart counter functionality
+        async function updateCartCounter() {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    document.getElementById('cart-counter').textContent = '0';
+                    return;
+                }
+
+                const response = await fetch('/api/cart', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const cartData = await response.json();
+                    const itemCount = cartData.items ? cartData.items.length : 0;
+                    document.getElementById('cart-counter').textContent = itemCount.toString();
+                } else {
+                    document.getElementById('cart-counter').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error updating cart counter:', error);
+                document.getElementById('cart-counter').textContent = '0';
+            }
         }
 
         // Cart counter functionality
