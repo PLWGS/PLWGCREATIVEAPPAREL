@@ -254,6 +254,14 @@
 
                 <!-- Cart & Search -->
                 <div class="flex items-center space-x-4">
+                    <!-- Login/Account Status -->
+                    <div id="auth-status" class="hidden lg:block">
+                        <a href="customer-login.html" class="text-accent hover:text-white transition-colors duration-300 font-medium" id="login-link">Login</a>
+                        <span class="text-text-secondary mx-2">|</span>
+                        <a href="account.html" class="text-text-primary hover:text-accent transition-colors duration-300 hidden" id="account-link">My Account</a>
+                        <button class="text-text-primary hover:text-accent transition-colors duration-300 hidden" id="logout-btn">Logout</button>
+                    </div>
+                    
                     <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
@@ -287,7 +295,9 @@
                 <a href="homepage.html" class="block text-text-primary hover:text-accent transition-colors duration-300">Home</a>
                 <a href="shop.html" class="block text-accent font-medium">Shop</a>
                 <a href="custom.html" class="block text-text-primary hover:text-accent transition-colors duration-300">Custom Orders</a>
-                <a href="account.html" class="block text-text-primary hover:text-accent transition-colors duration-300">Account</a>
+                <a href="customer-login.html" class="block text-accent font-medium" id="mobile-login-link">Login</a>
+                <a href="account.html" class="block text-text-primary hover:text-accent transition-colors duration-300 hidden" id="mobile-account-link">My Account</a>
+                <button class="block text-text-primary hover:text-accent transition-colors duration-300 hidden w-full text-left" id="mobile-logout-btn">Logout</button>
                 <a href="admin.html" class="block text-text-primary hover:text-accent transition-colors duration-300">Admin</a>
             </nav>
         </div>
@@ -346,6 +356,21 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Call to Action -->
+        <section class="py-6 border-b border-surface-light">
+            <div class="container mx-auto px-6">
+                <div class="text-center">
+                    <p class="text-text-secondary mb-3">Want to add items to cart and track your orders?</p>
+                    <a href="customer-login.html" class="inline-flex items-center px-6 py-3 bg-accent text-black font-bold rounded-lg hover:bg-accent/90 transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                        Login to Your Account
+                    </a>
                 </div>
             </div>
         </section>
@@ -430,11 +455,11 @@
                                         <span class="text-text-primary">Mother's Day</span>
                                         <span class="text-text-secondary text-sm ml-auto" id="mothers-day-count">(0)</span>
                                     </label>
-                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                                                          <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
                                         <span class="text-text-primary">Father's Day</span>
                                         <span class="text-text-secondary text-sm ml-auto" id="fathers-day-count">(0)</span>
-                                    </label>
+                                      </label>
                                     <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
                                         <span class="text-text-primary">Halloween</span>
@@ -739,7 +764,7 @@
 
     <!-- Frontend Enhancements -->
     <script src="../public/frontend-enhancements.js"></script>
-    
+
     <!-- JavaScript -->
     <script>
         // Particle Animation
@@ -1005,8 +1030,15 @@
             try {
                 const token = localStorage.getItem('customerToken');
                 if (!token) {
-                    alert('Please log in to add items to cart');
+                    // Show a better notification instead of alert
+                    showNotification('Please log in to add items to cart', 'error');
+                    
+                    // Wait a moment then redirect
+                    setTimeout(() => {
+                        if (confirm('You need to log in to add items to cart. Would you like to go to the login page?')) {
                     window.location.href = 'customer-login.html';
+                        }
+                    }, 1500);
                     return;
                 }
 
@@ -1053,13 +1085,40 @@
                         }
                     }, 1000);
                 } else {
-                    const errorData = await response.json();
-                    console.error('Cart API error:', errorData);
-                    alert('Error adding to cart: ' + (errorData.error || 'Unknown error'));
+                    let errorMessage = 'Unknown error occurred';
+                    
+                    // Handle specific error cases
+                    if (response.status === 401) {
+                        errorMessage = 'Please log in to add items to cart';
+                        showNotification(errorMessage, 'error');
+                        setTimeout(() => {
+                            if (confirm('You need to log in to add items to cart. Would you like to go to the login page?')) {
+                                window.location.href = 'customer-login.html';
+                            }
+                        }, 1500);
+                    } else if (response.status === 403) {
+                        errorMessage = 'Your session has expired. Please log in again.';
+                        showNotification(errorMessage, 'error');
+                        localStorage.removeItem('customerToken'); // Clear expired token
+                        setTimeout(() => {
+                            if (confirm('Your session has expired. Would you like to log in again?')) {
+                                window.location.href = 'customer-login.html';
+                            }
+                        }, 1500);
+                    } else {
+                        // Try to get error message from response, but don't consume the body twice
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorMessage;
+                        } catch (parseError) {
+                            console.log('Could not parse error response, using default message');
+                        }
+                        showNotification('Error adding to cart: ' + errorMessage, 'error');
+                    }
                 }
             } catch (error) {
                 console.error('Error adding to cart:', error);
-                alert('Error adding product to cart. Please try again.');
+                showNotification('Network error. Please check your connection and try again.', 'error');
             }
         }
 
@@ -1555,6 +1614,60 @@
 
         // Update cart counter on page load
         updateCartCounter();
+        
+        // Check authentication status and update UI
+        function checkAuthStatus() {
+            const token = localStorage.getItem('customerToken');
+            const authStatus = document.getElementById('auth-status');
+            const loginLink = document.getElementById('login-link');
+            const accountLink = document.getElementById('account-link');
+            const logoutBtn = document.getElementById('logout-btn');
+            const mobileLoginLink = document.getElementById('mobile-login-link');
+            const mobileAccountLink = document.getElementById('mobile-account-link');
+            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+            const loginCta = document.getElementById('login-cta');
+            
+            if (token) {
+                // User is logged in
+                if (loginLink) loginLink.classList.add('hidden');
+                if (accountLink) accountLink.classList.remove('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (mobileLoginLink) mobileLoginLink.classList.add('hidden');
+                if (mobileAccountLink) mobileAccountLink.classList.remove('hidden');
+                if (mobileLogoutBtn) mobileLogoutBtn.classList.remove('hidden');
+                if (loginCta) loginCta.classList.add('hidden');
+                
+                // Add logout functionality
+                if (logoutBtn) {
+                    logoutBtn.onclick = () => {
+                        localStorage.removeItem('customerToken');
+                        checkAuthStatus();
+                        updateCartCounter();
+                        showNotification('Logged out successfully', 'success');
+                    };
+                }
+                if (mobileLogoutBtn) {
+                    mobileLogoutBtn.onclick = () => {
+                        localStorage.removeItem('customerToken');
+                        checkAuthStatus();
+                        updateCartCounter();
+                        showNotification('Logged out successfully', 'success');
+                    };
+                }
+            } else {
+                // User is not logged in
+                if (loginLink) loginLink.classList.remove('hidden');
+                if (accountLink) accountLink.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                if (mobileLoginLink) mobileLoginLink.classList.remove('hidden');
+                if (mobileAccountLink) mobileAccountLink.classList.add('hidden');
+                if (mobileLogoutBtn) mobileLogoutBtn.classList.add('hidden');
+                if (loginCta) loginCta.classList.remove('hidden');
+            }
+        }
+        
+        // Check auth status on page load
+        checkAuthStatus();
 
 
     </script>
