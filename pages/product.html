@@ -1269,8 +1269,8 @@
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X' || selectedSize === 'XXL') {
-                    finalPrice = basePrice + 4.00; // 2X/XXL costs $4 more
-                    console.log('🔍 2X/XXL size detected, adding $4.00');
+                    finalPrice = basePrice + 2.00; // 2X/XXL costs $2 more
+                    console.log('🔍 2X/XXL size detected, adding $2.00');
                 } else if (selectedSize === '3X' || selectedSize === 'XXXL') {
                     finalPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
                     console.log('🔍 3X/XXXL size detected, adding $6.00');
@@ -1523,7 +1523,7 @@
                     const basePrice = parseFloat(productData?.price) || 22.00;
                     let unitPrice = basePrice;
                     if (size === '2X' || size === 'XXL') {
-                        unitPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                        unitPrice = basePrice + 2.00; // 2X/XXL costs $2 more
                     } else if (size === '3X' || size === 'XXXL') {
                         unitPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
                     } else if (size === '4X' || size === 'XXXXL') {
@@ -1633,7 +1633,7 @@
                     const basePrice = parseFloat(productData?.price) || 22.00;
                     let unitPrice = basePrice;
                     if (size === '2X' || size === 'XXL') {
-                        unitPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                        unitPrice = basePrice + 2.00; // 2X/XXL costs $2 more
                     } else if (size === '3X' || size === 'XXXL') {
                         unitPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
                     } else if (size === '4X' || size === 'XXXXL') {
