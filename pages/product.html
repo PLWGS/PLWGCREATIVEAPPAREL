@@ -108,16 +108,24 @@
             border-color: #ef4444;
         }
 
-        /* Color swatch selection feedback */
-        .color-swatch {
-            transition: transform 0.15s ease;
-            cursor: pointer;
+        /* Color preview and dropdown styles */
+        #colorPreview {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
-        .color-swatch.selected {
-            outline: 2px solid #00bcd4;
-            border-color: #00bcd4 !important;
-            transform: scale(1.08);
-            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.6);
+        
+        #colorPreview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #colorSelector {
+            transition: all 0.3s ease;
+        }
+        
+        #colorSelector:focus {
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
         }
         
         /* Sticky Add to Cart */
@@ -387,11 +395,20 @@
                     <!-- Color Options -->
                     <div class="space-y-4">
                         <h3 class="font-orbitron text-lg font-bold text-white">Color</h3>
-                        <div class="flex space-x-4 color-options">
-                            <div class="w-12 h-12 bg-black rounded-full border-2 border-accent cursor-pointer"></div>
-                            <div class="w-12 h-12 bg-gray-800 rounded-full border-2 border-surface-light hover:border-accent cursor-pointer transition-colors"></div>
-                            <div class="w-12 h-12 bg-gray-600 rounded-full border-2 border-surface-light hover:border-accent cursor-pointer transition-colors"></div>
+                        <div class="flex items-center space-x-4">
+                            <!-- Color Preview -->
+                            <div id="colorPreview" class="w-16 h-16 rounded-lg border-2 border-surface-light shadow-lg" style="background-color: #000000;"></div>
+                            
+                            <!-- Color Dropdown -->
+                            <div class="flex-1">
+                                <select id="colorSelector" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none text-sm">
+                                    <option value="">Select a color...</option>
+                                </select>
+                            </div>
                         </div>
+                        
+                        <!-- Color Name Display -->
+                        <div id="colorNameDisplay" class="text-sm text-text-secondary font-medium px-2 py-1 bg-surface-light rounded-md inline-block"></div>
                     </div>
 
                     <!-- Quantity & Add to Cart -->
@@ -1770,8 +1787,11 @@
                     try { productColors = JSON.parse(productColors); } catch(_) { productColors = []; }
                 }
                 if (Array.isArray(productColors) && productColors.length > 0) {
-                    const colorContainer = document.querySelector('.color-options');
-                    if (colorContainer) {
+                    const colorSelector = document.getElementById('colorSelector');
+                    const colorPreview = document.getElementById('colorPreview');
+                    const colorNameDisplay = document.getElementById('colorNameDisplay');
+                    
+                    if (colorSelector && colorPreview && colorNameDisplay) {
                         // Map normalized color names (lowercase, no spaces/hyphens) to hex
                         const colorHexMap = {
                             white:'#ffffff', natural:'#eee8d8', icegrey:'#d3d1cf', brown:'#352d2c', black:'#000000',
@@ -1784,6 +1804,7 @@
                             autumn:'#993f21', mustard:'#caa235', purple:'#472b7a', lilac:'#dab2d0', charitypink:'#f27da0',
                             fushsia:'#ec3f77', softpink:'#fae1df', pink:'#f0bebf', berry:'#cd4f7f', red:'#d32621', maroon:'#6c2232'
                         });
+                        
                         const resolveColor = (c) => {
                             if (!c) return '#000000';
                             if (typeof c === 'string' && c.trim().startsWith('#')) return c.trim();
@@ -1794,32 +1815,43 @@
                             if (colorHexMap[normalized]) return colorHexMap[normalized];
                             return name; // Let browser try CSS named color
                         };
-                        colorContainer.innerHTML = productColors.map((color, idx) => {
-                            const cssColor = resolveColor(color);
-                            const selected = idx === 0 ? 'ring-2 ring-accent border-accent' : '';
-                            return `
-                                <div class="color-swatch w-12 h-12 rounded-full border-2 border-surface-light hover:border-accent cursor-pointer transition-colors ${selected}"
-                                     data-color="${String(color).replace(/"/g,'&quot;')}"
-                                     style="background-color: ${cssColor}"
-                                     title="${color}"></div>
-                            `;
-                        }).join('');
 
-                        // Default selected color = first
-                        const firstSwatch = colorContainer.querySelector('.color-swatch');
-                        if (firstSwatch) {
-                            selectedColor = firstSwatch.getAttribute('data-color');
-                            firstSwatch.classList.add('selected');
+                        // Clear existing options and add new ones
+                        colorSelector.innerHTML = '<option value="">Select a color...</option>';
+                        
+                        productColors.forEach((color, idx) => {
+                            const option = document.createElement('option');
+                            option.value = String(color).replace(/"/g,'&quot;');
+                            option.textContent = color;
+                            option.dataset.hex = resolveColor(color);
+                            colorSelector.appendChild(option);
+                        });
+
+                        // Set default selected color (first one)
+                        if (productColors.length > 0) {
+                            const firstColor = productColors[0];
+                            selectedColor = String(firstColor).replace(/"/g,'&quot;');
+                            colorSelector.value = selectedColor;
+                            
+                            // Update preview and display
+                            const firstOption = colorSelector.querySelector(`option[value="${selectedColor}"]`);
+                            if (firstOption) {
+                                const hexColor = firstOption.dataset.hex;
+                                colorPreview.style.backgroundColor = hexColor;
+                                colorNameDisplay.textContent = firstColor;
+                            }
                         }
 
-                        // Selection handlers
-                        colorContainer.querySelectorAll('.color-swatch').forEach(swatch => {
-                            swatch.addEventListener('click', () => {
-                                colorContainer.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected','ring-2','ring-accent','border-accent'));
-                                swatch.classList.add('selected','ring-2','ring-accent','border-accent');
-                                selectedColor = swatch.getAttribute('data-color');
+                        // Color selection change handler
+                        colorSelector.addEventListener('change', () => {
+                            const selectedOption = colorSelector.options[colorSelector.selectedIndex];
+                            if (selectedOption && selectedOption.value) {
+                                selectedColor = selectedOption.value;
+                                const hexColor = selectedOption.dataset.hex;
+                                colorPreview.style.backgroundColor = hexColor;
+                                colorNameDisplay.textContent = selectedOption.textContent;
                                 console.log('🎨 Selected color:', selectedColor);
-                            });
+                            }
                         });
                     }
                 }
