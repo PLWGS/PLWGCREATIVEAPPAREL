@@ -1212,8 +1212,8 @@
         }
 
         // Function to update product counts and display
-        function updateProductCounts() {
-            const totalProducts = allProducts.length;
+        function updateProductCounts(filteredProductsCount = null) {
+            const totalProducts = filteredProductsCount !== null ? filteredProductsCount : allProducts.length;
             const startIndex = currentPage * productsPerPage + 1;
             const endIndex = Math.min((currentPage + 1) * productsPerPage, totalProducts);
             
@@ -1289,7 +1289,7 @@
             }
             
             // Update product counts display
-            updateProductCounts();
+            updateProductCounts(products.length);
         }
 
         // Initialize with first page - moved to after categories and products are loaded
@@ -2175,7 +2175,7 @@
                 
                 // Display filtered products
                 displayProducts(0, finalFilteredProducts);
-                updateProductCounts();
+                updateProductCounts(finalFilteredProducts.length);
                 
             } catch (error) {
                 console.error('❌ Error applying filters:', error);
