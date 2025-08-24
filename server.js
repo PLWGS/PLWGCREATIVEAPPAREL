@@ -3554,7 +3554,7 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
     const recentlyViewed = req.query.recentlyViewed ? JSON.parse(req.query.recentlyViewed) : [];
     if (recentlyViewed.length > 0) {
       const recentProducts = await pool.query(`
-        SELECT id, name, price, image_url, category, rating, review_count 
+        SELECT id, name, price, image_url, category
         FROM products 
         WHERE id = ANY($1) AND is_active = true
         ORDER BY array_position($1, id)
@@ -3569,7 +3569,7 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
     // Strategy 2: Wishlist items (if we have enough recommendations)
     if (recommendations.length < limit) {
       const wishlistProducts = await pool.query(`
-        SELECT p.id, p.name, p.price, p.image_url, p.category, p.rating, p.review_count
+        SELECT p.id, p.name, p.price, p.image_url, p.category
         FROM products p
         INNER JOIN wishlist w ON p.id = w.product_id
         WHERE w.customer_id = $1 AND p.is_active = true
@@ -3596,11 +3596,11 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
       if (purchaseHistory.rows.length > 0) {
         const categories = purchaseHistory.rows.map(r => r.category);
         const categoryProducts = await pool.query(`
-          SELECT p.id, p.name, p.price, p.image_url, p.category, p.rating, p.review_count
+          SELECT p.id, p.name, p.price, p.image_url, p.category
           FROM products p
           WHERE p.category = ANY($1) AND p.is_active = true
           AND p.id NOT IN (${recommendations.map(r => r.id).length > 0 ? recommendations.map(r => r.id).join(',') : 'NULL'})
-          ORDER BY p.rating DESC, p.review_count DESC
+          ORDER BY p.created_at DESC
           LIMIT $2
         `, [categories, limit - recommendations.length]);
         
@@ -3611,11 +3611,11 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
     // Strategy 4: Fallback to popular/trending products
     if (recommendations.length < limit) {
       const fallbackProducts = await pool.query(`
-        SELECT p.id, p.name, p.price, p.image_url, p.category, p.rating, p.review_count
+        SELECT p.id, p.name, p.price, p.image_url, p.category
         FROM products p
         WHERE p.is_active = true
         AND p.id NOT IN (${recommendations.map(r => r.id).length > 0 ? recommendations.map(r => r.id).join(',') : 'NULL'})
-        ORDER BY p.rating DESC, p.review_count DESC, p.created_at DESC
+        ORDER BY p.created_at DESC
         LIMIT $2
       `, [limit - recommendations.length]);
       
@@ -3640,7 +3640,7 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
     // Fallback to random products if everything fails
     try {
       const fallbackProducts = await pool.query(`
-        SELECT id, name, price, image_url, category, rating, review_count
+        SELECT id, name, price, image_url, category
         FROM products 
         WHERE is_active = true
         ORDER BY RANDOM()
@@ -3668,10 +3668,10 @@ app.get('/api/recommendations/public', async (req, res) => {
     
     // For public users, show popular/trending products
     const popularProducts = await pool.query(`
-      SELECT p.id, p.name, p.price, p.image_url, p.category, p.rating, p.review_count
+      SELECT p.id, p.name, p.price, p.image_url, p.category
       FROM products p
       WHERE p.is_active = true
-      ORDER BY p.rating DESC, p.review_count DESC, p.created_at DESC
+      ORDER BY p.created_at DESC
       LIMIT $1
     `, [limit]);
     
@@ -3685,7 +3685,7 @@ app.get('/api/recommendations/public', async (req, res) => {
     // Fallback to random products if everything fails
     try {
       const fallbackProducts = await pool.query(`
-        SELECT id, name, price, image_url, category, rating, review_count
+        SELECT id, name, price, image_url, category
         FROM products 
         WHERE is_active = true
         ORDER BY RANDOM()
