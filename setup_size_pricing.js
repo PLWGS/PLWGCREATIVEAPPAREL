@@ -39,9 +39,7 @@ async function setupSizePricing() {
             "M": {"price": 22.00, "available": true},
             "L": {"price": 22.00, "available": true},
             "XL": {"price": 22.00, "available": true},
-            "2X": {"price": 26.00, "available": true},
-            "3X": {"price": 28.00, "available": true},
-            "4X": {"price": 30.00, "available": true}
+            "2X": {"price": 26.00, "available": true}
         })]);
         
         console.log(`✅ Updated ${updateResult.rowCount} products with size pricing`);
@@ -75,8 +73,6 @@ async function setupSizePricing() {
         console.log('\n📊 Pricing Structure:');
         console.log('  S, M, L, XL: $22.00');
         console.log('  2X: $26.00 (+$4.00)');
-        console.log('  3X: $28.00 (+$6.00)');
-        console.log('  4X: $30.00 (+$8.00)');
 
     } catch (error) {
         console.error('❌ Error:', error.message);

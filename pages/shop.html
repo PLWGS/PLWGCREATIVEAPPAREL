@@ -492,8 +492,6 @@
                                     <option value="L">L</option>
                                     <option value="XL">XL</option>
                                     <option value="2X">2X/XXL</option>
-                                    <option value="3X">3X/XXXL</option>
-                                    <option value="4X">4X/XXXXL</option>
                                 </select>
                             </div>
 
@@ -858,7 +856,7 @@
         // Mobile filter functions
         function showMobileSizeFilter() {
             // Create a simple mobile-friendly size filter
-            const sizeOptions = ['All Sizes', 'S', 'M', 'L', 'XL', '2X/XXL', '3X/XXXL', '4X/XXXXL'];
+            const sizeOptions = ['All Sizes', 'S', 'M', 'L', 'XL', '2X/XXL'];
             const selectedSize = prompt('Select a size:\n' + sizeOptions.map((size, index) => `${index}: ${size}`).join('\n'));
             
             if (selectedSize !== null && !isNaN(selectedSize) && selectedSize >= 0 && selectedSize < sizeOptions.length) {
@@ -1001,8 +999,6 @@
                             <option value="L" data-price="${sizePricing.L?.price || 22.00}">L - $${(sizePricing.L?.price || 22.00).toFixed(2)}</option>
                             <option value="XL" data-price="${sizePricing.XL?.price || 22.00}">XL - $${(sizePricing.XL?.price || 22.00).toFixed(2)}</option>
                             <option value="2X" data-price="${sizePricing['2X']?.price || 26.00}">2X - $${(sizePricing['2X']?.price || 26.00).toFixed(2)}</option>
-                            <option value="3X" data-price="${sizePricing['3X']?.price || 28.00}">3X - $${(sizePricing['3X']?.price || 28.00).toFixed(2)}</option>
-                            <option value="4X" data-price="${sizePricing['4X']?.price || 30.00}">4X - $${(sizePricing['4X']?.price || 30.00).toFixed(2)}</option>
                         </select>
                     </div>
                     

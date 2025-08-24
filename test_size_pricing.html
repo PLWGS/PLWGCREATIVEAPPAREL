@@ -50,8 +50,6 @@
             <div class="size-option" data-size="L">L</div>
             <div class="size-option" data-size="XL">XL</div>
             <div class="size-option" data-size="2X">2X</div>
-            <div class="size-option" data-size="3X">3X</div>
-            <div class="size-option" data-size="4X">4X</div>
         </div>
     </div>
     
@@ -94,12 +92,6 @@
                 if (selectedSize === '2X') {
                     finalPrice = basePrice + 4.00;
                     log('🔍 2X size detected, adding $4.00');
-                } else if (selectedSize === '3X') {
-                    finalPrice = basePrice + 6.00;
-                    log('🔍 3X size detected, adding $6.00');
-                } else if (selectedSize === '4X') {
-                    finalPrice = basePrice + 8.00;
-                    log('🔍 4X size detected, adding $8.00');
                 } else {
                     log('🔍 Standard size, no price increase');
                 }
@@ -139,7 +131,7 @@
         document.querySelector('.size-option[data-size="M"]').classList.add('selected');
         
         log('🚀 Test page loaded. Click on different sizes to test pricing.');
-        log('Expected: 2X = $24.00, 3X = $26.00, 4X = $28.00');
+        log('Expected: 2X = $24.00, Standard sizes = $20.00');
     </script>
 <script id="dhws-dataInjector" src="/public/dhws-data-injector.js"></script>
 </body>

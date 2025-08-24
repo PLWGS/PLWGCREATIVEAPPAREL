@@ -1165,10 +1165,6 @@
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
                     finalPrice = basePrice + 4.00; // 2X costs $4 more
-                } else if (selectedSize === '3X') {
-                    finalPrice = basePrice + 6.00; // 3X costs $6 more
-                } else if (selectedSize === '4X') {
-                    finalPrice = basePrice + 8.00; // 4X costs $8 more
                 }
                 
                 currentPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
@@ -1225,10 +1221,6 @@
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
                     finalPrice = basePrice + 4.00; // 2X costs $4 more
-                } else if (selectedSize === '3X') {
-                    finalPrice = basePrice + 6.00; // 3X costs $6 more
-                } else if (selectedSize === '4X') {
-                    finalPrice = basePrice + 8.00; // 4X costs $8 more
                 }
                 
                 addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
@@ -1239,65 +1231,21 @@
         
         // Function to update price based on selected size
         function updatePriceForSize(selectedSize) {
-            console.log('🔍 updatePriceForSize called with size:', selectedSize);
+            const basePrice = parseFloat(window.productData.price);
+            let finalPrice = basePrice;
             
-            const currentPriceElement = document.getElementById('currentPrice');
-            const addToCartPriceElement = document.getElementById('addToCartPrice');
-            
-            console.log('🔍 Price elements found:', {
-                currentPrice: !!currentPriceElement,
-                addToCartPrice: !!addToCartPriceElement
-            });
-            
-            if (currentPriceElement && addToCartPriceElement) {
-                // Get base price from product data or fallback to default
-                let basePrice = 22.00;
-                
-                console.log('🔍 Global productData:', window.productData);
-                
-                // Try to get base price from global productData first
-                if (window.productData && window.productData.price) {
-                    basePrice = parseFloat(window.productData.price);
-                    console.log('🔍 Using price from productData:', basePrice);
-                } else if (currentPriceElement.dataset.basePrice) {
-                    basePrice = parseFloat(currentPriceElement.dataset.basePrice);
-                    console.log('🔍 Using price from dataset:', basePrice);
-                } else {
-                    console.log('🔍 Using fallback price:', basePrice);
-                }
-                
-                // Apply size-based pricing
-                let finalPrice = basePrice;
-                if (selectedSize === '2X' || selectedSize === 'XXL') {
-                    finalPrice = basePrice + 2.00; // 2X/XXL costs $2 more
-                    console.log('🔍 2X/XXL size detected, adding $2.00');
-                } else if (selectedSize === '3X' || selectedSize === 'XXXL') {
-                    finalPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
-                    console.log('🔍 3X/XXXL size detected, adding $6.00');
-                } else if (selectedSize === '4X' || selectedSize === 'XXXXL') {
-                    finalPrice = basePrice + 8.00; // 4X/XXXXL costs $8 more
-                    console.log('🔍 4X/XXXXL size detected, adding $8.00');
-                } else {
-                    console.log('🔍 Standard size, no price increase');
-                }
-                
-                console.log('🔍 Price calculation:', `${basePrice} + size markup = ${finalPrice}`);
-                
-                // Update price display
-                currentPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
-                currentPriceElement.dataset.selectedSize = selectedSize;
-                
-                // Update Add to Cart button price
-                addToCartPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
-                addToCartPriceElement.dataset.selectedSize = selectedSize;
-                
-                console.log(`✅ Price updated to $${finalPrice.toFixed(2)} for size ${selectedSize} (base: $${basePrice.toFixed(2)})`);
-            } else {
-                console.error('❌ Price elements not found:', {
-                    currentPrice: currentPriceElement,
-                    addToCartPrice: addToCartPriceElement
-                });
+            if (selectedSize === '2X' || selectedSize === 'XXL') {
+                finalPrice = basePrice + 2.00; // 2X/XXL costs $2 more
+                console.log('🔍 2X/XXL size detected, adding $2.00');
             }
+            
+            // Update price display
+            const priceElement = document.getElementById('currentPrice');
+            if (priceElement) {
+                priceElement.textContent = `$${finalPrice.toFixed(2)}`;
+            }
+            
+            return finalPrice;
         }
 
         // Fallback function for when database lookup fails
@@ -1524,10 +1472,6 @@
                     let unitPrice = basePrice;
                     if (size === '2X' || size === 'XXL') {
                         unitPrice = basePrice + 2.00; // 2X/XXL costs $2 more
-                    } else if (size === '3X' || size === 'XXXL') {
-                        unitPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
-                    } else if (size === '4X' || size === 'XXXXL') {
-                        unitPrice = basePrice + 8.00; // 4X/XXXXL costs $8 more
                     }
                     
                     // Add to cart via API
@@ -1634,10 +1578,6 @@
                     let unitPrice = basePrice;
                     if (size === '2X' || size === 'XXL') {
                         unitPrice = basePrice + 2.00; // 2X/XXL costs $2 more
-                    } else if (size === '3X' || size === 'XXXL') {
-                        unitPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
-                    } else if (size === '4X' || size === 'XXXXL') {
-                        unitPrice = basePrice + 8.00; // 4X/XXXXL costs $8 more
                     }
                     
                     console.log('Buy Now - Adding to cart:', {
@@ -1810,10 +1750,6 @@
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
                     finalPrice = basePrice + 4.00; // 2X costs $4 more
-                } else if (selectedSize === '3X') {
-                    finalPrice = basePrice + 6.00; // 3X costs $6 more
-                } else if (selectedSize === '4X') {
-                    finalPrice = basePrice + 8.00; // 4X costs $8 more
                 }
                 
                 priceElement.textContent = `$${finalPrice.toFixed(2)}`;
@@ -1833,10 +1769,6 @@
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
                     finalPrice = basePrice + 4.00; // 2X costs $4 more
-                } else if (selectedSize === '3X') {
-                    finalPrice = basePrice + 6.00; // 3X costs $6 more
-                } else if (selectedSize === '4X') {
-                    finalPrice = basePrice + 8.00; // 4X costs $8 more
                 }
                 
                 addToCartPrice.textContent = `$${finalPrice.toFixed(2)}`;
@@ -2045,7 +1977,7 @@
 
                     // Build size list: prefer explicit product.sizes; else derive keys from size_stock; else use default sizes
                     // Order sizes from smallest to largest, with XXL/2X at the end
-                    const knownOrder = ['S','M','L','XL','XXL','2X','3X','4X','XXXL','XXXXL'];
+                    const knownOrder = ['S','M','L','XL','XXL','2X'];
                     let sizes = [];
                     
                     if (Array.isArray(product.sizes) && product.sizes.length > 0) {
@@ -2056,7 +1988,7 @@
                         console.log('📏 Using product.size_stock keys:', sizes);
                     } else {
                         // Fallback to default sizes if no size data is provided
-                        sizes = ['S', 'M', 'L', 'XL', 'XXL', '2X', '3X', '4X'];
+                        sizes = ['S', 'M', 'L', 'XL', 'XXL', '2X'];
                         console.log('📏 Using fallback default sizes:', sizes);
                     }
                     
