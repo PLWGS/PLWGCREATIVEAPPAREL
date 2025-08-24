@@ -1752,6 +1752,9 @@
                 updateProductDisplay(product);
                 updateProductReviews(reviews);
                 
+                // Track this product as recently viewed
+                trackRecentlyViewed(productId);
+                
             } catch (error) {
                 console.error('❌ Error loading product data:', error);
                 // Show error message to user
@@ -2207,6 +2210,21 @@
         
         // Load product data when page loads
         document.addEventListener('DOMContentLoaded', loadProductData);
+        
+        // Track recently viewed products
+        function trackRecentlyViewed(productId) {
+            try {
+                const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+                if (!recentlyViewed.includes(productId)) {
+                    recentlyViewed.unshift(productId);
+                    if (recentlyViewed.length > 10) recentlyViewed.pop(); // Keep only 10
+                    localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+                    console.log('📱 Tracked recently viewed product:', productId);
+                }
+            } catch (error) {
+                console.error('Error tracking recently viewed:', error);
+            }
+        }
         
         // Update cart counter on page load
         updateCartCounter();

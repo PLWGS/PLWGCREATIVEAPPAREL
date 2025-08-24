@@ -3538,6 +3538,170 @@ app.get('/api/products/featured', async (req, res) => {
   }
 });
 
+// Smart Product Recommendations API (authenticated users)
+app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const customerId = req.customer.id;
+    const limit = parseInt(req.query.limit) || 4; // Default to 4 recommendations
+    
+    let recommendations = [];
+    
+    // Strategy 1: Recently viewed products (from current session)
+    const recentlyViewed = req.query.recentlyViewed ? JSON.parse(req.query.recentlyViewed) : [];
+    if (recentlyViewed.length > 0) {
+      const recentProducts = await pool.query(`
+        SELECT id, name, price, image_url, category, rating, review_count 
+        FROM products 
+        WHERE id = ANY($1) AND is_active = true
+        ORDER BY array_position($1, id)
+        LIMIT $2
+      `, [recentlyViewed, limit]);
+      
+      if (recentProducts.rows.length > 0) {
+        recommendations = recentProducts.rows;
+      }
+    }
+    
+    // Strategy 2: Wishlist items (if we have enough recommendations)
+    if (recommendations.length < limit) {
+      const wishlistProducts = await pool.query(`
+        SELECT p.id, p.name, p.price, p.image_url, p.category, p.rating, p.review_count
+        FROM products p
+        INNER JOIN wishlist w ON p.id = w.product_id
+        WHERE w.customer_id = $1 AND p.is_active = true
+        AND p.id NOT IN (${recommendations.map(r => r.id).length > 0 ? recommendations.map(r => r.id).join(',') : 'NULL'})
+        ORDER BY w.created_at DESC
+        LIMIT $2
+      `, [customerId, limit - recommendations.length]);
+      
+      recommendations = [...recommendations, ...wishlistProducts.rows];
+    }
+    
+    // Strategy 3: Purchase history based recommendations
+    if (recommendations.length < limit) {
+      const purchaseHistory = await pool.query(`
+        SELECT DISTINCT p.category
+        FROM order_items oi
+        INNER JOIN products p ON oi.product_id = p.id
+        INNER JOIN orders o ON oi.order_id = o.id
+        WHERE o.customer_id = $1 AND o.status != 'cancelled'
+        ORDER BY o.created_at DESC
+        LIMIT 3
+      `, [customerId]);
+      
+      if (purchaseHistory.rows.length > 0) {
+        const categories = purchaseHistory.rows.map(r => r.category);
+        const categoryProducts = await pool.query(`
+          SELECT p.id, p.name, p.price, p.image_url, p.category, p.rating, p.review_count
+          FROM products p
+          WHERE p.category = ANY($1) AND p.is_active = true
+          AND p.id NOT IN (${recommendations.map(r => r.id).length > 0 ? recommendations.map(r => r.id).join(',') : 'NULL'})
+          ORDER BY p.rating DESC, p.review_count DESC
+          LIMIT $2
+        `, [categories, limit - recommendations.length]);
+        
+        recommendations = [...recommendations, ...categoryProducts.rows];
+      }
+    }
+    
+    // Strategy 4: Fallback to popular/trending products
+    if (recommendations.length < limit) {
+      const fallbackProducts = await pool.query(`
+        SELECT p.id, p.name, p.price, p.image_url, p.category, p.rating, p.review_count
+        FROM products p
+        WHERE p.is_active = true
+        AND p.id NOT IN (${recommendations.map(r => r.id).length > 0 ? recommendations.map(r => r.id).join(',') : 'NULL'})
+        ORDER BY p.rating DESC, p.review_count DESC, p.created_at DESC
+        LIMIT $2
+      `, [limit - recommendations.length]);
+      
+      recommendations = [...recommendations, ...fallbackProducts.rows];
+    }
+    
+    // Ensure we don't exceed the limit
+    recommendations = recommendations.slice(0, limit);
+    
+    res.json({
+      recommendations: recommendations,
+      strategy: {
+        recentlyViewed: recentlyViewed.length > 0,
+        wishlist: recommendations.some(r => r.from_wishlist),
+        purchaseHistory: recommendations.some(r => r.from_purchase_history),
+        fallback: recommendations.some(r => r.from_fallback)
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error getting recommendations:', error);
+    // Fallback to random products if everything fails
+    try {
+      const fallbackProducts = await pool.query(`
+        SELECT id, name, price, image_url, category, rating, review_count
+        FROM products 
+        WHERE is_active = true
+        ORDER BY RANDOM()
+        LIMIT 4
+      `);
+      
+      res.json({
+        recommendations: fallbackProducts.rows,
+        strategy: { fallback: true, error: 'Using fallback due to error' }
+      });
+    } catch (fallbackError) {
+      res.status(500).json({ error: 'Failed to get recommendations' });
+    }
+  }
+});
+
+// Public Product Recommendations API (for non-logged-in users)
+app.get('/api/recommendations/public', async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const limit = parseInt(req.query.limit) || 4; // Default to 4 recommendations
+    
+    // For public users, show popular/trending products
+    const popularProducts = await pool.query(`
+      SELECT p.id, p.name, p.price, p.image_url, p.category, p.rating, p.review_count
+      FROM products p
+      WHERE p.is_active = true
+      ORDER BY p.rating DESC, p.review_count DESC, p.created_at DESC
+      LIMIT $1
+    `, [limit]);
+    
+    res.json({
+      recommendations: popularProducts.rows,
+      strategy: { fallback: true, message: 'Showing popular products' }
+    });
+    
+  } catch (error) {
+    console.error('Error getting public recommendations:', error);
+    // Fallback to random products if everything fails
+    try {
+      const fallbackProducts = await pool.query(`
+        SELECT id, name, price, image_url, category, rating, review_count
+        FROM products 
+        WHERE is_active = true
+        ORDER BY RANDOM()
+        LIMIT 4
+      `);
+      
+      res.json({
+        recommendations: fallbackProducts.rows,
+        strategy: { fallback: true, error: 'Using fallback due to error' }
+      });
+    } catch (fallbackError) {
+      res.status(500).json({ error: 'Failed to get recommendations' });
+    }
+  }
+});
+
 // Set or clear a product's hero or featured feature (admin)
 // Feature product validation
 const validateFeatureProduct = [
