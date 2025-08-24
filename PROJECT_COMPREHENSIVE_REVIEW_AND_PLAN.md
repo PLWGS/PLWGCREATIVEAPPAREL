@@ -135,7 +135,7 @@ This matrix provides a verified status of each major feature, based on direct te
 -   **Frontend Integration:** Size selector dropdowns with dynamic price updates
 -   **Cart Integration:** Size-specific pricing in shopping cart and checkout
 -   **Testing:** Verified functionality with dedicated test page
--   **Status:** 100% Complete - Customer request fulfilled, 2X shirts now $26.00
+-   **Status:** 100% Complete - Customer request fulfilled, 2X shirts now $22.00 (+$2.00 markup)
 
 ## 5. Current Project Status
 

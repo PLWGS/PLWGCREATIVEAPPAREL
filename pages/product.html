@@ -1159,12 +1159,12 @@
                 // Get the selected size and calculate price
                 const selectedSizeEl = document.querySelector('.size-option.selected');
                 const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
-                const basePrice = parseFloat(product.price) || 22.00;
+                const basePrice = parseFloat(product.price) || 20.00;
                 
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
-                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                    finalPrice = basePrice + 2.00; // 2X costs $2 more
                 }
                 
                 currentPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
@@ -1215,12 +1215,12 @@
                 // Get the selected size and calculate price
                 const selectedSizeEl = document.querySelector('.size-option.selected');
                 const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
-                const basePrice = parseFloat(product.price) || 22.00;
+                const basePrice = parseFloat(product.price) || 20.00;
                 
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
-                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                    finalPrice = basePrice + 2.00; // 2X costs $2 more
                 }
                 
                 addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
@@ -1744,12 +1744,12 @@
                 // Get the selected size and calculate price
                 const selectedSizeEl = document.querySelector('.size-option.selected');
                 const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
-                const basePrice = parseFloat(product.price) || 22.00;
+                const basePrice = parseFloat(product.price) || 20.00;
                 
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
-                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                    finalPrice = basePrice + 2.00; // 2X costs $2 more
                 }
                 
                 priceElement.textContent = `$${finalPrice.toFixed(2)}`;
@@ -1763,12 +1763,12 @@
                 // Get the selected size and calculate price
                 const selectedSizeEl = document.querySelector('.size-option.selected');
                 const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
-                const basePrice = parseFloat(product.price) || 22.00;
+                const basePrice = parseFloat(product.price) || 20.00;
                 
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
-                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                    finalPrice = basePrice + 2.00; // 2X costs $2 more
                 }
                 
                 addToCartPrice.textContent = `$${finalPrice.toFixed(2)}`;

@@ -29,13 +29,11 @@ END $$;
 -- Create a sample size pricing structure for existing products
 UPDATE products 
 SET size_pricing = '{
-    "S": {"price": 22.00, "available": true},
-    "M": {"price": 22.00, "available": true},
-    "L": {"price": 22.00, "available": true},
-    "XL": {"price": 22.00, "available": true},
-    "2X": {"price": 26.00, "available": true},
-    "3X": {"price": 28.00, "available": true},
-    "4X": {"price": 30.00, "available": true}
+    "S": {"price": 20.00, "available": true},
+    "M": {"price": 20.00, "available": true},
+    "L": {"price": 20.00, "available": true},
+    "XL": {"price": 20.00, "available": true},
+            "2X": {"price": 22.00, "available": true}
 }'::jsonb
 WHERE size_pricing = '{}' OR size_pricing IS NULL;
 

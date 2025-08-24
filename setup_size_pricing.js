@@ -35,11 +35,11 @@ async function setupSizePricing() {
             SET size_pricing = $1::jsonb
             WHERE size_pricing = '{}' OR size_pricing IS NULL
         `, [JSON.stringify({
-            "S": {"price": 22.00, "available": true},
-            "M": {"price": 22.00, "available": true},
-            "L": {"price": 22.00, "available": true},
-            "XL": {"price": 22.00, "available": true},
-            "2X": {"price": 26.00, "available": true}
+            "S": {"price": 20.00, "available": true},
+            "M": {"price": 20.00, "available": true},
+            "L": {"price": 20.00, "available": true},
+            "XL": {"price": 20.00, "available": true},
+            "2X": {"price": 22.00, "available": true}
         })]);
         
         console.log(`✅ Updated ${updateResult.rowCount} products with size pricing`);
@@ -71,8 +71,8 @@ async function setupSizePricing() {
 
         console.log('\n🎉 Size-based pricing setup completed successfully!');
         console.log('\n📊 Pricing Structure:');
-        console.log('  S, M, L, XL: $22.00');
-        console.log('  2X: $26.00 (+$4.00)');
+        console.log('  S, M, L, XL: $20.00');
+        console.log('  2X: $22.00 (+$2.00)');
 
     } catch (error) {
         console.error('❌ Error:', error.message);
