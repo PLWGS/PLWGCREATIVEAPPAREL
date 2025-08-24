@@ -1239,29 +1239,49 @@
         
         // Function to update price based on selected size
         function updatePriceForSize(selectedSize) {
+            console.log('🔍 updatePriceForSize called with size:', selectedSize);
+            
             const currentPriceElement = document.getElementById('currentPrice');
             const addToCartBtn = document.getElementById('addToCartBtn');
+            
+            console.log('🔍 Price elements found:', {
+                currentPrice: !!currentPriceElement,
+                addToCartBtn: !!addToCartBtn
+            });
             
             if (currentPriceElement && addToCartBtn) {
                 // Get base price from product data or fallback to default
                 let basePrice = 22.00;
                 
+                console.log('🔍 Global productData:', window.productData);
+                
                 // Try to get base price from global productData first
                 if (window.productData && window.productData.price) {
                     basePrice = parseFloat(window.productData.price);
+                    console.log('🔍 Using price from productData:', basePrice);
                 } else if (currentPriceElement.dataset.basePrice) {
                     basePrice = parseFloat(currentPriceElement.dataset.basePrice);
+                    console.log('🔍 Using price from dataset:', basePrice);
+                } else {
+                    console.log('🔍 Using fallback price:', basePrice);
                 }
                 
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
                     finalPrice = basePrice + 4.00; // 2X costs $4 more
+                    console.log('🔍 2X size detected, adding $4.00');
                 } else if (selectedSize === '3X') {
                     finalPrice = basePrice + 6.00; // 3X costs $6 more
+                    console.log('🔍 3X size detected, adding $6.00');
                 } else if (selectedSize === '4X') {
                     finalPrice = basePrice + 8.00; // 4X costs $8 more
+                    console.log('🔍 4X size detected, adding $8.00');
+                } else {
+                    console.log('🔍 Standard size, no price increase');
                 }
+                
+                console.log('🔍 Price calculation:', `${basePrice} + size markup = ${finalPrice}`);
                 
                 // Update price display
                 currentPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
@@ -1271,7 +1291,12 @@
                 addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
                 addToCartBtn.dataset.selectedSize = selectedSize;
                 
-                console.log(`💰 Price updated to $${finalPrice.toFixed(2)} for size ${selectedSize} (base: $${basePrice.toFixed(2)})`);
+                console.log(`✅ Price updated to $${finalPrice.toFixed(2)} for size ${selectedSize} (base: $${basePrice.toFixed(2)})`);
+            } else {
+                console.error('❌ Price elements not found:', {
+                    currentPrice: currentPriceElement,
+                    addToCartBtn: addToCartBtn
+                });
             }
         }
 
@@ -2012,13 +2037,17 @@
 
                     const sizeStock = product.size_stock || {};
 
+                    console.log('📏 Final sizes array:', sizes);
+                    
                     const sizeHTML = sizes.map(size => {
                         const optionClass = 'size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent';
-                        return `
+                        const sizeOption = `
                             <div class="${optionClass}" data-size="${size}">
                                 <span class="font-semibold">${size}</span>
                             </div>
                         `;
+                        console.log(`📏 Generated size option for ${size}:`, sizeOption);
+                        return sizeOption;
                     }).join('');
 
                     sizeContainer.innerHTML = sizeHTML;
@@ -2048,6 +2077,13 @@
                     if (firstAvailable) {
                         firstAvailable.classList.add('selected','border-accent');
                         firstAvailable.classList.remove('border-surface-light');
+                        console.log('📏 Default selected size:', firstAvailable.dataset.size);
+                        
+                        // Also update price for default size
+                        setTimeout(() => {
+                            console.log('📏 Updating price for default size:', firstAvailable.dataset.size);
+                            updatePriceForSize(firstAvailable.dataset.size);
+                        }, 100);
                     }
 
                     // Update total stock summary
