@@ -3,146 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Size-Based Pricing Test - PLWGCREATIVEAPPAREL</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Size Pricing Test</title>
     <style>
-        .size-selector {
-            background-color: #1f2937;
-            border: 1px solid #374151;
-            color: #f9fafb;
-            transition: all 0.3s ease;
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .size-option { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: 2px solid #333; 
+            cursor: pointer; 
+            border-radius: 5px;
         }
-        
-        .size-selector:focus {
+        .size-option.selected { 
+            background: #00bcd4; 
+            color: black; 
             border-color: #00bcd4;
-            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
         }
-        
-        .size-selector option {
-            background-color: #1f2937;
-            color: #f9fafb;
+        .price-display { 
+            font-size: 24px; 
+            margin: 20px 0; 
+            padding: 20px; 
+            background: #333; 
+            border-radius: 5px;
+        }
+        .debug { 
+            background: #222; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            font-family: monospace;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-8">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-center mb-8 text-cyan-400">🧪 Size-Based Pricing Test</h1>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Test Product 1 -->
-            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <h3 class="text-xl font-bold mb-4">Test Product 1</h3>
-                <p class="text-gray-400 mb-4">Base Price: $22.00</p>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-300 text-sm mb-2">Select Size:</label>
-                    <select class="size-selector w-full px-3 py-2 rounded-lg" id="size1">
-                        <option value="S" data-price="22.00">S - $22.00</option>
-                        <option value="M" data-price="22.00" selected>M - $22.00</option>
-                        <option value="L" data-price="22.00">L - $22.00</option>
-                        <option value="XL" data-price="22.00">XL - $22.00</option>
-                        <option value="2X" data-price="26.00">2X - $26.00 (+$4.00)</option>
-                        <option value="3X" data-price="28.00">3X - $28.00 (+$6.00)</option>
-                        <option value="4X" data-price="30.00">4X - $30.00 (+$8.00)</option>
-                    </select>
-                </div>
-                
-                <div class="text-center">
-                    <span class="text-2xl font-bold text-cyan-400" id="price1">$22.00</span>
-                </div>
-            </div>
-            
-            <!-- Test Product 2 -->
-            <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                <h3 class="text-xl font-bold mb-4">Test Product 2</h3>
-                <p class="text-gray-400 mb-4">Base Price: $18.00</p>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-300 text-sm mb-2">Select Size:</label>
-                    <select class="size-selector w-full px-3 py-2 rounded-lg" id="size2">
-                        <option value="S" data-price="18.00">S - $18.00</option>
-                        <option value="M" data-price="18.00" selected>M - $18.00</option>
-                        <option value="L" data-price="18.00">L - $18.00</option>
-                        <option value="XL" data-price="18.00">XL - $18.00</option>
-                        <option value="2X" data-price="22.00">2X - $22.00 (+$4.00)</option>
-                        <option value="3X" data-price="24.00">3X - $24.00 (+$6.00)</option>
-                        <option value="4X" data-price="26.00">4X - $26.00 (+$8.00)</option>
-                    </select>
-                </div>
-                
-                <div class="text-center">
-                    <span class="text-2xl font-bold text-cyan-400" id="price2">$18.00</span>
-                </div>
-            </div>
+<body>
+    <h1>Size-Based Pricing Test</h1>
+    
+    <div class="price-display">
+        <strong>Price: <span id="currentPrice">$20.00</span></strong>
+    </div>
+    
+    <div>
+        <h3>Select Size:</h3>
+        <div class="size-options">
+            <div class="size-option" data-size="S">S</div>
+            <div class="size-option" data-size="M">M</div>
+            <div class="size-option" data-size="L">L</div>
+            <div class="size-option" data-size="XL">XL</div>
+            <div class="size-option" data-size="2X">2X</div>
+            <div class="size-option" data-size="3X">3X</div>
+            <div class="size-option" data-size="4X">4X</div>
         </div>
-        
-        <div class="mt-8 text-center">
-            <h2 class="text-xl font-bold mb-4">🎯 Test Results</h2>
-            <div id="test-results" class="text-left max-w-2xl mx-auto bg-gray-800 rounded-lg p-4">
-                <p class="text-gray-400">Select different sizes to see dynamic pricing in action!</p>
-            </div>
-        </div>
+    </div>
+    
+    <div class="debug" id="debugOutput">
+        Debug output will appear here...
     </div>
 
     <script>
-        // Test size-based pricing functionality
-        function updatePrice(sizeSelector, priceDisplay) {
-            const selectedOption = sizeSelector.options[sizeSelector.selectedIndex];
-            const newPrice = parseFloat(selectedOption.dataset.price);
+        // Simulate product data
+        const productData = {
+            price: 20.00,
+            name: "Test Product"
+        };
+        
+        // Make it globally accessible
+        window.productData = productData;
+        
+        function log(message) {
+            const debugOutput = document.getElementById('debugOutput');
+            debugOutput.innerHTML += message + '<br>';
+            console.log(message);
+        }
+        
+        function updatePriceForSize(selectedSize) {
+            log('🔍 updatePriceForSize called with size: ' + selectedSize);
             
-            if (priceDisplay && !isNaN(newPrice)) {
-                priceDisplay.textContent = `$${newPrice.toFixed(2)}`;
+            const currentPriceElement = document.getElementById('currentPrice');
+            
+            if (currentPriceElement) {
+                // Get base price from product data
+                let basePrice = 20.00;
                 
-                // Update test results
-                updateTestResults();
+                if (window.productData && window.productData.price) {
+                    basePrice = parseFloat(window.productData.price);
+                    log('🔍 Using price from productData: ' + basePrice);
+                }
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00;
+                    log('🔍 2X size detected, adding $4.00');
+                } else if (selectedSize === '3X') {
+                    finalPrice = basePrice + 6.00;
+                    log('🔍 3X size detected, adding $6.00');
+                } else if (selectedSize === '4X') {
+                    finalPrice = basePrice + 8.00;
+                    log('🔍 4X size detected, adding $8.00');
+                } else {
+                    log('🔍 Standard size, no price increase');
+                }
+                
+                log('🔍 Price calculation: ' + basePrice + ' + size markup = ' + finalPrice);
+                
+                // Update price display
+                currentPriceElement.textContent = '$' + finalPrice.toFixed(2);
+                
+                log('✅ Price updated to $' + finalPrice.toFixed(2) + ' for size ' + selectedSize);
+            } else {
+                log('❌ Price element not found');
             }
         }
         
-        function updateTestResults() {
-            const size1 = document.getElementById('size1');
-            const size2 = document.getElementById('size2');
-            const price1 = document.getElementById('price1');
-            const price2 = document.getElementById('price2');
-            
-            const resultsDiv = document.getElementById('test-results');
-            
-            const size1Value = size1.value;
-            const size2Value = size2.value;
-            const price1Value = price1.textContent;
-            const price2Value = price2.textContent;
-            
-            resultsDiv.innerHTML = `
-                <h3 class="font-bold text-cyan-400 mb-2">Current Selection:</h3>
-                <p><strong>Product 1:</strong> Size ${size1Value} - ${price1Value}</p>
-                <p><strong>Product 2:</strong> Size ${size2Value} - ${price2Value}</p>
+        // Add click handlers for size selection
+        document.querySelectorAll('.size-option').forEach(option => {
+            option.addEventListener('click', () => {
+                log('🎯 Size clicked: ' + option.dataset.size);
                 
-                <h3 class="font-bold text-cyan-400 mt-4 mb-2">Pricing Logic:</h3>
-                <ul class="list-disc list-inside text-sm text-gray-300 space-y-1">
-                    <li>S, M, L, XL: Base price</li>
-                    <li>2X: Base price + $4.00</li>
-                    <li>3X: Base price + $6.00</li>
-                    <li>4X: Base price + $8.00</li>
-                </ul>
+                // Remove selected class from all options
+                document.querySelectorAll('.size-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
                 
-                <h3 class="font-bold text-cyan-400 mt-4 mb-2">Test Status:</h3>
-                <p class="text-green-400">✅ Size-based pricing is working correctly!</p>
-                <p class="text-sm text-gray-400 mt-2">The price updates dynamically when you change the size selection.</p>
-            `;
-        }
-        
-        // Add event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            const size1 = document.getElementById('size1');
-            const size2 = document.getElementById('size2');
-            const price1 = document.getElementById('price1');
-            const price2 = document.getElementById('price2');
-            
-            size1.addEventListener('change', () => updatePrice(size1, price1));
-            size2.addEventListener('change', () => updatePrice(size2, price2));
-            
-            // Initialize test results
-            updateTestResults();
+                // Add selected class to clicked option
+                option.classList.add('selected');
+                
+                log('✅ Size selection updated, calling updatePriceForSize with: ' + option.dataset.size);
+                
+                // Update price when size changes
+                updatePriceForSize(option.dataset.size);
+            });
         });
+        
+        // Set default selected size
+        document.querySelector('.size-option[data-size="M"]').classList.add('selected');
+        
+        log('🚀 Test page loaded. Click on different sizes to test pricing.');
+        log('Expected: 2X = $24.00, 3X = $26.00, 4X = $28.00');
     </script>
 <script id="dhws-dataInjector" src="/public/dhws-data-injector.js"></script>
 </body>

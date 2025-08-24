@@ -1242,14 +1242,14 @@
             console.log('🔍 updatePriceForSize called with size:', selectedSize);
             
             const currentPriceElement = document.getElementById('currentPrice');
-            const addToCartBtn = document.getElementById('addToCartBtn');
+            const addToCartPriceElement = document.getElementById('addToCartPrice');
             
             console.log('🔍 Price elements found:', {
                 currentPrice: !!currentPriceElement,
-                addToCartBtn: !!addToCartBtn
+                addToCartPrice: !!addToCartPriceElement
             });
             
-            if (currentPriceElement && addToCartBtn) {
+            if (currentPriceElement && addToCartPriceElement) {
                 // Get base price from product data or fallback to default
                 let basePrice = 22.00;
                 
@@ -1268,15 +1268,15 @@
                 
                 // Apply size-based pricing
                 let finalPrice = basePrice;
-                if (selectedSize === '2X') {
-                    finalPrice = basePrice + 4.00; // 2X costs $4 more
-                    console.log('🔍 2X size detected, adding $4.00');
-                } else if (selectedSize === '3X') {
-                    finalPrice = basePrice + 6.00; // 3X costs $6 more
-                    console.log('🔍 3X size detected, adding $6.00');
-                } else if (selectedSize === '4X') {
-                    finalPrice = basePrice + 8.00; // 4X costs $8 more
-                    console.log('🔍 4X size detected, adding $8.00');
+                if (selectedSize === '2X' || selectedSize === 'XXL') {
+                    finalPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                    console.log('🔍 2X/XXL size detected, adding $4.00');
+                } else if (selectedSize === '3X' || selectedSize === 'XXXL') {
+                    finalPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
+                    console.log('🔍 3X/XXXL size detected, adding $6.00');
+                } else if (selectedSize === '4X' || selectedSize === 'XXXXL') {
+                    finalPrice = basePrice + 8.00; // 4X/XXXXL costs $8 more
+                    console.log('🔍 4X/XXXXL size detected, adding $8.00');
                 } else {
                     console.log('🔍 Standard size, no price increase');
                 }
@@ -1288,14 +1288,14 @@
                 currentPriceElement.dataset.selectedSize = selectedSize;
                 
                 // Update Add to Cart button price
-                addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
-                addToCartBtn.dataset.selectedSize = selectedSize;
+                addToCartPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
+                addToCartPriceElement.dataset.selectedSize = selectedSize;
                 
                 console.log(`✅ Price updated to $${finalPrice.toFixed(2)} for size ${selectedSize} (base: $${basePrice.toFixed(2)})`);
             } else {
                 console.error('❌ Price elements not found:', {
                     currentPrice: currentPriceElement,
-                    addToCartBtn: addToCartBtn
+                    addToCartPrice: addToCartPriceElement
                 });
             }
         }
@@ -1502,10 +1502,8 @@
                         return;
                     }
                     
-                    // Extract just the size letter (M, L, etc.) from the selected size
-                    const sizeText = selectedSize.textContent.trim();
-                    const sizeMatch = sizeText.match(/^([A-Z]+)/);
-                    const size = sizeMatch ? sizeMatch[1] : 'M'; // Default to M if no match
+                    // Get the size from the data-size attribute (more reliable)
+                    const size = selectedSize.dataset.size || 'M';
                     
                     // Get quantity
                     const quantityEl = document.getElementById('qtyValue');
@@ -1524,12 +1522,12 @@
                     // Calculate price based on selected size
                     const basePrice = parseFloat(productData?.price) || 22.00;
                     let unitPrice = basePrice;
-                    if (size === '2X') {
-                        unitPrice = basePrice + 4.00; // 2X costs $4 more
-                    } else if (size === '3X') {
-                        unitPrice = basePrice + 6.00; // 3X costs $6 more
-                    } else if (size === '4X') {
-                        unitPrice = basePrice + 8.00; // 4X costs $8 more
+                    if (size === '2X' || size === 'XXL') {
+                        unitPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                    } else if (size === '3X' || size === 'XXXL') {
+                        unitPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
+                    } else if (size === '4X' || size === 'XXXXL') {
+                        unitPrice = basePrice + 8.00; // 4X/XXXXL costs $8 more
                     }
                     
                     // Add to cart via API
@@ -1563,7 +1561,7 @@
                     // window.location.href = 'cart.html';
                     
                 } catch (error) {
-                    console.error('Error adding to cart:', error);
+                    console.error('Error adding item to cart:', error);
                     alert('Error adding item to cart: ' + error.message);
                 }
             });
@@ -1621,10 +1619,8 @@
                         return;
                     }
                     
-                    // Extract just the size letter (M, L, etc.) from the selected size
-                    const sizeText = selectedSize.textContent.trim();
-                    const sizeMatch = sizeText.match(/^([A-Z]+)/);
-                    const size = sizeMatch ? sizeMatch[1] : 'M'; // Default to M if no match
+                    // Get the size from the data-size attribute (more reliable)
+                    const size = selectedSize.dataset.size || 'M';
                     
                     // Get quantity
                     const quantitySpan = document.querySelector('.sticky-cart span');
@@ -1633,11 +1629,23 @@
                     // Determine product name from loaded data
                     const productTitle = (productData && productData.name) ? productData.name : (document.getElementById('productTitle')?.textContent || '');
                     
+                    // Calculate price based on selected size for Buy Now
+                    const basePrice = parseFloat(productData?.price) || 22.00;
+                    let unitPrice = basePrice;
+                    if (size === '2X' || size === 'XXL') {
+                        unitPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                    } else if (size === '3X' || size === 'XXXL') {
+                        unitPrice = basePrice + 6.00; // 3X/XXXL costs $6 more
+                    } else if (size === '4X' || size === 'XXXXL') {
+                        unitPrice = basePrice + 8.00; // 4X/XXXXL costs $8 more
+                    }
+                    
                     console.log('Buy Now - Adding to cart:', {
                         product_name: productTitle,
                         quantity: quantity,
                         size: size,
-                        color: selectedColor || 'Black'
+                        color: selectedColor || 'Black',
+                        unit_price: unitPrice
                     });
                     
                     // Add to cart via API
@@ -1650,6 +1658,7 @@
                         body: JSON.stringify({
                             product_name: productTitle,
                             quantity: quantity,
+                            unit_price: unitPrice,
                             size: size,
                             color: selectedColor || 'Black'
                         })
@@ -1764,6 +1773,9 @@
         // Update product display with dynamic data
         function updateProductDisplay(product) {
             console.log('🎨 Updating product display with:', product);
+            console.log('🔍 Product sizes:', product.sizes);
+            console.log('🔍 Product size_stock:', product.size_stock);
+            console.log('🔍 Product price:', product.price);
             
             // Update page title
             const pageTitle = document.getElementById('pageTitle');
@@ -2022,17 +2034,30 @@
             } catch (e) { console.warn('Brand/specs notes render failed', e); }
             
             // Update sizes and stock dynamically
-            if ((product.sizes && product.sizes.length > 0) || product.size_stock) {
+            // Always generate size options, even if product data is incomplete
+            if (true) { // Changed from conditional to always generate
                 const sizeContainer = document.querySelector('.size-options');
                 if (sizeContainer) {
                     console.log('📏 Updating size options with:', product.sizes, product.size_stock);
 
-                    // Build size list: prefer explicit product.sizes; else derive keys from size_stock
-                    const knownOrder = ['S','M','L','XL','XXL'];
-                    let sizes = Array.isArray(product.sizes) && product.sizes.length > 0
-                        ? product.sizes
-                        : Object.keys(product.size_stock || {});
-                    // Remove XS defensively and sort
+                    // Build size list: prefer explicit product.sizes; else derive keys from size_stock; else use default sizes
+                    // Order sizes from smallest to largest, with XXL/2X at the end
+                    const knownOrder = ['S','M','L','XL','XXL','2X','3X','4X','XXXL','XXXXL'];
+                    let sizes = [];
+                    
+                    if (Array.isArray(product.sizes) && product.sizes.length > 0) {
+                        sizes = product.sizes;
+                        console.log('📏 Using product.sizes:', sizes);
+                    } else if (product.size_stock && Object.keys(product.size_stock).length > 0) {
+                        sizes = Object.keys(product.size_stock);
+                        console.log('📏 Using product.size_stock keys:', sizes);
+                    } else {
+                        // Fallback to default sizes if no size data is provided
+                        sizes = ['S', 'M', 'L', 'XL', 'XXL', '2X', '3X', '4X'];
+                        console.log('📏 Using fallback default sizes:', sizes);
+                    }
+                    
+                    // Remove XS defensively and sort by known order
                     sizes = sizes.filter(s => s !== 'XS').sort((a,b) => knownOrder.indexOf(a) - knownOrder.indexOf(b));
 
                     const sizeStock = product.size_stock || {};

@@ -3256,6 +3256,7 @@ app.get('/api/cart', authenticateCustomer, async (req, res) => {
 const validateCartAdd = [
   body('product_name').notEmpty().trim().withMessage('Product name is required'),
   body('quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer'),
+  body('unit_price').optional().isFloat({ min: 0 }).withMessage('Unit price must be a positive number'),
   body('size').optional().isString().withMessage('Size must be a string'),
   body('color').optional().isString().withMessage('Color must be a string'),
   (req, res, next) => {
@@ -3298,7 +3299,8 @@ app.post('/api/cart/add', authenticateCustomer, validateCartAdd, async (req, res
     }
 
     const product_id = productResult.rows[0].id;
-    const unit_price = productResult.rows[0].price;
+    // Use unit_price from request body if provided, otherwise use product base price
+    const unit_price = req.body.unit_price || productResult.rows[0].price;
     const product_image_url = productResult.rows[0].image_url;
 
     // Check if item already exists in cart
