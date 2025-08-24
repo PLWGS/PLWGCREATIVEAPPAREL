@@ -4157,6 +4157,174 @@ app.post('/api/cart/checkout', authenticateCustomer, validateCheckout, async (re
   }
 });
 
+// ========================================
+// CATEGORY MANAGEMENT API ENDPOINTS
+// ========================================
+
+// Get all categories
+app.get('/api/admin/categories', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, name, description, display_order, created_at, updated_at
+      FROM categories 
+      ORDER BY display_order ASC, name ASC
+    `);
+    
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+// Create new category
+app.post('/api/admin/categories', async (req, res) => {
+  try {
+    const { name, description, display_order } = req.body;
+    
+    // Validation
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({ error: 'Category name is required' });
+    }
+    
+    if (name.length > 100) {
+      return res.status(400).json({ error: 'Category name must be 100 characters or less' });
+    }
+    
+    // Check if category name already exists
+    const existingCategory = await pool.query(
+      'SELECT id FROM categories WHERE LOWER(name) = LOWER($1)',
+      [name.trim()]
+    );
+    
+    if (existingCategory.rows.length > 0) {
+      return res.status(400).json({ error: 'Category name already exists' });
+    }
+    
+    // Create category
+    const result = await pool.query(`
+      INSERT INTO categories (name, description, display_order, created_at, updated_at)
+      VALUES ($1, $2, $3, NOW(), NOW())
+      RETURNING id, name, description, display_order, created_at, updated_at
+    `, [name.trim(), description || null, display_order || 1]);
+    
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating category:', error);
+    res.status(500).json({ error: 'Failed to create category' });
+  }
+});
+
+// Update category
+app.put('/api/admin/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, display_order } = req.body;
+    
+    // Validation
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({ error: 'Category name is required' });
+    }
+    
+    if (name.length > 100) {
+      return res.status(400).json({ error: 'Category name must be 100 characters or less' });
+    }
+    
+    // Check if category exists
+    const existingCategory = await pool.query(
+      'SELECT id FROM categories WHERE id = $1',
+      [id]
+    );
+    
+    if (existingCategory.rows.length === 0) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    
+    // Check if new name conflicts with other categories
+    const nameConflict = await pool.query(
+      'SELECT id FROM categories WHERE LOWER(name) = LOWER($1) AND id != $2',
+      [name.trim(), id]
+    );
+    
+    if (nameConflict.rows.length > 0) {
+      return res.status(400).json({ error: 'Category name already exists' });
+    }
+    
+    // Update category
+    const result = await pool.query(`
+      UPDATE categories 
+      SET name = $1, description = $2, display_order = $3, updated_at = NOW()
+      WHERE id = $4
+      RETURNING id, name, description, display_order, created_at, updated_at
+    `, [name.trim(), description || null, display_order || 1, id]);
+    
+    // Update products that use this category name
+    await pool.query(
+      'UPDATE products SET category = $1 WHERE category = (SELECT name FROM categories WHERE id = $2)',
+      [name.trim(), id]
+    );
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error updating category:', error);
+    res.status(500).json({ error: 'Failed to update category' });
+  }
+});
+
+// Delete category
+app.delete('/api/admin/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get category info before deletion
+    const categoryResult = await pool.query(
+      'SELECT name FROM categories WHERE id = $1',
+      [id]
+    );
+    
+    if (categoryResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    
+    const categoryName = categoryResult.rows[0].name;
+    
+    // Move products to "Uncategorized" instead of deleting them
+    await pool.query(
+      'UPDATE products SET category = $1 WHERE category = $2',
+      ['Uncategorized', categoryName]
+    );
+    
+    // Delete the category
+    await pool.query('DELETE FROM categories WHERE id = $1', [id]);
+    
+    res.json({ message: 'Category deleted successfully', products_moved: 'Uncategorized' });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
+
+// Get category statistics
+app.get('/api/admin/categories/stats', async (req, res) => {
+  try {
+    const stats = await pool.query(`
+      SELECT 
+        c.name,
+        c.id,
+        COUNT(p.id) as product_count
+      FROM categories c
+      LEFT JOIN products p ON c.name = p.category
+      GROUP BY c.id, c.name
+      ORDER BY c.display_order ASC, c.name ASC
+    `);
+    
+    res.json(stats.rows);
+  } catch (error) {
+    console.error('Error fetching category stats:', error);
+    res.status(500).json({ error: 'Failed to fetch category statistics' });
+  }
+});
+
 // Initialize database and start server
 Promise.all([
   initializeAdminCredentials(),
@@ -4167,6 +4335,7 @@ Promise.all([
     console.log(`📧 Email configured: ${process.env.EMAIL_FROM}`);
     console.log(`🗄️ Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
     console.log(`🔐 Admin email: ${ADMIN_EMAIL_MEMO}`);
+    console.log(`🏷️ Category management system active`);
   });
 });
 

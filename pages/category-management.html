@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Category Management - PlwgsCreativeApparel Admin</title>
+    <meta name="description" content="Manage product categories for PlwgsCreativeApparel - add, edit, delete, and organize categories with real-time database updates." />
+    <link rel="stylesheet" href="../css/main.css" />
+    <style>
+        /* Category Management Specific Styles */
+        .sidebar-nav {
+            backdrop-filter: blur(10px);
+            background: rgba(42, 42, 42, 0.95);
+            border-right: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(15px);
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .category-card {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .category-card:hover {
+            border-color: rgba(0, 188, 212, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 188, 212, 0.15);
+        }
+        
+        .category-form {
+            background: rgba(26, 26, 26, 0.9);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            backdrop-filter: blur(20px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00bcd4, #4dd0e1);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 188, 212, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(75, 85, 99, 0.8);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            color: #e5e7eb;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(75, 85, 99, 1);
+            border-color: rgba(75, 85, 99, 0.8);
+        }
+        
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.8);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 1);
+            border-color: rgba(239, 68, 68, 0.8);
+        }
+        
+        .input-field {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            color: #e5e7eb;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+            outline: none;
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        
+        .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status-inactive { background: rgba(75, 85, 99, 0.2); color: #9ca3af; }
+        .status-warning { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar-nav {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar-nav.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Mobile Menu Toggle -->
+    <button id="mobile-menu-toggle" class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-accent rounded-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar-nav fixed left-0 top-0 h-full w-64 z-50 transition-transform duration-300">
+        <div class="p-6">
+            <!-- Logo -->
+            <div class="flex items-center space-x-3 mb-8">
+                <svg class="w-8 h-8 text-accent" viewBox="0 0 40 40" fill="currentColor">
+                    <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
+                    <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
+                    <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
+                </svg>
+                <div>
+                    <span class="font-orbitron text-lg font-bold text-gradient">PlwgsCreative</span>
+                    <p class="text-text-secondary text-xs">Admin Dashboard</p>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="space-y-2">
+                <a href="admin.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v0H8v0z"/>
+                    </svg>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+
+                <a href="admin-uploads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <span>Products</span>
+                    <div class="notification-dot ml-auto"></div>
+                </a>
+
+                <a href="orders.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <span>Orders</span>
+                    <span class="ml-auto bg-warning text-black text-xs px-2 py-1 rounded-full">0</span>
+                </a>
+
+                <a href="custom.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                    <span>Custom Orders</span>
+                    <span class="ml-auto bg-error text-white text-xs px-2 py-1 rounded-full">5</span>
+                </a>
+
+                <a href="customers.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                    </svg>
+                    <span>Customers</span>
+                </a>
+
+                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span>Analytics</span>
+                </a>
+
+                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Marketing</span>
+                </a>
+
+                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                    </svg>
+                    <span>Financials</span>
+                </a>
+
+                <a href="admin-uploads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <span>Uploads</span>
+                </a>
+
+                <a href="category-management.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-accent bg-opacity-20 text-accent border border-accent border-opacity-30">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                    <span>Category Management</span>
+                </a>
+            </nav>
+
+            <!-- Quick Actions -->
+            <div class="mt-8 pt-6 border-t border-surface-light">
+                <h3 class="text-text-secondary text-sm font-medium mb-4">Quick Actions</h3>
+                <div class="space-y-2">
+                    <button onclick="showAddCategoryForm()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                        Add New Category
+                    </button>
+                    <button onclick="refreshCategories()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                        Refresh Categories
+                    </button>
+                    <button onclick="exportCategories()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                        Export Categories
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 p-6">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gradient mb-2">Category Management</h1>
+            <p class="text-text-secondary">Organize your product categories with ease. Add, edit, delete, and manage categories with real-time updates.</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-text-secondary text-sm">Total Categories</p>
+                        <p class="text-2xl font-bold text-accent" id="total-categories">0</p>
+                    </div>
+                    <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-text-secondary text-sm">Active Categories</p>
+                        <p class="text-2xl font-bold text-green-400" id="active-categories">0</p>
+                    </div>
+                    <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-text-secondary text-sm">Total Products</p>
+                        <p class="text-2xl font-bold text-blue-400" id="total-products">0</p>
+                    </div>
+                    <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-text-secondary text-sm">Uncategorized</p>
+                        <p class="text-2xl font-bold text-yellow-400" id="uncategorized-products">0</p>
+                    </div>
+                    <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Category Form -->
+        <div id="add-category-form" class="category-form rounded-xl p-6 mb-8 hidden">
+            <h2 class="text-xl font-bold mb-4 text-accent">Add New Category</h2>
+            <form id="category-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-text-secondary mb-2">Category Name</label>
+                        <input type="text" id="category-name" class="input-field w-full" placeholder="e.g., Summer Collection" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-text-secondary mb-2">Display Order</label>
+                        <input type="number" id="category-order" class="input-field w-full" placeholder="1" min="1" value="1">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-text-secondary mb-2">Description (Optional)</label>
+                    <textarea id="category-description" class="input-field w-full h-20" placeholder="Brief description of this category..."></textarea>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button type="submit" class="btn-primary">Create Category</button>
+                    <button type="button" onclick="hideAddCategoryForm()" class="btn-secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Categories List -->
+        <div class="glass-card rounded-xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-accent">Product Categories</h2>
+                <button onclick="showAddCategoryForm()" class="btn-primary">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Add Category
+                </button>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <div class="flex-1">
+                    <input type="text" id="category-search" class="input-field w-full" placeholder="Search categories...">
+                </div>
+                <select id="category-sort" class="input-field">
+                    <option value="name">Sort by Name</option>
+                    <option value="products">Sort by Product Count</option>
+                    <option value="order">Sort by Display Order</option>
+                    <option value="created">Sort by Created Date</option>
+                </select>
+            </div>
+
+            <!-- Categories Grid -->
+            <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Categories will be loaded here -->
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+                    <p class="text-text-secondary mt-2">Loading categories...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Category Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="category-form rounded-xl p-6 w-full max-w-md">
+                <h2 class="text-xl font-bold mb-4 text-accent">Edit Category</h2>
+                <form id="edit-category-form" class="space-y-4">
+                    <input type="hidden" id="edit-category-id">
+                    <div>
+                        <label class="block text-sm font-medium text-text-secondary mb-2">Category Name</label>
+                        <input type="text" id="edit-category-name" class="input-field w-full" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-text-secondary mb-2">Display Order</label>
+                        <input type="number" id="edit-category-order" class="input-field w-full" min="1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-text-secondary mb-2">Description</label>
+                        <textarea id="edit-category-description" class="input-field w-full h-20"></textarea>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button type="submit" class="btn-primary">Update Category</button>
+                        <button type="button" onclick="closeEditModal()" class="btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="category-form rounded-xl p-6 w-full max-w-md">
+                <h2 class="text-xl font-bold mb-4 text-red-400">Delete Category</h2>
+                <p class="text-text-secondary mb-4">Are you sure you want to delete "<span id="delete-category-name" class="font-semibold"></span>"?</p>
+                <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4 mb-4">
+                    <p class="text-yellow-400 text-sm">
+                        <strong>Warning:</strong> This category has <span id="delete-category-count" class="font-bold">0</span> products. 
+                        Products will be moved to "Uncategorized".
+                    </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="confirmDeleteCategory()" class="btn-danger">Delete Category</button>
+                    <button onclick="closeDeleteModal()" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let categories = [];
+        let products = [];
+        let currentEditCategory = null;
+        let currentDeleteCategory = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCategories();
+            loadProducts();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('category-search').addEventListener('input', filterCategories);
+            
+            // Sort functionality
+            document.getElementById('category-sort').addEventListener('change', sortCategories);
+            
+            // Form submissions
+            document.getElementById('category-form').addEventListener('submit', handleAddCategory);
+            document.getElementById('edit-category-form').addEventListener('submit', handleEditCategory);
+            
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-toggle').addEventListener('click', toggleMobileMenu);
+        }
+
+        // Load categories from database
+        async function loadCategories() {
+            try {
+                const response = await fetch('/api/admin/categories');
+                if (response.ok) {
+                    categories = await response.json();
+                    updateCategoriesDisplay();
+                    updateStats();
+                } else {
+                    console.error('Failed to load categories');
+                    showNotification('Failed to load categories', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                showNotification('Error loading categories', 'error');
+            }
+        }
+
+        // Load products for counting
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products/public');
+                if (response.ok) {
+                    products = await response.json();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Update categories display
+        function updateCategoriesDisplay() {
+            const grid = document.getElementById('categories-grid');
+            
+            if (categories.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <svg class="w-16 h-16 text-text-secondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-text-secondary mb-2">No Categories Found</h3>
+                        <p class="text-text-secondary mb-4">Create your first category to get started!</p>
+                        <button onclick="showAddCategoryForm()" class="btn-primary">Create Category</button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = categories.map(category => {
+                const productCount = products.filter(p => p.category === category.name).length;
+                return `
+                    <div class="category-card rounded-xl p-6" data-category-id="${category.id}">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">${category.name}</h3>
+                                <p class="text-text-secondary text-sm mb-3">${category.description || 'No description'}</p>
+                                <div class="flex items-center space-x-4 text-sm">
+                                    <span class="status-badge status-active">${productCount} products</span>
+                                    <span class="text-text-secondary">Order: ${category.display_order || 1}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="editCategory('${category.id}')" class="p-2 text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                                <button onclick="deleteCategory('${category.id}', '${category.name}', ${productCount})" class="p-2 text-red-400 hover:bg-red-400 hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('total-categories').textContent = categories.length;
+            document.getElementById('active-categories').textContent = categories.length;
+            document.getElementById('total-products').textContent = products.length;
+            
+            const uncategorizedCount = products.filter(p => !p.category || p.category === '').length;
+            document.getElementById('uncategorized-products').textContent = uncategorizedCount;
+        }
+
+        // Filter categories
+        function filterCategories() {
+            const searchTerm = document.getElementById('category-search').value.toLowerCase();
+            const categoryCards = document.querySelectorAll('[data-category-id]');
+            
+            categoryCards.forEach(card => {
+                const categoryName = card.querySelector('h3').textContent.toLowerCase();
+                const categoryDesc = card.querySelector('p').textContent.toLowerCase();
+                
+                if (categoryName.includes(searchTerm) || categoryDesc.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Sort categories
+        function sortCategories() {
+            const sortBy = document.getElementById('category-sort').value;
+            
+            switch (sortBy) {
+                case 'name':
+                    categories.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'products':
+                    categories.sort((a, b) => {
+                        const countA = products.filter(p => p.category === a.name).length;
+                        const countB = products.filter(p => p.category === b.name).length;
+                        return countB - countA;
+                    });
+                    break;
+                case 'order':
+                    categories.sort((a, b) => (a.display_order || 1) - (b.display_order || 1));
+                    break;
+                case 'created':
+                    categories.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    break;
+            }
+            
+            updateCategoriesDisplay();
+        }
+
+        // Show add category form
+        function showAddCategoryForm() {
+            document.getElementById('add-category-form').classList.remove('hidden');
+            document.getElementById('category-name').focus();
+        }
+
+        // Hide add category form
+        function hideAddCategoryForm() {
+            document.getElementById('add-category-form').classList.add('hidden');
+            document.getElementById('category-form').reset();
+        }
+
+        // Handle add category
+        async function handleAddCategory(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('category-name').value.trim(),
+                display_order: parseInt(document.getElementById('category-order').value) || 1,
+                description: document.getElementById('category-description').value.trim()
+            };
+            
+            try {
+                const response = await fetch('/api/admin/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    showNotification('Category created successfully!', 'success');
+                    hideAddCategoryForm();
+                    loadCategories();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Failed to create category', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating category:', error);
+                showNotification('Error creating category', 'error');
+            }
+        }
+
+        // Edit category
+        function editCategory(categoryId) {
+            const category = categories.find(c => c.id == categoryId);
+            if (!category) return;
+            
+            currentEditCategory = category;
+            document.getElementById('edit-category-id').value = category.id;
+            document.getElementById('edit-category-name').value = category.name;
+            document.getElementById('edit-category-order').value = category.display_order || 1;
+            document.getElementById('edit-category-description').value = category.description || '';
+            
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+            currentEditCategory = null;
+        }
+
+        // Handle edit category
+        async function handleEditCategory(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('edit-category-name').value.trim(),
+                display_order: parseInt(document.getElementById('edit-category-order').value) || 1,
+                description: document.getElementById('edit-category-description').value.trim()
+            };
+            
+            try {
+                const response = await fetch(`/api/admin/categories/${currentEditCategory.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    showNotification('Category updated successfully!', 'success');
+                    closeEditModal();
+                    loadCategories();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Failed to update category', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating category:', error);
+                showNotification('Error updating category', 'error');
+            }
+        }
+
+        // Delete category
+        function deleteCategory(categoryId, categoryName, productCount) {
+            currentDeleteCategory = { id: categoryId, name: categoryName, productCount };
+            document.getElementById('delete-category-name').textContent = categoryName;
+            document.getElementById('delete-category-count').textContent = productCount;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            currentDeleteCategory = null;
+        }
+
+        // Confirm delete category
+        async function confirmDeleteCategory() {
+            if (!currentDeleteCategory) return;
+            
+            try {
+                const response = await fetch(`/api/admin/categories/${currentDeleteCategory.id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showNotification('Category deleted successfully!', 'success');
+                    closeDeleteModal();
+                    loadCategories();
+                    loadProducts();
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Failed to delete category', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                showNotification('Error deleting category', 'error');
+            }
+        }
+
+        // Refresh categories
+        function refreshCategories() {
+            loadCategories();
+            loadProducts();
+            showNotification('Categories refreshed!', 'success');
+        }
+
+        // Export categories
+        function exportCategories() {
+            const data = categories.map(cat => ({
+                name: cat.name,
+                description: cat.description || '',
+                display_order: cat.display_order || 1,
+                product_count: products.filter(p => p.category === cat.name).length,
+                created_at: cat.created_at
+            }));
+            
+            const csv = convertToCSV(data);
+            downloadCSV(csv, 'categories-export.csv');
+            showNotification('Categories exported successfully!', 'success');
+        }
+
+        // Convert data to CSV
+        function convertToCSV(data) {
+            const headers = Object.keys(data[0]);
+            const csvRows = [headers.join(',')];
+            
+            for (const row of data) {
+                const values = headers.map(header => {
+                    const value = row[header];
+                    return `"${value}"`;
+                });
+                csvRows.push(values.join(','));
+            }
+            
+            return csvRows.join('\n');
+        }
+
+        // Download CSV
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-600' : 
+                type === 'error' ? 'bg-red-600' : 
+                'bg-blue-600'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
