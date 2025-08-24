@@ -35,21 +35,7 @@
             <label class="block text-sm font-medium text-text-primary mb-2">Category</label>
             <select id="category" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg">
               <option value="">Select Category</option>
-              <option value="Halloween">Halloween</option>
-              <option value="Father's Day">Father's Day</option>
-              <option value="Birthday">Birthday</option>
-              <option value="Cancer Awareness">Cancer Awareness</option>
-              <option value="Custom">Custom</option>
-              <option value="Horror Essentials">Horror Essentials</option>
-              <option value="Pop Culture">Pop Culture</option>
-              <option value="Adult Shirts">Adult Shirts</option>
-              <option value="Adult Birthday Shirts">Adult Birthday Shirts</option>
-              <option value="Adult Music Shirts">Adult Music Shirts</option>
-              <option value="Adult Tank Tops">Adult Tank Tops</option>
-              <option value="Adult Hoodies">Adult Hoodies</option>
-              <option value="Adult Jackets">Adult Jackets</option>
-              <option value="Kid Shirts">Kid Shirts</option>
-              <option value="Kid Hoodies">Kid Hoodies</option>
+              <!-- Categories will be loaded dynamically -->
             </select>
           </div>
           <div>
@@ -363,6 +349,40 @@
       });
       return map;
     }
+    
+    // Load categories dynamically from database
+    async function loadCategories() {
+      try {
+        const response = await fetch('/api/admin/categories');
+        if (response.ok) {
+          const categories = await response.json();
+          updateCategoryDropdown(categories);
+        } else {
+          console.error('Failed to load categories');
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+    
+    // Update category dropdown with dynamic data
+    function updateCategoryDropdown(categories) {
+      const categorySelect = document.getElementById('category');
+      if (categorySelect) {
+        // Keep the first option (Select Category)
+        categorySelect.innerHTML = '<option value="">Select Category</option>';
+        
+        // Add dynamic categories
+        categories.forEach(category => {
+          if (category.name !== 'Uncategorized') {
+            const option = document.createElement('option');
+            option.value = category.name;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+          }
+        });
+      }
+    }
 
     document.getElementById('save').addEventListener('click', async () => {
       try {
@@ -423,6 +443,9 @@
       }
     });
 
+    // Load categories dynamically
+    loadCategories();
+    
     setupColorSelection();
     setupSizeSelection();
     if (!productId) { document.getElementById('loading').textContent = 'Missing product ID'; } else { fetchProduct(); }
