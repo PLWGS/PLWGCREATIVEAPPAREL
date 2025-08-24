@@ -173,6 +173,18 @@
                 <label class="text-sm text-text-secondary mb-1 block">Origin</label>
                 <input type="text" id="spec_origin" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
               </div>
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Print Method</label>
+                <input type="text" id="spec_print_method" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Sustainability</label>
+                <input type="text" id="spec_sustainability" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
+              <div>
+                <label class="text-sm text-text-secondary mb-1 block">Brand Preference</label>
+                <input type="text" id="spec_brand_preference" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
+              </div>
             </div>
           </div>
           <div>
@@ -308,6 +320,9 @@
       document.getElementById('spec_neck').value = specs.neck_style || '';
       document.getElementById('spec_sleeve').value = specs.sleeve_length || '';
       document.getElementById('spec_origin').value = specs.origin || '';
+      document.getElementById('spec_print_method').value = specs.print_method || '';
+      document.getElementById('spec_sustainability').value = specs.sustainability || '';
+      document.getElementById('spec_brand_preference').value = specs.brand_preference || '';
 
       // Features
       const features = p.features || {};
@@ -408,7 +423,10 @@
             fit: document.getElementById('spec_fit').value.trim(),
             neck_style: document.getElementById('spec_neck').value.trim(),
             sleeve_length: document.getElementById('spec_sleeve').value.trim(),
-            origin: document.getElementById('spec_origin').value.trim()
+            origin: document.getElementById('spec_origin').value.trim(),
+            print_method: document.getElementById('spec_print_method').value.trim(),
+            sustainability: document.getElementById('spec_sustainability').value.trim(),
+            brand_preference: document.getElementById('spec_brand_preference').value.trim()
           },
           features: {
             preshrunk: document.getElementById('feature_preshrunk').checked,
