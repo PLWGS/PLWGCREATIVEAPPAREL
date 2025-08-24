@@ -3574,7 +3574,7 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
         INNER JOIN wishlist w ON p.id = w.product_id
         WHERE w.customer_id = $1 AND p.is_active = true
         AND p.id NOT IN (${recommendations.map(r => r.id).length > 0 ? recommendations.map(r => r.id).join(',') : 'NULL'})
-        ORDER BY w.created_at DESC
+        ORDER BY w.added_at DESC
         LIMIT $2
       `, [customerId, limit - recommendations.length]);
       
