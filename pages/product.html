@@ -1150,10 +1150,27 @@
                 productTitleElement.textContent = product.name;
             }
             
-            // Update current price
+            // Update current price with size-based pricing
             const currentPriceElement = document.getElementById('currentPrice');
             if (currentPriceElement) {
-                currentPriceElement.textContent = `$${product.price}`;
+                // Get the selected size and calculate price
+                const selectedSizeEl = document.querySelector('.size-option.selected');
+                const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
+                const basePrice = parseFloat(product.price) || 22.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                } else if (selectedSize === '3X') {
+                    finalPrice = basePrice + 6.00; // 3X costs $6 more
+                } else if (selectedSize === '4X') {
+                    finalPrice = basePrice + 8.00; // 4X costs $8 more
+                }
+                
+                currentPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
+                currentPriceElement.dataset.basePrice = basePrice;
+                currentPriceElement.dataset.selectedSize = selectedSize;
             }
             
             // Update original price
@@ -1193,13 +1210,60 @@
                 descriptionElement.textContent = product.description;
             }
             
-            // Update add to cart button price
+            // Update add to cart button price with size-based pricing
             const addToCartBtn = document.getElementById('addToCartBtn');
             if (addToCartBtn) {
-                addToCartBtn.textContent = `Add to Cart - $${product.price}`;
+                // Get the selected size and calculate price
+                const selectedSizeEl = document.querySelector('.size-option.selected');
+                const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
+                const basePrice = parseFloat(product.price) || 22.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                } else if (selectedSize === '3X') {
+                    finalPrice = basePrice + 6.00; // 3X costs $6 more
+                } else if (selectedSize === '4X') {
+                    finalPrice = basePrice + 8.00; // 4X costs $8 more
+                }
+                
+                addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
+                addToCartBtn.dataset.basePrice = basePrice;
+                addToCartBtn.dataset.selectedSize = selectedSize;
             }
         }
         
+        // Function to update price based on selected size
+        function updatePriceForSize(selectedSize) {
+            const currentPriceElement = document.getElementById('currentPrice');
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            
+            if (currentPriceElement && addToCartBtn) {
+                const basePrice = parseFloat(currentPriceElement.dataset.basePrice) || 22.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                } else if (selectedSize === '3X') {
+                    finalPrice = basePrice + 6.00; // 3X costs $6 more
+                } else if (selectedSize === '4X') {
+                    finalPrice = basePrice + 8.00; // 4X costs $8 more
+                }
+                
+                // Update price display
+                currentPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
+                currentPriceElement.dataset.selectedSize = selectedSize;
+                
+                // Update Add to Cart button price
+                addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
+                addToCartBtn.dataset.selectedSize = selectedSize;
+                
+                console.log(`💰 Price updated to $${finalPrice.toFixed(2)} for size ${selectedSize}`);
+            }
+        }
+
         // Fallback function for when database lookup fails
         function loadFallbackProduct(productTitle) {
             console.log('Using fallback data for:', productTitle);
@@ -1421,6 +1485,17 @@
                         color: 'Black'
                     });
                     
+                    // Calculate price based on selected size
+                    const basePrice = parseFloat(productData?.price) || 22.00;
+                    let unitPrice = basePrice;
+                    if (size === '2X') {
+                        unitPrice = basePrice + 4.00; // 2X costs $4 more
+                    } else if (size === '3X') {
+                        unitPrice = basePrice + 6.00; // 3X costs $6 more
+                    } else if (size === '4X') {
+                        unitPrice = basePrice + 8.00; // 4X costs $8 more
+                    }
+                    
                     // Add to cart via API
                     const response = await fetch('/api/cart/add', {
                         method: 'POST',
@@ -1431,6 +1506,7 @@
                         body: JSON.stringify({
                             product_name: productTitle,
                             quantity: quantity,
+                            unit_price: unitPrice,
                             size: size,
                             color: selectedColor || 'Black'
                         })
@@ -1670,15 +1746,50 @@
                 productDescription.textContent = product.description || 'Quality printed design with custom artwork. Perfect for those who want to express their unique style.';
             }
             
-            // Update price
+            // Update price with size-based pricing
             const priceElement = document.getElementById('currentPrice');
             if (priceElement) {
-                priceElement.textContent = `$${product.price}`;
+                // Get the selected size and calculate price
+                const selectedSizeEl = document.querySelector('.size-option.selected');
+                const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
+                const basePrice = parseFloat(product.price) || 22.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                } else if (selectedSize === '3X') {
+                    finalPrice = basePrice + 6.00; // 3X costs $6 more
+                } else if (selectedSize === '4X') {
+                    finalPrice = basePrice + 8.00; // 4X costs $8 more
+                }
+                
+                priceElement.textContent = `$${finalPrice.toFixed(2)}`;
+                priceElement.dataset.basePrice = basePrice;
+                priceElement.dataset.selectedSize = selectedSize;
             }
+            
             // Also update Add to Cart button price
             const addToCartPrice = document.getElementById('addToCartPrice');
             if (addToCartPrice) {
-                addToCartPrice.textContent = `$${product.price}`;
+                // Get the selected size and calculate price
+                const selectedSizeEl = document.querySelector('.size-option.selected');
+                const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
+                const basePrice = parseFloat(product.price) || 22.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                } else if (selectedSize === '3X') {
+                    finalPrice = basePrice + 6.00; // 3X costs $6 more
+                } else if (selectedSize === '4X') {
+                    finalPrice = basePrice + 8.00; // 4X costs $8 more
+                }
+                
+                addToCartPrice.textContent = `$${finalPrice.toFixed(2)}`;
+                addToCartPrice.dataset.basePrice = basePrice;
+                addToCartPrice.dataset.selectedSize = selectedSize;
             }
             
             // Update original price if on sale
@@ -1910,6 +2021,9 @@
                                 });
                                 option.classList.add('selected', 'border-accent');
                                 option.classList.remove('border-surface-light');
+                                
+                                // Update price when size changes
+                                updatePriceForSize(option.dataset.size);
                             });
                         }
                     });
