@@ -1229,6 +1229,118 @@
 
         // Category filtering functionality
         let selectedCategories = ['All Designs'];
+        let allCategories = [];
+        
+        // Load categories dynamically from database
+        async function loadCategories() {
+            try {
+                const response = await fetch('/api/admin/categories');
+                if (response.ok) {
+                    allCategories = await response.json();
+                    updateCategoryFilterSidebar();
+                    updateCategoryCounts();
+                } else {
+                    console.error('Failed to load categories');
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+        
+        // Update category filter sidebar dynamically
+        function updateCategoryFilterSidebar() {
+            // Update main category filter section
+            const categorySection = document.querySelector('.filter-sidebar .space-y-8 > div:first-child');
+            if (categorySection) {
+                let filterHTML = '<h3 class="font-orbitron text-lg font-bold text-white mb-4">Categories</h3>';
+                filterHTML += '<div class="space-y-3">';
+                
+                // Add "All Designs" option
+                filterHTML += `
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent category-checkbox" checked data-category="All Designs" />
+                        <span class="text-text-primary">All Designs</span>
+                        <span class="text-text-secondary text-sm ml-auto" id="all-designs-count">(0)</span>
+                    </label>
+                `;
+                
+                // Add dynamic categories
+                allCategories.forEach(category => {
+                    if (category.name !== 'Uncategorized') {
+                        const categoryId = category.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                        filterHTML += `
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent category-checkbox" data-category="${category.name}" />
+                                <span class="text-text-primary">${category.name}</span>
+                                <span class="text-text-secondary text-sm ml-auto" id="${categoryId}-count">(0)</span>
+                            </label>
+                        `;
+                    }
+                });
+                
+                filterHTML += '</div>';
+                categorySection.innerHTML = filterHTML;
+            }
+            
+            // Update mobile filter chips
+            const mobileChipsSection = document.querySelector('.mobile-filter-chips');
+            if (mobileChipsSection) {
+                let chipsHTML = '';
+                chipsHTML += '<button class="filter-chip active" data-category="all">All Designs</button>';
+                
+                allCategories.forEach(category => {
+                    if (category.name !== 'Uncategorized') {
+                        const categoryId = category.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                        chipsHTML += `
+                            <button class="filter-chip" data-category="${categoryId}">
+                                ${category.name}
+                            </button>
+                        `;
+                    }
+                });
+                
+                mobileChipsSection.innerHTML = chipsHTML;
+            }
+            
+            // Re-attach event listeners
+            setupCategoryEventListeners();
+        }
+        
+        // Setup category event listeners
+        function setupCategoryEventListeners() {
+            // Remove old listeners
+            const oldCheckboxes = document.querySelectorAll('.category-checkbox');
+            oldCheckboxes.forEach(checkbox => {
+                checkbox.removeEventListener('change', handleCategoryChange);
+            });
+            
+            // Add new listeners
+            const newCheckboxes = document.querySelectorAll('.category-checkbox');
+            newCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', handleCategoryChange);
+            });
+        }
+        
+        // Handle category checkbox changes
+        function handleCategoryChange() {
+            const selectedCheckboxes = document.querySelectorAll('.category-checkbox:checked');
+            selectedCategories = Array.from(selectedCheckboxes).map(checkbox => checkbox.dataset.category);
+            
+            if (selectedCategories.includes('All Designs')) {
+                // If "All Designs" is selected, uncheck others
+                document.querySelectorAll('.category-checkbox:not([data-category="All Designs"])').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                selectedCategories = ['All Designs'];
+            } else {
+                // Remove "All Designs" if specific categories are selected
+                const allDesignsCheckbox = document.querySelector('.category-checkbox[data-category="All Designs"]');
+                if (allDesignsCheckbox) allDesignsCheckbox.checked = false;
+            }
+            
+            console.log('🎯 Selected categories:', selectedCategories);
+            filterProductsByCategory();
+        }
         
         function updateCategoryCounts() {
             const categoryCounts = {};
@@ -1239,27 +1351,20 @@
                 categoryCounts[category] = (categoryCounts[category] || 0) + 1;
             });
             
-            // Update category count displays
-            const categoryElements = {
-                'all-designs-count': allProducts.length,
-                'adult-shirts-count': categoryCounts['Adult Shirts'] || 0,
-                'adult-hoodies-count': categoryCounts['Adult Hoodies'] || 0,
-                'adult-birthday-count': categoryCounts['Adult Birthday'] || 0,
-                'youth-shirts-count': categoryCounts['Youth Shirts'] || 0,
-                'youth-hoodies-count': categoryCounts['Youth Hoodies'] || 0,
-                'youth-birthday-count': categoryCounts['Youth Birthday'] || 0,
-                'family-team-count': categoryCounts['Family/Team Shirts'] || 0,
-                'mothers-day-count': categoryCounts['Mother\'s Day'] || 0,
-                'fathers-day-count': categoryCounts['Father\'s Day'] || 0,
-                'halloween-count': categoryCounts['Halloween'] || 0,
-                'christmas-count': categoryCounts['Christmas'] || 0,
-                'other-holidays-count': categoryCounts['Other Holidays'] || 0
-            };
+            // Update "All Designs" count
+            const allDesignsElement = document.getElementById('all-designs-count');
+            if (allDesignsElement) {
+                allDesignsElement.textContent = `(${allProducts.length})`;
+            }
             
-            Object.keys(categoryElements).forEach(elementId => {
-                const element = document.getElementById(elementId);
-                if (element) {
-                    element.textContent = `(${categoryElements[elementId]})`;
+            // Update all category count displays
+            allCategories.forEach(category => {
+                if (category.name !== 'Uncategorized') {
+                    const categoryId = category.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    const element = document.getElementById(`${categoryId}-count`);
+                    if (element) {
+                        element.textContent = `(${categoryCounts[category.name] || 0})`;
+                    }
                 }
             });
             
@@ -1305,38 +1410,9 @@
             }
         }
         
-        // Set up category filter event listeners
-        const categoryFilters = document.querySelectorAll('input[type="checkbox"]');
-        categoryFilters.forEach(filter => {
-            filter.addEventListener('change', () => {
-                const categoryName = filter.parentElement.textContent.trim().split('(')[0].trim();
-                
-                if (filter.checked) {
-                    if (categoryName === 'All Designs') {
-                        // If "All Designs" is selected, uncheck others
-                        categoryFilters.forEach(f => {
-                            if (f !== filter) f.checked = false;
-                        });
-                        selectedCategories = ['All Designs'];
-                    } else {
-                        // Remove "All Designs" and add specific category
-                        selectedCategories = selectedCategories.filter(cat => cat !== 'All Designs');
-                        selectedCategories.push(categoryName);
-                    }
-                } else {
-                    // Remove category from selection
-                    selectedCategories = selectedCategories.filter(cat => cat !== categoryName);
-                    
-                    // If no categories selected, default to "All Designs"
-                    if (selectedCategories.length === 0) {
-                        selectedCategories = ['All Designs'];
-                        document.querySelector('input[value="all-designs"]').checked = true;
-                    }
-                }
-                
-                console.log('🎯 Selected categories:', selectedCategories);
-                filterProductsByCategory();
-            });
+        // Load categories when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
         });
 
         // Size filter functionality
