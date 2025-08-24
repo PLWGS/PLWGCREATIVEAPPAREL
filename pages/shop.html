@@ -248,7 +248,8 @@
                     <a href="homepage.html" class="text-text-primary hover:text-accent transition-colors duration-300">Home</a>
                     <a href="shop.html" class="text-accent font-medium">Shop</a>
                     <a href="custom.html" class="text-text-primary hover:text-accent transition-colors duration-300">Custom Orders</a>
-                    <a href="account.html" class="text-text-primary hover:text-accent transition-colors duration-300">Account</a>
+                    <a href="customer-login.html" class="text-text-primary hover:text-accent transition-colors duration-300" id="nav-login-link">Login</a>
+                    <a href="account.html" class="text-text-primary hover:text-accent transition-colors duration-300 hidden" id="nav-account-link">My Account</a>
                     <a href="admin.html" class="text-text-primary hover:text-accent transition-colors duration-300">Admin</a>
                 </div>
 
@@ -361,7 +362,7 @@
         </section>
 
         <!-- Login Call to Action -->
-        <section class="py-6 border-b border-surface-light">
+        <section class="py-6 border-b border-surface-light" id="login-cta">
             <div class="container mx-auto px-6">
                 <div class="text-center">
                     <p class="text-text-secondary mb-3">Want to add items to cart and track your orders?</p>
@@ -1626,6 +1627,8 @@
             const mobileAccountLink = document.getElementById('mobile-account-link');
             const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
             const loginCta = document.getElementById('login-cta');
+            const navLoginLink = document.getElementById('nav-login-link');
+            const navAccountLink = document.getElementById('nav-account-link');
             
             if (token) {
                 // User is logged in
@@ -1636,6 +1639,8 @@
                 if (mobileAccountLink) mobileAccountLink.classList.remove('hidden');
                 if (mobileLogoutBtn) mobileLogoutBtn.classList.remove('hidden');
                 if (loginCta) loginCta.classList.add('hidden');
+                if (navLoginLink) navLoginLink.classList.add('hidden');
+                if (navAccountLink) navAccountLink.classList.remove('hidden');
                 
                 // Add logout functionality
                 if (logoutBtn) {
@@ -1663,6 +1668,8 @@
                 if (mobileAccountLink) mobileAccountLink.classList.add('hidden');
                 if (mobileLogoutBtn) mobileLogoutBtn.classList.add('hidden');
                 if (loginCta) loginCta.classList.remove('hidden');
+                if (navLoginLink) navLoginLink.classList.remove('hidden');
+                if (navAccountLink) navAccountLink.classList.add('hidden');
             }
         }
         
