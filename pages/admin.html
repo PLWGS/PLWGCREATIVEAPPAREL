@@ -640,44 +640,13 @@
                         <h3 class="font-orbitron text-lg font-bold text-white">Custom Requests</h3>
                         <a href="custom.html" class="text-accent hover:text-accent-light text-sm">View All</a>
                     </div>
-                    <div class="space-y-4">
-                        <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="status-badge status-urgent">Urgent</span>
-                                <span class="text-text-secondary text-xs">2h ago</span>
-                            </div>
-                            <h4 class="text-white font-medium text-sm mb-2">Wedding Party Tees</h4>
-                            <p class="text-text-secondary text-xs mb-3">Custom design for 8 bridesmaids with funny quotes</p>
-                            <div class="flex items-center justify-between">
-                                <span class="text-accent font-bold text-sm">Est. $240</span>
-                                <button class="btn-primary text-xs px-3 py-1">Quote Now</button>
-                            </div>
+                    <div id="customRequestsContainer" class="space-y-4">
+                        <div id="customRequestsLoading" class="text-center py-6">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+                            <p class="text-text-secondary mt-2">Loading custom requests...</p>
                         </div>
-
-                        <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="status-badge status-processing">In Review</span>
-                                <span class="text-text-secondary text-xs">5h ago</span>
-                            </div>
-                            <h4 class="text-white font-medium text-sm mb-2">Horror Movie Mashup</h4>
-                            <p class="text-text-secondary text-xs mb-3">Combining 3 classic horror movies in one design</p>
-                            <div class="flex items-center justify-between">
-                                <span class="text-accent font-bold text-sm">Est. $35</span>
-                                <button class="border border-accent text-accent px-3 py-1 rounded text-xs hover:bg-accent hover:text-black transition-all duration-300">Review</button>
-                            </div>
-                        </div>
-
-                        <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="status-badge status-pending">New</span>
-                                <span class="text-text-secondary text-xs">1d ago</span>
-                            </div>
-                            <h4 class="text-white font-medium text-sm mb-2">Corporate Event Tees</h4>
-                            <p class="text-text-secondary text-xs mb-3">50 shirts for tech company with custom logo</p>
-                            <div class="flex items-center justify-between">
-                                <span class="text-accent font-bold text-sm">Est. $1,250</span>
-                                <button class="btn-primary text-xs px-3 py-1">Quote Now</button>
-                            </div>
+                        <div id="customRequestsEmpty" class="text-center py-6 hidden text-text-secondary text-sm">
+                            No custom requests found
                         </div>
                     </div>
                 </div>
@@ -1115,17 +1084,50 @@
             return `${Math.floor(diffInHours / 24)}d ago`;
         }
 
-        // Load custom requests
+        // Load custom requests and orders with custom input
         async function loadCustomRequests() {
             try {
-                const response = await apiRequest('/api/custom-requests?limit=5');
-                if (!response) return;
+                // Load both custom requests and orders with custom input
+                const [customRequestsResponse, customOrdersResponse] = await Promise.all([
+                    apiRequest('/api/custom-requests?limit=3'),
+                    apiRequest('/api/orders/custom-input?limit=3')
+                ]);
                 
-                const data = await response.json();
+                let allRequests = [];
                 
-                if (response.ok) {
-                    updateCustomRequests(data.requests);
+                // Add custom requests
+                if (customRequestsResponse && customRequestsResponse.ok) {
+                    const customData = await customRequestsResponse.json();
+                    allRequests = allRequests.concat(customData.requests || []);
                 }
+                
+                // Add orders with custom input
+                if (customOrdersResponse && customOrdersResponse.ok) {
+                    const ordersData = await customOrdersResponse.json();
+                    const customOrders = (ordersData.orders || []).map(order => ({
+                        id: `order_${order.id}`,
+                        type: 'order',
+                        customer_name: order.customer_name,
+                        product_type: order.product_name,
+                        concept_description: `Custom input: ${JSON.stringify(order.custom_input)}`,
+                        quantity: order.quantity,
+                        timeline: 'standard',
+                        budget_range: `$${order.total_price}`,
+                        status: order.order_status,
+                        created_at: order.created_at,
+                        email: order.customer_email,
+                        order_number: order.order_number
+                    }));
+                    allRequests = allRequests.concat(customOrders);
+                }
+                
+                // Sort by creation date (newest first)
+                allRequests.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                
+                // Take the first 5
+                allRequests = allRequests.slice(0, 5);
+                
+                updateCustomRequests(allRequests);
             } catch (error) {
                 console.error('Error loading custom requests:', error);
             }
@@ -1133,8 +1135,23 @@
 
         // Update custom requests
         function updateCustomRequests(requests) {
-            const container = document.querySelector('.glass-card:nth-child(2) .space-y-4');
-            if (!container || !requests) return;
+            const container = document.getElementById('customRequestsContainer');
+            const loading = document.getElementById('customRequestsLoading');
+            const empty = document.getElementById('customRequestsEmpty');
+            
+            if (!container) return;
+            
+            // Hide loading
+            if (loading) loading.classList.add('hidden');
+            
+            if (!requests || requests.length === 0) {
+                // Show empty state
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+            
+            // Hide empty state
+            if (empty) empty.classList.add('hidden');
             
             container.innerHTML = requests.map(request => {
                 const statusClass = request.status === 'pending' ? 'status-pending' : 
@@ -1158,7 +1175,10 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-accent font-bold text-sm">Budget: ${request.budget_range}</span>
-                            <button class="btn-primary text-xs px-3 py-1" onclick="viewCustomRequest(${request.id})">View Details</button>
+                            ${request.type === 'order' ? 
+                                `<button class="border border-accent text-accent px-3 py-1 rounded text-xs hover:bg-accent hover:text-black transition-all duration-300" onclick="viewOrderWithCustomInput('${request.order_number}')">View Order</button>` :
+                                `<button class="btn-primary text-xs px-3 py-1" onclick="viewCustomRequest(${request.id})">View Details</button>`
+                            }
                         </div>
                     </div>
                 `;
@@ -1745,7 +1765,95 @@
     var s = document.createElement('script');
     s.src = (location.pathname.includes('/pages/') ? '../public/mobile-menu-injector.js?v=20250809d' : 'public/mobile-menu-injector.js?v=20250809d');
     document.head.appendChild(s);
-  }
-  </script>
+          }
+
+        // View order with custom input
+        async function viewOrderWithCustomInput(orderNumber) {
+            try {
+                const response = await apiRequest(`/api/orders/custom-input`);
+                if (!response) return;
+                
+                const data = await response.json();
+                const order = data.orders.find(o => o.order_number === orderNumber);
+                
+                if (order) {
+                    showOrderWithCustomInputModal(order);
+                } else {
+                    console.error('Order not found');
+                }
+            } catch (error) {
+                console.error('Error loading order details:', error);
+            }
+        }
+
+        // Show order with custom input modal
+        function showOrderWithCustomInputModal(order) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="glass-card rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-orbitron text-xl font-bold text-white">Order with Custom Input</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-text-secondary hover:text-accent">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-text-secondary text-sm">Order Number</label>
+                                <p class="text-white font-medium">${order.order_number}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Customer Name</label>
+                                <p class="text-white font-medium">${order.customer_name}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Email</label>
+                                <p class="text-white font-medium">${order.customer_email}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Product</label>
+                                <p class="text-white font-medium">${order.product_name}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Quantity</label>
+                                <p class="text-white font-medium">${order.quantity}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Total</label>
+                                <p class="text-white font-medium">$${order.total_price}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Size</label>
+                                <p class="text-white font-medium">${order.size}</p>
+                            </div>
+                            <div>
+                                <label class="text-text-secondary text-sm">Color</label>
+                                <p class="text-white font-medium">${order.color}</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-text-secondary text-sm">Custom Input Details</label>
+                            <div class="bg-surface-dark p-4 rounded-lg mt-2">
+                                <pre class="text-white text-sm whitespace-pre-wrap">${JSON.stringify(order.custom_input, null, 2)}</pre>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-text-secondary text-sm">Order Date</label>
+                            <p class="text-white font-medium">${new Date(order.created_at).toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+    </script>
 </body>
 </html>

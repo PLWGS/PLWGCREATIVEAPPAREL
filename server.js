@@ -397,6 +397,7 @@ async function initializeDatabase() {
         size VARCHAR(10),
         color VARCHAR(50),
         image_url TEXT,
+        custom_input JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -1016,9 +1017,9 @@ app.post('/api/orders', validateOrder, async (req, res) => {
     // Create order items
     for (const item of items) {
       await pool.query(`
-        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color, image_url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      `, [order.id, item.product_id, item.product_name, item.quantity, item.unit_price, item.total_price, item.size, item.color, item.image_url]);
+        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color, image_url, custom_input)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `, [order.id, item.product_id, item.product_name, item.quantity, item.unit_price, item.total_price, item.size, item.color, item.image_url, item.custom_input]);
     }
     
     res.json({ order });
@@ -1182,6 +1183,41 @@ app.get('/api/customers/:id', authenticateToken, async (req, res) => {
 // =============================================================================
 // CUSTOM REQUESTS ENDPOINTS
 // =============================================================================
+
+// Get orders with custom input data
+app.get('/api/orders/custom-input', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        oi.id,
+        oi.order_id,
+        oi.product_name,
+        oi.quantity,
+        oi.unit_price,
+        oi.total_price,
+        oi.size,
+        oi.color,
+        oi.custom_input,
+        oi.created_at,
+        o.order_number,
+        o.customer_name,
+        o.customer_email,
+        o.total_amount,
+        o.status as order_status
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      WHERE oi.custom_input IS NOT NULL 
+        AND oi.custom_input != 'null' 
+        AND oi.custom_input != '{}'
+      ORDER BY oi.created_at DESC
+    `);
+    
+    res.json({ orders: result.rows });
+  } catch (error) {
+    console.error('Error fetching orders with custom input:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Get all custom requests
 app.get('/api/custom-requests', authenticateToken, async (req, res) => {
@@ -4369,9 +4405,9 @@ app.post('/api/cart/checkout', authenticateCustomer, validateCheckout, async (re
     // Create order items from cart items
     for (const item of cartItems) {
       await pool.query(`
-        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      `, [order.id, item.product_id, item.product_name, item.quantity, item.unit_price, (item.quantity * item.unit_price), item.size, item.color]);
+        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color, custom_input)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [order.id, item.product_id, item.product_name, item.quantity, item.unit_price, (item.quantity * item.unit_price), item.size, item.color, item.custom_input]);
     }
 
     // Clear cart after successful order
