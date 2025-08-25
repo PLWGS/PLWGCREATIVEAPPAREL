@@ -3277,6 +3277,7 @@ app.get('/api/cart', authenticateCustomer, async (req, res) => {
         c.size,
         c.color,
         c.image_url,
+        c.custom_input,
         (c.quantity * c.unit_price) as total_price
       FROM cart c
       WHERE c.customer_id = $1
@@ -4378,7 +4379,7 @@ app.post('/api/cart/checkout', authenticateCustomer, validateCheckout, async (re
 
     const customer = customerResult.rows[0];
 
-    // Get cart items
+    // Get cart items from cart table
     const cartResult = await pool.query(`
       SELECT * FROM cart WHERE customer_id = $1
     `, [customerId]);
