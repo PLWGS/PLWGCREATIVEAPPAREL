@@ -4301,6 +4301,10 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       }
     }
 
+    // Debug what we're receiving
+    console.log('🔍 Server received brand_preference:', req.body.brand_preference);
+    console.log('🔍 Server received specifications:', req.body.specifications);
+    
     // Update product
     const result = await pool.query(`
       UPDATE products SET
