@@ -692,8 +692,14 @@
         if (hasBase64) {
           body.images = uploadedImages.slice(0,5);
         } else {
-          body.image_url = uploadedImages[0] || null;
-          body.sub_images = uploadedImages.slice(1,5);
+          // Clean URLs to remove any potential invisible characters or encoding issues
+          const cleanUrl = (url) => {
+            if (!url || typeof url !== 'string') return null;
+            return url.trim().replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+          };
+          
+          body.image_url = cleanUrl(uploadedImages[0]);
+          body.sub_images = uploadedImages.slice(1,5).map(cleanUrl).filter(Boolean);
         }
 
                  // Debug each field individually
@@ -722,6 +728,11 @@
          
          console.log('🚀 Sending request body:', body);
          console.log('🔍 Specifications being sent:', body.specifications);
+         console.log('🔍 Image URLs being sent:', {
+           image_url: body.image_url,
+           sub_images: body.sub_images,
+           uploadedImages: uploadedImages
+         });
          
          const resp = await fetch(`/api/admin/products/${productId}`, {
            method:'PUT',
