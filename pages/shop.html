@@ -908,12 +908,12 @@
         const loadMoreBtn = document.getElementById('load-more-btn');
         const productsGrid = document.getElementById('products-grid');
 
-        // Products will be loaded from database
-        let allProducts = [];
-
+        // Global variables for pagination and filtering
         let currentPage = 0;
-        const productsPerPage = 6; // Show 6 products at a time (2 rows of 3)
-        let totalPages = 0;
+        let totalPages = 1;
+        let allProducts = [];
+        let filteredProducts = []; // Store filtered products for pagination
+        const productsPerPage = 6;
 
         // Load products from database
         async function loadProductsFromDatabase() {
@@ -934,23 +934,35 @@
                     });
                     
                     allProducts = Array.isArray(products) ? products : [];
+                    window.filteredProducts = []; // Initialize filteredProducts as empty on initial load
                     console.log('📦 Processed products array:', allProducts);
+                    
+                    // Debug: Check what categories are actually in the database
+                    const categoriesInDB = {};
+                    allProducts.forEach(product => {
+                        const category = product.category || 'No Category';
+                        categoriesInDB[category] = (categoriesInDB[category] || 0) + 1;
+                    });
+                    console.log('🔍 Categories found in database:', categoriesInDB);
+                    
                     totalPages = Math.ceil(allProducts.length / productsPerPage);
                     console.log('📄 Total pages:', totalPages);
-                    displayProducts(0);
+                    displayProducts(0, allProducts); // Pass allProducts explicitly
                     updateProductCounts();
                 } else {
                     console.log('❌ No products found in database');
                     allProducts = [];
+                    window.filteredProducts = [];
                     totalPages = 0;
-                    displayProducts(0);
+                    displayProducts(0, []); // Pass empty array explicitly
                     updateProductCounts();
                 }
             } catch (error) {
                 console.error('❌ Error loading products:', error);
                 allProducts = [];
+                window.filteredProducts = [];
                 totalPages = 0;
-                displayProducts(0);
+                displayProducts(0, []); // Pass empty array explicitly
                 updateProductCounts();
             }
         }
@@ -1292,6 +1304,47 @@
             updateProductCounts(products.length);
         }
 
+        // Function to load more products with proper filtering logic
+        function loadMoreProducts() {
+            // Determine which product list to use
+            const productsToUse = window.filteredProducts && window.filteredProducts.length > 0 ? window.filteredProducts : window.allProducts;
+            
+            currentPage++; // Increment page for the list being used
+            displayProducts(currentPage, productsToUse); // Display the relevant list
+        }
+
+        // Function to reset filters and return to showing all products
+        function resetFilters() {
+            // Clear active filter buttons visually
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+
+            // Clear the global filteredProducts array
+            window.filteredProducts = [];
+
+            // Reset to first page
+            currentPage = 0;
+
+            // Clear search
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+
+            // Re-display all products from the first page
+            displayProducts(0, window.allProducts);
+
+            // Update counts based on all products
+            if (window.allProducts) {
+                updateProductCounts(window.allProducts.length);
+            }
+            console.log('Filters reset, displaying all products.');
+        }
+
+
+
         // Initialize with first page - moved to after categories and products are loaded
 
         if (loadMoreBtn) {
@@ -1302,8 +1355,7 @@
 
                 // Simulate loading delay
                 setTimeout(() => {
-                    currentPage++;
-                    displayProducts(currentPage);
+                    loadMoreProducts(); // Use the new function
                     loadMoreBtn.disabled = false;
                 }, 800);
             });
@@ -2104,7 +2156,7 @@
                     });
                     
                     console.log('🧹 All filters cleared');
-                    applyAllFilters();
+                    resetFilters(); // Use our new resetFilters function instead of applyAllFilters
                 });
             }
         });
@@ -2119,16 +2171,24 @@
                     const response = await fetch('/api/products/public');
                     if (response.ok) {
                         allFilteredProducts = await response.json();
+                        console.log('🔍 Fetched all products:', allFilteredProducts.length);
                     }
                 } else if (selectedCategories.length > 0) {
+                    console.log('🔍 Fetching products for categories:', selectedCategories);
                     for (const category of selectedCategories) {
                         const apiUrl = `/api/products/public?category=${encodeURIComponent(category)}`;
+                        console.log('🔍 Fetching from:', apiUrl);
                         const response = await fetch(apiUrl);
                         if (response.ok) {
                             const categoryProducts = await response.json();
+                            console.log(`🔍 Category "${category}" returned ${categoryProducts.length} products:`, categoryProducts.map(p => ({ name: p.name, category: p.category })));
                             allFilteredProducts = [...allFilteredProducts, ...categoryProducts];
+                        } else {
+                            console.error(`❌ Failed to fetch category "${category}":`, response.status);
                         }
                     }
+                    console.log('🔍 Total products after category filtering:', allFilteredProducts.length);
+                    console.log('🔍 All fetched products:', allFilteredProducts.map(p => ({ name: p.name, category: p.category })));
                 }
                 
                 // Then apply size and color filters to the results
@@ -2172,6 +2232,10 @@
                 // Reset pagination
                 currentPage = 0;
                 totalPages = Math.ceil(finalFilteredProducts.length / productsPerPage);
+                
+                // Store filtered products globally for pagination
+                filteredProducts = finalFilteredProducts;
+                window.filteredProducts = finalFilteredProducts; // Also set on window for global access
                 
                 // Display filtered products
                 displayProducts(0, finalFilteredProducts);
