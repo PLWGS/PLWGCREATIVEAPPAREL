@@ -1637,47 +1637,53 @@
                 const requests = (data && data.requests) || [];
                 
                 // Update the custom requests section
-                const customRequestsSection = document.querySelector('.glass-card.rounded-xl.p-6:has(h3:contains("Custom Requests"))');
+                const customRequestsSection = document.querySelector('.glass-card.rounded-xl.p-6');
                 if (customRequestsSection) {
-                    const requestsContainer = customRequestsSection.querySelector('.space-y-4');
-                    if (requestsContainer) {
-                        if (requests.length === 0) {
-                            requestsContainer.innerHTML = '<p class="text-text-secondary text-center py-4">No custom requests found</p>';
-                        } else {
-                            requestsContainer.innerHTML = requests.slice(0, 3).map(request => {
-                                const timeAgo = formatTimeAgo(request.created_at);
-                                const statusClass = request.status === 'pending' ? 'status-pending' : 
-                                                  request.status === 'in-progress' ? 'status-processing' : 
-                                                  request.status === 'completed' ? 'status-completed' : 'status-urgent';
-                                const statusText = request.status === 'pending' ? 'New' : 
-                                                 request.status === 'in-progress' ? 'In Review' : 
-                                                 request.status === 'completed' ? 'Completed' : 'Urgent';
-                                
-                                return `
-                                    <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <span class="status-badge ${statusClass}">${statusText}</span>
-                                            <span class="text-text-secondary text-xs">${timeAgo}</span>
+                    const h3Element = customRequestsSection.querySelector('h3');
+                    if (h3Element && h3Element.textContent.includes('Custom Requests')) {
+                        const requestsContainer = customRequestsSection.querySelector('.space-y-4');
+                        if (requestsContainer) {
+                            if (requests.length === 0) {
+                                requestsContainer.innerHTML = '<p class="text-text-secondary text-center py-4">No custom requests found</p>';
+                            } else {
+                                requestsContainer.innerHTML = requests.slice(0, 3).map(request => {
+                                    const timeAgo = formatTimeAgo(request.created_at);
+                                    const statusClass = request.status === 'pending' ? 'status-pending' : 
+                                                      request.status === 'in-progress' ? 'status-processing' : 
+                                                      request.status === 'completed' ? 'status-completed' : 'status-urgent';
+                                    const statusText = request.status === 'pending' ? 'New' : 
+                                                     request.status === 'in-progress' ? 'In Review' : 
+                                                     request.status === 'completed' ? 'Completed' : 'Urgent';
+                                    
+                                    return `
+                                        <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <span class="status-badge ${statusClass}">${statusText}</span>
+                                                <span class="text-text-secondary text-xs">${timeAgo}</span>
+                                            </div>
+                                            <h4 class="text-white font-medium text-sm mb-2">${request.customer_name} - ${request.request_type}</h4>
+                                            <p class="text-text-secondary text-xs mb-3">${request.concept_description ? request.concept_description.substring(0, 100) + '...' : 'No description provided'}</p>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-accent font-bold text-sm">Est. $${request.estimated_budget}</span>
+                                                <button onclick="viewCustomRequest(${request.id})" class="btn-primary text-xs px-3 py-1">View Details</button>
+                                            </div>
                                         </div>
-                                        <h4 class="text-white font-medium text-sm mb-2">${request.customer_name} - ${request.request_type}</h4>
-                                        <p class="text-text-secondary text-xs mb-3">${request.concept_description ? request.concept_description.substring(0, 100) + '...' : 'No description provided'}</p>
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-accent font-bold text-sm">Est. $${request.estimated_budget}</span>
-                                            <button onclick="viewCustomRequest(${request.id})" class="btn-primary text-xs px-3 py-1">View Details</button>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
+                                    `;
+                                }).join('');
+                            }
                         }
                     }
                 }
                 
                 // Update the custom requests count in the metric card
-                const customRequestsMetric = document.querySelector('.metric-card:has(h3:contains("Custom Requests"))');
+                const customRequestsMetric = document.querySelector('.metric-card');
                 if (customRequestsMetric) {
-                    const countElement = customRequestsMetric.querySelector('h3');
-                    if (countElement) {
-                        countElement.textContent = requests.length;
+                    const h3Element = customRequestsMetric.querySelector('h3');
+                    if (h3Element && h3Element.textContent.includes('Custom Requests')) {
+                        const countElement = customRequestsMetric.querySelector('h3');
+                        if (countElement) {
+                            countElement.textContent = requests.length;
+                        }
                     }
                 }
                 

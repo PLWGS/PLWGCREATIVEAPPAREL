@@ -374,10 +374,7 @@ def create_edit_page_content(product_id, product_name, product_data):
             <div class="mt-8">
                 <h2 class="text-xl font-semibold text-white mb-6">Product Features</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label class="flex items-center">
-                        <input type="checkbox" id="feature-preshrunk" class="mr-3" {'checked' if features.get('preshrunk') else ''}>
-                        <span>Preshrunk</span>
-                    </label>
+
                     <label class="flex items-center">
                         <input type="checkbox" id="feature-double-stitched" class="mr-3" {'checked' if features.get('double_stitched') else ''}>
                         <span>Double Stitched</span>
@@ -486,7 +483,7 @@ def create_edit_page_content(product_id, product_name, product_data):
                     origin: document.getElementById('spec-origin').value
                 }},
                 features: {{
-                    preshrunk: document.getElementById('feature-preshrunk').checked,
+        
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
                     soft_touch: document.getElementById('feature-soft-touch').checked

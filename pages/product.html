@@ -579,38 +579,38 @@
                                 <div class="space-y-4">
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Material:</span>
-                                        <span class="text-white">100% Premium Cotton</span>
+                                        <span class="text-white" id="spec-material">100% Premium Cotton</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Weight:</span>
-                                        <span class="text-white">180 GSM</span>
+                                        <span class="text-white" id="spec-weight">180 GSM</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Fit:</span>
-                                        <span class="text-white">Unisex Regular</span>
+                                        <span class="text-white" id="spec-fit">Unisex Regular</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Print Method:</span>
-                                        <span class="text-white">Direct-to-Garment</span>
+                                        <span class="text-white" id="spec-print-method">Direct-to-Garment</span>
                                     </div>
                                 </div>
                                 
                                 <div class="space-y-4">
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Neck Style:</span>
-                                        <span class="text-white">Crew Neck</span>
+                                        <span class="text-white" id="spec-neck">Crew Neck</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Sleeve Length:</span>
-                                        <span class="text-white">Short Sleeve</span>
+                                        <span class="text-white" id="spec-sleeve">Short Sleeve</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Origin:</span>
-                                        <span class="text-white">Made in USA</span>
+                                        <span class="text-white" id="spec-origin">Made in USA</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Sustainability:</span>
-                                        <span class="text-white">Eco-Friendly Inks</span>
+                                        <span class="text-white" id="spec-sustainability">Eco-Friendly Inks</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-text-secondary">Brand Preference:</span>
@@ -630,7 +630,7 @@
                                         <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
-                                        <span>Pre-shrunk for consistent fit</span>
+                
                                     </li>
                                     <li class="flex items-center space-x-3">
                                         <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1950,6 +1950,46 @@
                         });
                     }
                 }
+            }
+            
+            // Update product specifications dynamically
+            console.log('🔍 Checking product specifications:', product.specifications);
+            if (product.specifications) {
+                try {
+                    const specs = typeof product.specifications === 'string' 
+                        ? JSON.parse(product.specifications) 
+                        : product.specifications;
+                    
+                    console.log('🔍 Parsed specifications:', specs);
+                    
+                    // Update each specification field with mapping to database field names
+                    const specFieldMapping = [
+                        { htmlId: 'material', dbField: 'material' },
+                        { htmlId: 'weight', dbField: 'weight' },
+                        { htmlId: 'fit', dbField: 'fit' },
+                        { htmlId: 'print-method', dbField: 'print_method' },
+                        { htmlId: 'neck', dbField: 'neck_style' },
+                        { htmlId: 'sleeve', dbField: 'sleeve_length' },
+                        { htmlId: 'origin', dbField: 'origin' },
+                        { htmlId: 'sustainability', dbField: 'sustainability' }
+                    ];
+                    
+                    specFieldMapping.forEach(mapping => {
+                        const element = document.getElementById(`spec-${mapping.htmlId}`);
+                        if (element && specs[mapping.dbField]) {
+                            console.log(`🔍 Updating ${mapping.htmlId}: ${specs[mapping.dbField]}`);
+                            element.textContent = specs[mapping.dbField];
+                        } else {
+                            console.log(`⚠️ Field ${mapping.htmlId} not found or empty:`, element, specs[mapping.dbField]);
+                        }
+                    });
+                    
+                    console.log('✅ Product specifications updated dynamically');
+                } catch (error) {
+                    console.warn('⚠️ Error updating specifications:', error);
+                }
+            } else {
+                console.log('⚠️ No specifications found in product data');
             }
             
             // Do not render visible tags; keep container hidden intentionally

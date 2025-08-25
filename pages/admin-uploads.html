@@ -446,15 +446,7 @@
                             <label for="track-inventory" class="text-text-secondary text-sm">Track inventory for this product</label>
                         </div>
 
-                        <!-- Brand preference -->
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-text-primary mb-2">Brand Preference</label>
-                            <select id="brand-preference" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none">
-                                <option value="either">Either (auto)</option>
-                                <option value="gildan">Gildan Softstyle 64000</option>
-                                <option value="bella">Bella+Canvas 3001</option>
-                            </select>
-                        </div>
+
 
                         <!-- Specs Notes -->
                         <div class="mt-4">
@@ -490,6 +482,18 @@
                                 <label class="block text-sm text-text-secondary mb-1">Origin</label>
                                 <input type="text" id="spec-origin" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Made in USA" value="Made in USA">
                             </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Print Method</label>
+                                <input type="text" id="spec-print-method" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Direct-to-Garment" value="Direct-to-Garment">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Sustainability</label>
+                                <input type="text" id="spec-sustainability" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Eco-Friendly Inks" value="Eco-Friendly Inks">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Brand Preference</label>
+                                <input type="text" id="spec-brand-preference" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Either (Gildan Softstyle 64000 or Bella+Canvas 3001)" value="Either (Gildan Softstyle 64000 or Bella+Canvas 3001)">
+                            </div>
                         </div>
                     </div>
 
@@ -498,8 +502,7 @@
                         <label class="block text-sm font-medium text-text-primary mb-2">Product Features</label>
                         <div class="space-y-2">
                             <div class="flex items-center space-x-2">
-                                <input type="checkbox" id="feature-preshrunk" class="rounded border-surface-light text-accent focus:ring-accent" checked>
-                                <label for="feature-preshrunk" class="text-sm text-text-primary">Pre-shrunk for consistent fit</label>
+                                
                             </div>
                             <div class="flex items-center space-x-2">
                                 <input type="checkbox" id="feature-double-stitched" class="rounded border-surface-light text-accent focus:ring-accent" checked>
@@ -947,7 +950,6 @@
                 sizes: selectedSizes,
                 size_stock: sizeStock, // Add size-specific stock quantities
                 track_inventory: !!document.getElementById('track-inventory').checked,
-                brand_preference: document.getElementById('brand-preference').value,
                 specs_notes: document.getElementById('specs-notes').value,
                 images: uploadedImages,
                 specifications: {
@@ -956,10 +958,12 @@
                     fit: document.getElementById('spec-fit').value,
                     neck_style: document.getElementById('spec-neck').value,
                     sleeve_length: document.getElementById('spec-sleeve').value,
-                    origin: document.getElementById('spec-origin').value
+                    origin: document.getElementById('spec-origin').value,
+                    print_method: document.getElementById('spec-print-method').value,
+                    sustainability: document.getElementById('spec-sustainability').value,
+                    brand_preference: document.getElementById('spec-brand-preference').value
                 },
                 features: {
-                    preshrunk: document.getElementById('feature-preshrunk').checked,
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
                     soft_touch: document.getElementById('feature-soft-touch').checked
@@ -1088,7 +1092,6 @@
             document.getElementById('low-stock-threshold').value = '5';
             document.getElementById('sale-percentage').value = '15';
             document.getElementById('track-inventory').checked = false;
-            document.getElementById('brand-preference').value = 'either';
             document.getElementById('specs-notes').value = '';
             document.getElementById('product-tags').value = '';
             uploadedImages = [];
@@ -1151,10 +1154,12 @@
                     fit: document.getElementById('spec-fit').value,
                     neck_style: document.getElementById('spec-neck').value,
                     sleeve_length: document.getElementById('spec-sleeve').value,
-                    origin: document.getElementById('spec-origin').value
+                    origin: document.getElementById('spec-origin').value,
+                    print_method: document.getElementById('spec-print-method').value,
+                    sustainability: document.getElementById('spec-sustainability').value,
+                    brand_preference: document.getElementById('spec-brand-preference').value
                 },
                 features: {
-                    preshrunk: document.getElementById('feature-preshrunk').checked,
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
                     soft_touch: document.getElementById('feature-soft-touch').checked

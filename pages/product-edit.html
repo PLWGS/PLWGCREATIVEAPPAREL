@@ -173,24 +173,29 @@
                 <label class="text-sm text-text-secondary mb-1 block">Origin</label>
                 <input type="text" id="spec_origin" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
               </div>
-              <div>
-                <label class="text-sm text-text-secondary mb-1 block">Print Method</label>
-                <input type="text" id="spec_print_method" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
-              </div>
-              <div>
-                <label class="text-sm text-text-secondary mb-1 block">Sustainability</label>
-                <input type="text" id="spec_sustainability" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
-              </div>
-              <div>
-                <label class="text-sm text-text-secondary mb-1 block">Brand Preference</label>
-                <input type="text" id="spec_brand_preference" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" />
-              </div>
+                                             <div>
+                  <label class="text-sm text-text-secondary mb-1 block">Print Method</label>
+                  <input type="text" id="spec_print_method" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" placeholder="Direct-to-Garment" />
+                </div>
+                <div>
+                  <label class="text-sm text-text-secondary mb-1 block">Sustainability</label>
+                  <input type="text" id="spec_sustainability" class="w-full px-3 py-2 bg-surface border border-surface-light rounded" placeholder="Eco-Friendly Inks" />
+                </div>
+                <div>
+                  <label class="text-sm text-text-secondary mb-1 block">Brand Preference</label>
+                  <select id="spec_brand_preference" class="w-full px-3 py-2 bg-surface border border-surface-light rounded">
+                    <option value="">Select Brand Preference</option>
+                    <option value="either">Either (Gildan Softstyle 64000 or Bella+Canvas 3001)</option>
+                    <option value="gildan">Gildan Softstyle 64000</option>
+                    <option value="bella">Bella+Canvas 3001</option>
+                  </select>
+                </div>
             </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-text-primary mb-2">Product Features</label>
             <div class="space-y-2">
-              <label class="flex items-center space-x-2"><input type="checkbox" id="feature_preshrunk" class="rounded border-surface-light text-accent"><span>Pre-shrunk for consistent fit</span></label>
+
               <label class="flex items-center space-x-2"><input type="checkbox" id="feature_double_stitched" class="rounded border-surface-light text-accent"><span>Double-stitched seams for durability</span></label>
               <label class="flex items-center space-x-2"><input type="checkbox" id="feature_fade_resistant" class="rounded border-surface-light text-accent"><span>Fade-resistant printing technology</span></label>
               <label class="flex items-center space-x-2"><input type="checkbox" id="feature_soft_touch" class="rounded border-surface-light text-accent"><span>Soft-touch finish for comfort</span></label>
@@ -288,6 +293,9 @@
         const resp = await fetch(`/api/admin/products/${productId}`, { headers: { 'Authorization': 'Bearer ' + token } });
         if (!resp.ok) throw new Error('Failed to load');
         productData = await resp.json();
+        
+        // Wait for categories to load before hydrating the form
+        await loadCategories();
         hydrateForm();
       } catch(e){
         document.getElementById('loading').textContent = 'Failed to load product.';
@@ -312,21 +320,22 @@
       const tagsVal = Array.isArray(p.tags) ? p.tags.join(', ') : (typeof p.tags === 'string' ? p.tags : '');
       document.getElementById('tags').value = tagsVal;
 
-      // Specs
-      const specs = p.specifications || {};
-      document.getElementById('spec_material').value = specs.material || '';
-      document.getElementById('spec_weight').value = specs.weight || '';
-      document.getElementById('spec_fit').value = specs.fit || '';
-      document.getElementById('spec_neck').value = specs.neck_style || '';
-      document.getElementById('spec_sleeve').value = specs.sleeve_length || '';
-      document.getElementById('spec_origin').value = specs.origin || '';
-      document.getElementById('spec_print_method').value = specs.print_method || '';
-      document.getElementById('spec_sustainability').value = specs.sustainability || '';
-      document.getElementById('spec_brand_preference').value = specs.brand_preference || '';
+                    // Specs
+        const specs = p.specifications || {};
+        console.log('🔍 Loading specifications from product:', specs);
+        console.log('🔍 Product data received:', p);
+        document.getElementById('spec_material').value = specs.material || '';
+        document.getElementById('spec_weight').value = specs.weight || '';
+        document.getElementById('spec_fit').value = specs.fit || '';
+        document.getElementById('spec_neck').value = specs.neck_style || '';
+        document.getElementById('spec_sleeve').value = specs.sleeve_length || '';
+        document.getElementById('spec_origin').value = specs.origin || '';
+        document.getElementById('spec_print_method').value = specs.print_method || '';
+        document.getElementById('spec_sustainability').value = specs.sustainability || '';
+        document.getElementById('spec_brand_preference').value = specs.brand_preference || 'either';
 
       // Features
       const features = p.features || {};
-      document.getElementById('feature_preshrunk').checked = !!features.preshrunk;
       document.getElementById('feature_double_stitched').checked = !!features.double_stitched;
       document.getElementById('feature_fade_resistant').checked = !!features.fade_resistant;
       document.getElementById('feature_soft_touch').checked = !!features.soft_touch;
@@ -404,37 +413,36 @@
         const token = localStorage.getItem('adminToken');
         if (!token) { alert('Please login'); location.href='admin-login.html'; return; }
 
-        const body = {
-          name: document.getElementById('name').value.trim(),
-          description: document.getElementById('description').value.trim(),
-          category: document.getElementById('category').value.trim(),
-          price: parseFloat(document.getElementById('price').value) || 0,
-          original_price: document.getElementById('original_price').value ? parseFloat(document.getElementById('original_price').value) : null,
-          stock_quantity: parseInt(document.getElementById('stock_quantity').value, 10) || 50,
-          low_stock_threshold: parseInt(document.getElementById('low_stock_threshold').value, 10) || 5,
-          sale_percentage: parseInt(document.getElementById('sale_percentage').value, 10) || 15,
-          tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean),
-          colors: selectedColors,
-          sizes: selectedSizes,
-          size_stock: buildSizeStock(),
-          specifications: {
-            material: document.getElementById('spec_material').value.trim(),
-            weight: document.getElementById('spec_weight').value.trim(),
-            fit: document.getElementById('spec_fit').value.trim(),
-            neck_style: document.getElementById('spec_neck').value.trim(),
-            sleeve_length: document.getElementById('spec_sleeve').value.trim(),
-            origin: document.getElementById('spec_origin').value.trim(),
-            print_method: document.getElementById('spec_print_method').value.trim(),
-            sustainability: document.getElementById('spec_sustainability').value.trim(),
-            brand_preference: document.getElementById('spec_brand_preference').value.trim()
-          },
-          features: {
-            preshrunk: document.getElementById('feature_preshrunk').checked,
-            double_stitched: document.getElementById('feature_double_stitched').checked,
-            fade_resistant: document.getElementById('feature_fade_resistant').checked,
-            soft_touch: document.getElementById('feature_soft_touch').checked
-          }
-        };
+                 const body = {
+           name: document.getElementById('name').value.trim(),
+           description: document.getElementById('description').value.trim(),
+           category: document.getElementById('category').value.trim(),
+           price: parseFloat(document.getElementById('price').value) || 0,
+           original_price: document.getElementById('original_price').value ? parseFloat(document.getElementById('original_price').value) : null,
+           stock_quantity: parseInt(document.getElementById('stock_quantity').value, 10) || 50,
+           low_stock_threshold: parseInt(document.getElementById('low_stock_threshold').value, 10) || 5,
+           sale_percentage: parseInt(document.getElementById('sale_percentage').value, 10) || 15,
+           tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean),
+           colors: selectedColors,
+           sizes: selectedSizes,
+           size_stock: buildSizeStock(),
+           specifications: {
+             material: document.getElementById('spec_material').value.trim() || '',
+             weight: document.getElementById('spec_weight').value.trim() || '',
+             fit: document.getElementById('spec_fit').value.trim() || '',
+             neck_style: document.getElementById('spec_neck').value.trim() || '',
+             sleeve_length: document.getElementById('spec_sleeve').value.trim() || '',
+             origin: document.getElementById('spec_origin').value.trim() || '',
+             print_method: document.getElementById('spec_print_method').value.trim() || '',
+             sustainability: document.getElementById('spec_sustainability').value.trim() || ''
+           },
+           brand_preference: document.getElementById('spec_brand_preference').value.trim() || '',
+           features: {
+             double_stitched: document.getElementById('feature_double_stitched').checked,
+             fade_resistant: document.getElementById('feature_fade_resistant').checked,
+             soft_touch: document.getElementById('feature_soft_touch').checked
+           }
+         };
 
         // Images: send base64 array when present, else keep existing URLs
         const hasBase64 = uploadedImages.some(src => typeof src === 'string' && src.startsWith('data:'));
@@ -445,28 +453,54 @@
           body.sub_images = uploadedImages.slice(1,5);
         }
 
-        const resp = await fetch(`/api/admin/products/${productId}`, {
-          method:'PUT',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-          body: JSON.stringify(body)
-        });
-        if (!resp.ok) {
-          const err = await resp.json().catch(()=>({error:'Failed'}));
-          throw new Error(err.error || 'Failed');
-        }
-        alert('Product updated successfully');
-        location.href = 'admin-uploads.html';
+                 // Debug each field individually
+         console.log('🔍 Debugging form fields:');
+         console.log('spec_material:', document.getElementById('spec_material').value);
+         console.log('spec_weight:', document.getElementById('spec_weight').value);
+         console.log('spec_fit:', document.getElementById('spec_fit').value);
+         console.log('spec_neck:', document.getElementById('spec_neck').value);
+         console.log('spec_sleeve:', document.getElementById('spec_sleeve').value);
+         console.log('spec_origin:', document.getElementById('spec_origin').value);
+         console.log('spec_print_method:', document.getElementById('spec_print_method').value);
+         console.log('spec_sustainability:', document.getElementById('spec_sustainability').value);
+         console.log('spec_brand_preference:', document.getElementById('spec_brand_preference').value);
+         console.log('spec_brand_preference type:', typeof document.getElementById('spec_brand_preference').value);
+         console.log('spec_brand_preference element exists:', !!document.getElementById('spec_brand_preference'));
+         
+         console.log('🚀 Sending request body:', body);
+         console.log('🔍 Specifications being sent:', body.specifications);
+         
+         const resp = await fetch(`/api/admin/products/${productId}`, {
+           method:'PUT',
+           headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+           body: JSON.stringify(body)
+         });
+                 if (!resp.ok) {
+           const err = await resp.json().catch(()=>({error:'Failed'}));
+           console.error('❌ Server error response:', err);
+           throw new Error(err.error || `HTTP ${resp.status}: ${resp.statusText}`);
+         }
+                 alert('Product updated successfully');
+         console.log('✅ Product saved, reloading data...');
+         // Reload the product data to show updated values
+         await fetchProduct();
       } catch(e){
         alert('Error saving: '+ e.message);
       }
     });
 
-    // Load categories dynamically
-    loadCategories();
-    
-    setupColorSelection();
-    setupSizeSelection();
-    if (!productId) { document.getElementById('loading').textContent = 'Missing product ID'; } else { fetchProduct(); }
+         // Categories are now loaded in fetchProduct()
+     
+     // Wait for DOM to be fully loaded before initializing
+     document.addEventListener('DOMContentLoaded', () => {
+       setupColorSelection();
+       setupSizeSelection();
+       if (!productId) { 
+         document.getElementById('loading').textContent = 'Missing product ID'; 
+       } else { 
+         fetchProduct(); 
+       }
+     });
   </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>

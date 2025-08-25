@@ -443,8 +443,7 @@ function createEditPageForProduct(productId, productName) {
                             <label class="block text-sm font-medium text-text-primary mb-2">Product Features</label>
                             <div class="space-y-2">
                                 <div class="flex items-center space-x-2">
-                                    <input type="checkbox" id="feature-preshrunk" class="rounded border-surface-light text-accent focus:ring-accent" checked>
-                                    <label for="feature-preshrunk" class="text-sm text-text-primary">Pre-shrunk for consistent fit</label>
+                                    
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <input type="checkbox" id="feature-double-stitched" class="rounded border-surface-light text-accent focus:ring-accent" checked>
@@ -605,7 +604,7 @@ function createEditPageForProduct(productId, productName) {
 
             // Features
             const features = productData.features || {};
-            document.getElementById('feature-preshrunk').checked = features.preshrunk !== false;
+
             document.getElementById('feature-double-stitched').checked = features.double_stitched !== false;
             document.getElementById('feature-fade-resistant').checked = features.fade_resistant !== false;
             document.getElementById('feature-soft-touch').checked = features.soft_touch !== false;
@@ -814,7 +813,7 @@ function createEditPageForProduct(productId, productName) {
                     origin: document.getElementById('spec-origin').value
                 },
                 features: {
-                    preshrunk: document.getElementById('feature-preshrunk').checked,
+    
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
                     soft_touch: document.getElementById('feature-soft-touch').checked

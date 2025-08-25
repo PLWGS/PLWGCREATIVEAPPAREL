@@ -281,6 +281,18 @@
                         <label for="spec-origin" class="form-label">Origin</label>
                         <input type="text" id="spec-origin" class="form-input" value="Made in USA">
                     </div>
+                    <div class="form-group">
+                        <label for="spec-print-method" class="form-label">Print Method</label>
+                        <input type="text" id="spec-print-method" class="form-input" value="Direct-to-Garment">
+                    </div>
+                    <div class="form-group">
+                        <label for="spec-sustainability" class="form-label">Sustainability</label>
+                        <input type="text" id="spec-sustainability" class="form-input" value="Eco-Friendly Inks">
+                    </div>
+                    <div class="form-group">
+                        <label for="spec-brand-preference" class="form-label">Brand Preference</label>
+                        <input type="text" id="spec-brand-preference" class="form-input" value="Either (Gildan Softstyle 64000 or Bella+Canvas 3001)">
+                    </div>
                 </div>
             </div>
 
@@ -288,10 +300,7 @@
             <div class="mt-8">
                 <h2 class="text-xl font-semibold text-white mb-6">Product Features</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label class="flex items-center">
-                        <input type="checkbox" id="feature-preshrunk" class="mr-3" checked>
-                        <span>Preshrunk</span>
-                    </label>
+
                     <label class="flex items-center">
                         <input type="checkbox" id="feature-double-stitched" class="mr-3" checked>
                         <span>Double Stitched</span>
@@ -340,10 +349,12 @@
                 fit: 'Regular',
                 neck_style: 'Crew Neck',
                 sleeve_length: 'Short Sleeve',
-                origin: 'Made in USA'
+                origin: 'Made in USA',
+                print_method: 'Direct-to-Garment',
+                sustainability: 'Eco-Friendly Inks',
+                brand_preference: 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)'
             },
             features: {
-                preshrunk: true,
                 double_stitched: true,
                 fade_resistant: true,
                 soft_touch: true
@@ -382,11 +393,14 @@
                 document.getElementById('spec-neck').value = productData.specifications.neck_style || '';
                 document.getElementById('spec-sleeve').value = productData.specifications.sleeve_length || '';
                 document.getElementById('spec-origin').value = productData.specifications.origin || '';
+                document.getElementById('spec-print-method').value = productData.specifications.print_method || '';
+                document.getElementById('spec-sustainability').value = productData.specifications.sustainability || '';
+                document.getElementById('spec-brand-preference').value = productData.specifications.brand_preference || '';
             }
             
             // Set features
             if (productData.features) {
-                document.getElementById('feature-preshrunk').checked = productData.features.preshrunk || false;
+        
                 document.getElementById('feature-double-stitched').checked = productData.features.double_stitched || false;
                 document.getElementById('feature-fade-resistant').checked = productData.features.fade_resistant || false;
                 document.getElementById('feature-soft-touch').checked = productData.features.soft_touch || false;
@@ -420,10 +434,13 @@
                     fit: document.getElementById('spec-fit').value,
                     neck_style: document.getElementById('spec-neck').value,
                     sleeve_length: document.getElementById('spec-sleeve').value,
-                    origin: document.getElementById('spec-origin').value
+                    origin: document.getElementById('spec-origin').value,
+                    print_method: document.getElementById('spec-print-method').value,
+                    sustainability: document.getElementById('spec-sustainability').value,
+                    brand_preference: document.getElementById('spec-brand-preference').value
                 },
                 features: {
-                    preshrunk: document.getElementById('feature-preshrunk').checked,
+    
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
                     soft_touch: document.getElementById('feature-soft-touch').checked

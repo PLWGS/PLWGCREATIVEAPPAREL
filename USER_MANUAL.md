@@ -1623,7 +1623,7 @@ This section provides comprehensive, step-by-step instructions for managing your
 ##### Feature Checkboxes
 All features are currently checked, indicating these are standard features of your products:
 
-1. **Pre-shrunk for consistent fit**:
+
    - **Benefit**: Garment maintains size after washing
    - **Customer Value**: Reliable sizing, no surprises after first wash
 
@@ -1893,7 +1893,7 @@ All features are currently checked, indicating these are standard features of yo
 
 ##### Product Features
 1. **Feature Checkboxes**:
-   - **Pre-shrunk for consistent fit**: Check/uncheck to enable/disable
+   
    - **Double-stitched seams for durability**: Check/uncheck to enable/disable
    - **Fade-resistant printing technology**: Check/uncheck to enable/disable
    - **Soft-touch finish for comfort**: Check/uncheck to enable/disable

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Product 21 - Funny UGH Shirt - Printed Design - PlwgsCreativeApparel</title>
-    <meta name="description" content="Edit product details for Funny UGH Shirt - Printed Design - comprehensive product management system for PlwgsCreativeApparel." />
+    <title>Edit Product 33 - Christmas Nightmare Before Coffee Shirt Choose Print Color - Printed Design - PlwgsCreativeApparel</title>
+    <meta name="description" content="Edit product details for Christmas Nightmare Before Coffee Shirt Choose Print Color - Printed Design - comprehensive product management system for PlwgsCreativeApparel." />
     <link rel="stylesheet" href="../css/main.css" />
     <style>
         /* Uploads Specific Styles */
@@ -234,7 +234,7 @@
                     </button>
                     
                     <div>
-                        <h1 class="font-orbitron text-2xl font-bold text-white">Edit Product: Funny UGH Shirt - Printed Design</h1>
+                        <h1 class="font-orbitron text-2xl font-bold text-white">Edit Product: Christmas Nightmare Before Coffee Shirt Choose Print Color - Printed Design</h1>
                         <p class="text-text-secondary text-sm">Modify product details and specifications.</p>
                     </div>
                 </div>
@@ -434,7 +434,8 @@
                             <label class="block text-sm font-medium text-text-primary mb-2">Product Features</label>
                             <div class="space-y-2">
                                 <div class="flex items-center space-x-2">
-                                    
+                                    <input type="checkbox" id="feature-preshrunk" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+                                    <label for="feature-preshrunk" class="text-sm text-text-primary">Pre-shrunk for consistent fit</label>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <input type="checkbox" id="feature-double-stitched" class="rounded border-surface-light text-accent focus:ring-accent" checked>
@@ -474,7 +475,7 @@
 
     <script>
         // Global variables
-        const productId = 21;
+        const productId = 33;
         let uploadedImages = [];
         let selectedColors = ['Black'];
         let selectedSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -595,7 +596,7 @@
 
             // Features
             const features = productData.features || {};
-
+            document.getElementById('feature-preshrunk').checked = features.preshrunk !== false;
             document.getElementById('feature-double-stitched').checked = features.double_stitched !== false;
             document.getElementById('feature-fade-resistant').checked = features.fade_resistant !== false;
             document.getElementById('feature-soft-touch').checked = features.soft_touch !== false;
@@ -804,7 +805,7 @@
                     origin: document.getElementById('spec-origin').value
                 },
                 features: {
-    
+                    preshrunk: document.getElementById('feature-preshrunk').checked,
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
                     soft_touch: document.getElementById('feature-soft-touch').checked
@@ -855,6 +856,5 @@
             }, 100);
         }
     </script>
-<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>

@@ -293,8 +293,7 @@ def create_edit_page_content(product_id, product_name):
                 <h2 class="text-xl font-semibold mb-4">Features</h2>
                 <div class="checkbox-group">
                     <div class="checkbox-item">
-                        <input type="checkbox" id="feature-preshrunk">
-                        <label for="feature-preshrunk">Preshrunk</label>
+                        
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="feature-double_stitched">
@@ -404,7 +403,7 @@ def create_edit_page_content(product_id, product_name):
 
             // Features
             const features = productData.features || {{}};
-            document.getElementById('feature-preshrunk').checked = features.preshrunk || false;
+    
             document.getElementById('feature-double_stitched').checked = features.double_stitched || false;
             document.getElementById('feature-fade_resistant').checked = features.fade_resistant || false;
             document.getElementById('feature-soft_touch').checked = features.soft_touch || false;
@@ -480,7 +479,7 @@ def create_edit_page_content(product_id, product_name):
                     origin: document.getElementById('spec-origin').value
                 }},
                 features: {{
-                    preshrunk: document.getElementById('feature-preshrunk').checked,
+    
                     double_stitched: document.getElementById('feature-double_stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
                     soft_touch: document.getElementById('feature-soft_touch').checked

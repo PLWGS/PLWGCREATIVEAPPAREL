@@ -334,10 +334,7 @@ def create_dynamic_edit_page_content(product_id, product_name):
             <div class="mt-8">
                 <h2 class="text-xl font-semibold text-white mb-6">Product Features</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <label class="flex items-center">
-                        <input type="checkbox" id="feature-preshrunk" class="mr-3">
-                        <span>Preshrunk</span>
-                    </label>
+
                     <label class="flex items-center">
                         <input type="checkbox" id="feature-double-stitched" class="mr-3">
                         <span>Double Stitched</span>
@@ -435,7 +432,7 @@ def create_dynamic_edit_page_content(product_id, product_name):
             
             // Features
             const features = productData.features || {{}};
-            document.getElementById('feature-preshrunk').checked = features.preshrunk || false;
+
             document.getElementById('feature-double-stitched').checked = features.double_stitched || false;
             document.getElementById('feature-fade-resistant').checked = features.fade_resistant || false;
             document.getElementById('feature-soft-touch').checked = features.soft_touch || false;
@@ -511,7 +508,7 @@ def create_dynamic_edit_page_content(product_id, product_name):
                     origin: document.getElementById('spec-origin').value
                 }},
                 features: {{
-                    preshrunk: document.getElementById('feature-preshrunk').checked,
+    
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
                     soft_touch: document.getElementById('feature-soft-touch').checked
