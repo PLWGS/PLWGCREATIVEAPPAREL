@@ -4028,6 +4028,10 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
 
   try {
     const productId = req.params.id;
+    
+    // Debug: Log the incoming request body
+    console.log('🔍 Admin product update - Request body:', JSON.stringify(req.body, null, 2));
+    
     const {
       name,
       description,
@@ -4057,6 +4061,15 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       custom_lyrics_labels,
       custom_lyrics_char_limit
     } = req.body;
+    
+    // Debug: Log the extracted custom input values
+    console.log('🔍 Custom input values extracted:', {
+      custom_lyrics_enabled,
+      custom_lyrics_required,
+      custom_lyrics_fields,
+      custom_lyrics_labels,
+      custom_lyrics_char_limit
+    });
 
     // Process tags to ensure it's always a JavaScript array
     let processedTags = [];
