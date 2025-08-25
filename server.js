@@ -4306,6 +4306,14 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     console.log('🔍 Server received specifications:', req.body.specifications);
     
     // Update product
+    console.log('🔍 About to execute UPDATE query with brand_preference:', req.body.brand_preference);
+    
+    // Add detailed debugging for the UPDATE execution
+    console.log('🔍 [DEBUG] About to execute UPDATE for product ID:', productId);
+    console.log('🔍 [DEBUG] UPDATE query text:', text);
+    console.log('🔍 [DEBUG] UPDATE values array:', values);
+    console.log('🔍 [DEBUG] brand_preference value being sent:', values[17]);
+    
     const result = await pool.query(`
       UPDATE products SET
         name = $1, description = $2, price = $3, original_price = $4, 
@@ -4335,6 +4343,12 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       custom_lyrics_char_limit || 250,
       productId
     ]);
+
+    // Debug what was actually updated
+    console.log('🔍 [DEBUG] UPDATE result:', result);
+    console.log('🔍 [DEBUG] Rows affected:', result.rowCount);
+    console.log('🔍 Database UPDATE result - brand_preference field:', result.rows[0].brand_preference);
+    console.log('🔍 Database UPDATE result - specifications:', result.rows[0].specifications);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
