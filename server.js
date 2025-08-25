@@ -1187,6 +1187,33 @@ app.get('/api/customers/:id', authenticateToken, async (req, res) => {
 // Get orders with custom input data
 app.get('/api/orders/custom-input', authenticateToken, async (req, res) => {
   try {
+    console.log('🔍 Fetching orders with custom input...');
+    
+    // First, let's check if the order_items table has the custom_input column
+    const tableCheck = await pool.query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'order_items' AND column_name = 'custom_input'
+    `);
+    
+    console.log('🔍 Table structure check:', tableCheck.rows);
+    
+    if (tableCheck.rows.length === 0) {
+      console.log('❌ custom_input column not found in order_items table');
+      return res.json({ orders: [], message: 'custom_input column not found' });
+    }
+    
+    // First try a simple query to see if we can access the table at all
+    console.log('🔍 Testing simple order_items query...');
+    const simpleTest = await pool.query(`
+      SELECT COUNT(*) as total_items, 
+             COUNT(CASE WHEN custom_input IS NOT NULL THEN 1 END) as with_custom_input
+      FROM order_items
+    `);
+    
+    console.log('🔍 Simple test result:', simpleTest.rows[0]);
+    
+    // Now try the main query with better error handling
     const result = await pool.query(`
       SELECT 
         oi.id,
@@ -1212,10 +1239,11 @@ app.get('/api/orders/custom-input', authenticateToken, async (req, res) => {
       ORDER BY oi.created_at DESC
     `);
     
+    console.log('🔍 Query successful, found', result.rows.length, 'orders with custom input');
     res.json({ orders: result.rows });
   } catch (error) {
-    console.error('Error fetching orders with custom input:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('❌ Error fetching orders with custom input:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
