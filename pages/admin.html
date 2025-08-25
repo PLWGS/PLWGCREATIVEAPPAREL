@@ -638,7 +638,10 @@
                 <div class="glass-card rounded-xl p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="font-orbitron text-lg font-bold text-white">Custom Requests</h3>
-                        <a href="custom.html" class="text-accent hover:text-accent-light text-sm">View All</a>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="testCustomInputAPI()" class="text-accent hover:text-accent-light text-xs px-2 py-1 border border-accent rounded">Test API</button>
+                            <a href="custom.html" class="text-accent hover:text-accent-light text-sm">View All</a>
+                        </div>
                     </div>
                     <div id="customRequestsContainer" class="space-y-4">
                         <div id="customRequestsLoading" class="text-center py-6">
@@ -1087,23 +1090,30 @@
         // Load custom requests and orders with custom input
         async function loadCustomRequests() {
             try {
+                console.log('🔍 Loading custom requests...');
+                
                 // Load both custom requests and orders with custom input
                 const [customRequestsResponse, customOrdersResponse] = await Promise.all([
                     apiRequest('/api/custom-requests?limit=3'),
                     apiRequest('/api/orders/custom-input?limit=3')
                 ]);
                 
+                console.log('🔍 Custom requests response:', customRequestsResponse);
+                console.log('🔍 Custom orders response:', customOrdersResponse);
+                
                 let allRequests = [];
                 
                 // Add custom requests
                 if (customRequestsResponse && customRequestsResponse.ok) {
                     const customData = await customRequestsResponse.json();
+                    console.log('🔍 Custom requests data:', customData);
                     allRequests = allRequests.concat(customData.requests || []);
                 }
                 
                 // Add orders with custom input
                 if (customOrdersResponse && customOrdersResponse.ok) {
                     const ordersData = await customOrdersResponse.json();
+                    console.log('🔍 Orders with custom input data:', ordersData);
                     const customOrders = (ordersData.orders || []).map(order => ({
                         id: `order_${order.id}`,
                         type: 'order',
@@ -1121,6 +1131,8 @@
                     allRequests = allRequests.concat(customOrders);
                 }
                 
+                console.log('🔍 All requests combined:', allRequests);
+                
                 // Sort by creation date (newest first)
                 allRequests.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 
@@ -1129,7 +1141,7 @@
                 
                 updateCustomRequests(allRequests);
             } catch (error) {
-                console.error('Error loading custom requests:', error);
+                console.error('❌ Error loading custom requests:', error);
             }
         }
 
@@ -1766,6 +1778,38 @@
     s.src = (location.pathname.includes('/pages/') ? '../public/mobile-menu-injector.js?v=20250809d' : 'public/mobile-menu-injector.js?v=20250809d');
     document.head.appendChild(s);
           }
+
+        // Test custom input API endpoints
+        async function testCustomInputAPI() {
+            try {
+                console.log('🧪 Testing Custom Input API endpoints...');
+                
+                // Test custom requests endpoint
+                console.log('🧪 Testing /api/custom-requests...');
+                const customRequestsResponse = await apiRequest('/api/custom-requests?limit=3');
+                console.log('🧪 Custom requests response:', customRequestsResponse);
+                
+                if (customRequestsResponse && customRequestsResponse.ok) {
+                    const customData = await customRequestsResponse.json();
+                    console.log('🧪 Custom requests data:', customData);
+                }
+                
+                // Test orders with custom input endpoint
+                console.log('🧪 Testing /api/orders/custom-input...');
+                const customOrdersResponse = await apiRequest('/api/orders/custom-input?limit=3');
+                console.log('🧪 Custom orders response:', customOrdersResponse);
+                
+                if (customOrdersResponse && customOrdersResponse.ok) {
+                    const ordersData = await customOrdersResponse.json();
+                    console.log('🧪 Orders with custom input data:', ordersData);
+                }
+                
+                alert('API test completed! Check console for results.');
+            } catch (error) {
+                console.error('❌ API test error:', error);
+                alert('API test failed! Check console for error details.');
+            }
+        }
 
         // View order with custom input
         async function viewOrderWithCustomInput(orderNumber) {
