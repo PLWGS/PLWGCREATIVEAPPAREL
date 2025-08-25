@@ -33,7 +33,7 @@ SET size_pricing = '{
     "M": {"price": 20.00, "available": true},
     "L": {"price": 20.00, "available": true},
     "XL": {"price": 20.00, "available": true},
-            "2X": {"price": 22.00, "available": true}
+            "2X": {"price": 24.00, "available": true}
 }'::jsonb
 WHERE size_pricing = '{}' OR size_pricing IS NULL;
 

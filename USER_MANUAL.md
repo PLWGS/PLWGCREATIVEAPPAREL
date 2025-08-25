@@ -340,7 +340,7 @@ Welcome to your new PLWGCREATIVEAPPAREL platform! This section will guide you th
    - **Product Name**: "Vintage Skull T-Shirt" (example)
    - **Category**: Select "Horror Collection"
    - **Base Price**: $20.00 (for S, M, L, XL sizes)
-   - **2XL Price**: Automatically $22.00 (+$2.00 markup)
+   - **2XL Price**: Automatically $24.00 (+$4.00 markup)
    - **Description**: Detailed product information
 
 3. **Image Upload Process**:
@@ -357,9 +357,9 @@ Welcome to your new PLWGCREATIVEAPPAREL platform! This section will guide you th
    - **Example**: $20.00 base price = all standard sizes cost $20.00
 
 2. **Extended Sizes** (2X/XXL):
-   - **Automatic Markup**: $2.00 added to base price
-   - **Example**: $20.00 base price + $2.00 = $22.00 for 2X
-   - **Customer Display**: Shows "2X - $22.00 (+$2.00)"
+   - **Automatic Markup**: $4.00 added to base price
+   - **Example**: $20.00 base price + $4.00 = $24.00 for 2X
+   - **Customer Display**: Shows "2X - $24.00 (+$4.00)"
 
 3. **Size Availability**:
    - **Stock Management**: Enter actual quantities for each size
@@ -1403,7 +1403,7 @@ This section provides comprehensive, step-by-step instructions for managing your
   - **2XL Size**: Automatically adds a $2.00 markup to this base price
   - **Example**: If you enter $20.00 as the base price:
     - S, M, L, XL sizes = $20.00 each
-    - 2XL size = $22.00 ($20.00 + $2.00 markup)
+    - 2XL size = $24.00 ($20.00 + $4.00 markup)
 - **Format**: Enter as a number with up to 2 decimal places (e.g., 20.00, 45.99)
 
 ##### Description
@@ -3254,7 +3254,7 @@ The **Customer Features** section of your platform provides a professional, enga
 
 **Pricing Display**:
 - **Base Price**: Standard size pricing
-- **Size Markup**: Clear 2X pricing (+$2.00)
+- **Size Markup**: Clear 2X pricing (+$4.00)
 - **Sale Pricing**: Discounted prices when applicable
 - **Total Calculation**: Clear final price display
 

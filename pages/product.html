@@ -1214,7 +1214,7 @@
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
-                    finalPrice = basePrice + 2.00; // 2X costs $2 more
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
                 }
                 
                 addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
@@ -1229,8 +1229,8 @@
             let finalPrice = basePrice;
             
             if (selectedSize === '2X' || selectedSize === 'XXL') {
-                finalPrice = basePrice + 2.00; // 2X/XXL costs $2 more
-                console.log('🔍 2X/XXL size detected, adding $2.00');
+                finalPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                console.log('🔍 2X/XXL size detected, adding $4.00');
             }
             
             // Update price display
@@ -1465,7 +1465,7 @@
                     const basePrice = parseFloat(productData?.price) || 22.00;
                     let unitPrice = basePrice;
                     if (size === '2X' || size === 'XXL') {
-                        unitPrice = basePrice + 2.00; // 2X/XXL costs $2 more
+                        unitPrice = basePrice + 4.00; // 2X/XXL costs $4 more
                     }
                     
                     // Add to cart via API
@@ -1571,7 +1571,7 @@
                     const basePrice = parseFloat(productData?.price) || 22.00;
                     let unitPrice = basePrice;
                     if (size === '2X' || size === 'XXL') {
-                        unitPrice = basePrice + 2.00; // 2X/XXL costs $2 more
+                        unitPrice = basePrice + 4.00; // 2X/XXL costs $4 more
                     }
                     
                     console.log('Buy Now - Adding to cart:', {
@@ -1743,7 +1743,7 @@
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
-                    finalPrice = basePrice + 2.00; // 2X costs $2 more
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
                 }
                 
                 priceElement.textContent = `$${finalPrice.toFixed(2)}`;
@@ -1762,7 +1762,7 @@
                 // Apply size-based pricing
                 let finalPrice = basePrice;
                 if (selectedSize === '2X') {
-                    finalPrice = basePrice + 2.00; // 2X costs $2 more
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
                 }
                 
                 addToCartPrice.textContent = `$${finalPrice.toFixed(2)}`;
