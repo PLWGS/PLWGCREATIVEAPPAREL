@@ -679,17 +679,17 @@
              fade_resistant: document.getElementById('feature_fade_resistant').checked,
              soft_touch: document.getElementById('feature_soft_touch').checked
            },
-           // Custom input options
-           custom_birthday_enabled: document.getElementById('custom_birthday_enabled').checked,
-           custom_birthday_required: document.getElementById('custom_birthday_required').checked,
-           custom_birthday_fields: getEnabledBirthdayFields(),
-           custom_birthday_labels: getBirthdayLabels(),
-           custom_birthday_char_limit: parseInt(document.getElementById('custom_birthday_char_limit').value) || 250,
-           custom_lyrics_enabled: document.getElementById('custom_lyrics_enabled').checked,
-           custom_lyrics_required: document.getElementById('custom_lyrics_required').checked,
-           custom_lyrics_fields: getEnabledLyricsFields(),
-           custom_lyrics_labels: getLyricsLabels(),
-           custom_lyrics_char_limit: parseInt(document.getElementById('custom_lyrics_char_limit').value) || 250
+                       // Custom input options
+            custom_birthday_enabled: document.getElementById('custom_birthday_enabled').checked,
+            custom_birthday_required: document.getElementById('custom_birthday_required').checked,
+            custom_birthday_fields: JSON.stringify(getEnabledBirthdayFields()),
+            custom_birthday_labels: JSON.stringify(getBirthdayLabels()),
+            custom_birthday_char_limit: parseInt(document.getElementById('custom_birthday_char_limit').value) || 250,
+            custom_lyrics_enabled: document.getElementById('custom_lyrics_enabled').checked,
+            custom_lyrics_required: document.getElementById('custom_lyrics_required').checked,
+            custom_lyrics_fields: JSON.stringify(getEnabledLyricsFields()),
+            custom_lyrics_labels: JSON.stringify(getLyricsLabels()),
+            custom_lyrics_char_limit: parseInt(document.getElementById('custom_lyrics_char_limit').value) || 250
          };
 
         // Images: send base64 array when present, else keep existing URLs
