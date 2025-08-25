@@ -1239,6 +1239,12 @@
                 priceElement.textContent = `$${finalPrice.toFixed(2)}`;
             }
             
+            // Also update Add to Cart button text
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (addToCartBtn) {
+                addToCartBtn.innerHTML = `Add to Cart - $${finalPrice.toFixed(2)}`;
+            }
+            
             return finalPrice;
         }
 
@@ -1752,8 +1758,8 @@
             }
             
             // Also update Add to Cart button price
-            const addToCartPrice = document.getElementById('addToCartPrice');
-            if (addToCartPrice) {
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (addToCartBtn) {
                 // Get the selected size and calculate price
                 const selectedSizeEl = document.querySelector('.size-option.selected');
                 const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
@@ -1765,9 +1771,10 @@
                     finalPrice = basePrice + 4.00; // 2X costs $4 more
                 }
                 
-                addToCartPrice.textContent = `$${finalPrice.toFixed(2)}`;
-                addToCartPrice.dataset.basePrice = basePrice;
-                addToCartPrice.dataset.selectedSize = selectedSize;
+                // Update the button text to show the dynamic price
+                addToCartBtn.innerHTML = `Add to Cart - $${finalPrice.toFixed(2)}`;
+                addToCartBtn.dataset.basePrice = basePrice;
+                addToCartBtn.dataset.selectedSize = selectedSize;
             }
             
             // Update original price if on sale
