@@ -1,4 +1,4 @@
-# PLWGCREATIVEAPPAREL - User Manual
+# PLWG CREATIVE APPAREL - USER MANUAL FOR LORI
 
 ## Table of Contents
 
@@ -19,10 +19,10 @@
 
 ## Introduction
 
-Welcome to the PLWGCREATIVEAPPAREL User Manual. This comprehensive guide covers all aspects of managing and using your e-commerce platform, from administrative functions to customer-facing features. Whether you're a first-time user or an experienced administrator, this manual provides step-by-step instructions for every function.
+Welcome to the PLWG CREATIVE APPAREL User Manual. This comprehensive guide covers all aspects of managing and using your e-commerce platform, from administrative functions to customer-facing features. Whether you're a first-time user or an experienced administrator, this manual provides step-by-step instructions for every function.
 
 ### Platform Overview
-PLWGCREATIVEAPPAREL is a full-featured e-commerce platform designed specifically for apparel businesses. It combines powerful business management tools with a professional customer shopping experience.
+PLWG CREATIVE APPAREL is a full-featured e-commerce platform designed specifically for apparel businesses. It combines powerful business management tools with a professional customer shopping experience.
 
 **Core Platform Features:**
 - **Admin Dashboard**: Complete business management interface with real-time analytics
@@ -202,7 +202,7 @@ PLWGCREATIVEAPPAREL is a full-featured e-commerce platform designed specifically
 
 ### First-Time Setup for New Users
 
-Welcome to your new PLWGCREATIVEAPPAREL platform! This section will guide you through everything you need to do to get your business up and running successfully.
+Welcome to your new PLWG CREATIVE APPAREL platform! This section will guide you through everything you need to do to get your business up and running successfully.
 
 #### Pre-Setup Checklist
 
@@ -646,7 +646,7 @@ Welcome to your new PLWGCREATIVEAPPAREL platform! This section will guide you th
 
 ### Dashboard Overview and Purpose
 
-The **Admin Dashboard** is your digital business headquarters - a centralized control center that gives you complete visibility and control over every aspect of your PLWGCREATIVEAPPAREL business. Think of it as your command bridge where you can monitor, manage, and optimize your apparel business operations in real-time.
+The **Admin Dashboard** is your digital business headquarters - a centralized control center that gives you complete visibility and control over every aspect of your PLWG CREATIVE APPAREL business. Think of it as your command bridge where you can monitor, manage, and optimize your apparel business operations in real-time.
 
 **Why This Dashboard is Essential:**
 - **Complete Business Visibility**: See your entire business at a glance
@@ -3628,7 +3628,7 @@ The **Customer Features** section of your platform provides a professional, enga
 
 ### Conclusion
 
-The **Customer Features** of your PLWGCREATIVEAPPAREL platform provide a comprehensive, professional shopping experience that delights customers and drives business success. By understanding how customers interact with your store, you can:
+The **Customer Features** of your PLWG CREATIVE APPAREL platform provide a comprehensive, professional shopping experience that delights customers and drives business success. By understanding how customers interact with your store, you can:
 
 **Optimize Customer Experience:**
 - Ensure smooth, professional shopping process
@@ -3663,7 +3663,7 @@ The customer features are designed to work seamlessly with your admin functions,
 
 ### Comprehensive Problem-Solving Guide
 
-The **Troubleshooting** section provides solutions to common issues you may encounter while using your PLWGCREATIVEAPPAREL platform. This guide is designed to help you resolve problems quickly and get back to running your business efficiently.
+The **Troubleshooting** section provides solutions to common issues you may encounter while using your PLWG CREATIVE APPAREL platform. This guide is designed to help you resolve problems quickly and get back to running your business efficiently.
 
 **How to Use This Section:**
 1. **Identify Your Problem**: Find the issue category that matches your situation
@@ -4560,7 +4560,7 @@ By developing strong troubleshooting skills, you'll be able to maintain your pla
 
 ## Conclusion
 
-This user manual provides comprehensive guidance for managing and using the PLWGCREATIVEAPPAREL platform. Regular reference to this document will ensure optimal platform utilization and customer satisfaction.
+This user manual provides comprehensive guidance for managing and using the PLWG CREATIVE APPAREL platform. Regular reference to this document will ensure optimal platform utilization and customer satisfaction.
 
 For additional support or questions, please refer to the support channels listed above or contact the development team directly.
 
@@ -4568,13 +4568,13 @@ For additional support or questions, please refer to the support channels listed
 
 *Last Updated: [Current Date]*
 *Version: 1.0*
-*Platform: PLWGCREATIVEAPPAREL v1.0*
+*Platform: PLWG CREATIVE APPAREL v1.0*
 
 ## Admin Panel - Complete User Guide
 
 ### Overview and Importance
 
-The **Admin Panel** is your central command center for managing every aspect of your PLWGCREATIVEAPPAREL business. This powerful dashboard gives you real-time visibility into your store's performance, complete control over order processing, and comprehensive management of all business operations. Think of it as your digital business headquarters where you can monitor, manage, and optimize your apparel business from anywhere.
+The **Admin Panel** is your central command center for managing every aspect of your PLWG CREATIVE APPAREL business. This powerful dashboard gives you real-time visibility into your store's performance, complete control over order processing, and comprehensive management of all business operations. Think of it as your digital business headquarters where you can monitor, manage, and optimize your apparel business from anywhere.
 
 **Why This Matters:**
 - **Complete Business Control**: Manage products, orders, customers, and analytics from one place
@@ -5186,3 +5186,55 @@ The **Admin Panel** is your complete business management solution that transform
 **Remember**: Your Admin Panel is designed to work for you, not against you. Take time to learn each section, establish your daily routines, and let the system handle the complexity while you focus on what you do best: creating amazing designs and serving your customers.
 
 With consistent use and proper workflow management, this Admin Panel will become your most valuable business tool, helping you build a successful, scalable apparel business that delights customers and drives growth.
+
+## Enhanced Admin Dashboard Interface (v3.7)
+
+### Scrollable Sections
+The admin dashboard now features professional scrollable containers that eliminate the need for excessive page scrolling:
+
+- **Order Management**: Each status column (Pending, Processing, Shipped, Completed) has its own scrollable area
+- **Custom Requests**: The custom requests section scrolls independently when there are many requests
+- **Recent Activity**: Activity feed scrolls within its container
+- **Newsletter Subscribers**: Subscriber table scrolls vertically when needed
+
+### Professional Scrollbars
+- **Teal-accented scrollbars** that match your brand colors
+- **Always visible** when content overflows for better user experience
+- **Smooth hover effects** for professional appearance
+- **Cross-browser compatibility** for consistent experience
+
+### Compact Layout Options
+- **Quick Stats Summary**: At-a-glance view of total orders, pending, processing, and completed counts
+- **Compact Order Cards**: More information displayed in less space
+- **View Toggle**: Switch between compact and expanded views for order management
+- **Enhanced Order Information**: Order cards now show product details, customer names, and order metadata
+
+### Using the New Features
+
+#### Quick Stats Summary
+- Located above the Order Management section
+- Shows real-time counts that update automatically
+- No action needed - displays current status at a glance
+
+#### Compact/Expanded View Toggle
+- **Compact View** (default): Shows orders in manageable sections with scrollbars
+- **Expanded View**: Shows all orders without height restrictions
+- Click the toggle button to switch between views based on your preference
+
+#### Enhanced Order Cards
+- **Product Information**: See product name, size, color, and quantity at a glance
+- **Customer Details**: Customer names are formatted for quick identification
+- **Clickable Cards**: Click any order card to open a detailed modal with complete information
+- **Status Indicators**: Clear visual status badges (Pending, Processing, Shipped, Completed)
+
+#### Professional Scrollbars
+- **Automatic Display**: Scrollbars appear when content overflows
+- **Easy Navigation**: Use mouse wheel or drag scrollbar to navigate content
+- **Visual Feedback**: Hover effects provide clear interaction feedback
+
+### Benefits of the New Interface
+1. **Reduced Scrolling**: No more endless page scrolling to find information
+2. **Better Organization**: Related information grouped in logical, scrollable sections
+3. **Improved Efficiency**: Quick access to order details and customer information
+4. **Professional Appearance**: Clean, modern interface that reflects your brand quality
+5. **Flexible Viewing**: Choose between compact and expanded views based on your needs
