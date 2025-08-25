@@ -413,6 +413,7 @@ async function initializeDatabase() {
         size VARCHAR(50) DEFAULT 'M',
         color VARCHAR(50) DEFAULT 'Black',
         image_url TEXT,
+        custom_input JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -430,6 +431,7 @@ async function initializeDatabase() {
         size VARCHAR(50) DEFAULT 'M',
         color VARCHAR(50) DEFAULT 'Black',
         image_url TEXT,
+        custom_input JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -3287,7 +3289,7 @@ app.post('/api/cart/add', authenticateCustomer, validateCartAdd, async (req, res
 
   try {
     const customerId = req.customer.id;
-    const { product_name, quantity, size, color, image_url } = req.body;
+    const { product_name, quantity, size, color, image_url, custom_input } = req.body;
 
     // Look up product ID, price, and image by name
     const productResult = await pool.query(`
@@ -3310,22 +3312,22 @@ app.post('/api/cart/add', authenticateCustomer, validateCartAdd, async (req, res
     `, [customerId, product_id, size || 'M', color || 'Black']);
 
     if (existingItem.rows.length > 0) {
-      // Update quantity
+      // Update quantity and custom input data
       const newQuantity = existingItem.rows[0].quantity + (quantity || 1);
       await pool.query(`
         UPDATE cart 
-        SET quantity = $1, updated_at = CURRENT_TIMESTAMP 
-        WHERE id = $2
-      `, [newQuantity, existingItem.rows[0].id]);
+        SET quantity = $1, custom_input = $2, updated_at = CURRENT_TIMESTAMP 
+        WHERE id = $3
+      `, [newQuantity, custom_input ? JSON.stringify(custom_input) : null, existingItem.rows[0].id]);
 
       res.json({ message: 'Cart updated', item: { id: existingItem.rows[0].id, quantity: newQuantity } });
     } else {
       // Add new item
       const result = await pool.query(`
-        INSERT INTO cart (customer_id, product_id, product_name, quantity, unit_price, size, color, image_url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO cart (customer_id, product_id, product_name, quantity, unit_price, size, color, image_url, custom_input)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING *
-      `, [customerId, product_id, product_name, quantity || 1, unit_price, size || 'M', color || 'Black', product_image_url]);
+      `, [customerId, product_id, product_name, quantity || 1, unit_price, size || 'M', color || 'Black', product_image_url, custom_input ? JSON.stringify(custom_input) : null]);
 
       res.json({ message: 'Item added to cart', item: result.rows[0] });
     }

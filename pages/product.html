@@ -623,6 +623,31 @@
                                 </div>
                             </div>
                             
+                            <!-- Custom Input Fields -->
+                            <div id="customInputSection" class="border-t border-surface-light pt-6 hidden">
+                                <h4 class="font-orbitron text-lg font-bold text-white mb-4">Custom Request</h4>
+                                
+                                <!-- Birthday Custom Input -->
+                                <div id="birthdayCustomInput" class="space-y-4 hidden">
+                                    <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-accent border-opacity-30">
+                                        <h5 class="font-semibold text-accent mb-3">Birthday Customization</h5>
+                                        <div id="birthdayFields" class="space-y-3">
+                                            <!-- Fields will be populated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Lyrics Custom Input -->
+                                <div id="lyricsCustomInput" class="space-y-4 hidden">
+                                    <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-accent border-opacity-30">
+                                        <h5 class="font-semibold text-accent mb-3">Music Lyrics Customization</h5>
+                                        <div id="lyricsFields" class="space-y-3">
+                                            <!-- Fields will be populated dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="border-t border-surface-light pt-6">
                                 <h4 class="font-orbitron text-lg font-bold text-white mb-4">Features</h4>
                                 <ul class="space-y-2 text-text-secondary">
@@ -1460,11 +1485,43 @@
                     // Determine product name from loaded data
                     const productTitle = (productData && productData.name) ? productData.name : (document.getElementById('productTitle')?.textContent || '');
                     
+                    // Collect custom input data
+                    const customInputData = {};
+                    
+                    // Check if birthday custom input is enabled
+                    if (productData && productData.custom_birthday_enabled) {
+                        const birthdayFields = productData.custom_birthday_fields || ['birthdate', 'name', 'additional_info'];
+                        birthdayFields.forEach(field => {
+                            const element = document.getElementById(`birthday-${field}`);
+                            if (element) {
+                                const value = element.value.trim();
+                                if (value) {
+                                    customInputData[`birthday_${field}`] = value;
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Check if lyrics custom input is enabled
+                    if (productData && productData.custom_lyrics_enabled) {
+                        const lyricsFields = productData.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
+                        lyricsFields.forEach(field => {
+                            const element = document.getElementById(`lyrics-${field}`);
+                            if (element) {
+                                const value = element.value.trim();
+                                if (value) {
+                                    customInputData[`lyrics_${field}`] = value;
+                                }
+                            }
+                        });
+                    }
+                    
                     console.log('Adding to cart:', {
                         product_name: productTitle,
                         quantity: quantity,
                         size: size,
-                        color: 'Black'
+                        color: 'Black',
+                        custom_input: customInputData
                     });
                     
                     // Calculate price based on selected size
@@ -1486,7 +1543,8 @@
                             quantity: quantity,
                             unit_price: unitPrice,
                             size: size,
-                            color: selectedColor || 'Black'
+                            color: selectedColor || 'Black',
+                            custom_input: customInputData
                         })
                     });
                     
@@ -1573,6 +1631,37 @@
                     // Determine product name from loaded data
                     const productTitle = (productData && productData.name) ? productData.name : (document.getElementById('productTitle')?.textContent || '');
                     
+                    // Collect custom input data
+                    const customInputData = {};
+                    
+                    // Check if birthday custom input is enabled
+                    if (productData && productData.custom_birthday_enabled) {
+                        const birthdayFields = productData.custom_birthday_fields || ['birthdate', 'name', 'additional_info'];
+                        birthdayFields.forEach(field => {
+                            const element = document.getElementById(`birthday-${field}`);
+                            if (element) {
+                                const value = element.value.trim();
+                                if (value) {
+                                    customInputData[`birthday_${field}`] = value;
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Check if lyrics custom input is enabled
+                    if (productData && productData.custom_lyrics_enabled) {
+                        const lyricsFields = productData.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
+                        lyricsFields.forEach(field => {
+                            const element = document.getElementById(`lyrics-${field}`);
+                            if (element) {
+                                const value = element.value.trim();
+                                if (value) {
+                                    customInputData[`lyrics_${field}`] = value;
+                                }
+                            }
+                        });
+                    }
+                    
                     // Calculate price based on selected size for Buy Now
                     const basePrice = parseFloat(productData?.price) || 22.00;
                     let unitPrice = basePrice;
@@ -1585,7 +1674,8 @@
                         quantity: quantity,
                         size: size,
                         color: selectedColor || 'Black',
-                        unit_price: unitPrice
+                        unit_price: unitPrice,
+                        custom_input: customInputData
                     });
                     
                     // Add to cart via API
@@ -1600,7 +1690,8 @@
                             quantity: quantity,
                             unit_price: unitPrice,
                             size: size,
-                            color: selectedColor || 'Black'
+                            color: selectedColor || 'Black',
+                            custom_input: customInputData
                         })
                     });
                     
@@ -2102,6 +2193,9 @@
                 }
             }
             
+            // Update custom input fields
+            updateCustomInputFields(product);
+            
             // Update breadcrumbs
             const breadcrumbContainer = document.querySelector('.breadcrumb-container');
             if (breadcrumbContainer) {
@@ -2117,6 +2211,114 @@
             }
             
             console.log('✅ Product display updated successfully');
+        }
+
+        // Function to update custom input fields based on product configuration
+        function updateCustomInputFields(product) {
+            console.log('🔍 Checking custom input configuration:', {
+                birthday: product.custom_birthday_enabled,
+                lyrics: product.custom_lyrics_enabled
+            });
+            
+            const customInputSection = document.getElementById('customInputSection');
+            const birthdayCustomInput = document.getElementById('birthdayCustomInput');
+            const lyricsCustomInput = document.getElementById('lyricsCustomInput');
+            
+            // Hide all custom input sections initially
+            customInputSection.classList.add('hidden');
+            birthdayCustomInput.classList.add('hidden');
+            lyricsCustomInput.classList.add('hidden');
+            
+            // Check if any custom input is enabled
+            if (product.custom_birthday_enabled || product.custom_lyrics_enabled) {
+                customInputSection.classList.remove('hidden');
+                
+                // Handle Birthday Custom Input
+                if (product.custom_birthday_enabled) {
+                    birthdayCustomInput.classList.remove('hidden');
+                    const birthdayFields = document.getElementById('birthdayFields');
+                    
+                    // Parse fields and labels
+                    const fields = product.custom_birthday_fields || ['birthdate', 'name', 'additional_info'];
+                    const labels = product.custom_birthday_labels || {
+                        birthdate: 'Birthdate',
+                        name: 'Name',
+                        additional_info: 'Any other references or information'
+                    };
+                    
+                    // Generate HTML for birthday fields
+                    birthdayFields.innerHTML = fields.map(field => {
+                        const isRequired = product.custom_birthday_required;
+                        const charLimit = product.custom_birthday_char_limit || 250;
+                        const label = labels[field] || field;
+                        
+                        return `
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-text-primary">
+                                    ${label}${isRequired ? ' *' : ''}
+                                </label>
+                                <textarea 
+                                    id="birthday-${field}" 
+                                    name="birthday-${field}"
+                                    class="w-full px-3 py-2 bg-surface-light bg-opacity-50 border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                    placeholder="${label}${isRequired ? ' (required)' : ' (optional)'}"
+                                    maxlength="${charLimit}"
+                                    ${isRequired ? 'required' : ''}
+                                    rows="2"
+                                ></textarea>
+                                <div class="text-xs text-text-secondary text-right">
+                                    ${charLimit} characters max
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+                
+                // Handle Lyrics Custom Input
+                if (product.custom_lyrics_enabled) {
+                    lyricsCustomInput.classList.remove('hidden');
+                    const lyricsFields = document.getElementById('lyricsFields');
+                    
+                    // Parse fields and labels
+                    const fields = product.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
+                    const labels = product.custom_lyrics_labels || {
+                        artist_band: 'Artist or Band Name',
+                        song_name: 'Song Name',
+                        song_lyrics: 'Song Lyrics (Optional)'
+                    };
+                    
+                    // Generate HTML for lyrics fields
+                    lyricsFields.innerHTML = fields.map(field => {
+                        const isRequired = product.custom_lyrics_required;
+                        const charLimit = product.custom_lyrics_char_limit || 250;
+                        const label = labels[field] || field;
+                        
+                        return `
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-text-primary">
+                                    ${label}${isRequired ? ' *' : ''}
+                                </label>
+                                <textarea 
+                                    id="lyrics-${field}" 
+                                    name="lyrics-${field}"
+                                    class="w-full px-3 py-2 bg-surface-light bg-opacity-50 border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                    placeholder="${label}${isRequired ? ' (required)' : ''}"
+                                    maxlength="${charLimit}"
+                                    ${isRequired ? 'required' : ''}
+                                    rows="2"
+                                ></textarea>
+                                <div class="text-xs text-text-secondary text-right">
+                                    ${charLimit} characters max
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+                
+                console.log('✅ Custom input fields updated successfully');
+            } else {
+                console.log('ℹ️ No custom input fields enabled for this product');
+            }
         }
 
         function updateProductReviews(reviews){
