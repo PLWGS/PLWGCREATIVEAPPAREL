@@ -2215,6 +2215,7 @@
 
         // Function to update custom input fields based on product configuration
         function updateCustomInputFields(product) {
+            console.log('🔍 Full product data for custom inputs:', product);
             console.log('🔍 Checking custom input configuration:', {
                 birthday: product.custom_birthday_enabled,
                 lyrics: product.custom_lyrics_enabled
@@ -2223,6 +2224,12 @@
             const customInputSection = document.getElementById('customInputSection');
             const birthdayCustomInput = document.getElementById('birthdayCustomInput');
             const lyricsCustomInput = document.getElementById('lyricsCustomInput');
+            
+            console.log('🔍 Custom input HTML elements found:', {
+                customInputSection: !!customInputSection,
+                birthdayCustomInput: !!birthdayCustomInput,
+                lyricsCustomInput: !!lyricsCustomInput
+            });
             
             // Hide all custom input sections initially
             customInputSection.classList.add('hidden');
