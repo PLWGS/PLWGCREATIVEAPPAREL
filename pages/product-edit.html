@@ -715,6 +715,16 @@
          console.log('spec_brand_preference type:', typeof document.getElementById('spec_brand_preference').value);
          console.log('spec_brand_preference element exists:', !!document.getElementById('spec_brand_preference'));
          
+         // Debug custom input fields specifically
+         console.log('🔍 Custom input fields being sent:', {
+           custom_birthday_enabled: body.custom_birthday_enabled,
+           custom_birthday_required: body.custom_birthday_required,
+           custom_lyrics_enabled: body.custom_lyrics_enabled,
+           custom_lyrics_required: body.custom_lyrics_required,
+           custom_lyrics_fields: body.custom_lyrics_fields,
+           custom_lyrics_labels: body.custom_lyrics_labels
+         });
+         
          console.log('🚀 Sending request body:', body);
          console.log('🔍 Specifications being sent:', body.specifications);
          
