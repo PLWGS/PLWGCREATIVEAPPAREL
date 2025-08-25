@@ -462,7 +462,7 @@
         document.getElementById('spec_origin').value = specs.origin || '';
         document.getElementById('spec_print_method').value = specs.print_method || '';
         document.getElementById('spec_sustainability').value = specs.sustainability || '';
-        document.getElementById('spec_brand_preference').value = p.brand_preference || '';
+        document.getElementById('spec_brand_preference').value = (specs.brand_preference || p.brand_preference || '');
 
       // Features
       const features = p.features || {};
@@ -666,7 +666,8 @@
              sleeve_length: document.getElementById('spec_sleeve').value.trim() || '',
              origin: document.getElementById('spec_origin').value.trim() || '',
              print_method: document.getElementById('spec_print_method').value.trim() || '',
-             sustainability: document.getElementById('spec_sustainability').value.trim() || ''
+             sustainability: document.getElementById('spec_sustainability').value.trim() || '',
+             brand_preference: document.getElementById('spec_brand_preference').value.trim() || ''
            },
            brand_preference: document.getElementById('spec_brand_preference').value.trim() || '',
            features: {
