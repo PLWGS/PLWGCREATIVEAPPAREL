@@ -428,6 +428,7 @@
         await loadCategories();
         hydrateForm();
       } catch(e){
+        console.error('❌ Error loading product:', e);
         document.getElementById('loading').textContent = 'Failed to load product.';
       }
     }
@@ -462,7 +463,12 @@
         document.getElementById('spec_origin').value = specs.origin || '';
         document.getElementById('spec_print_method').value = specs.print_method || '';
         document.getElementById('spec_sustainability').value = specs.sustainability || '';
-        document.getElementById('spec_brand_preference').value = (specs.brand_preference || p.brand_preference || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)');
+        const brandPrefValue = (specs.brand_preference || p.brand_preference || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)');
+        console.log('🔍 Setting brand_preference field to:', brandPrefValue);
+        console.log('🔍 specs.brand_preference:', specs.brand_preference);
+        console.log('🔍 p.brand_preference:', p.brand_preference);
+        document.getElementById('spec_brand_preference').value = brandPrefValue;
+        console.log('🔍 Field value after setting:', document.getElementById('spec_brand_preference').value);
 
       // Features
       const features = p.features || {};
