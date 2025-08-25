@@ -3819,7 +3819,19 @@ app.get('/api/admin/products/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    res.json(result.rows[0]);
+    const product = result.rows[0];
+    
+    // Debug: Log what's being returned for custom input fields
+    console.log('🔍 Product fetch - Custom input fields for ID', productId, ':', {
+      custom_birthday_enabled: product.custom_birthday_enabled,
+      custom_birthday_required: product.custom_birthday_required,
+      custom_lyrics_enabled: product.custom_lyrics_enabled,
+      custom_lyrics_required: product.custom_lyrics_required,
+      custom_lyrics_fields: product.custom_lyrics_fields,
+      custom_lyrics_labels: product.custom_lyrics_labels
+    });
+
+    res.json(product);
   } catch (error) {
     console.error('Error fetching product:', error);
     res.status(500).json({ error: 'Failed to fetch product' });

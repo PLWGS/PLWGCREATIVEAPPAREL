@@ -418,6 +418,17 @@
         if (!resp.ok) throw new Error('Failed to load');
         productData = await resp.json();
         
+        // Debug: Log the full product data received from backend
+        console.log('🔍 Full product data received from backend:', productData);
+        console.log('🔍 Custom input fields in received data:', {
+          custom_birthday_enabled: productData.custom_birthday_enabled,
+          custom_birthday_required: productData.custom_birthday_required,
+          custom_lyrics_enabled: productData.custom_lyrics_enabled,
+          custom_lyrics_required: productData.custom_lyrics_required,
+          custom_lyrics_fields: productData.custom_lyrics_fields,
+          custom_lyrics_labels: productData.custom_lyrics_labels
+        });
+        
         // Wait for categories to load before hydrating the form
         await loadCategories();
         hydrateForm();
