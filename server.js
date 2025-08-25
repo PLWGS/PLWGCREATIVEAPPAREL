@@ -1184,8 +1184,46 @@ app.get('/api/customers/:id', authenticateToken, async (req, res) => {
 // CUSTOM REQUESTS ENDPOINTS
 // =============================================================================
 
-// Get orders with custom input data
-app.get('/api/orders/custom-input', authenticateToken, async (req, res) => {
+// Test database connection
+app.get('/api/test-db', async (req, res) => {
+  try {
+    console.log('🧪 Testing database connection...');
+    console.log('🔍 Pool object:', pool);
+    
+    if (!pool) {
+      console.log('❌ Database pool is null/undefined');
+      return res.status(500).json({ error: 'Database pool not available' });
+    }
+    
+    // Test basic connection
+    const testResult = await pool.query('SELECT NOW() as current_time');
+    console.log('🔍 Basic query test:', testResult.rows[0]);
+    
+    // Test if order_items table exists
+    const tableExists = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'order_items'
+      ) as table_exists
+    `);
+    
+    console.log('🔍 order_items table exists:', tableExists.rows[0]);
+    
+    res.json({ 
+      message: 'Database test successful',
+      pool_available: !!pool,
+      basic_query: testResult.rows[0],
+      order_items_exists: tableExists.rows[0].table_exists
+    });
+  } catch (error) {
+    console.error('❌ Database test error:', error);
+    res.status(500).json({ error: 'Database test failed', details: error.message });
+  }
+});
+
+// Get orders with custom input data (without auth for testing)
+app.get('/api/orders/custom-input', async (req, res) => {
   try {
     console.log('🔍 Fetching orders with custom input...');
     
