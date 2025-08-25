@@ -345,6 +345,11 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS in_featured BOOLEAN DEFAULT false`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS featured_order INTEGER`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS specs_notes TEXT`);
+      
+      // Add custom input columns if they don't exist
+      await pool.query(`ALTER TABLE order_items ADD COLUMN IF NOT EXISTS custom_input JSONB`);
+      await pool.query(`ALTER TABLE cart ADD COLUMN IF NOT EXISTS custom_input JSONB`);
+      await pool.query(`ALTER TABLE cart_items ADD COLUMN IF NOT EXISTS custom_input JSONB`);
     } catch (error) {
       console.log('Some columns may already exist:', error.message);
     }
@@ -790,7 +795,18 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
       SELECT o.*, 
              c.name as customer_name, 
              c.email as customer_email,
-             COUNT(oi.id) as item_count
+             COUNT(oi.id) as item_count,
+             json_agg(
+               json_build_object(
+                 'id', oi.id,
+                 'product_name', oi.product_name,
+                 'quantity', oi.quantity,
+                 'size', oi.size,
+                 'color', oi.color,
+                 'unit_price', oi.unit_price,
+                 'total_price', oi.total_price
+               ) ORDER BY oi.id
+             ) FILTER (WHERE oi.id IS NOT NULL) as order_items
       FROM orders o
       LEFT JOIN customers c ON o.customer_id = c.id
       LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -820,7 +836,7 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    query += ` GROUP BY o.id, c.name, c.email ORDER BY o.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    query += ` GROUP BY o.id, c.name, c.email, o.order_number, o.status, o.total_amount, o.created_at ORDER BY o.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(Math.min(parseInt(limit, 10) || 50, 200), parseInt(offset, 10) || 0);
 
     const result = await pool.query(query, params);
@@ -876,6 +892,53 @@ app.get('/api/orders/export', authenticateToken, async (req, res) => {
   } catch (e) {
     console.error('Error exporting orders:', e);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get orders with custom input data
+app.get('/api/orders/custom-input', async (req, res) => {
+  try {
+    // Check if the order_items table has the custom_input column
+    const tableCheck = await pool.query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'order_items' AND column_name = 'custom_input'
+    `);
+    
+    if (tableCheck.rows.length === 0) {
+      return res.json({ orders: [], message: 'custom_input column not found' });
+    }
+    
+    // Main query to get orders with custom input
+    const result = await pool.query(`
+      SELECT 
+        oi.id,
+        oi.order_id,
+        oi.product_name,
+        oi.quantity,
+        oi.unit_price,
+        oi.total_price,
+        oi.size,
+        oi.color,
+        oi.custom_input,
+        o.order_number,
+        o.customer_name,
+        o.customer_email,
+        o.total_amount,
+        o.status as order_status,
+        o.created_at
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      WHERE oi.custom_input IS NOT NULL 
+        AND oi.custom_input != 'null' 
+        AND oi.custom_input != '{}'
+      ORDER BY o.id DESC
+    `);
+    
+    res.json({ orders: result.rows });
+  } catch (error) {
+    console.error('Error fetching orders with custom input:', error);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
@@ -1222,68 +1285,7 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// Get orders with custom input data (without auth for testing)
-app.get('/api/orders/custom-input', async (req, res) => {
-  try {
-    console.log('🔍 Fetching orders with custom input...');
-    
-    // First, let's check if the order_items table has the custom_input column
-    const tableCheck = await pool.query(`
-      SELECT column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_name = 'order_items' AND column_name = 'custom_input'
-    `);
-    
-    console.log('🔍 Table structure check:', tableCheck.rows);
-    
-    if (tableCheck.rows.length === 0) {
-      console.log('❌ custom_input column not found in order_items table');
-      return res.json({ orders: [], message: 'custom_input column not found' });
-    }
-    
-    // First try a simple query to see if we can access the table at all
-    console.log('🔍 Testing simple order_items query...');
-    const simpleTest = await pool.query(`
-      SELECT COUNT(*) as total_items, 
-             COUNT(CASE WHEN custom_input IS NOT NULL THEN 1 END) as with_custom_input
-      FROM order_items
-    `);
-    
-    console.log('🔍 Simple test result:', simpleTest.rows[0]);
-    
-    // Now try the main query with better error handling
-    const result = await pool.query(`
-      SELECT 
-        oi.id,
-        oi.order_id,
-        oi.product_name,
-        oi.quantity,
-        oi.unit_price,
-        oi.total_price,
-        oi.size,
-        oi.color,
-        oi.custom_input,
-        oi.created_at,
-        o.order_number,
-        o.customer_name,
-        o.customer_email,
-        o.total_amount,
-        o.status as order_status
-      FROM order_items oi
-      JOIN orders o ON oi.order_id = o.id
-      WHERE oi.custom_input IS NOT NULL 
-        AND oi.custom_input != 'null' 
-        AND oi.custom_input != '{}'
-      ORDER BY oi.created_at DESC
-    `);
-    
-    console.log('🔍 Query successful, found', result.rows.length, 'orders with custom input');
-    res.json({ orders: result.rows });
-  } catch (error) {
-    console.error('❌ Error fetching orders with custom input:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message });
-  }
-});
+
 
 // Get all custom requests
 app.get('/api/custom-requests', authenticateToken, async (req, res) => {
@@ -1652,11 +1654,40 @@ app.get('/api/analytics/dashboard', authenticateToken, async (req, res) => {
       ORDER BY stock_quantity ASC
     `);
 
-    // Custom requests count (period-aware)
-    const customRequestsCountResult = await pool.query(`
-      SELECT COUNT(*)::int AS count
-      FROM custom_requests ${dateFilter}
-    `);
+    // Custom requests count (period-aware) - includes both custom_requests and orders with custom input
+    let customRequestsCountResult;
+    if (dateFilter) {
+      // If there's a date filter, apply it to both tables
+      customRequestsCountResult = await pool.query(`
+        SELECT COUNT(*)::int AS count
+        FROM (
+          SELECT id FROM custom_requests ${dateFilter}
+          UNION ALL
+          SELECT o.id 
+          FROM orders o
+          JOIN order_items oi ON o.id = oi.order_id
+          WHERE oi.custom_input IS NOT NULL 
+          AND oi.custom_input != '{}'
+          AND o.status != 'completed'
+          ${dateFilter.replace('WHERE', 'AND o.')}
+        ) AS all_custom_requests
+      `);
+    } else {
+      // If no date filter, just count all pending custom requests
+      customRequestsCountResult = await pool.query(`
+        SELECT COUNT(*)::int AS count
+        FROM (
+          SELECT id FROM custom_requests
+          UNION ALL
+          SELECT o.id 
+          FROM orders o
+          JOIN order_items oi ON o.id = oi.order_id
+          WHERE oi.custom_input IS NOT NULL 
+          AND oi.custom_input != '{}'
+          AND o.status != 'completed'
+        ) AS all_custom_requests
+      `);
+    }
     
     res.json({
       sales: salesResult.rows[0],

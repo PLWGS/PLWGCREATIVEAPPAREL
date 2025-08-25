@@ -40,6 +40,7 @@
         
         .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
         .status-processing { background: rgba(0, 188, 212, 0.2); color: #00bcd4; }
+        .status-shipped { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
         .status-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .status-urgent { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
         
@@ -92,6 +93,52 @@
             background: linear-gradient(90deg, #00bcd4, #4dd0e1);
             height: 100%;
             transition: width 0.3s ease;
+        }
+        
+        /* Custom Scrollbar Styles */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(42, 42, 42, 0.5);
+            border-radius: 4px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(0, 188, 212, 0.8);
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 188, 212, 1);
+        }
+        
+        /* Firefox scrollbar */
+        .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 188, 212, 0.8) rgba(42, 42, 42, 0.5);
+        }
+        
+        /* Force scrollbar to always show */
+        .scrollbar-thin {
+            overflow-y: scroll !important;
+        }
+        
+        /* Ensure content can actually overflow */
+        .overflow-y-auto {
+            overflow-y: auto !important;
+        }
+        
+
+        
+        /* Line clamp utility for text truncation */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         
         /* Mobile Responsive */
@@ -159,7 +206,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                     </svg>
                     <span>Custom Orders</span>
-                    <span class="ml-auto bg-error text-white text-xs px-2 py-1 rounded-full">5</span>
+                    <span id="sidebarCustomOrdersCount" class="ml-auto bg-error text-white text-xs px-2 py-1 rounded-full">0</span>
                 </a>
 
                 <a href="customers.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
@@ -343,12 +390,19 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                 </svg>
                             </div>
-                            <span class="text-error text-sm font-medium">Urgent</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-error text-sm font-medium">Pending</span>
+                                <button onclick="refreshCustomRequestsCount()" class="text-error hover:text-error-light transition-colors" title="Refresh count">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                        <h3 class="text-2xl font-bold text-white mb-1">23</h3>
+                        <h3 class="text-2xl font-bold text-white mb-1">0</h3>
                         <p class="text-text-secondary text-sm">Custom Requests</p>
                         <div class="progress-bar mt-3">
-                            <div class="progress-fill bg-error" style="width: 40%"></div>
+                            <div class="progress-fill bg-error" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -449,6 +503,28 @@
                 </div>
             </section>
 
+            <!-- Quick Stats Summary -->
+            <section class="mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-accent mb-1" id="totalOrdersCount">0</div>
+                        <div class="text-text-secondary text-sm">Total Orders</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-warning mb-1" id="pendingOrdersCount">0</div>
+                        <div class="text-text-secondary text-sm">Pending</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-accent mb-1" id="processingOrdersCount">0</div>
+                        <div class="text-text-secondary text-sm">Processing</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-success mb-1" id="completedOrdersCount">0</div>
+                        <div class="text-text-secondary text-sm">Completed</div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Order Management Kanban -->
             <section>
                 <div class="flex items-center justify-between mb-6">
@@ -457,6 +533,9 @@
                         <button id="processAllOrdersBtn" class="btn-primary text-sm px-4 py-2">Process All</button>
                         <button id="exportOrdersBtn" class="border border-accent text-accent px-4 py-2 rounded-lg text-sm hover:bg-accent hover:text-black transition-all duration-300">
                             Export Orders
+                        </button>
+                        <button onclick="toggleOrderView()" class="text-accent hover:text-accent-light text-sm px-3 py-2 border border-accent rounded-lg transition-all duration-300">
+                            <span id="orderViewToggle">Compact View</span>
                         </button>
                     </div>
                 </div>
@@ -468,7 +547,7 @@
                             <h3 class="font-medium text-white">Pending</h3>
                             <span class="status-badge status-pending">0</span>
                         </div>
-                        <div class="space-y-3">
+                        <div class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-surface-dark">
                             <div class="kanban-card rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-white font-medium text-sm">#ORD-2847</span>
@@ -501,7 +580,7 @@
                             <h3 class="font-medium text-white">Processing</h3>
                             <span class="status-badge status-processing">0</span>
                         </div>
-                        <div class="space-y-3">
+                        <div class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-surface-dark">
                             <div class="kanban-card rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-white font-medium text-sm">#ORD-2845</span>
@@ -534,7 +613,7 @@
                             <h3 class="font-medium text-white">Shipped</h3>
                             <span class="status-badge status-processing">0</span>
                         </div>
-                        <div class="space-y-3">
+                        <div class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-surface-dark">
                             <div class="kanban-card rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-white font-medium text-sm">#ORD-2843</span>
@@ -567,7 +646,7 @@
                             <h3 class="font-medium text-white">Completed</h3>
                             <span class="status-badge status-completed">0</span>
                         </div>
-                        <div class="space-y-3">
+                        <div class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-surface-dark">
                             <div class="kanban-card rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-white font-medium text-sm">#ORD-2841</span>
@@ -636,14 +715,15 @@
 
                 <!-- Custom Order Requests -->
                 <div class="glass-card rounded-xl p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="font-orbitron text-lg font-bold text-white">Custom Requests</h3>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="testCustomInputAPI()" class="text-accent hover:text-accent-light text-xs px-2 py-1 border border-accent rounded">Test API</button>
-                            <a href="custom.html" class="text-accent hover:text-accent-light text-sm">View All</a>
-                        </div>
-                    </div>
-                    <div id="customRequestsContainer" class="space-y-4">
+                            <div class="flex items-center justify-between mb-6">
+            <h3 class="font-orbitron text-lg font-bold text-white">Custom Requests</h3>
+            <div class="flex items-center space-x-2">
+                <button onclick="testCustomInputAPI()" class="text-accent hover:text-accent-light text-xs px-2 py-1 border border-accent rounded">Test API</button>
+                <button onclick="loadCustomRequests()" class="text-accent hover:text-accent-light text-xs px-2 py-1 border border-accent rounded">Load Now</button>
+                <a href="custom.html" class="text-accent hover:text-accent-light text-sm">View All</a>
+            </div>
+        </div>
+        <div id="customRequestsContainer" class="space-y-4 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-surface-dark">
                         <div id="customRequestsLoading" class="text-center py-6">
                             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
                             <p class="text-text-secondary mt-2">Loading custom requests...</p>
@@ -667,7 +747,7 @@
                         <p class="text-text-secondary mt-2">Loading activity...</p>
                     </div>
                     <div id="activityEmpty" class="text-center py-6 hidden text-text-secondary text-sm">No recent activity</div>
-                    <div id="activityList" class="space-y-4"></div>
+                    <div id="activityList" class="space-y-4 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-surface-dark"></div>
                 </div>
             </section>
 
@@ -695,7 +775,7 @@
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-surface-dark">
                         <table class="w-full text-left">
                             <thead>
                                 <tr class="border-b border-surface-light">
@@ -802,12 +882,11 @@
                     updateMetrics(data.sales);
                     updateTopProducts(data.topProducts);
                     updateLowStockAlerts(data.lowStock);
-                    // Update Custom Requests metric card (4th card)
-                    const customReqCardValue = document.querySelector('.metric-card:nth-child(4) h3');
-                    if (customReqCardValue && typeof data.customRequestsCount !== 'undefined') {
-                        customReqCardValue.textContent = (data.customRequestsCount || 0).toString();
-                    }
+                    updateCustomRequestsMetric(data.customRequestsCount || 0);
                 }
+                
+                // Load custom requests after dashboard data
+                loadCustomRequests();
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
@@ -870,6 +949,50 @@
             }
             if (totalOrdersElement) {
                 totalOrdersElement.textContent = (salesData.total_orders || 0).toLocaleString();
+            }
+        }
+
+        // Update custom requests metric card
+        function updateCustomRequestsMetric(count) {
+            const customReqCardValue = document.querySelector('.metric-card:nth-child(4) h3');
+            const customReqProgressBar = document.querySelector('.metric-card:nth-child(4) .progress-fill');
+            const sidebarCount = document.getElementById('sidebarCustomOrdersCount');
+            
+            if (customReqCardValue) {
+                customReqCardValue.textContent = count.toString();
+            }
+            
+            // Update sidebar count
+            if (sidebarCount) {
+                sidebarCount.textContent = count.toString();
+                
+                // Update sidebar badge color based on urgency
+                if (count === 0) {
+                    sidebarCount.className = 'ml-auto bg-success text-white text-xs px-2 py-1 rounded-full';
+                } else if (count <= 5) {
+                    sidebarCount.className = 'ml-auto bg-accent text-white text-xs px-2 py-1 rounded-full';
+                } else if (count <= 10) {
+                    sidebarCount.className = 'ml-auto bg-warning text-black text-xs px-2 py-1 rounded-full';
+                } else {
+                    sidebarCount.className = 'ml-auto bg-error text-white text-xs px-2 py-1 rounded-full';
+                }
+            }
+            
+            if (customReqProgressBar) {
+                // Set progress bar width based on count (max 100% for 20+ requests)
+                const progressWidth = Math.min((count / 20) * 100, 100);
+                customReqProgressBar.style.width = progressWidth + '%';
+                
+                // Update progress bar color based on urgency
+                if (count === 0) {
+                    customReqProgressBar.style.background = 'rgba(16, 185, 129, 0.8)'; // Green for no pending
+                } else if (count <= 5) {
+                    customReqProgressBar.style.background = 'rgba(0, 188, 212, 0.8)'; // Blue for low
+                } else if (count <= 10) {
+                    customReqProgressBar.style.background = 'rgba(245, 158, 11, 0.8)'; // Yellow for medium
+                } else {
+                    customReqProgressBar.style.background = 'rgba(239, 68, 68, 0.8)'; // Red for high
+                }
             }
         }
 
@@ -999,6 +1122,23 @@
         function updateOrderKanban(orders) {
             const statuses = ['pending', 'processing', 'shipped', 'completed'];
             
+            // Update summary counts
+            const totalOrders = orders.length;
+            const pendingCount = orders.filter(order => order.status === 'pending').length;
+            const processingCount = orders.filter(order => order.status === 'processing').length;
+            const completedCount = orders.filter(order => order.status === 'completed').length;
+            
+            // Update summary cards
+            const totalElement = document.getElementById('totalOrdersCount');
+            const pendingElement = document.getElementById('pendingOrdersCount');
+            const processingElement = document.getElementById('processingOrdersCount');
+            const completedElement = document.getElementById('completedOrdersCount');
+            
+            if (totalElement) totalElement.textContent = totalOrders;
+            if (pendingElement) pendingElement.textContent = pendingCount;
+            if (processingElement) processingElement.textContent = processingCount;
+            if (completedElement) completedElement.textContent = completedCount;
+            
             statuses.forEach(status => {
                 const column = document.querySelector(`[data-status="${status}"]`);
                 if (!column) return;
@@ -1009,9 +1149,39 @@
                 if (orderContainer) {
                     orderContainer.innerHTML = statusOrders.map(order => {
                         const next = getNextStatus(order.status);
-                        const actionBtn = next ? `<button class=\"text-xs border border-accent text-accent px-2 py-1 rounded hover:bg-accent hover:text-black\" onclick=\"updateOrderStatus(${order.id}, '${next}')\">${labelForStatus(next)}</button>` : '';
+                        const actionBtn = next ? `<button class="text-xs border border-accent text-accent px-2 py-1 rounded hover:bg-accent hover:text-black transition-all duration-300" onclick="updateOrderStatus(${order.id}, '${next}')">${labelForStatus(next)}</button>` : '';
+                        
+                        // Get product information from order items
+                        let productInfo = 'Product details unavailable';
+                        if (order.order_items && Array.isArray(order.order_items) && order.order_items.length > 0) {
+                            productInfo = order.order_items.map(item => {
+                                const size = item.size ? ` - ${item.size}` : '';
+                                const color = item.color ? ` (${item.color})` : '';
+                                return `${item.product_name}${size}${color} (${item.quantity}x)`;
+                            }).join(', ');
+                        }
+                        
+                        // Format customer name (show first name + last initial)
+                        const customerName = order.customer_name || 'Customer';
+                        const customerDisplay = customerName.includes(' ') 
+                            ? customerName.split(' ')[0] + ' ' + customerName.split(' ')[1].charAt(0) + '.'
+                            : customerName;
+                        
                         return `
-                        <div class=\"kanban-card rounded-lg p-4\" draggable=\"true\" data-order-id=\"${order.id}\">\n                            <div class=\"flex items-center justify-between mb-2\">\n                                <span class=\"text-white font-medium text-sm\">${order.order_number}</span>\n                                <span class=\"text-text-secondary text-xs\">${formatTimeAgo(order.created_at)}</span>\n                            </div>\n                            <p class=\"text-text-secondary text-sm mb-2\">${order.customer_name || 'Customer'}</p>\n                            <div class=\"flex items-center justify-between mb-2\">\n                                <span class=\"text-accent font-bold text-sm\">$${order.total_amount}</span>\n                                <span class=\"text-text-secondary text-xs\">${order.customer_name || 'Customer'}</span>\n                            </div>\n                            <div class=\"flex justify-end\">${actionBtn}</div>\n                        </div>`;
+                        <div class="kanban-card rounded-lg p-3 cursor-pointer" draggable="true" data-order-id="${order.id}" title="Click to view full details" onclick="showOrderDetails(${order.id})">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-white font-medium text-xs">${order.order_number}</span>
+                                <span class="text-text-secondary text-xs">${formatTimeAgo(order.created_at)}</span>
+                            </div>
+                            <p class="text-text-secondary text-xs mb-1 line-clamp-2">${productInfo}</p>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-accent font-bold text-xs">$${parseFloat(order.total_amount || 0).toFixed(2)}</span>
+                                <span class="text-text-secondary text-xs">${customerDisplay}</span>
+                            </div>
+                            <div class="flex justify-end">
+                                ${actionBtn}
+                            </div>
+                        </div>`;
                     }).join('');
                 }
                 const badge = column.querySelector('.status-badge');
@@ -1066,6 +1236,14 @@
                 if (response && response.ok) {
                     showNotification('Order status updated', 'success');
                     await loadOrders();
+                    
+                    // Always refresh custom requests to show updated status
+                    await loadCustomRequests();
+                    
+                    // If order was marked as completed, refresh dashboard metrics to update custom requests count
+                    if (status === 'completed') {
+                        await loadDashboardData();
+                    }
                 } else {
                     showNotification('Failed to update order status', 'error');
                 }
@@ -1091,6 +1269,7 @@
         async function loadCustomRequests() {
             try {
                 console.log('🔍 Loading custom requests...');
+                console.log('🔍 Starting loadCustomRequests function...');
                 
                 // Load both custom requests and orders with custom input
                 const [customRequestsResponse, customOrdersResponse] = await Promise.all([
@@ -1107,27 +1286,31 @@
                 if (customRequestsResponse && customRequestsResponse.ok) {
                     const customData = await customRequestsResponse.json();
                     console.log('🔍 Custom requests data:', customData);
-                    allRequests = allRequests.concat(customData.requests || []);
+                    // Filter out completed custom requests
+                    const activeCustomRequests = (customData.requests || []).filter(request => request.status !== 'completed');
+                    allRequests = allRequests.concat(activeCustomRequests);
                 }
                 
                 // Add orders with custom input
                 if (customOrdersResponse && customOrdersResponse.ok) {
                     const ordersData = await customOrdersResponse.json();
                     console.log('🔍 Orders with custom input data:', ordersData);
-                    const customOrders = (ordersData.orders || []).map(order => ({
-                        id: `order_${order.id}`,
-                        type: 'order',
-                        customer_name: order.customer_name,
-                        product_type: order.product_name,
-                        concept_description: `Custom input: ${JSON.stringify(order.custom_input)}`,
-                        quantity: order.quantity,
-                        timeline: 'standard',
-                        budget_range: `$${order.total_price}`,
-                        status: order.order_status,
-                        created_at: order.created_at,
-                        email: order.customer_email,
-                        order_number: order.order_number
-                    }));
+                    const customOrders = (ordersData.orders || [])
+                        .filter(order => order.order_status !== 'completed') // Filter out completed orders
+                        .map(order => ({
+                            id: `order_${order.id}`,
+                            type: 'order',
+                            customer_name: order.customer_name,
+                            product_type: order.product_name,
+                            concept_description: `Custom input: ${JSON.stringify(order.custom_input)}`,
+                            quantity: order.quantity,
+                            timeline: 'standard',
+                            budget_range: `$${order.total_price}`,
+                            status: order.order_status || 'pending', // Ensure status is always defined
+                            created_at: order.created_at || new Date().toISOString(), // Use actual order date if available
+                            email: order.customer_email,
+                            order_number: order.order_number
+                        }));
                     allRequests = allRequests.concat(customOrders);
                 }
                 
@@ -1139,26 +1322,52 @@
                 // Take the first 5
                 allRequests = allRequests.slice(0, 5);
                 
+                console.log('🔍 About to call updateCustomRequests with:', allRequests);
                 updateCustomRequests(allRequests);
+                console.log('🔍 updateCustomRequests completed');
             } catch (error) {
                 console.error('❌ Error loading custom requests:', error);
+                console.error('❌ Full error details:', error);
             }
         }
 
         // Update custom requests
         function updateCustomRequests(requests) {
+            console.log('🔍 updateCustomRequests called with:', requests);
+            console.log('🔍 requests length:', requests ? requests.length : 'null');
+            
             const container = document.getElementById('customRequestsContainer');
             const loading = document.getElementById('customRequestsLoading');
             const empty = document.getElementById('customRequestsEmpty');
             
-            if (!container) return;
+            console.log('🔍 Container elements found:', {
+                container: !!container,
+                loading: !!loading,
+                empty: !!empty
+            });
+            
+            if (!container) {
+                console.error('❌ Container not found!');
+                return;
+            }
             
             // Hide loading
-            if (loading) loading.classList.add('hidden');
+            if (loading) {
+                console.log('🔍 Hiding loading state');
+                loading.classList.add('hidden');
+            } else {
+                console.log('❌ Loading element not found');
+            }
             
             if (!requests || requests.length === 0) {
+                console.log('🔍 No requests found, showing empty state');
                 // Show empty state
-                if (empty) empty.classList.remove('hidden');
+                if (empty) {
+                    empty.classList.remove('hidden');
+                    console.log('🔍 Empty state shown');
+                } else {
+                    console.log('❌ Empty element not found');
+                }
                 return;
             }
             
@@ -1166,9 +1375,33 @@
             if (empty) empty.classList.add('hidden');
             
             container.innerHTML = requests.map(request => {
-                const statusClass = request.status === 'pending' ? 'status-pending' : 
-                                  request.status === 'processing' ? 'status-processing' : 
-                                  request.status === 'urgent' ? 'status-urgent' : 'status-pending';
+                // Map status to proper CSS class and display text
+                let statusClass, statusText;
+                switch(request.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = 'Pending';
+                        break;
+                    case 'processing':
+                        statusClass = 'status-processing';
+                        statusText = 'Processing';
+                        break;
+                    case 'shipped':
+                        statusClass = 'status-shipped';
+                        statusText = 'Shipped';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        statusText = 'Completed';
+                        break;
+                    case 'urgent':
+                        statusClass = 'status-urgent';
+                        statusText = 'Urgent';
+                        break;
+                    default:
+                        statusClass = 'status-pending';
+                        statusText = 'Pending';
+                }
                 
                 const timelineText = request.timeline === 'rush' ? 'Rush' : 
                                    request.timeline === 'express' ? 'Express' : 'Standard';
@@ -1176,7 +1409,7 @@
                 return `
                     <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="status-badge ${statusClass}">${request.status}</span>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
                             <span class="text-text-secondary text-xs">${formatTimeAgo(request.created_at)}</span>
                         </div>
                         <h4 class="text-white font-medium text-sm mb-2">${request.customer_name} - ${request.product_type}</h4>
@@ -1339,6 +1572,11 @@
                 if (response && response.ok) {
                     showNotification('Request status updated successfully', 'success');
                     loadCustomRequests(); // Refresh the list
+                    
+                    // If request was marked as completed, refresh dashboard metrics to update custom requests count
+                    if (status === 'completed') {
+                        await loadDashboardData();
+                    }
                 } else {
                     showNotification('Failed to update request status', 'error');
                 }
@@ -1346,6 +1584,136 @@
                 console.error('Error updating request status:', error);
                 showNotification('Error updating request status', 'error');
             }
+        }
+
+        // Refresh custom requests count
+        async function refreshCustomRequestsCount() {
+            try {
+                await loadDashboardData();
+                showNotification('Custom requests count refreshed', 'success');
+            } catch (error) {
+                console.error('Error refreshing custom requests count:', error);
+                showNotification('Error refreshing count', 'error');
+            }
+        }
+
+        // Show order details modal
+        async function showOrderDetails(orderId) {
+            try {
+                const response = await apiRequest(`/api/orders/${orderId}`);
+                if (!response) return;
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showOrderDetailsModal(data.order);
+                } else {
+                    showNotification('Failed to load order details', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading order details:', error);
+                showNotification('Error loading order details', 'error');
+            }
+        }
+
+        // Show order details modal
+        function showOrderDetailsModal(order) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="glass-card rounded-2xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-orbitron text-xl font-bold text-white">Order Details - ${order.order_number}</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-text-secondary hover:text-accent">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="text-accent font-medium mb-2">Customer Information</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><span class="text-text-secondary">Name:</span> <span class="text-white">${order.customer_name || 'N/A'}</span></p>
+                                <p><span class="text-text-secondary">Email:</span> <span class="text-white">${order.customer_email || 'N/A'}</span></p>
+                                <p><span class="text-text-secondary">Order Date:</span> <span class="text-white">${new Date(order.created_at).toLocaleString()}</span></p>
+                                <p><span class="text-text-secondary">Status:</span> <span class="status-badge status-${order.status}">${order.status}</span></p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-accent font-medium mb-2">Order Summary</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><span class="text-text-secondary">Total Amount:</span> <span class="text-accent font-bold">$${parseFloat(order.total_amount || 0).toFixed(2)}</span></p>
+                                <p><span class="text-text-secondary">Items:</span> <span class="text-white">${order.item_count || 0}</span></p>
+                                <p><span class="text-text-secondary">Order Number:</span> <span class="text-white font-mono">${order.order_number}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-accent font-medium mb-3">Order Items</h4>
+                        <div class="space-y-3">
+                            ${order.order_items && order.order_items.length > 0 ? order.order_items.map(item => `
+                                <div class="bg-surface-dark p-4 rounded-lg">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <h5 class="text-white font-medium">${item.product_name}</h5>
+                                            <div class="text-sm text-text-secondary space-y-1 mt-2">
+                                                <p>Quantity: ${item.quantity}</p>
+                                                ${item.size ? `<p>Size: ${item.size}</p>` : ''}
+                                                ${item.color ? `<p>Color: ${item.color}</p>` : ''}
+                                                ${item.custom_input ? `<p class="text-accent">Custom Input: ${JSON.stringify(item.custom_input)}</p>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-accent font-bold">$${parseFloat(item.unit_price || 0).toFixed(2)} each</p>
+                                            <p class="text-white font-medium">$${parseFloat(item.total_price || 0).toFixed(2)} total</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('') : '<p class="text-text-secondary">No order items found</p>'}
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-text-secondary hover:text-accent transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+
+
+
+
+
+        // Toggle order view between compact and expanded
+        function toggleOrderView() {
+            const columns = document.querySelectorAll('.kanban-column');
+            const toggleBtn = document.getElementById('orderViewToggle');
+            const isCompact = toggleBtn.textContent === 'Compact View';
+            
+            columns.forEach(column => {
+                const orderContainer = column.querySelector('.space-y-3');
+                if (orderContainer) {
+                    if (isCompact) {
+                        // Switch to expanded view
+                        orderContainer.classList.remove('max-h-96');
+                        orderContainer.classList.add('max-h-screen');
+                        toggleBtn.textContent = 'Compact View';
+                    } else {
+                        // Switch to compact view
+                        orderContainer.classList.remove('max-h-screen');
+                        orderContainer.classList.add('max-h-96');
+                        toggleBtn.textContent = 'Expanded View';
+                    }
+                }
+            });
         }
 
         // Send quote (placeholder function)
@@ -1660,82 +2028,7 @@
             return '#';
         }
 
-        // Load custom requests
-        async function loadCustomRequests() {
-            try {
-                const res = await apiRequest('/api/custom-requests');
-                if (!res) return;
-                const data = await res.json();
-                const requests = (data && data.requests) || [];
-                
-                // Update the custom requests section
-                const customRequestsSection = document.querySelector('.glass-card.rounded-xl.p-6');
-                if (customRequestsSection) {
-                    const h3Element = customRequestsSection.querySelector('h3');
-                    if (h3Element && h3Element.textContent.includes('Custom Requests')) {
-                        const requestsContainer = customRequestsSection.querySelector('.space-y-4');
-                        if (requestsContainer) {
-                            if (requests.length === 0) {
-                                requestsContainer.innerHTML = '<p class="text-text-secondary text-center py-4">No custom requests found</p>';
-                            } else {
-                                requestsContainer.innerHTML = requests.slice(0, 3).map(request => {
-                                    const timeAgo = formatTimeAgo(request.created_at);
-                                    const statusClass = request.status === 'pending' ? 'status-pending' : 
-                                                      request.status === 'in-progress' ? 'status-processing' : 
-                                                      request.status === 'completed' ? 'status-completed' : 'status-urgent';
-                                    const statusText = request.status === 'pending' ? 'New' : 
-                                                     request.status === 'in-progress' ? 'In Review' : 
-                                                     request.status === 'completed' ? 'Completed' : 'Urgent';
-                                    
-                                    return `
-                                        <div class="p-4 bg-surface-dark rounded-lg border border-accent border-opacity-30">
-                                            <div class="flex items-center justify-between mb-2">
-                                                <span class="status-badge ${statusClass}">${statusText}</span>
-                                                <span class="text-text-secondary text-xs">${timeAgo}</span>
-                                            </div>
-                                            <h4 class="text-white font-medium text-sm mb-2">${request.customer_name} - ${request.request_type}</h4>
-                                            <p class="text-text-secondary text-xs mb-3">${request.concept_description ? request.concept_description.substring(0, 100) + '...' : 'No description provided'}</p>
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-accent font-bold text-sm">Est. $${request.estimated_budget}</span>
-                                                <button onclick="viewCustomRequest(${request.id})" class="btn-primary text-xs px-3 py-1">View Details</button>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('');
-                            }
-                        }
-                    }
-                }
-                
-                // Update the custom requests count in the metric card
-                const customRequestsMetric = document.querySelector('.metric-card');
-                if (customRequestsMetric) {
-                    const h3Element = customRequestsMetric.querySelector('h3');
-                    if (h3Element && h3Element.textContent.includes('Custom Requests')) {
-                        const countElement = customRequestsMetric.querySelector('h3');
-                        if (countElement) {
-                            countElement.textContent = requests.length;
-                        }
-                    }
-                }
-                
-                // Update the sidebar notification badge
-                const sidebarBadge = document.querySelector('a[href="custom.html"] .bg-error');
-                if (sidebarBadge) {
-                    sidebarBadge.textContent = requests.length;
-                }
-                
-            } catch (e) { 
-                console.error('Load custom requests error', e); 
-            }
-        }
 
-        // View custom request details
-        function viewCustomRequest(requestId) {
-            // For now, redirect to custom.html with the request ID
-            // In the future, this could open a modal or dedicated page
-            window.location.href = `custom.html?requestId=${requestId}`;
-        }
 
         // Initialize dashboard on page load
         document.addEventListener('DOMContentLoaded', () => {
@@ -1745,7 +2038,7 @@
             // Load all dashboard data
             loadDashboardData();
             loadOrders();
-            loadCustomRequests();
+            // loadCustomRequests(); // Commented out duplicate call
             loadSubscribers();
             loadActivity();
             loadSalesSeries('7d');
@@ -1809,6 +2102,83 @@
                 console.error('❌ API test error:', error);
                 alert('API test failed! Check console for error details.');
             }
+        }
+
+        // Format custom input for display
+        function formatCustomInput(customInput) {
+            if (!customInput || typeof customInput !== 'object') {
+                return '<p class="text-text-secondary">No custom input provided</p>';
+            }
+            
+            let html = '<div class="space-y-3">';
+            
+            // Handle lyrics custom input
+            if (customInput.lyrics_song_name || customInput.lyrics_artist_band || customInput.lyrics_song_lyrics) {
+                html += '<div class="border-l-4 border-accent pl-4">';
+                html += '<h4 class="text-accent font-medium mb-2">🎵 Song Lyrics Request</h4>';
+                if (customInput.lyrics_song_name) {
+                    html += `<div class="mb-2"><span class="text-text-secondary text-sm">Song Name:</span> <span class="text-white">${customInput.lyrics_song_name}</span></div>`;
+                }
+                if (customInput.lyrics_artist_band) {
+                    html += `<div class="mb-2"><span class="text-text-secondary text-sm">Artist/Band:</span> <span class="text-white">${customInput.lyrics_artist_band}</span></div>`;
+                }
+                if (customInput.lyrics_song_lyrics) {
+                    html += `<div class="mb-2"><span class="text-text-secondary text-sm">Lyrics:</span> <div class="text-white bg-black bg-opacity-30 p-2 rounded mt-1 font-mono text-xs">${customInput.lyrics_song_lyrics}</div></div>`;
+                }
+                html += '</div>';
+            }
+            
+            // Handle birthday custom input
+            if (customInput.birthday_name || customInput.birthday_date || customInput.birthday_message) {
+                html += '<div class="border-l-4 border-accent pl-4">';
+                html += '<h4 class="text-accent font-medium mb-2">🎂 Birthday Request</h4>';
+                if (customInput.birthday_name) {
+                    html += `<div class="mb-2"><span class="text-text-secondary text-sm">Name:</span> <span class="text-white">${customInput.birthday_name}</span></div>`;
+                }
+                if (customInput.birthday_date) {
+                    html += `<div class="mb-2"><span class="text-text-secondary text-sm">Birthday:</span> <span class="text-white">${customInput.birthday_date}</span></div>`;
+                }
+                if (customInput.birthday_message) {
+                    html += `<div class="mb-2"><span class="text-text-secondary text-sm">Message:</span> <div class="text-white bg-black bg-opacity-30 p-2 rounded mt-1">${customInput.birthday_message}</div></div>`;
+                }
+                html += '</div>';
+            }
+            
+            // Handle any other custom input fields
+            const otherFields = Object.keys(customInput).filter(key => 
+                !key.startsWith('lyrics_') && !key.startsWith('birthday_')
+            );
+            
+            if (otherFields.length > 0) {
+                html += '<div class="border-l-4 border-accent pl-4">';
+                html += '<h4 class="text-accent font-medium mb-2">📝 Additional Custom Input</h4>';
+                otherFields.forEach(field => {
+                    const value = customInput[field];
+                    if (value && value !== 'null' && value !== 'undefined') {
+                        const label = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        html += `<div class="mb-2"><span class="text-text-secondary text-sm">${label}:</span> <span class="text-white">${value}</span></div>`;
+                    }
+                });
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        // Format order date
+        function formatOrderDate(order) {
+            // Try to get date from order_items table first
+            if (order.created_at) {
+                try {
+                    return new Date(order.created_at).toLocaleString();
+                } catch (e) {
+                    console.warn('Invalid created_at date:', order.created_at);
+                }
+            }
+            
+            // Fallback: use current time since we don't have the actual order date
+            return new Date().toLocaleString() + ' (estimated)';
         }
 
         // View order with custom input
@@ -1884,13 +2254,13 @@
                         <div>
                             <label class="text-text-secondary text-sm">Custom Input Details</label>
                             <div class="bg-surface-dark p-4 rounded-lg mt-2">
-                                <pre class="text-white text-sm whitespace-pre-wrap">${JSON.stringify(order.custom_input, null, 2)}</pre>
+                                ${formatCustomInput(order.custom_input)}
                             </div>
                         </div>
                         
                         <div>
                             <label class="text-text-secondary text-sm">Order Date</label>
-                            <p class="text-white font-medium">${new Date(order.created_at).toLocaleString()}</p>
+                            <p class="text-white font-medium">${formatOrderDate(order)}</p>
                         </div>
                     </div>
                 </div>
