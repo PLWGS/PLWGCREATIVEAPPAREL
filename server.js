@@ -3835,6 +3835,16 @@ const validateProduct = [
   body('tags').optional().isArray().withMessage('Tags must be an array'),
   body('colors').optional().isArray().withMessage('Colors must be an array'),
   body('sizes').optional().isArray().withMessage('Sizes must be an array'),
+  body('custom_birthday_enabled').optional().isBoolean().withMessage('Custom birthday enabled must be a boolean'),
+  body('custom_birthday_required').optional().isBoolean().withMessage('Custom birthday required must be a boolean'),
+  body('custom_birthday_fields').optional().isJSON().withMessage('Custom birthday fields must be valid JSON'),
+  body('custom_birthday_labels').optional().isJSON().withMessage('Custom birthday labels must be valid JSON'),
+  body('custom_birthday_char_limit').optional().isInt({ min: 50, max: 1000 }).withMessage('Custom birthday character limit must be between 50 and 1000'),
+  body('custom_lyrics_enabled').optional().isBoolean().withMessage('Custom lyrics enabled must be a boolean'),
+  body('custom_lyrics_required').optional().isBoolean().withMessage('Custom lyrics required must be a boolean'),
+  body('custom_lyrics_fields').optional().isJSON().withMessage('Custom lyrics fields must be valid JSON'),
+  body('custom_lyrics_labels').optional().isJSON().withMessage('Custom lyrics labels must be valid JSON'),
+  body('custom_lyrics_char_limit').optional().isInt({ min: 50, max: 1000 }).withMessage('Custom lyrics character limit must be between 50 and 1000'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -3864,7 +3874,17 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       sizes,
       images,
       specifications,
-      features
+      features,
+      custom_birthday_enabled,
+      custom_birthday_required,
+      custom_birthday_fields,
+      custom_birthday_labels,
+      custom_birthday_char_limit,
+      custom_lyrics_enabled,
+      custom_lyrics_required,
+      custom_lyrics_fields,
+      custom_lyrics_labels,
+      custom_lyrics_char_limit
     } = req.body;
 
     // Process tags to ensure it's always a JavaScript array
@@ -3942,8 +3962,10 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
         id, name, description, price, original_price, image_url, category, subcategory, 
         tags, stock_quantity, low_stock_threshold, is_featured, is_on_sale, sale_percentage,
         colors, sizes, specifications, features, sub_images, size_stock,
-        track_inventory, brand_preference, specs_notes
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+        track_inventory, brand_preference, specs_notes,
+        custom_birthday_enabled, custom_birthday_required, custom_birthday_fields, custom_birthday_labels, custom_birthday_char_limit,
+        custom_lyrics_enabled, custom_lyrics_required, custom_lyrics_fields, custom_lyrics_labels, custom_lyrics_char_limit
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)
       RETURNING *
     `, [
       nextId, name, description, price, original_price, image_url, category, 'Featured',
@@ -3951,7 +3973,15 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       true, true, sale_percentage || 15, JSON.stringify(colors || []), 
       JSON.stringify(sizesFiltered), JSON.stringify(specifications || {}),
       JSON.stringify(features || {}), JSON.stringify(sub_images), JSON.stringify(sizeStock),
-      !!req.body.track_inventory, req.body.brand_preference || 'either', req.body.specs_notes || ''
+      !!req.body.track_inventory, req.body.brand_preference || 'either', req.body.specs_notes || '',
+      custom_birthday_enabled || false, custom_birthday_required || false, 
+      custom_birthday_fields || '["birthdate", "name", "additional_info"]',
+      custom_birthday_labels || '{"birthdate": "Birthdate", "name": "Name", "additional_info": "Any other references or information"}',
+      custom_birthday_char_limit || 250,
+      custom_lyrics_enabled || false, custom_lyrics_required || false,
+      custom_lyrics_fields || '["artist_band", "song_name", "song_lyrics"]',
+      custom_lyrics_labels || '{"artist_band": "Artist or Band Name", "song_name": "Song Name", "song_lyrics": "Song Lyrics (Optional)"}',
+      custom_lyrics_char_limit || 250
     ]);
 
     console.log(`✅ Product created with ID ${nextId}`);
@@ -4013,7 +4043,17 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       image_url,
       sub_images,
       specifications,
-      features
+      features,
+      custom_birthday_enabled,
+      custom_birthday_required,
+      custom_birthday_fields,
+      custom_birthday_labels,
+      custom_birthday_char_limit,
+      custom_lyrics_enabled,
+      custom_lyrics_required,
+      custom_lyrics_fields,
+      custom_lyrics_labels,
+      custom_lyrics_char_limit
     } = req.body;
 
     // Process tags to ensure it's always a JavaScript array
@@ -4108,8 +4148,10 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
         low_stock_threshold = $9, sale_percentage = $10, colors = $11,
         sizes = $12, specifications = $13, features = $14, sub_images = $15,
         size_stock = $16, track_inventory = $17, brand_preference = $18, specs_notes = $19,
+        custom_birthday_enabled = $20, custom_birthday_required = $21, custom_birthday_fields = $22, custom_birthday_labels = $23, custom_birthday_char_limit = $24,
+        custom_lyrics_enabled = $25, custom_lyrics_required = $26, custom_lyrics_fields = $27, custom_lyrics_labels = $28, custom_lyrics_char_limit = $29,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $20
+      WHERE id = $30
       RETURNING *
     `, [
       name, description, price, original_price, final_image_url, category,
@@ -4118,6 +4160,14 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       JSON.stringify(specifications || {}), JSON.stringify(features || {}),
       JSON.stringify(final_sub_images), JSON.stringify(size_stock || {}),
       !!req.body.track_inventory, req.body.brand_preference || 'either', req.body.specs_notes || '',
+      custom_birthday_enabled || false, custom_birthday_required || false, 
+      custom_birthday_fields || '["birthdate", "name", "additional_info"]',
+      custom_birthday_labels || '{"birthdate": "Birthdate", "name": "Name", "additional_info": "Any other references or information"}',
+      custom_birthday_char_limit || 250,
+      custom_lyrics_enabled || false, custom_lyrics_required || false,
+      custom_lyrics_fields || '["artist_band", "song_name", "song_lyrics"]',
+      custom_lyrics_labels || '{"artist_band": "Artist or Band Name", "song_name": "Song Name", "song_lyrics": "Song Lyrics (Optional)"}',
+      custom_lyrics_char_limit || 250,
       productId
     ]);
 
@@ -4488,6 +4538,68 @@ app.get('/api/admin/categories/stats', async (req, res) => {
   } catch (error) {
     console.error('Error fetching category stats:', error);
     res.status(500).json({ error: 'Failed to fetch category statistics' });
+  }
+});
+
+// Get products with custom input fields enabled
+app.get('/api/admin/products/custom-inputs', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        id,
+        name,
+        category,
+        custom_birthday_enabled,
+        custom_birthday_required,
+        custom_birthday_fields,
+        custom_birthday_labels,
+        custom_birthday_char_limit,
+        custom_lyrics_enabled,
+        custom_lyrics_required,
+        custom_lyrics_fields,
+        custom_lyrics_labels,
+        custom_lyrics_char_limit
+      FROM products 
+      WHERE custom_birthday_enabled = true OR custom_lyrics_enabled = true
+      ORDER BY category, name
+    `);
+    
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching products with custom inputs:', error);
+    res.status(500).json({ error: 'Failed to fetch products with custom inputs' });
+  }
+});
+
+// Get custom input configuration for a specific product
+app.get('/api/admin/products/:id/custom-inputs', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await pool.query(`
+      SELECT 
+        custom_birthday_enabled,
+        custom_birthday_required,
+        custom_birthday_fields,
+        custom_birthday_labels,
+        custom_birthday_char_limit,
+        custom_lyrics_enabled,
+        custom_lyrics_required,
+        custom_lyrics_fields,
+        custom_lyrics_labels,
+        custom_lyrics_char_limit
+      FROM products 
+      WHERE id = $1
+    `, [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching product custom inputs:', error);
+    res.status(500).json({ error: 'Failed to fetch product custom inputs' });
   }
 });
 

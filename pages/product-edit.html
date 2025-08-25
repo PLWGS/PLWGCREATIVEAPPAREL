@@ -200,10 +200,134 @@
               <label class="flex items-center space-x-2"><input type="checkbox" id="feature_fade_resistant" class="rounded border-surface-light text-accent"><span>Fade-resistant printing technology</span></label>
               <label class="flex items-center space-x-2"><input type="checkbox" id="feature_soft_touch" class="rounded border-surface-light text-accent"><span>Soft-touch finish for comfort</span></label>
             </div>
-            <div class="mt-4">
-              <label class="block text-sm font-medium text-text-primary mb-2">Tags</label>
-              <input type="text" id="tags" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg" placeholder="custom, printed, quality" />
+          </div>
+        </div>
+
+        <!-- Custom Input Options -->
+        <div class="space-y-6">
+          <h3 class="font-orbitron text-lg font-semibold text-accent">Custom Input Options</h3>
+          
+          <!-- Birthday Custom Input -->
+          <div class="glass-card rounded-lg p-4 border border-accent border-opacity-20">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-3">
+                <input type="checkbox" id="custom_birthday_enabled" class="rounded border-surface-light text-accent focus:ring-accent">
+                <label for="custom_birthday_enabled" class="text-sm font-medium text-text-primary">Enable Birthday Custom Input</label>
+              </div>
+              <div class="flex items-center space-x-3">
+                <input type="checkbox" id="custom_birthday_required" class="rounded border-surface-light text-accent focus:ring-accent">
+                <label for="custom_birthday_required" class="text-sm text-text-secondary">Required</label>
+              </div>
             </div>
+            
+            <div id="birthday-options" class="space-y-3 hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm text-text-secondary mb-1">Character Limit</label>
+                  <input type="number" id="custom_birthday_char_limit" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="250" min="50" max="1000">
+                </div>
+                <div>
+                  <label class="block text-sm text-text-secondary mb-1">Enabled Fields</label>
+                  <div class="space-y-2">
+                    <div class="flex items-center space-x-2">
+                      <input type="checkbox" id="birthday-field-birthdate" class="rounded border-surface-light text-accent focus:ring-accent">
+                      <label for="birthday-field-birthdate" class="text-sm text-text-primary">Birthdate</label>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <input type="checkbox" id="birthday-field-name" class="rounded border-surface-light text-accent focus:ring-accent">
+                      <label for="birthday-field-name" class="text-sm text-text-primary">Name</label>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <input type="checkbox" id="birthday-field-additional" class="rounded border-surface-light text-accent focus:ring-accent">
+                      <label for="birthday-field-additional" class="text-sm text-text-primary">Additional Information</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm text-text-secondary mb-1">Custom Labels</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm text-text-secondary mb-1">Birthdate Label</label>
+                    <input type="text" id="birthday-label-birthdate" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Birthdate">
+                  </div>
+                  <div>
+                    <label class="block text-sm text-text-secondary mb-1">Name Label</label>
+                    <input type="text" id="birthday-label-name" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Name">
+                  </div>
+                  <div>
+                    <label class="block text-sm text-text-secondary mb-1">Additional Info Label</label>
+                    <input type="text" id="birthday-label-additional" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Any other references or information">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lyrics Custom Input -->
+          <div class="glass-card rounded-lg p-4 border border-accent border-opacity-20">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-3">
+                <input type="checkbox" id="custom_lyrics_enabled" class="rounded border-surface-light text-accent focus:ring-accent">
+                <label for="custom_lyrics_enabled" class="text-sm font-medium text-text-primary">Enable Lyrics Custom Input</label>
+              </div>
+              <div class="flex items-center space-x-3">
+                <input type="checkbox" id="custom_lyrics_required" class="rounded border-surface-light text-accent focus:ring-accent">
+                <label for="custom_lyrics_required" class="text-sm text-text-secondary">Required</label>
+              </div>
+            </div>
+            
+            <div id="lyrics-options" class="space-y-3 hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm text-text-secondary mb-1">Character Limit</label>
+                  <input type="number" id="custom_lyrics_char_limit" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="250" min="50" max="1000">
+                </div>
+                <div>
+                  <label class="block text-sm text-text-secondary mb-1">Enabled Fields</label>
+                  <div class="space-y-2">
+                    <div class="flex items-center space-x-2">
+                      <input type="checkbox" id="lyrics-field-artist" class="rounded border-surface-light text-accent focus:ring-accent">
+                      <label for="lyrics-field-artist" class="text-sm text-text-primary">Artist or Band Name</label>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <input type="checkbox" id="lyrics-field-song" class="rounded border-surface-light text-accent focus:ring-accent">
+                      <label for="lyrics-field-song" class="text-sm text-text-primary">Song Name</label>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <input type="checkbox" id="lyrics-field-lyrics" class="rounded border-surface-light text-accent focus:ring-accent">
+                      <label for="lyrics-field-lyrics" class="text-sm text-text-primary">Song Lyrics (Optional)</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm text-text-secondary mb-1">Custom Labels</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm text-text-secondary mb-1">Artist/Band Label</label>
+                    <input type="text" id="lyrics-label-artist" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Artist or Band Name">
+                  </div>
+                  <div>
+                    <label class="text-sm text-text-secondary mb-1">Song Name Label</label>
+                    <input type="text" id="lyrics-label-song" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Song Name">
+                  </div>
+                  <div>
+                    <label class="block text-sm text-text-secondary mb-1">Song Lyrics Label</label>
+                    <input type="text" id="lyrics-label-lyrics" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Song Lyrics (Optional)">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-text-primary mb-2">Tags</label>
+          <input type="text" id="tags" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg" placeholder="custom, printed, quality" />
+        </div>
           </div>
         </div>
 
@@ -340,6 +464,54 @@
       document.getElementById('feature_fade_resistant').checked = !!features.fade_resistant;
       document.getElementById('feature_soft_touch').checked = !!features.soft_touch;
 
+      // Custom Input Options
+      document.getElementById('custom_birthday_enabled').checked = !!p.custom_birthday_enabled;
+      document.getElementById('custom_birthday_required').checked = !!p.custom_birthday_required;
+      document.getElementById('custom_birthday_char_limit').value = p.custom_birthday_char_limit || 250;
+      
+      // Birthday fields
+      const birthdayFields = p.custom_birthday_fields || ['birthdate', 'name', 'additional_info'];
+      document.getElementById('birthday-field-birthdate').checked = birthdayFields.includes('birthdate');
+      document.getElementById('birthday-field-name').checked = birthdayFields.includes('name');
+      document.getElementById('birthday-field-additional').checked = birthdayFields.includes('additional_info');
+      
+      // Birthday labels
+      const birthdayLabels = p.custom_birthday_labels || {
+        birthdate: 'Birthdate',
+        name: 'Name',
+        additional_info: 'Any other references or information'
+      };
+      document.getElementById('birthday-label-birthdate').value = birthdayLabels.birthdate || 'Birthdate';
+      document.getElementById('birthday-label-name').value = birthdayLabels.name || 'Name';
+      document.getElementById('birthday-label-additional').value = birthdayLabels.additional_info || 'Any other references or information';
+      
+      // Show/hide birthday options
+      document.getElementById('birthday-options').classList.toggle('hidden', !p.custom_birthday_enabled);
+
+      // Lyrics custom input
+      document.getElementById('custom_lyrics_enabled').checked = !!p.custom_lyrics_enabled;
+      document.getElementById('custom_lyrics_required').checked = !!p.custom_lyrics_required;
+      document.getElementById('custom_lyrics_char_limit').value = p.custom_lyrics_char_limit || 250;
+      
+      // Lyrics fields
+      const lyricsFields = p.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
+      document.getElementById('lyrics-field-artist').checked = lyricsFields.includes('artist_band');
+      document.getElementById('lyrics-field-song').checked = lyricsFields.includes('song_name');
+      document.getElementById('lyrics-field-lyrics').checked = lyricsFields.includes('song_lyrics');
+      
+      // Lyrics labels
+      const lyricsLabels = p.custom_lyrics_labels || {
+        artist_band: 'Artist or Band Name',
+        song_name: 'Song Name',
+        song_lyrics: 'Song Lyrics (Optional)'
+      };
+      document.getElementById('lyrics-label-artist').value = lyricsLabels.artist_band || 'Artist or Band Name';
+      document.getElementById('lyrics-label-song').value = lyricsLabels.song_name || 'Song Name';
+      document.getElementById('lyrics-label-lyrics').value = lyricsLabels.song_lyrics || 'Song Lyrics (Optional)';
+      
+      // Show/hide lyrics options
+      document.getElementById('lyrics-options').classList.toggle('hidden', !p.custom_lyrics_enabled);
+
       // Colors
       selectedColors = Array.isArray(p.colors) ? p.colors.slice() : [];
       document.querySelectorAll('#color-options .color-swatch').forEach(el => {
@@ -372,6 +544,60 @@
         if (!isNaN(val)) map[size] = val;
       });
       return map;
+    }
+
+    function setupCustomInputOptions() {
+      // Birthday custom input toggle
+      const birthdayEnabled = document.getElementById('custom_birthday_enabled');
+      const birthdayOptions = document.getElementById('birthday-options');
+      
+      if (birthdayEnabled && birthdayOptions) {
+        birthdayEnabled.addEventListener('change', function() {
+          birthdayOptions.classList.toggle('hidden', !this.checked);
+        });
+      }
+
+      // Lyrics custom input toggle
+      const lyricsEnabled = document.getElementById('custom_lyrics_enabled');
+      const lyricsOptions = document.getElementById('lyrics-options');
+      
+      if (lyricsEnabled && lyricsOptions) {
+        lyricsEnabled.addEventListener('change', function() {
+          lyricsOptions.classList.toggle('hidden', !this.checked);
+        });
+      }
+    }
+
+    function getEnabledBirthdayFields() {
+      const fields = [];
+      if (document.getElementById('birthday-field-birthdate').checked) fields.push('birthdate');
+      if (document.getElementById('birthday-field-name').checked) fields.push('name');
+      if (document.getElementById('birthday-field-additional').checked) fields.push('additional_info');
+      return fields;
+    }
+
+    function getBirthdayLabels() {
+      return {
+        birthdate: document.getElementById('birthday-label-birthdate').value,
+        name: document.getElementById('birthday-label-name').value,
+        additional_info: document.getElementById('birthday-label-additional').value
+      };
+    }
+
+    function getEnabledLyricsFields() {
+      const fields = [];
+      if (document.getElementById('lyrics-field-artist').checked) fields.push('artist_band');
+      if (document.getElementById('lyrics-field-song').checked) fields.push('song_name');
+      if (document.getElementById('lyrics-field-lyrics').checked) fields.push('song_lyrics');
+      return fields;
+    }
+
+    function getLyricsLabels() {
+      return {
+        artist_band: document.getElementById('lyrics-label-artist').value,
+        song_name: document.getElementById('lyrics-label-song').value,
+        song_lyrics: document.getElementById('lyrics-label-lyrics').value
+      };
     }
     
     // Load categories dynamically from database
@@ -441,7 +667,18 @@
              double_stitched: document.getElementById('feature_double_stitched').checked,
              fade_resistant: document.getElementById('feature_fade_resistant').checked,
              soft_touch: document.getElementById('feature_soft_touch').checked
-           }
+           },
+           // Custom input options
+           custom_birthday_enabled: document.getElementById('custom_birthday_enabled').checked,
+           custom_birthday_required: document.getElementById('custom_birthday_required').checked,
+           custom_birthday_fields: getEnabledBirthdayFields(),
+           custom_birthday_labels: getBirthdayLabels(),
+           custom_birthday_char_limit: parseInt(document.getElementById('custom_birthday_char_limit').value) || 250,
+           custom_lyrics_enabled: document.getElementById('custom_lyrics_enabled').checked,
+           custom_lyrics_required: document.getElementById('custom_lyrics_required').checked,
+           custom_lyrics_fields: getEnabledLyricsFields(),
+           custom_lyrics_labels: getLyricsLabels(),
+           custom_lyrics_char_limit: parseInt(document.getElementById('custom_lyrics_char_limit').value) || 250
          };
 
         // Images: send base64 array when present, else keep existing URLs
@@ -495,6 +732,7 @@
      document.addEventListener('DOMContentLoaded', () => {
        setupColorSelection();
        setupSizeSelection();
+       setupCustomInputOptions();
        if (!productId) { 
          document.getElementById('loading').textContent = 'Missing product ID'; 
        } else { 
