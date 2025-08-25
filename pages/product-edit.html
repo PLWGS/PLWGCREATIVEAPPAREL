@@ -462,7 +462,7 @@
         document.getElementById('spec_origin').value = specs.origin || '';
         document.getElementById('spec_print_method').value = specs.print_method || '';
         document.getElementById('spec_sustainability').value = specs.sustainability || '';
-        document.getElementById('spec_brand_preference').value = (specs.brand_preference || p.brand_preference || '');
+        document.getElementById('spec_brand_preference').value = (specs.brand_preference || p.brand_preference || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)');
 
       // Features
       const features = p.features || {};
@@ -667,9 +667,9 @@
              origin: document.getElementById('spec_origin').value.trim() || '',
              print_method: document.getElementById('spec_print_method').value.trim() || '',
              sustainability: document.getElementById('spec_sustainability').value.trim() || '',
-             brand_preference: document.getElementById('spec_brand_preference').value.trim() || ''
+             brand_preference: document.getElementById('spec_brand_preference').value.trim() || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)'
            },
-           brand_preference: document.getElementById('spec_brand_preference').value.trim() || '',
+           brand_preference: document.getElementById('spec_brand_preference').value.trim() || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)',
            features: {
              double_stitched: document.getElementById('feature_double_stitched').checked,
              fade_resistant: document.getElementById('feature_fade_resistant').checked,
