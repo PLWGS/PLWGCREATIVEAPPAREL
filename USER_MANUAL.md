@@ -1577,12 +1577,14 @@ This section provides comprehensive, step-by-step instructions for managing your
    - **When Checked**: Stock automatically decreases with sales, triggers low stock alerts
 
 ##### Brand Preference
-- **Field**: Dropdown menu showing "Either (auto)"
+- **Field**: Text input field (previously dropdown)
 - **Purpose**: Specifies the brand of blank garment to use
-- **Options**: 
-  - "Either (auto)": System automatically selects between preferred brands
-  - Specific brand names (e.g., Gildan Softstyle, Bella+Canvas 3001)
-- **Best Practice**: Use "Either (auto)" for flexibility in fulfillment
+- **How to Use**: 
+  - Type any custom brand preference text
+  - Leave blank to use default fallback text
+- **Default Fallback**: "Either (Gildan Softstyle 64000 or Bella+Canvas 3001)" (only shows when field is empty)
+- **Best Practice**: Type specific brand preferences for clarity, or leave blank for flexibility
+- **Customer Display**: Your custom text appears exactly as typed on the product listing page
 
 ##### Notes/Specs (Optional)
 - **Field**: Large text area for additional information
