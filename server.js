@@ -4784,6 +4784,83 @@ app.get('/api/admin/products/:id/custom-inputs', authenticateToken, async (req, 
   }
 });
 
+// Email test endpoint
+app.get('/api/test-email', async (req, res) => {
+  try {
+    console.log('🧪 Testing email configuration...');
+    console.log('📧 SMTP Host:', process.env.SMTP_HOST);
+    console.log('📧 SMTP Port:', process.env.SMTP_PORT);
+    console.log('📧 SMTP User:', process.env.SMTP_USER);
+    console.log('📧 SMTP Secure:', process.env.SMTP_SECURE);
+    console.log('📧 Email From:', process.env.EMAIL_FROM);
+    
+    // Test email configuration
+    const testEmail = {
+      from: process.env.EMAIL_FROM || 'test@example.com',
+      to: process.env.ADMIN_EMAIL || 'test@example.com',
+      subject: '🧪 Email Test - PLWG Creative Apparel',
+      text: `This is a test email to verify your email configuration.
+      
+Time: ${new Date().toISOString()}
+Server: ${process.env.NODE_ENV || 'development'}
+SMTP Host: ${process.env.SMTP_HOST}
+SMTP Port: ${process.env.SMTP_PORT}
+
+If you receive this, your email configuration is working!`,
+      html: `<h2>🧪 Email Test - PLWG Creative Apparel</h2>
+<p>This is a test email to verify your email configuration.</p>
+<ul>
+<li><strong>Time:</strong> ${new Date().toISOString()}</li>
+<li><strong>Server:</strong> ${process.env.NODE_ENV || 'development'}</li>
+<li><strong>SMTP Host:</strong> ${process.env.SMTP_HOST}</li>
+<li><strong>SMTP Port:</strong> ${process.env.SMTP_PORT}</li>
+</ul>
+<p><strong>If you receive this, your email configuration is working!</strong></p>`
+    };
+
+    // Verify transporter configuration
+    await transporter.verify();
+    console.log('✅ SMTP connection verified successfully');
+    
+    // Send test email
+    const info = await transporter.sendMail(testEmail);
+    console.log('✅ Test email sent successfully:', info.messageId);
+    
+    res.json({
+      success: true,
+      message: 'Test email sent successfully',
+      messageId: info.messageId,
+      config: {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_SECURE,
+        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+        from: process.env.EMAIL_FROM
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Email test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: {
+        code: error.code,
+        command: error.command,
+        responseCode: error.responseCode,
+        response: error.response
+      },
+      config: {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_SECURE,
+        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+        from: process.env.EMAIL_FROM
+      }
+    });
+  }
+});
+
 // Initialize database and start server
 Promise.all([
   initializeAdminCredentials(),
