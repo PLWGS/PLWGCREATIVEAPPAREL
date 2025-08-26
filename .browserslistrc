@@ -1,0 +1,9 @@
+# Browserslist configuration
+# Suppress outdated database warnings
+defaults
+not dead
+> 0.5%
+last 2 versions
+Firefox ESR
+not ie <= 11
+not ie_mob <= 11

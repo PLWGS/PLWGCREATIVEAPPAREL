@@ -56,6 +56,10 @@
     "node": ">=14.0.0",
     "npm": ">=6.0.0"
   },
+  "dotenv": {
+    "debug": false,
+    "radar": false
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/mariaisabeljuarezgomez/PLWGCREATIVEAPPAREL.git"
