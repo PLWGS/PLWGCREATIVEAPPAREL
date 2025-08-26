@@ -1983,16 +1983,12 @@
                     if (colorSelector && colorPreview && colorNameDisplay) {
                         // Map normalized color names (lowercase, no spaces/hyphens) to hex
                         const colorHexMap = {
-                            white:'#ffffff', natural:'#eee8d8', icegrey:'#d3d1cf', brown:'#352d2c', black:'#000000',
-                            navy:'#252432', aqua:'#088dbb', royalblue:'#17489b', teal:'#00a69c', gold:'#f1b83e',
-                            army:'#585244', armygreen:'#585244', militarygreen:'#495443', evergreen:'#2b4d35',
+                            black:'#000000', navy:'#252432', athleticgreysolid:'#d3d3d3', stormblue:'#626874', royalblue:'#17489b',
+                            aquablue:'#4098ca', tealbluegreen:'#00a69c', mintgreen:'#b2ddc4', evergreen:'#2b4d35', militarygreen:'#495443',
+                            army:'#585244', natural:'#eee8d8', sunset:'#f8a790', orange:'#f3703b', autumn:'#993f21', gold:'#f1b83e',
+                            mustard:'#caa235', white:'#ffffff', charitypink:'#f27da0', fushsia:'#ec3f77', maroon:'#6c2232',
+                            red:'#d32621', lilac:'#dab2d0', teampurple:'#471b7c'
                         };
-                        // extend with more greens and others
-                        Object.assign(colorHexMap, {
-                            olivegreen:'#595624', kellygreen:'#0d572c', mint:'#b2ddc4', sunset:'#f8a790', orange:'#f3703b',
-                            autumn:'#993f21', mustard:'#caa235', purple:'#472b7a', lilac:'#dab2d0', charitypink:'#f27da0',
-                            fushsia:'#ec3f77', softpink:'#fae1df', pink:'#f0bebf', berry:'#cd4f7f', red:'#d32621', maroon:'#6c2232'
-                        });
                         
                         const resolveColor = (c) => {
                             if (!c) return '#000000';
