@@ -96,14 +96,23 @@ if (process.env.DATABASE_URL) {
 }
 
 // Email transporter
+// Smarter config: if port is 465, secure is always true.
+// Otherwise, respect the environment variable. This prevents common misconfigurations.
+const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+const smtpSecure = process.env.SMTP_SECURE === 'true';
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: process.env.SMTP_SECURE === 'true',
+  port: smtpPort,
+  secure: smtpPort === 465 ? true : smtpSecure,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD
-  }
+  },
+  // Add a timeout to prevent long waits on connection issues
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000, // 10 seconds
+  socketTimeout: 10000, // 10 seconds
 });
 
 // Helper function to check database availability
