@@ -2090,10 +2090,9 @@
 
             // Show brand preference and notes if available
             try {
-                const brandPref = product.brand_preference || 'either';
-                const map = { either: 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', gildan: 'Gildan Softstyle 64000', bella: 'Bella+Canvas 3001' };
+                const brandPref = product.brand_preference || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)';
                 const brandTextEl = document.getElementById('brandPrefText');
-                if (brandTextEl) brandTextEl.textContent = map[brandPref] || map.either;
+                if (brandTextEl) brandTextEl.textContent = brandPref;
                 const notes = product.specs_notes || '';
                 if (notes) {
                     const row = document.getElementById('specsNotesRow');

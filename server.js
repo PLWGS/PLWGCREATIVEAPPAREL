@@ -3993,6 +3993,7 @@ const validateProduct = [
   body('custom_lyrics_fields').optional().isJSON().withMessage('Custom lyrics fields must be valid JSON'),
   body('custom_lyrics_labels').optional().isJSON().withMessage('Custom lyrics labels must be valid JSON'),
   body('custom_lyrics_char_limit').optional().isInt({ min: 50, max: 1000 }).withMessage('Custom lyrics character limit must be between 50 and 1000'),
+  body('brand_preference').optional().isString().withMessage('Brand preference must be a string'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -4168,6 +4169,9 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
 });
 
 app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (req, res) => {
+  console.log('🔍 [DEBUG] PUT endpoint called for product ID:', req.params.id);
+  console.log('🔍 [DEBUG] Request body received:', req.body);
+  console.log('🔍 [DEBUG] Starting product update process...');
   if (!pool) {
     return res.status(500).json({ error: 'Database not available' });
   }
@@ -4310,9 +4314,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     
     // Add detailed debugging for the UPDATE execution
     console.log('🔍 [DEBUG] About to execute UPDATE for product ID:', productId);
-    console.log('🔍 [DEBUG] UPDATE query text:', text);
-    console.log('🔍 [DEBUG] UPDATE values array:', values);
-    console.log('🔍 [DEBUG] brand_preference value being sent:', values[17]);
+    console.log('🔍 [DEBUG] brand_preference value being sent:', req.body.brand_preference);
     
     const result = await pool.query(`
       UPDATE products SET
