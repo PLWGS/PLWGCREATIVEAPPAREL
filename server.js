@@ -98,6 +98,7 @@ if (process.env.DATABASE_URL) {
 // Email transporter
 // Smarter config: if port is 465, secure is always true.
 // Otherwise, respect the environment variable. This prevents common misconfigurations.
+// TRIGGERING REDEPLOY: 2FA login needs to pick up new email config
 const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
 const smtpSecure = process.env.SMTP_SECURE === 'true';
 
