@@ -4311,6 +4311,36 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     console.log('🔍 Server received brand_preference:', req.body.brand_preference);
     console.log('🔍 Server received specifications:', req.body.specifications);
     
+    // Ensure specifications include standard care instructions for all printed apparel
+    const defaultSpecifications = {
+      material: '100% Premium Cotton',
+      weight: '180 GSM',
+      fit: 'Unisex Regular',
+      neck_style: 'Crew Neck',
+      sleeve_length: 'Short Sleeve',
+      origin: 'Made in USA',
+      print_method: 'Direct-to-Garment',
+      sustainability: 'Eco-Friendly Inks',
+      care_instructions: {
+        machine_wash_cold: true,
+        turn_inside_out: true,
+        mild_detergent: true,
+        no_fabric_softener: true,
+        no_bleach: true,
+        no_dry_clean_iron: true
+      }
+    };
+    
+    // Merge user specifications with defaults, ensuring care instructions are always included
+    const finalSpecifications = {
+      ...defaultSpecifications,
+      ...(specifications || {}),
+      care_instructions: {
+        ...defaultSpecifications.care_instructions,
+        ...(specifications?.care_instructions || {})
+      }
+    };
+    
     // Update product
     console.log('🔍 About to execute UPDATE query with brand_preference:', req.body.brand_preference);
     
@@ -4334,7 +4364,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       name, description, price, original_price, final_image_url, category,
       processedTags, stock_quantity || 50, low_stock_threshold || 5,
       sale_percentage || 15, JSON.stringify(colors || []), JSON.stringify((Array.isArray(sizes) ? sizes.filter(s => s !== 'XS') : [])),
-      JSON.stringify(specifications || {}), JSON.stringify(features || {}),
+      JSON.stringify(finalSpecifications), JSON.stringify(features || {}),
       JSON.stringify(final_sub_images), JSON.stringify(size_stock || {}),
       !!req.body.track_inventory, req.body.brand_preference || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', req.body.specs_notes || '',
       custom_birthday_enabled || false, custom_birthday_required || false, 
