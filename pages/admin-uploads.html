@@ -814,11 +814,17 @@
         }
 
         function getLyricsLabels() {
-            return {
-                artist_band: document.getElementById('lyrics-label-artist').value,
-                song_name: document.getElementById('lyrics-label-song').value,
-                song_lyrics: document.getElementById('lyrics-label-lyrics').value
-            };
+            const labels = {};
+            if (document.getElementById('lyrics-field-artist').checked) {
+                labels.artist_band = document.getElementById('lyrics-label-artist').value;
+            }
+            if (document.getElementById('lyrics-field-song').checked) {
+                labels.song_name = document.getElementById('lyrics-label-song').value;
+            }
+            if (document.getElementById('lyrics-field-lyrics').checked) {
+                labels.song_lyrics = document.getElementById('lyrics-label-lyrics').value;
+            }
+            return labels;
         }
 
         function clearCustomInputFields() {
@@ -1170,13 +1176,13 @@
                 // Custom input options
                 custom_birthday_enabled: document.getElementById('custom-birthday-enabled').checked,
                 custom_birthday_required: document.getElementById('custom-birthday-required').checked,
-                custom_birthday_fields: getEnabledBirthdayFields(),
-                custom_birthday_labels: getBirthdayLabels(),
+                custom_birthday_fields: JSON.stringify(getEnabledBirthdayFields()),
+                custom_birthday_labels: JSON.stringify(getBirthdayLabels()),
                 custom_birthday_char_limit: parseInt(document.getElementById('custom-birthday-char-limit').value) || 250,
                 custom_lyrics_enabled: document.getElementById('custom-lyrics-enabled').checked,
                 custom_lyrics_required: document.getElementById('custom-lyrics-required').checked,
-                custom_lyrics_fields: getEnabledLyricsFields(),
-                custom_lyrics_labels: getLyricsLabels(),
+                custom_lyrics_fields: JSON.stringify(getEnabledLyricsFields()),
+                custom_lyrics_labels: JSON.stringify(getLyricsLabels()),
                 custom_lyrics_char_limit: parseInt(document.getElementById('custom-lyrics-char-limit').value) || 250
             };
             
@@ -1278,8 +1284,13 @@
                 errorContainer = document.createElement('div');
                 errorContainer.id = 'form-error-message';
                 errorContainer.className = 'bg-red-500 bg-opacity-20 border border-red-500 text-red-500 px-4 py-3 rounded-lg mb-4';
-                const form = document.getElementById('product-form');
-                form.insertBefore(errorContainer, form.firstChild);
+                const formContainer = document.getElementById('new-product-form');
+                if (formContainer) {
+                    formContainer.insertBefore(errorContainer, formContainer.firstChild);
+                } else {
+                    // Fallback: append to body if form container not found
+                    document.body.insertBefore(errorContainer, document.body.firstChild);
+                }
             }
             errorContainer.textContent = message;
             errorContainer.classList.remove('hidden');

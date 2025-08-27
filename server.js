@@ -3987,18 +3987,47 @@ const validateProduct = [
   body('sizes').optional().isArray().withMessage('Sizes must be an array'),
   body('custom_birthday_enabled').optional().isBoolean().withMessage('Custom birthday enabled must be a boolean'),
   body('custom_birthday_required').optional().isBoolean().withMessage('Custom birthday required must be a boolean'),
-  body('custom_birthday_fields').optional().isJSON().withMessage('Custom birthday fields must be valid JSON'),
-  body('custom_birthday_labels').optional().isJSON().withMessage('Custom birthday labels must be valid JSON'),
+  body('custom_birthday_fields').optional().custom((value) => {
+    // Accept both arrays and JSON strings
+    if (Array.isArray(value)) return true;
+    if (typeof value === 'string') {
+      try { JSON.parse(value); return true; } catch { return false; }
+    }
+    return false;
+  }).withMessage('Custom birthday fields must be an array or valid JSON string'),
+  body('custom_birthday_labels').optional().custom((value) => {
+    // Accept both objects and JSON strings
+    if (typeof value === 'object' && value !== null) return true;
+    if (typeof value === 'string') {
+      try { JSON.parse(value); return true; } catch { return false; }
+    }
+    return false;
+  }).withMessage('Custom birthday labels must be an object or valid JSON string'),
   body('custom_birthday_char_limit').optional().isInt({ min: 50, max: 1000 }).withMessage('Custom birthday character limit must be between 50 and 1000'),
   body('custom_lyrics_enabled').optional().isBoolean().withMessage('Custom lyrics enabled must be a boolean'),
   body('custom_lyrics_required').optional().isBoolean().withMessage('Custom lyrics required must be a boolean'),
-  body('custom_lyrics_fields').optional().isJSON().withMessage('Custom lyrics fields must be valid JSON'),
-  body('custom_lyrics_labels').optional().isJSON().withMessage('Custom lyrics labels must be valid JSON'),
+  body('custom_lyrics_fields').optional().custom((value) => {
+    // Accept both arrays and JSON strings
+    if (Array.isArray(value)) return true;
+    if (typeof value === 'string') {
+      try { JSON.parse(value); return true; } catch { return false; }
+    }
+    return false;
+  }).withMessage('Custom lyrics fields must be an array or valid JSON string'),
+  body('custom_lyrics_labels').optional().custom((value) => {
+    // Accept both objects and JSON strings
+    if (typeof value === 'object' && value !== null) return true;
+    if (typeof value === 'string') {
+      try { JSON.parse(value); return true; } catch { return false; }
+    }
+    return false;
+  }).withMessage('Custom lyrics labels must be an object or valid JSON string'),
   body('custom_lyrics_char_limit').optional().isInt({ min: 50, max: 1000 }).withMessage('Custom lyrics character limit must be between 50 and 1000'),
-  body('brand_preference').optional().isString().withMessage('Brand preference must be a string'),
+  body('specifications.brand_preference').optional().isString().withMessage('Brand preference must be a string'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('🔍 Validation errors:', JSON.stringify(errors.array(), null, 2));
       return res.status(400).json({ errors: errors.array() });
     }
     next();
@@ -4124,7 +4153,7 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       true, true, sale_percentage || 15, JSON.stringify(colors || []), 
       JSON.stringify(sizesFiltered), JSON.stringify(specifications || {}),
       JSON.stringify(features || {}), JSON.stringify(sub_images), JSON.stringify(sizeStock),
-      !!req.body.track_inventory, req.body.brand_preference || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', req.body.specs_notes || '',
+      !!req.body.track_inventory, (specifications && specifications.brand_preference) || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', req.body.specs_notes || '',
       custom_birthday_enabled || false, custom_birthday_required || false, 
       custom_birthday_fields || '["birthdate", "name", "additional_info"]',
       custom_birthday_labels || '{"birthdate": "Birthdate", "name": "Name", "additional_info": "Any other references or information"}',
@@ -4366,7 +4395,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       sale_percentage || 15, JSON.stringify(colors || []), JSON.stringify((Array.isArray(sizes) ? sizes.filter(s => s !== 'XS') : [])),
       JSON.stringify(finalSpecifications), JSON.stringify(features || {}),
       JSON.stringify(final_sub_images), JSON.stringify(size_stock || {}),
-      !!req.body.track_inventory, req.body.brand_preference || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', req.body.specs_notes || '',
+      !!req.body.track_inventory, (finalSpecifications && finalSpecifications.brand_preference) || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', req.body.specs_notes || '',
       custom_birthday_enabled || false, custom_birthday_required || false, 
       custom_birthday_fields || '["birthdate", "name", "additional_info"]',
       custom_birthday_labels || '{"birthdate": "Birthdate", "name": "Name", "additional_info": "Any other references or information"}',
