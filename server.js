@@ -675,6 +675,16 @@ async function sendEmail(to, subject, html) {
 console.log('✅ Middleware setup complete');
 console.log('🔧 Setting up routes...');
 
+// Health check endpoint for Railway
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    service: 'PLWG Creative Apparel Admin Dashboard',
+    version: '1.0.0'
+  });
+});
+
 // Admin login
 app.post('/api/admin/login',
   body('email').notEmpty().withMessage('Email is required.'),
