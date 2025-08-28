@@ -8,7 +8,7 @@
     "watch:css": "npx @dhiwise/component-tagger --omit=dev && npx tailwindcss -i ./css/tailwind.css -o ./css/main.css --watch",
     "dev": "npm run watch:css",
     "start": "npm run build:css --omit=dev && node server.js",
-    "start:railway": "node debug-railway.js",
+    "start:railway": "node server.js",
     "start:production": "node server.js",
     "serve": "node dev-server.js",
     "dev:full": "npm run build:css --omit=dev && node dev-server.js",
