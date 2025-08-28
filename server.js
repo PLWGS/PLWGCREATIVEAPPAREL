@@ -99,44 +99,37 @@ if (!isRailway) {
 // Railway Logging Suppression - Prevent other libraries from logging
 // -----------------------------------------------------------------------------
 if (isRailway) {
-  // Suppress all console output from other libraries in Railway
-  const originalConsole = {
-    log: console.log,
-    warn: console.warn,
-    info: console.info,
-    error: console.error,
-    debug: console.debug
-  };
-  
-  // Only allow our logger to output
-  console.log = (...args) => {
-    // Only allow critical logs through
-    if (args[0] && typeof args[0] === 'string' && args[0].includes('❌')) {
-      originalConsole.log(...args);
-    }
-  };
-  
+  console.log('🚂 Railway environment detected - minimizing logs...');
+  // Less aggressive logging suppression for Railway
+  const originalWarn = console.warn;
+  const originalInfo = console.info;
+  const originalDebug = console.debug;
+
+  // Only suppress verbose warnings and info, keep errors and our logs
   console.warn = (...args) => {
-    // Suppress all warnings in Railway
-  };
-  
-  console.info = (...args) => {
-    // Suppress all info in Railway
-  };
-  
-  console.debug = (...args) => {
-    // Suppress all debug in Railway
-  };
-  
-  // Keep error logging but rate limit it
-  let lastErrorLog = 0;
-  console.error = (...args) => {
-    const now = Date.now();
-    if (now - lastErrorLog > 2000) { // Only log errors every 2 seconds
-      originalConsole.error(...args);
-      lastErrorLog = now;
+    // Only show critical warnings
+    if (args[0] && typeof args[0] === 'string' && args[0].includes('❌')) {
+      originalWarn(...args);
     }
   };
+
+  console.info = (...args) => {
+    // Suppress info logs but keep our important messages
+    if (args[0] && typeof args[0] === 'string' && (
+      args[0].includes('✅') ||
+      args[0].includes('🚀') ||
+      args[0].includes('🔧') ||
+      args[0].includes('🎉')
+    )) {
+      originalInfo(...args);
+    }
+  };
+
+  console.debug = (...args) => {
+    // Suppress debug logs completely
+  };
+
+  console.log('🚂 Railway logging suppression enabled');
 }
 
 // -----------------------------------------------------------------------------
