@@ -165,6 +165,12 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
+
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`📨 ${req.method} ${req.path} - ${req.ip}`);
+  next();
+});
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static('.'));
@@ -607,11 +613,23 @@ async function sendEmail(to, subject, html) {
 
 // Health check endpoint for Railway
 app.get('/', (req, res) => {
+  const timestamp = new Date().toISOString();
+  console.log(`🏥 HEALTHCHECK: ${req.method} ${req.path} from ${req.ip} at ${timestamp}`);
+
+  // Log request headers for debugging
+  console.log('🏥 Healthcheck headers:', {
+    'user-agent': req.get('User-Agent'),
+    'host': req.get('Host'),
+    'connection': req.get('Connection')
+  });
+
   res.status(200).json({
     status: 'healthy',
-    timestamp: new Date().toISOString(),
+    timestamp: timestamp,
     service: 'PLWG Creative Apparel Admin Dashboard',
-    version: '1.0.0'
+    version: '1.0.0',
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
   });
 });
 
@@ -5027,6 +5045,12 @@ Promise.all([
   initializeDatabase()
 ]).then(() => {
   app.listen(PORT, () => {
+    console.log(`🚀 SERVER SUCCESSFULLY STARTED on port ${PORT}`);
+    console.log(`📧 Email configured: ${process.env.EMAIL_FROM}`);
+    console.log(`🗄️ Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
+    console.log(`🔐 Admin email: ${ADMIN_EMAIL_MEMO}`);
+    console.log(`🏷️ Category management system active`);
+    console.log(`🌐 Ready for Railway healthcheck at http://localhost:${PORT}/`);
     logger.info(`🚀 Admin Dashboard API server running on port ${PORT}`);
     logger.info(`📧 Email configured: ${process.env.EMAIL_FROM}`);
     logger.info(`🗄️ Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
