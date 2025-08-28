@@ -150,29 +150,54 @@ let ADMIN_EMAIL_MEMO = null;
 let ADMIN_PASSWORD_HASH_MEMO = null;
 
 async function initializeAdminCredentials() {
+  console.log('🔐 Starting admin credentials initialization...');
   try {
+    console.log('📧 Setting ADMIN_EMAIL_MEMO...');
     ADMIN_EMAIL_MEMO = process.env.ADMIN_EMAIL || null;
+    console.log(`📧 ADMIN_EMAIL_MEMO set to: ${ADMIN_EMAIL_MEMO ? '***set***' : 'null'}`);
 
+    console.log('🔍 Checking environment variables...');
     const envHash = process.env.ADMIN_PASSWORD_HASH;
     const envPassword = process.env.ADMIN_PASSWORD;
     const isDevelopment = (process.env.NODE_ENV || 'development') !== 'production';
     const overrideWithPassword = isDevelopment || process.env.ADMIN_OVERRIDE_PASSWORD === 'true';
 
+    console.log(`🔍 envHash exists: ${!!envHash}`);
+    console.log(`🔍 envPassword exists: ${!!envPassword}`);
+    console.log(`🔍 isDevelopment: ${isDevelopment}`);
+    console.log(`🔍 overrideWithPassword: ${overrideWithPassword}`);
+
     if (overrideWithPassword && envPassword && envPassword.length > 0) {
-      // Prefer plain password in development or when explicitly overridden
-      ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
-      logger.info('🔐 Using ADMIN_PASSWORD (hashed at startup)');
+      console.log('🔐 Hashing password with bcrypt...');
+      try {
+        ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
+        console.log('✅ Password hashed successfully');
+        logger.info('🔐 Using ADMIN_PASSWORD (hashed at startup)');
+      } catch (hashError) {
+        console.error('❌ Bcrypt hash failed:', hashError);
+        throw hashError;
+      }
     } else if (envHash && envHash.startsWith('$2')) {
+      console.log('🔐 Using existing hash from environment');
       ADMIN_PASSWORD_HASH_MEMO = envHash;
       logger.info('🔐 Using ADMIN_PASSWORD_HASH from environment');
     } else if (envPassword && envPassword.length > 0) {
-      ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
-      logger.info('🔐 Generated admin password hash from ADMIN_PASSWORD');
+      console.log('🔐 Hashing password (fallback)...');
+      try {
+        ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
+        console.log('✅ Password hashed successfully (fallback)');
+        logger.info('🔐 Generated admin password hash from ADMIN_PASSWORD');
+      } catch (hashError) {
+        console.error('❌ Bcrypt hash failed (fallback):', hashError);
+        throw hashError;
+      }
     } else {
+      console.log('⚠️ No password credentials found');
       logger.warn('⚠️ No ADMIN_PASSWORD_HASH or ADMIN_PASSWORD provided. Admin login will fail until one is set.');
     }
   } catch (err) {
     console.error('❌ Failed to initialize admin credentials:', err);
+    throw err; // Re-throw to crash the server if initialization fails
   }
 }
 
