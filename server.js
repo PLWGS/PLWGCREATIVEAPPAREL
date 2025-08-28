@@ -15,33 +15,99 @@ require('dotenv').config();
 // Logging Configuration - Reduce Railway log verbosity
 // -----------------------------------------------------------------------------
 const isProduction = process.env.NODE_ENV === 'production';
-const LOG_LEVEL = process.env.LOG_LEVEL || (isProduction ? 'error' : 'info');
+const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production' || process.env.RAILWAY_PROJECT_ID;
+const LOG_LEVEL = process.env.LOG_LEVEL || (isProduction || isRailway ? 'error' : 'info');
 
-// Custom logger to control verbosity
+// Custom logger to control verbosity - EXTREMELY restrictive for Railway
 const logger = {
   info: (...args) => {
+    // In Railway, only log critical info
     if (LOG_LEVEL === 'info' || LOG_LEVEL === 'debug') {
-      console.log(...args);
+      if (!isRailway || LOG_LEVEL === 'debug') {
+        console.log(...args);
+      }
     }
   },
   warn: (...args) => {
+    // In Railway, only log critical warnings
     if (LOG_LEVEL === 'warn' || LOG_LEVEL === 'info' || LOG_LEVEL === 'debug') {
-      console.warn(...args);
+      if (!isRailway || LOG_LEVEL === 'debug') {
+        console.warn(...args);
+      }
     }
   },
   error: (...args) => {
-    // Always log errors
-    console.error(...args);
+    // Always log errors, but limit frequency in Railway
+    if (isRailway) {
+      // Rate limit errors in Railway to prevent rate limiting
+      if (!logger.error.lastLog || Date.now() - logger.error.lastLog > 1000) {
+        console.error(...args);
+        logger.error.lastLog = Date.now();
+      }
+    } else {
+      console.error(...args);
+    }
   },
   debug: (...args) => {
     if (LOG_LEVEL === 'debug') {
-      console.log('🔍 DEBUG:', ...args);
+      if (!isRailway) {
+        console.log('🔍 DEBUG:', ...args);
+      }
     }
   }
 };
 
 // Log startup configuration
-logger.info(`🚀 Starting server with LOG_LEVEL: ${LOG_LEVEL}, NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+if (!isRailway) {
+  logger.info(`🚀 Starting server with LOG_LEVEL: ${LOG_LEVEL}, NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+  if (isRailway) {
+    logger.info('🚂 Railway environment detected - logging minimized');
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Railway Logging Suppression - Prevent other libraries from logging
+// -----------------------------------------------------------------------------
+if (isRailway) {
+  // Suppress all console output from other libraries in Railway
+  const originalConsole = {
+    log: console.log,
+    warn: console.warn,
+    info: console.info,
+    error: console.error,
+    debug: console.debug
+  };
+  
+  // Only allow our logger to output
+  console.log = (...args) => {
+    // Only allow critical logs through
+    if (args[0] && typeof args[0] === 'string' && args[0].includes('❌')) {
+      originalConsole.log(...args);
+    }
+  };
+  
+  console.warn = (...args) => {
+    // Suppress all warnings in Railway
+  };
+  
+  console.info = (...args) => {
+    // Suppress all info in Railway
+  };
+  
+  console.debug = (...args) => {
+    // Suppress all debug in Railway
+  };
+  
+  // Keep error logging but rate limit it
+  let lastErrorLog = 0;
+  console.error = (...args) => {
+    const now = Date.now();
+    if (now - lastErrorLog > 2000) { // Only log errors every 2 seconds
+      originalConsole.error(...args);
+      lastErrorLog = now;
+    }
+  };
+}
 
 // -----------------------------------------------------------------------------
 // Admin credentials bootstrap
