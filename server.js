@@ -1,52 +1,22 @@
-console.log('🚀 SERVER START: Loading dependencies...');
-
 const express = require('express');
-console.log('✅ Express loaded');
-
 const cors = require('cors');
-console.log('✅ CORS loaded');
-
 const { Pool } = require('pg');
-console.log('✅ PostgreSQL loaded');
-
 const nodemailer = require('nodemailer');
-console.log('✅ Nodemailer loaded');
-
 const bcrypt = require('bcrypt');
-console.log('✅ Bcrypt loaded');
-
 const jwt = require('jsonwebtoken');
-console.log('✅ JWT loaded');
-
 const fs = require('fs');
-console.log('✅ FS loaded');
-
 const path = require('path');
-console.log('✅ Path loaded');
-
 const crypto = require('crypto');
-console.log('✅ Crypto loaded');
-
 const { uploadProductImages, uploadImageToCloudinary, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
-console.log('✅ Cloudinary functions loaded');
-
 const { body, validationResult } = require('express-validator');
-console.log('✅ Express validator loaded');
-
 require('dotenv').config();
-console.log('✅ Environment variables loaded');
-
-console.log('🎉 All dependencies loaded successfully!');
 
 // -----------------------------------------------------------------------------
 // Logging Configuration - Reduce Railway log verbosity
 // -----------------------------------------------------------------------------
-console.log('🔧 Setting up logging configuration...');
 const isProduction = process.env.NODE_ENV === 'production';
 const isRailway = process.env.RAILWAY_ENVIRONMENT === 'production' || process.env.RAILWAY_PROJECT_ID;
 const LOG_LEVEL = process.env.LOG_LEVEL || (isProduction || isRailway ? 'error' : 'info');
-console.log(`📊 LOG_LEVEL: ${LOG_LEVEL}, NODE_ENV: ${process.env.NODE_ENV}, isRailway: ${isRailway}`);
-console.log('✅ Logging configuration complete');
 
 // Custom logger to control verbosity - EXTREMELY restrictive for Railway
 const logger = {
@@ -99,7 +69,6 @@ if (!isRailway) {
 // Railway Logging Suppression - Prevent other libraries from logging
 // -----------------------------------------------------------------------------
 if (isRailway) {
-  console.log('🚂 Railway environment detected - minimizing logs...');
   // Less aggressive logging suppression for Railway
   const originalWarn = console.warn;
   const originalInfo = console.info;
@@ -129,7 +98,6 @@ if (isRailway) {
     // Suppress debug logs completely
   };
 
-  console.log('🚂 Railway logging suppression enabled');
 }
 
 // -----------------------------------------------------------------------------
@@ -143,58 +111,31 @@ let ADMIN_EMAIL_MEMO = null;
 let ADMIN_PASSWORD_HASH_MEMO = null;
 
 async function initializeAdminCredentials() {
-  console.log('🔐 Starting admin credentials initialization...');
   try {
-    console.log('📧 Setting ADMIN_EMAIL_MEMO...');
     ADMIN_EMAIL_MEMO = process.env.ADMIN_EMAIL || null;
-    console.log(`📧 ADMIN_EMAIL_MEMO set to: ${ADMIN_EMAIL_MEMO ? '***set***' : 'null'}`);
 
-    console.log('🔍 Checking environment variables...');
     const envHash = process.env.ADMIN_PASSWORD_HASH;
     const envPassword = process.env.ADMIN_PASSWORD;
     const isDevelopment = (process.env.NODE_ENV || 'development') !== 'production';
     const overrideWithPassword = isDevelopment || process.env.ADMIN_OVERRIDE_PASSWORD === 'true';
 
-    console.log(`🔍 envHash exists: ${!!envHash}`);
-    console.log(`🔍 envPassword exists: ${!!envPassword}`);
-    console.log(`🔍 isDevelopment: ${isDevelopment}`);
-    console.log(`🔍 overrideWithPassword: ${overrideWithPassword}`);
-
     if (overrideWithPassword && envPassword && envPassword.length > 0) {
-      console.log('🔐 Hashing password with bcrypt...');
-      try {
-        ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
-        console.log('✅ Password hashed successfully');
-        logger.info('🔐 Using ADMIN_PASSWORD (hashed at startup)');
-      } catch (hashError) {
-        console.error('❌ Bcrypt hash failed:', hashError);
-        throw hashError;
-      }
+      // Prefer plain password in development or when explicitly overridden
+      ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
+      logger.info('🔐 Using ADMIN_PASSWORD (hashed at startup)');
     } else if (envHash && envHash.startsWith('$2')) {
-      console.log('🔐 Using existing hash from environment');
       ADMIN_PASSWORD_HASH_MEMO = envHash;
       logger.info('🔐 Using ADMIN_PASSWORD_HASH from environment');
     } else if (envPassword && envPassword.length > 0) {
-      console.log('🔐 Hashing password (fallback)...');
-      try {
-        ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
-        console.log('✅ Password hashed successfully (fallback)');
-        logger.info('🔐 Generated admin password hash from ADMIN_PASSWORD');
-      } catch (hashError) {
-        console.error('❌ Bcrypt hash failed (fallback):', hashError);
-        throw hashError;
-      }
+      ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
+      logger.info('🔐 Generated admin password hash from ADMIN_PASSWORD');
     } else {
-      console.log('⚠️ No password credentials found');
       logger.warn('⚠️ No ADMIN_PASSWORD_HASH or ADMIN_PASSWORD provided. Admin login will fail until one is set.');
     }
   } catch (err) {
-    console.error('❌ Failed to initialize admin credentials:', err);
-    throw err; // Re-throw to crash the server if initialization fails
+    logger.error('❌ Failed to initialize admin credentials:', err);
   }
 }
-
-console.log('✅ Admin credentials initialization complete');
 
 // Fetch active admin password hash. Preference order:
 // 1) Database-stored override in admin_settings ('admin_password_hash')
@@ -215,13 +156,9 @@ async function getActiveAdminPasswordHash() {
   return ADMIN_PASSWORD_HASH_MEMO;
 }
 
-console.log('🔧 Creating Express app...');
 const app = express();
-console.log('✅ Express app created');
-
 const PORT = process.env.PORT || 3000;
 const FEATURE_STATIC_PRODUCT_PAGES = String(process.env.FEATURE_STATIC_PRODUCT_PAGES || 'false').toLowerCase() === 'true';
-console.log(`📊 PORT: ${PORT}, FEATURE_STATIC_PRODUCT_PAGES: ${FEATURE_STATIC_PRODUCT_PAGES}`);
 
 // Middleware
 app.use(cors({
@@ -244,12 +181,8 @@ if (process.env.DATABASE_URL) {
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   });
 } else {
-  console.log('⚠️ No DATABASE_URL found - running in development mode without database');
+  logger.warn('⚠️ No DATABASE_URL found - running in development mode without database');
 }
-
-console.log('✅ Database setup complete');
-
-console.log('🔧 Setting up email transporter...');
 
 // Email transporter
 // Smarter config: if port is 465, secure is always true.
@@ -671,9 +604,6 @@ async function sendEmail(to, subject, html) {
     return false;
   }
 }
-
-console.log('✅ Middleware setup complete');
-console.log('🔧 Setting up routes...');
 
 // Health check endpoint for Railway
 app.get('/', (req, res) => {
@@ -5092,13 +5022,10 @@ If you receive this, your email configuration is working!`,
 });
 
 // Initialize database and start server
-console.log('🚀 Initializing database and admin credentials...');
 Promise.all([
   initializeAdminCredentials(),
   initializeDatabase()
 ]).then(() => {
-  console.log('✅ Database and admin credentials initialized successfully');
-  console.log('🔧 Starting server...');
   app.listen(PORT, () => {
     logger.info(`🚀 Admin Dashboard API server running on port ${PORT}`);
     logger.info(`📧 Email configured: ${process.env.EMAIL_FROM}`);
