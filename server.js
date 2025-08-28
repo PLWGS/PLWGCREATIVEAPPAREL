@@ -12,6 +12,38 @@ const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
 // -----------------------------------------------------------------------------
+// Logging Configuration - Reduce Railway log verbosity
+// -----------------------------------------------------------------------------
+const isProduction = process.env.NODE_ENV === 'production';
+const LOG_LEVEL = process.env.LOG_LEVEL || (isProduction ? 'error' : 'info');
+
+// Custom logger to control verbosity
+const logger = {
+  info: (...args) => {
+    if (LOG_LEVEL === 'info' || LOG_LEVEL === 'debug') {
+      console.log(...args);
+    }
+  },
+  warn: (...args) => {
+    if (LOG_LEVEL === 'warn' || LOG_LEVEL === 'info' || LOG_LEVEL === 'debug') {
+      console.warn(...args);
+    }
+  },
+  error: (...args) => {
+    // Always log errors
+    console.error(...args);
+  },
+  debug: (...args) => {
+    if (LOG_LEVEL === 'debug') {
+      console.log('🔍 DEBUG:', ...args);
+    }
+  }
+};
+
+// Log startup configuration
+logger.info(`🚀 Starting server with LOG_LEVEL: ${LOG_LEVEL}, NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+
+// -----------------------------------------------------------------------------
 // Admin credentials bootstrap
 // -----------------------------------------------------------------------------
 // We keep a single, in-memory, canonical hash so deployments never require
@@ -33,18 +65,18 @@ async function initializeAdminCredentials() {
     if (overrideWithPassword && envPassword && envPassword.length > 0) {
       // Prefer plain password in development or when explicitly overridden
       ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
-      console.log('🔐 Using ADMIN_PASSWORD (hashed at startup)');
+      logger.info('🔐 Using ADMIN_PASSWORD (hashed at startup)');
     } else if (envHash && envHash.startsWith('$2')) {
       ADMIN_PASSWORD_HASH_MEMO = envHash;
-      console.log('🔐 Using ADMIN_PASSWORD_HASH from environment');
+      logger.info('🔐 Using ADMIN_PASSWORD_HASH from environment');
     } else if (envPassword && envPassword.length > 0) {
       ADMIN_PASSWORD_HASH_MEMO = await bcrypt.hash(envPassword, 12);
-      console.log('🔐 Generated admin password hash from ADMIN_PASSWORD');
+      logger.info('🔐 Generated admin password hash from ADMIN_PASSWORD');
     } else {
-      console.warn('⚠️ No ADMIN_PASSWORD_HASH or ADMIN_PASSWORD provided. Admin login will fail until one is set.');
+      logger.warn('⚠️ No ADMIN_PASSWORD_HASH or ADMIN_PASSWORD provided. Admin login will fail until one is set.');
     }
   } catch (err) {
-    console.error('❌ Failed to initialize admin credentials:', err);
+    logger.error('❌ Failed to initialize admin credentials:', err);
   }
 }
 
@@ -62,7 +94,7 @@ async function getActiveAdminPasswordHash() {
       }
     }
   } catch (e) {
-    console.error('⚠️ Could not read admin password hash from admin_settings:', e.message);
+    logger.error('⚠️ Could not read admin password hash from admin_settings:', e.message);
   }
   return ADMIN_PASSWORD_HASH_MEMO;
 }
@@ -92,7 +124,7 @@ if (process.env.DATABASE_URL) {
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   });
 } else {
-  console.log('⚠️ No DATABASE_URL found - running in development mode without database');
+  logger.warn('⚠️ No DATABASE_URL found - running in development mode without database');
 }
 
 // Email transporter
@@ -145,7 +177,7 @@ const authenticateToken = async (req, res, next) => {
 // Initialize database tables
 async function initializeDatabase() {
   if (!pool) {
-    console.log('⚠️ Skipping database initialization - no database connection');
+    logger.warn('⚠️ Skipping database initialization - no database connection');
     return;
   }
   
@@ -191,7 +223,7 @@ async function initializeDatabase() {
     try {
       await pool.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS birthday DATE`);
     } catch (error) {
-      console.log('Customers: birthday column check failed:', error.message);
+      logger.error('Customers: birthday column check failed:', error.message);
     }
 
     // Create customer_addresses table
@@ -361,7 +393,7 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE cart ADD COLUMN IF NOT EXISTS custom_input JSONB`);
       await pool.query(`ALTER TABLE cart_items ADD COLUMN IF NOT EXISTS custom_input JSONB`);
     } catch (error) {
-      console.log('Some columns may already exist:', error.message);
+      logger.error('Some columns may already exist:', error.message);
     }
 
     // Admin settings key-value store (for admin password hash and flags)
@@ -479,11 +511,11 @@ async function initializeDatabase() {
     `);
 
     // Skip inserting sample products - we want to start fresh
-    console.log('📦 Products table initialized - ready for fresh product uploads');
+    logger.info('📦 Products table initialized - ready for fresh product uploads');
 
-    console.log('✅ Database tables initialized successfully');
+    logger.info('✅ Database tables initialized successfully');
   } catch (error) {
-    console.error('❌ Error initializing database:', error);
+    logger.error('❌ Error initializing database:', error);
   }
 }
 
@@ -511,7 +543,7 @@ async function sendEmail(to, subject, html) {
     });
     return true;
   } catch (e) {
-    console.error('❌ Failed to send email:', e.message);
+    logger.error('❌ Failed to send email:', e.message);
     return false;
   }
 }
@@ -529,11 +561,11 @@ app.post('/api/admin/login',
 
     const { email, password } = req.body;
 
-    console.log('🔍 DEBUG LOGIN ATTEMPT:');
-    console.log('Email provided:', email);
-    console.log('Password provided:', password ? '[HIDDEN]' : 'undefined');
-    console.log('ADMIN_EMAIL (active):', ADMIN_EMAIL_MEMO);
-    console.log('Admin hash available (memo):', ADMIN_PASSWORD_HASH_MEMO ? 'Yes' : 'No');
+    logger.debug('🔍 DEBUG LOGIN ATTEMPT:');
+    logger.debug('Email provided:', email);
+    logger.debug('Password provided:', password ? '[HIDDEN]' : 'undefined');
+    logger.debug('ADMIN_EMAIL (active):', ADMIN_EMAIL_MEMO);
+    logger.debug('Admin hash available (memo):', ADMIN_PASSWORD_HASH_MEMO ? 'Yes' : 'No');
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });
@@ -541,7 +573,7 @@ app.post('/api/admin/login',
 
     // Check if admin credentials match
     if (email && ADMIN_EMAIL_MEMO && email.toLowerCase() === ADMIN_EMAIL_MEMO.toLowerCase()) {
-      console.log('✅ Email matches');
+      logger.info('✅ Email matches');
       let isValidPassword = false;
 
       // Prefer DB-stored admin hash if present
@@ -550,13 +582,13 @@ app.post('/api/admin/login',
         try {
           isValidPassword = await bcrypt.compare(password, activeHash);
         } catch (e) {
-          console.error('❌ Error during bcrypt.compare for admin login:', e.message);
+          logger.error('❌ Error during bcrypt.compare for admin login:', e.message);
         }
       } else if (ADMIN_PASSWORD_HASH_MEMO) {
         try {
           isValidPassword = await bcrypt.compare(password, ADMIN_PASSWORD_HASH_MEMO);
         } catch (e) {
-          console.error('❌ Error during bcrypt.compare for admin login:', e.message);
+          logger.error('❌ Error during bcrypt.compare for admin login:', e.message);
         }
       }
 
@@ -565,11 +597,11 @@ app.post('/api/admin/login',
       if (!isValidPassword && process.env.ADMIN_PASSWORD) {
         if (password === process.env.ADMIN_PASSWORD) {
           isValidPassword = true;
-          console.warn('⚠️ Using plain ADMIN_PASSWORD fallback. Please set ADMIN_PASSWORD_HASH or keep ADMIN_PASSWORD stable.');
+          logger.warn('⚠️ Using plain ADMIN_PASSWORD fallback. Please set ADMIN_PASSWORD_HASH or keep ADMIN_PASSWORD stable.');
         }
       }
 
-      console.log('🔐 Password check result:', isValidPassword);
+      logger.info('🔐 Password check result:', isValidPassword);
       
       if (isValidPassword) {
         // 2FA gate (email OTP) enabled by default unless disabled
@@ -587,7 +619,7 @@ app.post('/api/admin/login',
             `<p>Your login verification code is:</p><p style="font-size:22px;font-weight:bold;letter-spacing:2px;">${code}</p><p>This code expires in 5 minutes.</p>`
           );
           if (!sent) {
-            console.warn('⚠️ 2FA email failed to send; denying login');
+            logger.warn('⚠️ 2FA email failed to send; denying login');
             return res.status(500).json({ error: 'Failed to send 2FA code' });
           }
 
@@ -602,15 +634,15 @@ app.post('/api/admin/login',
           return res.json({ success: true, token, user: { email, role: 'admin' } });
         }
       } else {
-        console.log('❌ Password does not match hash');
+        logger.error('❌ Password does not match hash');
         res.status(401).json({ error: 'Invalid credentials' });
       }
     } else {
-      console.log('❌ Email does not match');
+      logger.error('❌ Email does not match');
       res.status(401).json({ error: 'Invalid credentials' });
     }
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -652,7 +684,7 @@ app.post('/api/admin/2fa/verify', validate2FAVerification, async (req, res) => {
     );
     res.json({ success: true, token, user: { email: record.email, role: 'admin' } });
   } catch (err) {
-    console.error('2FA verify error:', err);
+    logger.error('2FA verify error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -715,7 +747,7 @@ app.post('/api/admin/password/request-reset', validatePasswordResetRequest, asyn
     }
     res.json({ success: true });
   } catch (err) {
-    console.error('Password reset request error:', err);
+    logger.error('Password reset request error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -747,7 +779,7 @@ app.post('/api/admin/password/reset', validatePasswordReset, async (req, res) =>
     ADMIN_PASSWORD_HASH_MEMO = newHash;
     res.json({ success: true });
   } catch (err) {
-    console.error('Password reset error:', err);
+    logger.error('Password reset error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -776,7 +808,7 @@ app.post('/api/admin/password/bootstrap', validatePasswordBootstrap, async (req,
     ADMIN_PASSWORD_HASH_MEMO = newHash;
     res.json({ success: true });
   } catch (err) {
-    console.error('Bootstrap set password error:', err);
+    logger.error('Bootstrap set password error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -852,7 +884,7 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
     const result = await pool.query(query, params);
     res.json({ orders: result.rows });
   } catch (error) {
-    console.error('Error fetching orders:', error);
+    logger.error('Error fetching orders:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -900,7 +932,7 @@ app.get('/api/orders/export', authenticateToken, async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="orders_${period}.csv"`);
     res.send(csv);
   } catch (e) {
-    console.error('Error exporting orders:', e);
+    logger.error('Error exporting orders:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -947,7 +979,7 @@ app.get('/api/orders/custom-input', async (req, res) => {
     
     res.json({ orders: result.rows });
   } catch (error) {
-    console.error('Error fetching orders with custom input:', error);
+    logger.error('Error fetching orders with custom input:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
@@ -977,7 +1009,7 @@ app.get('/api/orders/:id', authenticateToken, async (req, res) => {
       items: itemsResult.rows
     });
   } catch (error) {
-    console.error('Error fetching order:', error);
+    logger.error('Error fetching order:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1024,12 +1056,12 @@ app.patch('/api/orders/:id/status', authenticateToken, validateOrderStatusUpdate
         `order:${updated.id}`
       ]);
     } catch (e) {
-      console.warn('Notification insert failed (non-fatal):', e.message);
+      logger.warn('Notification insert failed (non-fatal):', e.message);
     }
 
     res.json({ order: updated });
   } catch (error) {
-    console.error('Error updating order:', error);
+    logger.error('Error updating order:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1097,7 +1129,7 @@ app.post('/api/orders', validateOrder, async (req, res) => {
     
     res.json({ order });
   } catch (error) {
-    console.error('Error creating order:', error);
+    logger.error('Error creating order:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1114,7 +1146,7 @@ app.get('/api/products', authenticateToken, async (req, res) => {
     `);
     res.json({ products: result.rows });
   } catch (error) {
-    console.error('Error fetching products:', error);
+    logger.error('Error fetching products:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1148,7 +1180,7 @@ app.post('/api/products', authenticateToken, validatePublicProduct, async (req, 
     
     res.json({ product: result.rows[0] });
   } catch (error) {
-    console.error('Error creating product:', error);
+    logger.error('Error creating product:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1171,7 +1203,7 @@ app.put('/api/products/:id', authenticateToken, validatePublicProduct, async (re
     
     res.json({ product: result.rows[0] });
   } catch (error) {
-    console.error('Error updating product:', error);
+    logger.error('Error updating product:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1189,7 +1221,7 @@ app.delete('/api/products/:id', authenticateToken, async (req, res) => {
     
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
-    console.error('Error deleting product:', error);
+    logger.error('Error deleting product:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1223,7 +1255,7 @@ app.get('/api/customers', authenticateToken, async (req, res) => {
 
     res.json({ customers: result.rows });
   } catch (error) {
-    console.error('Error fetching customers:', error);
+    logger.error('Error fetching customers:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1248,7 +1280,7 @@ app.get('/api/customers/:id', authenticateToken, async (req, res) => {
       orders: ordersResult.rows
     });
   } catch (error) {
-    console.error('Error fetching customer:', error);
+    logger.error('Error fetching customer:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1260,17 +1292,17 @@ app.get('/api/customers/:id', authenticateToken, async (req, res) => {
 // Test database connection
 app.get('/api/test-db', async (req, res) => {
   try {
-    console.log('🧪 Testing database connection...');
-    console.log('🔍 Pool object:', pool);
+    logger.info('🧪 Testing database connection...');
+    logger.info('🔍 Pool object:', pool);
     
     if (!pool) {
-      console.log('❌ Database pool is null/undefined');
+      logger.error('❌ Database pool is null/undefined');
       return res.status(500).json({ error: 'Database pool not available' });
     }
     
     // Test basic connection
     const testResult = await pool.query('SELECT NOW() as current_time');
-    console.log('🔍 Basic query test:', testResult.rows[0]);
+    logger.info('🔍 Basic query test:', testResult.rows[0]);
     
     // Test if order_items table exists
     const tableExists = await pool.query(`
@@ -1281,7 +1313,7 @@ app.get('/api/test-db', async (req, res) => {
       ) as table_exists
     `);
     
-    console.log('🔍 order_items table exists:', tableExists.rows[0]);
+    logger.info('🔍 order_items table exists:', tableExists.rows[0]);
     
     res.json({ 
       message: 'Database test successful',
@@ -1290,7 +1322,7 @@ app.get('/api/test-db', async (req, res) => {
       order_items_exists: tableExists.rows[0].table_exists
     });
   } catch (error) {
-    console.error('❌ Database test error:', error);
+    logger.error('❌ Database test error:', error);
     res.status(500).json({ error: 'Database test failed', details: error.message });
   }
 });
@@ -1325,7 +1357,7 @@ app.get('/api/custom-requests', authenticateToken, async (req, res) => {
     const result = await pool.query(query, params);
     res.json({ requests: result.rows });
   } catch (error) {
-    console.error('Error fetching custom requests:', error);
+    logger.error('Error fetching custom requests:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1345,7 +1377,7 @@ app.get('/api/custom-requests/:id', authenticateToken, async (req, res) => {
     
     res.json({ request: result.rows[0] });
   } catch (error) {
-    console.error('Error fetching custom request:', error);
+    logger.error('Error fetching custom request:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1368,7 +1400,7 @@ app.patch('/api/custom-requests/:id/status', authenticateToken, async (req, res)
     
     res.json({ request: result.rows[0] });
   } catch (error) {
-    console.error('Error updating custom request:', error);
+    logger.error('Error updating custom request:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1399,7 +1431,7 @@ const validateCustomRequest = [
 // Create new custom request
 app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
   try {
-    console.log('📝 Custom request received:', req.body);
+    logger.info('📝 Custom request received:', req.body);
     
     const {
       fullName,
@@ -1421,7 +1453,7 @@ app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
     let processedReferenceImages = null;
     if (referenceImages && referenceImages.length > 0) {
       try {
-        console.log('🖼️ Processing reference images...');
+        logger.info('🖼️ Processing reference images...');
         processedReferenceImages = [];
         
         for (const image of referenceImages) {
@@ -1437,22 +1469,22 @@ app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
             });
           }
         }
-        console.log(`✅ Processed ${processedReferenceImages.length} reference images`);
+        logger.info(`✅ Processed ${processedReferenceImages.length} reference images`);
       } catch (imageError) {
-        console.error('❌ Error processing reference images:', imageError);
+        logger.error('❌ Error processing reference images:', imageError);
         // Don't fail the request if image processing fails
         processedReferenceImages = null;
       }
     }
 
-    console.log('✅ Required fields validated');
+    logger.info('✅ Required fields validated');
 
     // Check if database is available
     const dbCheck = checkDatabase();
-    console.log('🗄️ Database check:', dbCheck);
+    logger.info('��️ Database check:', dbCheck);
     
     if (!dbCheck.available) {
-      console.log('⚠️ Database not available, using mock request');
+      logger.warn('⚠️ Database not available, using mock request');
       
       // Create mock custom request object for email - using existing table structure exactly
       const mockCustomRequest = {
@@ -1475,23 +1507,23 @@ app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
         created_at: new Date()
       };
 
-      console.log('📧 Sending email for mock request...');
+      logger.info('📧 Sending email for mock request...');
 
       // Send email notifications
       try {
         // Send admin notification
         await sendCustomRequestEmail(mockCustomRequest);
-        console.log('✅ Admin notification email sent successfully');
+        logger.info('✅ Admin notification email sent successfully');
         
         // Send customer confirmation
         await sendCustomerConfirmationEmail(mockCustomRequest);
-        console.log('✅ Customer confirmation email sent successfully');
+        logger.info('✅ Customer confirmation email sent successfully');
       } catch (emailError) {
-        console.error('❌ Error sending emails:', emailError);
+        logger.error('❌ Error sending emails:', emailError);
         // Don't fail the request if email fails
       }
 
-      console.log('✅ Returning mock response');
+      logger.info('✅ Returning mock response');
       return res.status(201).json({ 
         success: true, 
         message: 'Custom request submitted successfully! We\'ll review your submission and get back to you within 24 hours.',
@@ -1499,7 +1531,7 @@ app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
       });
     }
 
-    console.log('🗄️ Database available, inserting into database...');
+    logger.info('🗄️ Database available, inserting into database...');
 
     // Insert into database - using existing table structure exactly
     const result = await pool.query(`
@@ -1525,23 +1557,23 @@ app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
     ]);
 
     const customRequest = result.rows[0];
-    console.log('✅ Database insert successful');
+    logger.info('✅ Database insert successful');
 
     // Send email notifications
     try {
       // Send admin notification
       await sendCustomRequestEmail(customRequest);
-      console.log('✅ Admin notification email sent successfully');
+      logger.info('✅ Admin notification email sent successfully');
       
       // Send customer confirmation
       await sendCustomerConfirmationEmail(customRequest);
-      console.log('✅ Customer confirmation email sent successfully');
+      logger.info('✅ Customer confirmation email sent successfully');
     } catch (emailError) {
-      console.error('❌ Error sending emails:', emailError);
+      logger.error('❌ Error sending emails:', emailError);
       // Don't fail the request if email fails
     }
 
-    console.log('✅ Returning success response');
+    logger.info('✅ Returning success response');
     res.status(201).json({ 
       success: true, 
       message: 'Custom request submitted successfully! We\'ll review your submission and get back to you within 24 hours.',
@@ -1549,8 +1581,8 @@ app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error creating custom request:', error);
-    console.error('❌ Error stack:', error.stack);
+    logger.error('❌ Error creating custom request:', error);
+    logger.error('❌ Error stack:', error.stack);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1584,7 +1616,7 @@ app.get('/api/custom-requests/customer/:email', async (req, res) => {
       count: result.rows.length 
     });
   } catch (error) {
-    console.error('Error fetching customer custom requests:', error);
+    logger.error('Error fetching customer custom requests:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1707,7 +1739,7 @@ app.get('/api/analytics/dashboard', authenticateToken, async (req, res) => {
       customRequestsCount: customRequestsCountResult.rows[0]?.count || 0
     });
   } catch (error) {
-    console.error('Error fetching analytics:', error);
+    logger.error('Error fetching analytics:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1745,7 +1777,7 @@ app.get('/api/analytics/sales-series', authenticateToken, async (req, res) => {
 
     res.json({ series: seriesResult.rows });
   } catch (e) {
-    console.error('Error fetching sales series:', e);
+    logger.error('Error fetching sales series:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1771,7 +1803,7 @@ app.get('/api/inventory', authenticateToken, async (req, res) => {
     
     res.json({ inventory: result.rows });
   } catch (error) {
-    console.error('Error fetching inventory:', error);
+    logger.error('Error fetching inventory:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1807,7 +1839,7 @@ app.post('/api/orders/process-all', authenticateToken, validateProcessAllOrders,
     `);
     res.json({ moved: result.rowCount });
   } catch (e) {
-    console.error('Error processing all orders:', e);
+    logger.error('Error processing all orders:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1871,7 +1903,7 @@ app.get('/api/admin/activity', authenticateToken, async (req, res) => {
 
     res.json({ activity: combined });
   } catch (e) {
-    console.error('Error fetching admin activity:', e);
+    logger.error('Error fetching admin activity:', e);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1896,7 +1928,7 @@ app.get('/api/admin/notifications', authenticateToken, async (req, res) => {
     res.json({ notifications: result.rows });
   } catch (e) {
     // If table does not exist yet, return empty array safely
-    console.warn('Notifications fetch fallback:', e.message);
+    logger.warn('Notifications fetch fallback:', e.message);
     res.json({ notifications: [] });
   }
 });
@@ -1910,7 +1942,7 @@ app.patch('/api/admin/notifications/read', authenticateToken, async (req, res) =
     `);
     res.json({ updated: result.rowCount });
   } catch (e) {
-    console.warn('Notifications mark-read fallback:', e.message);
+    logger.warn('Notifications mark-read fallback:', e.message);
     res.json({ updated: 0 });
   }
 });
@@ -1933,7 +1965,7 @@ app.patch('/api/products/:id/stock', authenticateToken, async (req, res) => {
     
     res.json({ product: result.rows[0] });
   } catch (error) {
-    console.error('Error updating stock:', error);
+    logger.error('Error updating stock:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2007,7 +2039,7 @@ app.post('/api/subscribe', validateNewsletterSubscription, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error subscribing:', error);
+    logger.error('Error subscribing:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2231,9 +2263,9 @@ async function sendWelcomeEmail(email, name) {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`✅ Welcome email sent to ${email}`);
+    logger.info(`✅ Welcome email sent to ${email}`);
   } catch (error) {
-    console.error(`❌ Error sending welcome email to ${email}:`, error);
+    logger.error(`❌ Error sending welcome email to ${email}:`, error);
   }
 }
 
@@ -2414,9 +2446,9 @@ async function sendCustomerConfirmationEmail(customRequest) {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`✅ Customer confirmation email sent for request ${customRequest.id}`);
+    logger.info(`✅ Customer confirmation email sent for request ${customRequest.id}`);
   } catch (error) {
-    console.error(`❌ Error sending customer confirmation email:`, error);
+    logger.error(`❌ Error sending customer confirmation email:`, error);
   }
 }
 
@@ -2645,9 +2677,9 @@ async function sendCustomRequestEmail(customRequest) {
 
     try {
       await transporter.sendMail(mailOptions);
-      console.log(`✅ Custom request email sent to ${adminEmail} for request ${customRequest.id}`);
+      logger.info(`✅ Custom request email sent to ${adminEmail} for request ${customRequest.id}`);
     } catch (error) {
-      console.error(`❌ Error sending custom request email to ${adminEmail}:`, error);
+      logger.error(`❌ Error sending custom request email to ${adminEmail}:`, error);
     }
   }
 }
@@ -2664,7 +2696,7 @@ app.get('/api/subscribers', authenticateToken, async (req, res) => {
     const result = await pool.query('SELECT * FROM subscribers ORDER BY subscribed_at DESC');
     res.json({ subscribers: result.rows });
   } catch (error) {
-    console.error('Error fetching subscribers:', error);
+    logger.error('Error fetching subscribers:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2697,7 +2729,7 @@ app.post('/api/unsubscribe', validateUnsubscribe, async (req, res) => {
 
     res.json({ success: true, message: 'Successfully unsubscribed' });
   } catch (error) {
-    console.error('Error unsubscribing:', error);
+    logger.error('Error unsubscribing:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2835,7 +2867,7 @@ app.post('/api/customer/auth', validateRegistration, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Customer auth error:', error);
+    logger.error('Customer auth error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2877,7 +2909,7 @@ app.get('/api/customer/profile', authenticateCustomer, async (req, res) => {
       style_profile: styleProfileResult.rows[0] || null
     });
   } catch (error) {
-    console.error('Error fetching customer profile:', error);
+    logger.error('Error fetching customer profile:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2932,7 +2964,7 @@ app.put('/api/customer/profile', authenticateCustomer, async (req, res) => {
     
     res.json({ success: true, message: 'Profile updated successfully' });
   } catch (error) {
-    console.error('Error updating customer profile:', error);
+    logger.error('Error updating customer profile:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -2970,7 +3002,7 @@ app.get('/api/customer/orders', authenticateCustomer, async (req, res) => {
     
     res.json({ orders: ordersWithItems });
   } catch (error) {
-    console.error('Error fetching customer orders:', error);
+    logger.error('Error fetching customer orders:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3012,7 +3044,7 @@ app.get('/api/customer/orders/:id', authenticateCustomer, async (req, res) => {
 
     res.json({ order, items, reviewsByProduct });
   } catch (error) {
-    console.error('Error fetching order details:', error);
+    logger.error('Error fetching order details:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3071,7 +3103,7 @@ app.post('/api/customer/reviews', authenticateCustomer, validateCustomerReview, 
     if (error && error.code === '23514') { // CHECK violation
       return res.status(400).json({ error: 'Invalid rating' });
     }
-    console.error('Error creating review:', error);
+    logger.error('Error creating review:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3090,7 +3122,7 @@ app.get('/api/customer/wishlist', authenticateCustomer, async (req, res) => {
     
     res.json({ wishlist: wishlistResult.rows });
   } catch (error) {
-    console.error('Error fetching wishlist:', error);
+    logger.error('Error fetching wishlist:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3128,7 +3160,7 @@ app.post('/api/customer/wishlist', authenticateCustomer, validateWishlistAdd, as
     
     res.json({ success: true, message: 'Added to wishlist' });
   } catch (error) {
-    console.error('Error adding to wishlist:', error);
+    logger.error('Error adding to wishlist:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3145,7 +3177,7 @@ app.delete('/api/customer/wishlist/:product_id', authenticateCustomer, async (re
     
     res.json({ success: true, message: 'Removed from wishlist' });
   } catch (error) {
-    console.error('Error removing from wishlist:', error);
+    logger.error('Error removing from wishlist:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3192,7 +3224,7 @@ app.get('/api/customer/loyalty', authenticateCustomer, async (req, res) => {
       tier_progress: tierProgress
     });
   } catch (error) {
-    console.error('Error fetching loyalty info:', error);
+    logger.error('Error fetching loyalty info:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3253,7 +3285,7 @@ app.post('/api/customer/loyalty/redeem', authenticateCustomer, validateLoyaltyRe
     
     res.json({ success: true, message: 'Reward redeemed successfully' });
   } catch (error) {
-    console.error('Error redeeming reward:', error);
+    logger.error('Error redeeming reward:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3299,7 +3331,7 @@ app.put('/api/customer/style-profile', authenticateCustomer, validateStyleProfil
     
     res.json({ success: true, message: 'Style profile updated successfully' });
   } catch (error) {
-    console.error('Error updating style profile:', error);
+    logger.error('Error updating style profile:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3339,7 +3371,7 @@ app.get('/api/customer/recommendations', authenticateCustomer, async (req, res) 
     
     res.json({ recommendations: recommendationsResult.rows });
   } catch (error) {
-    console.error('Error fetching recommendations:', error);
+    logger.error('Error fetching recommendations:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -3393,7 +3425,7 @@ app.get('/api/cart', authenticateCustomer, async (req, res) => {
 
     res.json({ items: result.rows });
   } catch (error) {
-    console.error('Error fetching cart:', error);
+    logger.error('Error fetching cart:', error);
     res.status(500).json({ error: 'Failed to fetch cart' });
   }
 });
@@ -3476,7 +3508,7 @@ app.post('/api/cart/add', authenticateCustomer, validateCartAdd, async (req, res
       res.json({ message: 'Item added to cart', item: result.rows[0] });
     }
   } catch (error) {
-    console.error('Error adding to cart:', error);
+    logger.error('Error adding to cart:', error);
     res.status(500).json({ error: 'Failed to add item to cart' });
   }
 });
@@ -3515,7 +3547,7 @@ app.put('/api/cart/update/:id', authenticateCustomer, validateCartUpdate, async 
       res.json({ message: 'Cart updated', item: result.rows[0] });
     }
   } catch (error) {
-    console.error('Error updating cart:', error);
+    logger.error('Error updating cart:', error);
     res.status(500).json({ error: 'Failed to update cart' });
   }
 });
@@ -3540,7 +3572,7 @@ app.delete('/api/cart/remove/:id', authenticateCustomer, async (req, res) => {
 
     res.json({ message: 'Item removed from cart' });
   } catch (error) {
-    console.error('Error removing from cart:', error);
+    logger.error('Error removing from cart:', error);
     res.status(500).json({ error: 'Failed to remove item from cart' });
   }
 });
@@ -3560,7 +3592,7 @@ app.delete('/api/cart/clear', authenticateCustomer, async (req, res) => {
 
     res.json({ message: 'Cart cleared' });
   } catch (error) {
-    console.error('Error clearing cart:', error);
+    logger.error('Error clearing cart:', error);
     res.status(500).json({ error: 'Failed to clear cart' });
   }
 });
@@ -3591,7 +3623,7 @@ app.get('/api/products/public', async (req, res) => {
     const result = await pool.query(query, queryParams);
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching products:', error);
+    logger.error('Error fetching products:', error);
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
@@ -3647,7 +3679,7 @@ app.get('/api/products/public/:id', async (req, res) => {
 
     res.json({ product, reviews: { count, average, items: itemsResult.rows } });
   } catch (error) {
-    console.error('Error fetching product:', error);
+    logger.error('Error fetching product:', error);
     res.status(500).json({ error: 'Failed to fetch product' });
   }
 });
@@ -3663,7 +3695,7 @@ app.get('/api/products/hero', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching hero products:', error);
+    logger.error('Error fetching hero products:', error);
     res.status(500).json({ error: 'Failed to fetch hero products' });
   }
 });
@@ -3679,7 +3711,7 @@ app.get('/api/products/featured', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching featured products:', error);
+    logger.error('Error fetching featured products:', error);
     res.status(500).json({ error: 'Failed to fetch featured products' });
   }
 });
@@ -3782,7 +3814,7 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error getting recommendations:', error);
+    logger.error('Error getting recommendations:', error);
     // Fallback to random products if everything fails
     try {
       const fallbackProducts = await pool.query(`
@@ -3827,7 +3859,7 @@ app.get('/api/recommendations/public', async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error getting public recommendations:', error);
+    logger.error('Error getting public recommendations:', error);
     // Fallback to random products if everything fails
     try {
       const fallbackProducts = await pool.query(`
@@ -3898,7 +3930,7 @@ app.put('/api/admin/products/:id/feature', authenticateToken, validateFeaturePro
     res.json({ success: true });
   } catch (error) {
     await pool.query('ROLLBACK');
-    console.error('Error updating product feature:', error);
+    logger.error('Error updating product feature:', error);
     res.status(500).json({ error: 'Failed to update product feature' });
   }
 });
@@ -3925,7 +3957,7 @@ app.get('/api/products/search', async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error searching product:', error);
+    logger.error('Error searching product:', error);
     res.status(500).json({ error: 'Failed to search product' });
   }
 });
@@ -3942,7 +3974,7 @@ app.get('/api/admin/products', authenticateToken, async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching products:', error);
+    logger.error('Error fetching products:', error);
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
@@ -3969,7 +4001,7 @@ app.get('/api/admin/products/:id', authenticateToken, async (req, res) => {
 
     res.json(product);
   } catch (error) {
-    console.error('Error fetching product:', error);
+    logger.error('Error fetching product:', error);
     res.status(500).json({ error: 'Failed to fetch product' });
   }
 });
@@ -4027,7 +4059,7 @@ const validateProduct = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.log('🔍 Validation errors:', JSON.stringify(errors.array(), null, 2));
+      logger.debug('🔍 Validation errors:', JSON.stringify(errors.array(), null, 2));
       return res.status(400).json({ errors: errors.array() });
     }
     next();
@@ -4097,38 +4129,38 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
     let image_url = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
     let sub_images = [];
     
-    console.log('🔍 DEBUG: Received images data:', JSON.stringify(images, null, 2));
+    logger.info('🔍 DEBUG: Received images data:', JSON.stringify(images, null, 2));
     
     if (images && images.length > 0) {
       try {
-        console.log(`☁️ Uploading ${images.length} images to Cloudinary for product: ${name}`);
-        console.log('🔍 DEBUG: First image structure:', JSON.stringify(images[0], null, 2));
+        logger.info(`☁️ Uploading ${images.length} images to Cloudinary for product: ${name}`);
+        logger.info('�� DEBUG: First image structure:', JSON.stringify(images[0], null, 2));
         
         // Upload images to Cloudinary
         const uploadedUrls = await uploadProductImages(images, name);
         
         if (uploadedUrls.mainImage) {
           image_url = uploadedUrls.mainImage;
-          console.log(`✅ Main image uploaded to Cloudinary: ${image_url}`);
+          logger.info(`✅ Main image uploaded to Cloudinary: ${image_url}`);
         }
         
         if (uploadedUrls.subImages.length > 0) {
           sub_images = uploadedUrls.subImages;
-          console.log(`✅ ${sub_images.length} sub images uploaded to Cloudinary`);
+          logger.info(`✅ ${sub_images.length} sub images uploaded to Cloudinary`);
         }
         
-        console.log(`🎉 All images uploaded successfully to Cloudinary for product: ${name}`);
+        logger.info(`🎉 All images uploaded successfully to Cloudinary for product: ${name}`);
       } catch (imageError) {
-        console.error('❌ Error uploading images to Cloudinary:', imageError);
+        logger.error('❌ Error uploading images to Cloudinary:', imageError);
         // Continue without images if there's an error
-        console.log('⚠️ Continuing product creation without images');
+        logger.info('⚠️ Continuing product creation without images');
       }
     } else {
-      console.log('⚠️ No images provided for upload');
+      logger.info('⚠️ No images provided for upload');
     }
 
     // Insert product with sequential ID
-    console.log(`💾 Inserting product into database: ID ${nextId}, Name: ${name}`);
+    logger.info(`💾 Inserting product into database: ID ${nextId}, Name: ${name}`);
     
     // Collect size stock quantities from the request (sanitize: remove XS)
     const sizeStockRaw = req.body.size_stock || {};
@@ -4164,7 +4196,7 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       custom_lyrics_char_limit || 250
     ]);
 
-    console.log(`✅ Product created with ID ${nextId}`);
+    logger.info(`✅ Product created with ID ${nextId}`);
 
     // Create edit page for the new product
     try {
@@ -4172,13 +4204,13 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       const editPageCreated = createEditPageForProduct(nextId, name);
       
       if (editPageCreated) {
-        console.log(`✅ Edit page created for product ${nextId}`);
+        logger.info(`✅ Edit page created for product ${nextId}`);
       } else {
-        console.log(`⚠️ Failed to create edit page for product ${nextId}`);
+        logger.info(`⚠️ Failed to create edit page for product ${nextId}`);
       }
     } catch (editPageError) {
-      console.error('❌ Error creating edit page:', editPageError);
-      console.log('⚠️ Continuing without edit page creation');
+      logger.error('❌ Error creating edit page:', editPageError);
+      logger.info('⚠️ Continuing without edit page creation');
     }
 
     // Optionally generate static product page (feature-flagged)
@@ -4186,23 +4218,23 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       try {
         const { buildStaticProductPage } = require('./tools/static_product_builder');
         await buildStaticProductPage(result.rows[0]);
-        console.log(`🧱 Static product page generated for ID ${nextId}`);
+        logger.info(`🧱 Static product page generated for ID ${nextId}`);
       } catch (e) {
-        console.error('❌ Static page build failed:', e.message || e);
+        logger.error('❌ Static page build failed:', e.message || e);
       }
     }
 
     res.json({ message: 'Product created successfully', product: result.rows[0] });
   } catch (error) {
-    console.error('Error creating product:', error);
+    logger.error('Error creating product:', error);
     res.status(500).json({ error: 'Failed to create product' });
   }
 });
 
 app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (req, res) => {
-  console.log('🔍 [DEBUG] PUT endpoint called for product ID:', req.params.id);
-  console.log('🔍 [DEBUG] Request body received:', req.body);
-  console.log('🔍 [DEBUG] Starting product update process...');
+  logger.info('🔍 [DEBUG] PUT endpoint called for product ID:', req.params.id);
+  logger.info('🔍 [DEBUG] Request body received:', req.body);
+  logger.info('🔍 [DEBUG] Starting product update process...');
   if (!pool) {
     return res.status(500).json({ error: 'Database not available' });
   }
@@ -4211,7 +4243,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     const productId = req.params.id;
     
     // Debug: Log the incoming request body
-    console.log('🔍 Admin product update - Request body:', JSON.stringify(req.body, null, 2));
+    logger.info('🔍 Admin product update - Request body:', JSON.stringify(req.body, null, 2));
     
     const {
       name,
@@ -4244,7 +4276,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     } = req.body;
     
     // Debug: Log the extracted custom input values
-    console.log('🔍 Custom input values extracted:', {
+    logger.info('🔍 Custom input values extracted:', {
       custom_lyrics_enabled,
       custom_lyrics_required,
       custom_lyrics_fields,
@@ -4288,7 +4320,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     let processedMixedImages = null; // when provided via 'images'
 
     if (Array.isArray(images) && images.length > 0) {
-      console.log(`📸 Received ${images.length} images from client for processing`);
+      logger.info(`📸 Received ${images.length} images from client for processing`);
       processedMixedImages = [];
 
       for (let i = 0; i < Math.min(images.length, 5); i += 1) {
@@ -4312,7 +4344,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
             continue;
           }
         } catch (uErr) {
-          console.error(`❌ Failed processing image index ${i}:`, uErr?.message || uErr);
+          logger.error(`❌ Failed processing image index ${i}:`, uErr?.message || uErr);
         }
       }
 
@@ -4320,25 +4352,25 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       if (processedMixedImages.length > 0) {
         final_image_url = processedMixedImages[0] || final_image_url;
         final_sub_images = processedMixedImages.slice(1);
-        console.log(`✅ Final images prepared from mixed payload. main=${final_image_url}, subs=${final_sub_images.length}`);
+        logger.info(`✅ Final images prepared from mixed payload. main=${final_image_url}, subs=${final_sub_images.length}`);
       } else {
-        console.warn('⚠️ No valid images processed from payload; retaining existing image_url/sub_images');
+        logger.warn('⚠️ No valid images processed from payload; retaining existing image_url/sub_images');
       }
     } else if (image_url || (sub_images && sub_images.length > 0)) {
       // Existing images (URL format) - keep them as is
       if (image_url && !image_url.startsWith('data:')) {
         final_image_url = image_url;
-        console.log(`✅ Keeping existing main image: ${final_image_url}`);
+        logger.info(`✅ Keeping existing main image: ${final_image_url}`);
       }
       if (sub_images && Array.isArray(sub_images)) {
         final_sub_images = sub_images.filter(img => img && !img.startsWith('data:'));
-        console.log(`✅ Keeping ${final_sub_images.length} existing sub images`);
+        logger.info(`✅ Keeping ${final_sub_images.length} existing sub images`);
       }
     }
 
     // Debug what we're receiving
-    console.log('🔍 Server received brand_preference:', req.body.brand_preference);
-    console.log('🔍 Server received specifications:', req.body.specifications);
+    logger.info('🔍 Server received brand_preference:', req.body.brand_preference);
+    logger.info('🔍 Server received specifications:', req.body.specifications);
     
     // Ensure specifications include standard care instructions for all printed apparel
     const defaultSpecifications = {
@@ -4371,11 +4403,11 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     };
     
     // Update product
-    console.log('🔍 About to execute UPDATE query with brand_preference:', req.body.brand_preference);
+    logger.info('🔍 About to execute UPDATE query with brand_preference:', req.body.brand_preference);
     
     // Add detailed debugging for the UPDATE execution
-    console.log('🔍 [DEBUG] About to execute UPDATE for product ID:', productId);
-    console.log('🔍 [DEBUG] brand_preference value being sent:', req.body.brand_preference);
+    logger.info('🔍 [DEBUG] About to execute UPDATE for product ID:', productId);
+    logger.info('🔍 [DEBUG] brand_preference value being sent:', req.body.brand_preference);
     
     const result = await pool.query(`
       UPDATE products SET
@@ -4408,10 +4440,10 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     ]);
 
     // Debug what was actually updated
-    console.log('🔍 [DEBUG] UPDATE result:', result);
-    console.log('🔍 [DEBUG] Rows affected:', result.rowCount);
-    console.log('🔍 Database UPDATE result - brand_preference field:', result.rows[0].brand_preference);
-    console.log('🔍 Database UPDATE result - specifications:', result.rows[0].specifications);
+    logger.info('🔍 [DEBUG] UPDATE result:', result);
+    logger.info('🔍 [DEBUG] Rows affected:', result.rowCount);
+    logger.info('🔍 Database UPDATE result - brand_preference field:', result.rows[0].brand_preference);
+    logger.info('🔍 Database UPDATE result - specifications:', result.rows[0].specifications);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
@@ -4423,13 +4455,13 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       const editPageCreated = createEditPageForProduct(productId, name);
       
       if (editPageCreated) {
-        console.log(`✅ Edit page updated for product ${productId} with new name: ${name}`);
+        logger.info(`✅ Edit page updated for product ${productId} with new name: ${name}`);
       } else {
-        console.log(`⚠️ Failed to update edit page for product ${productId}`);
+        logger.info(`⚠️ Failed to update edit page for product ${productId}`);
       }
     } catch (editPageError) {
-      console.error('❌ Error updating edit page:', editPageError);
-      console.log('⚠️ Continuing without edit page update');
+      logger.error('❌ Error updating edit page:', editPageError);
+      logger.info('⚠️ Continuing without edit page update');
     }
 
     // Optionally regenerate static product page (feature-flagged)
@@ -4437,15 +4469,15 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       try {
         const { buildStaticProductPage } = require('./tools/static_product_builder');
         await buildStaticProductPage(result.rows[0]);
-        console.log(`🧱 Static product page regenerated for ID ${productId}`);
+        logger.info(`🧱 Static product page regenerated for ID ${productId}`);
       } catch (e) {
-        console.error('❌ Static page rebuild failed:', e.message || e);
+        logger.error('❌ Static page rebuild failed:', e.message || e);
       }
     }
 
     res.json({ message: 'Product updated successfully', product: result.rows[0] });
   } catch (error) {
-    console.error('Error updating product:', error);
+    logger.error('Error updating product:', error);
     res.status(500).json({ error: 'Failed to update product' });
   }
 });
@@ -4487,9 +4519,9 @@ app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
     if (imageUrlsToDelete.length > 0) {
       try {
         await deleteImagesFromCloudinary(imageUrlsToDelete);
-        console.log(`✅ Deleted ${imageUrlsToDelete.length} images from Cloudinary`);
+        logger.info(`✅ Deleted ${imageUrlsToDelete.length} images from Cloudinary`);
       } catch (error) {
-        console.error('❌ Error deleting images from Cloudinary:', error);
+        logger.error('❌ Error deleting images from Cloudinary:', error);
       }
     }
 
@@ -4498,7 +4530,7 @@ app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
       UPDATE products SET is_active = false, updated_at = CURRENT_TIMESTAMP WHERE id = $1
     `, [productId]);
 
-    console.log(`✅ Product ${productId} archived (soft-deleted) successfully`);
+    logger.info(`✅ Product ${productId} archived (soft-deleted) successfully`);
 
     // Delete edit page for the product
     const editPagePattern = `product-edit-product-${productId}_*.html`;
@@ -4511,15 +4543,15 @@ app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
       if (editPageFile) {
         const editPagePath = path.join(pagesDir, editPageFile);
         fs.unlinkSync(editPagePath);
-        console.log(`✅ Deleted edit page: ${editPageFile}`);
+        logger.info(`✅ Deleted edit page: ${editPageFile}`);
       }
     } catch (error) {
-      console.log(`⚠️ Error deleting edit page for product ${productId}:`, error.message);
+      logger.info(`⚠️ Error deleting edit page for product ${productId}:`, error.message);
     }
 
     res.json({ message: 'Product archived successfully' });
   } catch (error) {
-    console.error('Error deleting product:', error);
+    logger.error('Error deleting product:', error);
     res.status(500).json({ error: 'Failed to delete product' });
   }
 });
@@ -4610,7 +4642,7 @@ app.post('/api/cart/checkout', authenticateCustomer, validateCheckout, async (re
       orderNumber: orderNumber
     });
   } catch (error) {
-    console.error('Error during checkout:', error);
+    logger.error('Error during checkout:', error);
     res.status(500).json({ error: 'Failed to process checkout' });
   }
 });
@@ -4630,7 +4662,7 @@ app.get('/api/admin/categories', async (req, res) => {
     
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    logger.error('Error fetching categories:', error);
     res.status(500).json({ error: 'Failed to fetch categories' });
   }
 });
@@ -4668,7 +4700,7 @@ app.post('/api/admin/categories', async (req, res) => {
     
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating category:', error);
+    logger.error('Error creating category:', error);
     res.status(500).json({ error: 'Failed to create category' });
   }
 });
@@ -4724,7 +4756,7 @@ app.put('/api/admin/categories/:id', async (req, res) => {
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error updating category:', error);
+    logger.error('Error updating category:', error);
     res.status(500).json({ error: 'Failed to update category' });
   }
 });
@@ -4757,7 +4789,7 @@ app.delete('/api/admin/categories/:id', async (req, res) => {
     
     res.json({ message: 'Category deleted successfully', products_moved: 'Uncategorized' });
   } catch (error) {
-    console.error('Error deleting category:', error);
+    logger.error('Error deleting category:', error);
     res.status(500).json({ error: 'Failed to delete category' });
   }
 });
@@ -4778,7 +4810,7 @@ app.get('/api/admin/categories/stats', async (req, res) => {
     
     res.json(stats.rows);
   } catch (error) {
-    console.error('Error fetching category stats:', error);
+    logger.error('Error fetching category stats:', error);
     res.status(500).json({ error: 'Failed to fetch category statistics' });
   }
 });
@@ -4808,7 +4840,7 @@ app.get('/api/admin/products/custom-inputs', authenticateToken, async (req, res)
     
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching products with custom inputs:', error);
+    logger.error('Error fetching products with custom inputs:', error);
     res.status(500).json({ error: 'Failed to fetch products with custom inputs' });
   }
 });
@@ -4840,7 +4872,7 @@ app.get('/api/admin/products/:id/custom-inputs', authenticateToken, async (req, 
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching product custom inputs:', error);
+    logger.error('Error fetching product custom inputs:', error);
     res.status(500).json({ error: 'Failed to fetch product custom inputs' });
   }
 });
@@ -4848,12 +4880,12 @@ app.get('/api/admin/products/:id/custom-inputs', authenticateToken, async (req, 
 // Email test endpoint
 app.get('/api/test-email', async (req, res) => {
   try {
-    console.log('🧪 Testing email configuration...');
-    console.log('📧 SMTP Host:', process.env.SMTP_HOST);
-    console.log('📧 SMTP Port:', process.env.SMTP_PORT);
-    console.log('📧 SMTP User:', process.env.SMTP_USER);
-    console.log('📧 SMTP Secure:', process.env.SMTP_SECURE);
-    console.log('📧 Email From:', process.env.EMAIL_FROM);
+    logger.info('🧪 Testing email configuration...');
+    logger.info('📧 SMTP Host:', process.env.SMTP_HOST);
+    logger.info('📧 SMTP Port:', process.env.SMTP_PORT);
+    logger.info('📧 SMTP User:', process.env.SMTP_USER);
+    logger.info('📧 SMTP Secure:', process.env.SMTP_SECURE);
+    logger.info('📧 Email From:', process.env.EMAIL_FROM);
     
     // Test email configuration
     const testEmail = {
@@ -4881,11 +4913,11 @@ If you receive this, your email configuration is working!`,
 
     // Verify transporter configuration
     await transporter.verify();
-    console.log('✅ SMTP connection verified successfully');
+    logger.info('✅ SMTP connection verified successfully');
     
     // Send test email
     const info = await transporter.sendMail(testEmail);
-    console.log('✅ Test email sent successfully:', info.messageId);
+    logger.info('✅ Test email sent successfully:', info.messageId);
     
     res.json({
       success: true,
@@ -4901,7 +4933,7 @@ If you receive this, your email configuration is working!`,
     });
     
   } catch (error) {
-    console.error('❌ Email test failed:', error);
+    logger.error('❌ Email test failed:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -4928,11 +4960,11 @@ Promise.all([
   initializeDatabase()
 ]).then(() => {
   app.listen(PORT, () => {
-    console.log(`🚀 Admin Dashboard API server running on port ${PORT}`);
-    console.log(`📧 Email configured: ${process.env.EMAIL_FROM}`);
-    console.log(`🗄️ Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
-    console.log(`🔐 Admin email: ${ADMIN_EMAIL_MEMO}`);
-    console.log(`🏷️ Category management system active`);
+    logger.info(`🚀 Admin Dashboard API server running on port ${PORT}`);
+    logger.info(`📧 Email configured: ${process.env.EMAIL_FROM}`);
+    logger.info(`🗄️ Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
+    logger.info(`🔐 Admin email: ${ADMIN_EMAIL_MEMO}`);
+    logger.info(`🏷️ Category management system active`);
   });
 });
 
