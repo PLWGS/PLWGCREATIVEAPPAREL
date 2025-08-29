@@ -93,3 +93,8 @@ jspm_packages/
 
 # Project documentation with sensitive information
 COMPREHENSIVE_PROJECT_REVIEW.md
+
+# Test files that might contain sensitive data
+*test*.js
+*smtp*.js
+railway-*.js
