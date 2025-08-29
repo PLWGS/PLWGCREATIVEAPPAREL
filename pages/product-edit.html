@@ -182,6 +182,27 @@
                 </div>
             </div>
           </div>
+
+          <!-- Shipping Information -->
+          <div>
+            <label class="block text-sm font-medium text-text-primary mb-2">Shipping Information</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-text-secondary mb-1 block">Shipping Cost ($)</label>
+                    <input type="number" id="shipping_cost" step="0.01" min="0" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="4.50" />
+                    <p class="text-xs text-text-secondary mt-1">Default: $4.50 for shirts, $10.50 for hoodies</p>
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary mb-1 block">Local Pickup Option</label>
+                    <div class="flex items-center space-x-2 mt-2">
+                        <input type="checkbox" id="local_pickup_enabled" class="rounded border-surface-light text-accent focus:ring-accent">
+                        <label for="local_pickup_enabled" class="text-sm text-text-primary">Enable local pickup for this product</label>
+                    </div>
+                    <p class="text-xs text-text-secondary mt-1">Customers can choose to pick up locally instead of shipping</p>
+                </div>
+            </div>
+          </div>
+
           <div>
             <label class="block text-sm font-medium text-text-primary mb-2">Product Features</label>
             <div class="space-y-2">
@@ -465,6 +486,10 @@
         document.getElementById('spec_brand_preference').value = brandPrefValue;
         console.log('🔍 Field value after setting:', document.getElementById('spec_brand_preference').value);
 
+        // Shipping information
+        document.getElementById('shipping_cost').value = p.shipping_cost ?? 4.50;
+        document.getElementById('local_pickup_enabled').checked = p.local_pickup_enabled ?? true;
+
       // Features
       const features = p.features || {};
       document.getElementById('feature_double_stitched').checked = !!features.double_stitched;
@@ -671,6 +696,8 @@
              brand_preference: document.getElementById('spec_brand_preference').value.trim() || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)'
            },
            brand_preference: document.getElementById('spec_brand_preference').value.trim() || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)',
+           shipping_cost: parseFloat(document.getElementById('shipping_cost').value) || 4.50,
+           local_pickup_enabled: document.getElementById('local_pickup_enabled').checked,
            features: {
              double_stitched: document.getElementById('feature_double_stitched').checked,
              fade_resistant: document.getElementById('feature_fade_resistant').checked,

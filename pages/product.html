@@ -431,19 +431,8 @@
                             </button>
                         </div>
                         
-                        <div class="flex items-center justify-center space-x-6 text-sm text-text-secondary">
-                            <div class="flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                </svg>
-                                <span>Free Shipping</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <span>30-Day Returns</span>
-                            </div>
+                        <div id="shipping-info-section" class="space-y-3">
+                            <!-- Dynamic shipping options will appear here -->
                         </div>
                         
                         <!-- Custom Input Fields - Moved here for better visibility -->
@@ -858,28 +847,8 @@
                             <div class="grid md:grid-cols-2 gap-8">
                                 <div>
                                     <h4 class="font-orbitron text-lg font-bold text-white mb-4">Shipping Options</h4>
-                                    <div class="space-y-4">
-                                        <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
-                                            <div>
-                                                <div class="font-semibold text-white">Standard Shipping</div>
-                                                <div class="text-text-secondary text-sm">5-7 business days</div>
-                                            </div>
-                                            <div class="text-accent font-bold">FREE</div>
-                                        </div>
-                                        <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
-                                            <div>
-                                                <div class="font-semibold text-white">Express Shipping</div>
-                                                <div class="text-text-secondary text-sm">2-3 business days</div>
-                                            </div>
-                                            <div class="text-accent font-bold">$9.99</div>
-                                        </div>
-                                        <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
-                                            <div>
-                                                <div class="font-semibold text-white">Overnight Shipping</div>
-                                                <div class="text-text-secondary text-sm">Next business day</div>
-                                            </div>
-                                            <div class="text-accent font-bold">$19.99</div>
-                                        </div>
+                                    <div id="shipping-options" class="space-y-4">
+                                        <!-- Dynamic shipping options will be loaded here -->
                                     </div>
                                 </div>
                                 
@@ -1248,6 +1217,142 @@
                 addToCartBtn.dataset.basePrice = basePrice;
                 addToCartBtn.dataset.selectedSize = selectedSize;
             }
+            
+            // Update shipping information
+            console.log('🚚 About to call updateShippingDisplay with product:', product);
+            updateShippingDisplay(product);
+        }
+        
+        // Function to update shipping display
+        function updateShippingDisplay(product) {
+            console.log('🚚 Updating shipping display with product:', product);
+            console.log('🚚 Raw shipping_cost:', product.shipping_cost, typeof product.shipping_cost);
+            console.log('🚚 Raw local_pickup_enabled:', product.local_pickup_enabled, typeof product.local_pickup_enabled);
+            
+            const shippingCost = parseFloat(product.shipping_cost) || 4.50;
+            const localPickupEnabled = product.local_pickup_enabled !== false;
+            
+            // Update the main shipping info section with shipping method selector
+            const shippingInfoSection = document.getElementById('shipping-info-section');
+            if (shippingInfoSection) {
+                let shippingHTML = `
+                    <div class="text-center text-sm text-text-secondary mb-2">Choose Shipping Method:</div>
+                    <div class="space-y-2">
+                        <!-- Standard Shipping Option -->
+                        <label class="flex items-center justify-between p-3 border border-surface-light rounded-lg cursor-pointer hover:border-accent transition-colors shipping-option" data-method="standard" data-cost="${shippingCost}">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="shipping-method" value="standard" class="text-accent focus:ring-accent" checked>
+                                <div>
+                                    <div class="font-semibold text-white flex items-center space-x-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span>Standard Shipping</span>
+                                    </div>
+                                    <div class="text-text-secondary text-sm">5-7 business days</div>
+                                </div>
+                            </div>
+                            <div class="font-bold text-white">$${shippingCost.toFixed(2)}</div>
+                        </label>
+                `;
+                
+                // Local pickup option (only if enabled)
+                if (localPickupEnabled) {
+                    shippingHTML += `
+                        <!-- Local Pickup Option -->
+                        <label class="flex items-center justify-between p-3 border border-surface-light rounded-lg cursor-pointer hover:border-accent transition-colors shipping-option" data-method="pickup" data-cost="0">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="shipping-method" value="pickup" class="text-accent focus:ring-accent">
+                                <div>
+                                    <div class="font-semibold text-white flex items-center space-x-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        <span>Local Pickup</span>
+                                    </div>
+                                    <div class="text-text-secondary text-sm">Pick up in Goodyear, Arizona</div>
+                                </div>
+                            </div>
+                            <div class="font-bold text-accent">FREE</div>
+                        </label>
+                    `;
+                }
+                
+                shippingHTML += `
+                    </div>
+                    <!-- Returns Policy -->
+                    <div class="flex items-center justify-center space-x-2 text-sm text-text-secondary mt-3 pt-3 border-t border-surface-light">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>30-Day Returns</span>
+                    </div>
+                `;
+                
+                shippingInfoSection.innerHTML = shippingHTML;
+                
+                // Add event listeners for shipping method selection
+                setupShippingMethodListeners();
+            }
+            
+            // Also update the detailed shipping options section if it exists
+            const shippingOptionsContainer = document.getElementById('shipping-options');
+            if (shippingOptionsContainer) {
+                let optionsHTML = '';
+                
+                // Standard shipping option
+                optionsHTML += `
+                    <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
+                        <div>
+                            <div class="font-semibold text-white">Standard Shipping</div>
+                            <div class="text-text-secondary text-sm">5-7 business days</div>
+                        </div>
+                        <div class="text-accent font-bold">$${shippingCost.toFixed(2)}</div>
+                    </div>
+                `;
+                
+                // Local pickup option (if enabled)
+                if (localPickupEnabled) {
+                    optionsHTML += `
+                        <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
+                            <div>
+                                <div class="font-semibold text-white">Local Pickup</div>
+                                <div class="text-text-secondary text-sm">Pick up at our location</div>
+                            </div>
+                            <div class="text-accent font-bold">FREE</div>
+                        </div>
+                    `;
+                }
+                
+                shippingOptionsContainer.innerHTML = optionsHTML;
+            }
+        }
+        
+        // Function to set up shipping method selection listeners
+        function setupShippingMethodListeners() {
+            const shippingOptions = document.querySelectorAll('.shipping-option');
+            shippingOptions.forEach(option => {
+                const radio = option.querySelector('input[type="radio"]');
+                option.addEventListener('click', function() {
+                    // Check the radio button
+                    radio.checked = true;
+                    
+                    // Update visual selection
+                    shippingOptions.forEach(opt => opt.classList.remove('border-accent'));
+                    option.classList.add('border-accent');
+                    
+                    // Store shipping choice for cart
+                    const shippingMethod = option.dataset.method;
+                    const shippingCost = parseFloat(option.dataset.cost);
+                    
+                    console.log('🚚 Shipping method selected:', shippingMethod, 'Cost:', shippingCost);
+                    
+                    // Store in sessionStorage for cart to use
+                    sessionStorage.setItem('selectedShippingMethod', shippingMethod);
+                    sessionStorage.setItem('selectedShippingCost', shippingCost);
+                });
+            });
         }
         
         // Function to update price based on selected size
@@ -1516,6 +1621,13 @@
                                 }
                             }
                         });
+                    }
+                    
+                    // Store default shipping preferences if not already set
+                    if (!sessionStorage.getItem('selectedShippingMethod')) {
+                        sessionStorage.setItem('selectedShippingMethod', 'standard');
+                        sessionStorage.setItem('selectedShippingCost', productData?.shipping_cost || '4.50');
+                        console.log('🚚 Set default shipping preferences:', 'standard', productData?.shipping_cost || '4.50');
                     }
                     
                     console.log('Adding to cart:', {
@@ -2206,6 +2318,10 @@
                     <span class="text-accent">Product Details</span>
                 `;
             }
+            
+            // Update shipping information
+            console.log('🚚 About to call updateShippingDisplay with product:', product);
+            updateShippingDisplay(product);
             
             console.log('✅ Product display updated successfully');
         }

@@ -1782,6 +1782,25 @@ All features are currently checked, indicating these are standard features of yo
    - **Example**: Set Price = $20.00, Original Price = $40.00 → Shows "50% OFF"
    - **Real-time Effect**: Discount display updates immediately on customer-facing pages
 
+5. **Shipping Cost ($)** - NEW FEATURE:
+   - **Field**: Number input for shipping cost
+   - **Default Value**: $4.50 (automatically set for new products)
+   - **Purpose**: Sets the shipping cost customers pay for this specific product
+   - **Examples**: 
+     * Shirts: $4.50 (standard)
+     * Hoodies: $10.50 (heavier items)
+     * Small accessories: $3.00 (lighter items)
+   - **Real-time Effect**: Customers see exact shipping cost on product page
+   - **Flexibility**: Each product can have its own unique shipping cost
+
+6. **Local Pickup Available** - NEW FEATURE:
+   - **Field**: Checkbox (enabled by default)
+   - **Purpose**: Allows customers to choose FREE local pickup instead of paying shipping
+   - **Location**: Customers can pick up in Goodyear, Arizona
+   - **Customer Benefit**: Saves customers money by eliminating shipping costs
+   - **When to Disable**: Only disable if product cannot be picked up locally
+   - **Real-time Effect**: Shows "Local Pickup - FREE" option on product page
+
 ##### Product Details (Right Column)
 1. **Description**:
    - **Field**: Large text area for product details
@@ -3303,10 +3322,22 @@ The **Customer Features** section of your platform provides a professional, enga
 - **Quantity Adjustment**: Easy quantity modification
 - **Remove Items**: Simple item removal
 
+**Shipping Method Selection** - NEW FEATURE:
+- **Two Options Available**: Standard Shipping or Local Pickup
+- **Interactive Selection**: Customers choose their preferred method on product page
+- **Standard Shipping**: Shows exact cost (e.g., $4.50 for shirts, $10.50 for hoodies)
+- **Local Pickup - FREE**: Available for pickup in Goodyear, Arizona
+- **Smart Cart**: Cart automatically applies chosen shipping method
+- **Cost Transparency**: Clear breakdown of subtotal + shipping = total
+- **Customer Control**: Customers can save money by choosing local pickup
+
 **Customer Benefits**:
 - Easy product selection and addition
 - Clear cart contents and pricing
 - Simple quantity and item management
+- **Choice between shipping and pickup options**
+- **Transparent shipping costs**
+- **Money-saving local pickup option**
 - Professional shopping experience
 
 #### Checkout Process

@@ -1,12 +1,12 @@
 # PLWG CREATIVE APPAREL - COMPREHENSIVE PROJECT REVIEW AND PLAN
 
-## Version: v3.9
-## Status: PRODUCTION READY WITH COMPLETE CUSTOM INPUT SYSTEM, ENHANCED ADMIN DASHBOARD, FIXED BRAND PREFERENCE FEATURE, AND FULLY FUNCTIONAL ADMIN UPLOADS PAGE
+## Version: v4.0
+## Status: PRODUCTION READY WITH COMPLETE CUSTOM INPUT SYSTEM, ENHANCED ADMIN DASHBOARD, DYNAMIC SHIPPING COST SYSTEM, AND CUSTOMER SHIPPING CHOICE
 
-**Date:** December 19, 2024
+**Date:** January 27, 2025
 **Author:** Jules, AI Software Engineer
-**Last Updated:** December 19, 2024 (Updated with Brand Preference Feature Fix, Complete Custom Input System Implementation, and Admin Uploads Page Fix)
-**Current Version:** v3.9 - Complete Custom Input System with Full Data Persistence, Working Brand Preference Input, and Fully Functional Admin Uploads Page
+**Last Updated:** January 27, 2025 (Major Update: Dynamic Shipping Cost System with Customer Choice Implementation)
+**Current Version:** v4.0 - Complete Custom Input System with Dynamic Shipping Costs and Customer Shipping Method Selection
 
 ## 1. Project Overview
 
@@ -38,15 +38,18 @@ The backend is a monolithic Node.js application built with Express. It handles:
 -   Email notifications via Nodemailer
 -   Size-based pricing system for products
 -   **Custom input system with full data persistence from cart to orders**
+-   **Dynamic shipping cost system with customer choice between standard shipping and local pickup**
 
 ### Database (PostgreSQL)
 
 The application uses a PostgreSQL database with a comprehensive schema to store all data, including:
 -   Products with size-based pricing (JSONB column)
 -   **Products with custom input configuration (birthday and lyrics customization)**
+-   **Products with dynamic shipping costs and local pickup options**
 -   Customers
 -   Orders
 -   **Order items with custom input data (JSONB column)**
+-   **Orders with detailed shipping amount tracking (subtotal, shipping_amount, tax_amount, discount_amount)**
 -   Shopping Carts
 -   **Cart items with custom input data (JSONB column)**
 -   Custom Requests
@@ -217,6 +220,19 @@ The project has successfully completed all planned phases and is now ready for p
 - **Enhanced Order Cards**: Order cards now display product names, sizes, colors, quantities, and customer names for quick identification
 - **Clickable Order Details**: Added modal system for comprehensive order information display
 - **Professional UI**: Clean, production-ready interface with all temporary test elements and debug styles removed
+
+### Dynamic Shipping Cost System ✅
+- **Status**: 100% Complete - Fully functional dynamic shipping system with customer choice
+- **Customer Choice**: Interactive shipping method selector on product pages (Standard Shipping vs Local Pickup)
+- **Admin Control**: Per-product shipping cost configuration in admin upload/edit forms
+- **Database Integration**: New shipping_cost and local_pickup_enabled columns with proper indexing
+- **Cart Integration**: Real-time shipping calculation based on customer selection
+- **Local Pickup Option**: FREE local pickup option eliminates shipping charges when selected
+- **Smart Defaults**: Configurable default shipping costs (shirts: $4.50, hoodies: $10.50)
+- **Order Tracking**: Enhanced orders table with subtotal, shipping_amount, tax_amount, discount_amount columns
+- **Session Persistence**: Customer shipping preferences persist from product page to cart
+- **API Enhancement**: Updated product and cart APIs to handle shipping data
+- **Form Validation**: Proper validation for shipping cost inputs in admin forms
 
 ### Custom Input System ✅
 - **Status**: 100% Complete - Professional custom input system fully operational with complete data flow

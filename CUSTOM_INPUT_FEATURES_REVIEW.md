@@ -347,3 +347,51 @@ You now have a **professional-grade custom input system** that:
 - **Test Elements Removed**: All temporary test buttons, test functions, and debug CSS removed
 - **Production Ready**: Clean, professional interface suitable for production use
 - **Debug Logs Cleaned**: Server-side debug console.log statements removed for cleaner server output
+
+## Dynamic Shipping Cost System ✅ COMPLETED
+
+### Overview
+The website now features a fully dynamic shipping cost system that replaces hardcoded "Free" shipping with configurable per-product shipping costs and local pickup options.
+
+### Key Features
+- **Admin Control**: Shipping costs can be set individually for each product during upload/edit
+- **Customer Choice**: Customers can choose between standard shipping and local pickup
+- **Flexible Pricing**: Different shipping costs for different product types (shirts: $4.50, hoodies: $10.50, etc.)
+- **Local Pickup Option**: Customers can choose FREE local pickup to avoid shipping charges
+- **Real-time Updates**: Cart automatically updates totals based on customer's shipping choice
+
+### Database Implementation
+- **New Columns Added**:
+  - `products.shipping_cost` (DECIMAL, default $4.50)
+  - `products.local_pickup_enabled` (BOOLEAN, default true)
+  - `orders.subtotal` (DECIMAL)
+  - `orders.shipping_amount` (DECIMAL)
+  - `orders.tax_amount` (DECIMAL)
+  - `orders.discount_amount` (DECIMAL)
+
+### Admin Interface
+- **Product Upload Page**: New shipping cost input field with $4.50 default
+- **Product Edit Page**: Ability to modify shipping costs for existing products
+- **Local Pickup Toggle**: Admin can enable/disable local pickup per product
+- **Form Validation**: Proper validation for shipping cost inputs
+
+### Customer Experience
+- **Product Page**: Interactive shipping method selector showing both options
+- **Visual Selection**: Customers can click to choose standard shipping or local pickup
+- **Clear Pricing**: Displays exact shipping cost (e.g., "Standard Shipping - $10.50")
+- **Cart Integration**: Selected shipping method carries over to cart with correct pricing
+- **Smart Defaults**: Defaults to standard shipping if no selection made
+
+### Technical Implementation
+- **Session Storage**: Customer shipping preferences persist across pages
+- **API Integration**: Shipping data flows from database through API to frontend
+- **Cart Logic**: Dynamic calculation based on customer choice
+- **Fallback System**: Graceful handling of products without shipping data
+- **Performance**: Indexed database fields for fast shipping cost queries
+
+### Shipping Cost Logic
+- **Standard Shipping**: Uses product-specific shipping cost from database
+- **Local Pickup**: Always FREE ($0.00) when available and selected
+- **Product Types**: Different default costs (shirts $4.50, hoodies $10.50)
+- **Order-Based**: One shipping fee per order (not per item)
+- **Customer Choice**: Final cost determined by customer selection

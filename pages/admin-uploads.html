@@ -492,6 +492,26 @@
                         </div>
                     </div>
 
+                    <!-- Shipping Information -->
+                    <div>
+                        <label class="block text-sm font-medium text-text-primary mb-2">Shipping Information</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Shipping Cost ($)</label>
+                                <input type="number" id="shipping-cost" step="0.01" min="0" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="4.50" value="4.50">
+                                <p class="text-xs text-text-secondary mt-1">Default: $4.50 for shirts, $10.50 for hoodies</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-text-secondary mb-1">Local Pickup Option</label>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <input type="checkbox" id="local-pickup-enabled" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+                                    <label for="local-pickup-enabled" class="text-sm text-text-primary">Enable local pickup for this product</label>
+                                </div>
+                                <p class="text-xs text-text-secondary mt-1">Customers can choose to pick up locally instead of shipping</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Features -->
                     <div>
                         <label class="block text-sm font-medium text-text-primary mb-2">Product Features</label>
@@ -1168,6 +1188,8 @@
                     sustainability: document.getElementById('spec-sustainability').value,
                     brand_preference: document.getElementById('spec-brand-preference').value
                 },
+                shipping_cost: parseFloat(document.getElementById('shipping-cost').value) || 4.50,
+                local_pickup_enabled: document.getElementById('local-pickup-enabled').checked,
                 features: {
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,
@@ -1383,6 +1405,8 @@
                     sustainability: document.getElementById('spec-sustainability').value,
                     brand_preference: document.getElementById('spec-brand-preference').value
                 },
+                shipping_cost: parseFloat(document.getElementById('shipping-cost').value) || 4.50,
+                local_pickup_enabled: document.getElementById('local-pickup-enabled').checked,
                 features: {
                     double_stitched: document.getElementById('feature-double-stitched').checked,
                     fade_resistant: document.getElementById('feature-fade-resistant').checked,

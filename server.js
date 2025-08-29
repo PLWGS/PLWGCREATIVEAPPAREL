@@ -4125,6 +4125,8 @@ const validateProduct = [
   }).withMessage('Custom lyrics labels must be an object or valid JSON string'),
   body('custom_lyrics_char_limit').optional().isInt({ min: 50, max: 1000 }).withMessage('Custom lyrics character limit must be between 50 and 1000'),
   body('specifications.brand_preference').optional().isString().withMessage('Brand preference must be a string'),
+  body('shipping_cost').optional().isFloat({ min: 0 }).withMessage('Shipping cost must be a positive number'),
+  body('local_pickup_enabled').optional().isBoolean().withMessage('Local pickup enabled must be a boolean'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -4165,7 +4167,9 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       custom_lyrics_required,
       custom_lyrics_fields,
       custom_lyrics_labels,
-      custom_lyrics_char_limit
+      custom_lyrics_char_limit,
+      shipping_cost,
+      local_pickup_enabled
     } = req.body;
 
     // Process tags to ensure it's always a JavaScript array
@@ -4245,8 +4249,9 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
         colors, sizes, specifications, features, sub_images, size_stock,
         track_inventory, brand_preference, specs_notes,
         custom_birthday_enabled, custom_birthday_required, custom_birthday_fields, custom_birthday_labels, custom_birthday_char_limit,
-        custom_lyrics_enabled, custom_lyrics_required, custom_lyrics_fields, custom_lyrics_labels, custom_lyrics_char_limit
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)
+        custom_lyrics_enabled, custom_lyrics_required, custom_lyrics_fields, custom_lyrics_labels, custom_lyrics_char_limit,
+        shipping_cost, local_pickup_enabled
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35)
       RETURNING *
     `, [
       nextId, name, description, price, original_price, image_url, category, 'Featured',
@@ -4262,7 +4267,8 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       custom_lyrics_enabled || false, custom_lyrics_required || false,
       custom_lyrics_fields || '["artist_band", "song_name", "song_lyrics"]',
       custom_lyrics_labels || '{"artist_band": "Artist or Band Name", "song_name": "Song Name", "song_lyrics": "Song Lyrics (Optional)"}',
-      custom_lyrics_char_limit || 250
+      custom_lyrics_char_limit || 250,
+      shipping_cost || 4.50, local_pickup_enabled !== false
     ]);
 
     logger.info(`✅ Product created with ID ${nextId}`);
@@ -4341,7 +4347,9 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       custom_lyrics_required,
       custom_lyrics_fields,
       custom_lyrics_labels,
-      custom_lyrics_char_limit
+      custom_lyrics_char_limit,
+      shipping_cost,
+      local_pickup_enabled
     } = req.body;
     
     // Debug: Log the extracted custom input values
@@ -4487,8 +4495,9 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
         size_stock = $16, track_inventory = $17, brand_preference = $18, specs_notes = $19,
         custom_birthday_enabled = $20, custom_birthday_required = $21, custom_birthday_fields = $22, custom_birthday_labels = $23, custom_birthday_char_limit = $24,
         custom_lyrics_enabled = $25, custom_lyrics_required = $26, custom_lyrics_fields = $27, custom_lyrics_labels = $28, custom_lyrics_char_limit = $29,
+        shipping_cost = $30, local_pickup_enabled = $31,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $30
+      WHERE id = $32
       RETURNING *
     `, [
       name, description, price, original_price, final_image_url, category,
@@ -4505,6 +4514,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       custom_lyrics_fields || '["artist_band", "song_name", "song_lyrics"]',
       custom_lyrics_labels || '{"artist_band": "Artist or Band Name", "song_name": "Song Name", "song_lyrics": "Song Lyrics (Optional)"}',
       custom_lyrics_char_limit || 250,
+      shipping_cost || 4.50, local_pickup_enabled !== false,
       productId
     ]);
 

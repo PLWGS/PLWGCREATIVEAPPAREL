@@ -283,7 +283,7 @@
                         </div>
                         <div class="flex justify-between text-text-secondary">
                             <span>Shipping</span>
-                            <span>Free</span>
+                            <span id="shipping-cost">Calculating...</span>
                         </div>
                         <div class="border-t border-surface-light pt-3">
                             <div class="flex justify-between text-white font-bold">
@@ -330,6 +330,60 @@
             description: ''
         };
 
+        // Calculate shipping cost based on cart contents
+        async function calculateShippingCost(cartItems) {
+            if (!cartItems || cartItems.length === 0) {
+                return 0;
+            }
+
+            try {
+                // Check if customer selected local pickup
+                const selectedShippingMethod = sessionStorage.getItem('selectedShippingMethod');
+                const selectedShippingCost = sessionStorage.getItem('selectedShippingCost');
+                
+                console.log('🚚 Cart shipping method:', selectedShippingMethod, 'Cost:', selectedShippingCost);
+                
+                // If customer explicitly chose local pickup, return 0
+                if (selectedShippingMethod === 'pickup') {
+                    console.log('🚚 Customer chose local pickup - FREE shipping');
+                    return 0;
+                }
+                
+                // If customer chose standard shipping and we have the cost, use it
+                if (selectedShippingMethod === 'standard' && selectedShippingCost !== null) {
+                    const cost = parseFloat(selectedShippingCost);
+                    console.log('🚚 Customer chose standard shipping:', cost);
+                    return cost;
+                }
+
+                // Fallback: Get shipping data from products (for backwards compatibility)
+                const productIds = [...new Set(cartItems.map(item => item.product_id))];
+                const productShippingData = [];
+
+                for (const productId of productIds) {
+                    const response = await fetch(`/api/products/public/${productId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const product = data.product || data;
+                        productShippingData.push({
+                            id: productId,
+                            shipping_cost: parseFloat(product.shipping_cost) || 4.50,
+                            local_pickup_enabled: product.local_pickup_enabled !== false
+                        });
+                    }
+                }
+
+                // Use the highest shipping cost as default (ONE shipping fee per order)
+                const highestShippingCost = Math.max(...productShippingData.map(p => p.shipping_cost));
+                console.log('🚚 Fallback shipping cost:', highestShippingCost);
+                return highestShippingCost;
+
+            } catch (error) {
+                console.error('Error calculating shipping cost:', error);
+                return 4.50; // Fallback shipping cost
+            }
+        }
+
         // Load cart items from API
         async function loadCartItems() {
             console.log('=== CART PAGE DEBUG ===');
@@ -365,7 +419,7 @@
                     console.log('Cart items loaded:', data.items);
                     
                     if (data.items && data.items.length > 0) {
-                        displayCartItems(data.items);
+                        await displayCartItems(data.items);
                         // Show success toast
                         if (window.frontendEnhancements) {
                             window.frontendEnhancements.showToast(`Cart loaded with ${data.items.length} items`, 'success');
@@ -392,7 +446,7 @@
         }
 
         // Display cart items
-        function displayCartItems(items) {
+        async function displayCartItems(items) {
             const cartContainer = document.getElementById('cart-items');
             if (!cartContainer) {
                 console.error('Cart items container not found');
@@ -438,21 +492,34 @@
 
             cartContainer.innerHTML = cartHTML;
             
+            // Calculate shipping costs dynamically
+            const shippingCost = await calculateShippingCost(items);
+            const finalTotal = totalAmount + shippingCost;
+            
             // Update totals
             const subtotalElement = document.getElementById('subtotal');
+            const shippingElement = document.getElementById('shipping-cost');
             const totalElement = document.getElementById('total-price');
+            
             if (subtotalElement) {
                 subtotalElement.textContent = `$${totalAmount.toFixed(2)}`;
             }
+            if (shippingElement) {
+                if (shippingCost === 0) {
+                    shippingElement.textContent = 'Local Pickup';
+                } else {
+                    shippingElement.textContent = `$${shippingCost.toFixed(2)}`;
+                }
+            }
             if (totalElement) {
-                totalElement.textContent = `$${totalAmount.toFixed(2)}`;
+                totalElement.textContent = `$${finalTotal.toFixed(2)}`;
             }
 
             // Show checkout button
             const checkoutBtn = document.getElementById('checkout-btn');
             if (checkoutBtn) {
                 checkoutBtn.style.display = 'block';
-                checkoutBtn.textContent = `Proceed to Checkout - $${totalAmount.toFixed(2)}`;
+                checkoutBtn.textContent = `Proceed to Checkout - $${finalTotal.toFixed(2)}`;
             }
         }
 
