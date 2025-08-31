@@ -1874,11 +1874,14 @@ app.get('/api/analytics/dashboard', authenticateToken, async (req, res) => {
     const topProductsResult = await pool.query(`
       SELECT oi.product_name,
              SUM(oi.quantity) as total_sold,
-             SUM(oi.total_price) as total_revenue
+             SUM(oi.total_price) as total_revenue,
+             p.image_url,
+             p.id as product_id
       FROM order_items oi
       JOIN orders o ON oi.order_id = o.id
+      LEFT JOIN products p ON p.name = oi.product_name
       ${dateFilter.replace('WHERE', 'WHERE o.')}
-      GROUP BY oi.product_name
+      GROUP BY oi.product_name, p.image_url, p.id
       ORDER BY total_revenue DESC
       LIMIT 5
     `);

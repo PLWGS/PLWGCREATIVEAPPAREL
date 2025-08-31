@@ -452,53 +452,20 @@
                 <div class="glass-card rounded-xl p-6">
                     <h3 class="font-orbitron text-lg font-bold text-white mb-6">Top Performing Designs</h3>
                     <div class="space-y-4">
-                        <div class="flex items-center space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=60&auto=format&fit=crop" alt="Horror Skull Tee" class="w-12 h-12 rounded-lg object-cover" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=60'; this.onerror=null;" />
-                            <div class="flex-1">
-                                <h4 class="text-white font-medium text-sm">Horror Skull Tee</h4>
-                                <p class="text-text-secondary text-xs">142 sold this week</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-accent font-bold text-sm">$3,408</p>
-                                <p class="text-success text-xs">+24%</p>
-                            </div>
+                        <div id="topProductsContainer" class="space-y-4">
+                                                    <!-- Dynamic content will be loaded here -->
+                        <div class="text-center text-text-secondary text-sm py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-3"></div>
+                            <p class="text-text-secondary">Loading top products...</p>
+                            <p class="text-xs text-gray-500 mt-2">This will show your best-selling designs with actual product images</p>
+                        </div>
                         </div>
 
-                        <div class="flex items-center space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <img src="https://images.pixabay.com/photo/2016/03/27/19/32/fashion-1283863_1280.jpg?q=80&w=60&auto=format&fit=crop" alt="Pop Culture Mashup" class="w-12 h-12 rounded-lg object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=60&auto=format&fit=crop'; this.onerror=null;" />
-                            <div class="flex-1">
-                                <h4 class="text-white font-medium text-sm">Pop Culture Mashup</h4>
-                                <p class="text-text-secondary text-xs">98 sold this week</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-accent font-bold text-sm">$2,646</p>
-                                <p class="text-success text-xs">+18%</p>
-                            </div>
-                        </div>
 
-                        <div class="flex items-center space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <img src="https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=60" alt="Custom Design" class="w-12 h-12 rounded-lg object-cover" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=60&auto=format&fit=crop'; this.onerror=null;" />
-                            <div class="flex-1">
-                                <h4 class="text-white font-medium text-sm">Sarcastic Quote Tee</h4>
-                                <p class="text-text-secondary text-xs">76 sold this week</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-accent font-bold text-sm">$1,824</p>
-                                <p class="text-success text-xs">+12%</p>
-                            </div>
-                        </div>
 
-                        <div class="flex items-center space-x-4 p-3 bg-surface-dark rounded-lg">
-                            <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=60&auto=format&fit=crop" alt="Minimalist Design" class="w-12 h-12 rounded-lg object-cover" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=60'; this.onerror=null;" />
-                            <div class="flex-1">
-                                <h4 class="text-white font-medium text-sm">Minimalist Rebel</h4>
-                                <p class="text-text-secondary text-xs">54 sold this week</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-accent font-bold text-sm">$1,296</p>
-                                <p class="text-success text-xs">+8%</p>
-                            </div>
-                        </div>
+
+
+
                     </div>
                 </div>
             </section>
@@ -879,6 +846,7 @@
                 const data = await response.json();
                 
                 if (response.ok) {
+                    console.log('📊 Dashboard data loaded:', data);
                     updateMetrics(data.sales);
                     updateTopProducts(data.topProducts);
                     updateLowStockAlerts(data.lowStock);
@@ -998,27 +966,58 @@
 
         // Update top products
         function updateTopProducts(products) {
-            const topProductsContainer = document.querySelector('.glass-card:nth-child(2) .space-y-4');
-            if (!topProductsContainer || !products) return;
+            console.log('🎯 Updating top products:', products);
+            const topProductsContainer = document.getElementById('topProductsContainer');
+            if (!topProductsContainer) {
+                console.error('❌ Top products container not found');
+                return;
+            }
+            if (!products) {
+                console.log('⚠️ No products data provided');
+                return;
+            }
             
             if (!products.length) {
+                console.log('📭 No top products for the selected period');
                 topProductsContainer.innerHTML = `<div class="text-center text-text-secondary text-sm py-4">No top products for the selected period</div>`;
                 return;
             }
 
-            topProductsContainer.innerHTML = products.map((product, index) => `
-                <div class="flex items-center space-x-4 p-3 bg-surface-dark rounded-lg">
-                    <img src="${product.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=60&auto=format&fit=crop'}" alt="${product.product_name}" class="w-12 h-12 rounded-lg object-cover" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=60'; this.onerror=null;" />
-                    <div class="flex-1">
-                        <h4 class="text-white font-medium text-sm">${product.product_name}</h4>
-                        <p class="text-text-secondary text-xs">${product.total_sold} sold this week</p>
+            topProductsContainer.innerHTML = products.map((product, index) => {
+                // Optimize Cloudinary image URL for crisp thumbnails
+                let imageUrl = product.image_url || '';
+                console.log(`🖼️ Product ${index + 1} image:`, imageUrl);
+                
+                if (imageUrl && imageUrl.includes('cloudinary.com')) {
+                    // Transform Cloudinary URL for optimal thumbnail size and quality
+                    const originalUrl = imageUrl;
+                    imageUrl = imageUrl.replace('/upload/', '/upload/c_fill,g_auto,w_80,h_80,q_auto,f_auto/');
+                    console.log(`🔄 Transformed Cloudinary URL:`, originalUrl, '→', imageUrl);
+                }
+                
+                return `
+                    <div class="flex items-center space-x-4 p-3 bg-surface-dark rounded-lg hover:bg-surface-light transition-colors duration-200">
+                        <div class="relative">
+                            <img src="${imageUrl}" 
+                                 alt="${product.product_name || 'Product'}" 
+                                 class="w-16 h-16 rounded-lg object-cover border border-surface-light" 
+                                 loading="lazy" 
+                                 onerror="this.src='https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=80&auto=format&fit=crop'; this.onerror=null;" />
+                            <div class="absolute -top-1 -right-1 w-4 h-4 bg-accent rounded-full flex items-center justify-center">
+                                <span class="text-xs font-bold text-black">${index + 1}</span>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-white font-medium text-sm">${product.product_name || 'Product Name'}</h4>
+                            <p class="text-text-secondary text-xs">${product.total_sold || 0} sold this week</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-accent font-bold text-sm">$${(product.total_revenue || 0).toFixed(2)}</p>
+                            <p class="text-success text-xs">+${Math.floor(Math.random() * 20 + 10)}%</p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-accent font-bold text-sm">$${product.total_revenue}</p>
-                        <p class="text-success text-xs">+${Math.floor(Math.random() * 20 + 10)}%</p>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Update low stock alerts
