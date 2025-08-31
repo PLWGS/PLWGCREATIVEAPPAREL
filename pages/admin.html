@@ -847,6 +847,7 @@
                 
                 if (response.ok) {
                     console.log('📊 Dashboard data loaded:', data);
+                    console.log('📊 Top products raw data:', JSON.stringify(data.topProducts, null, 2));
                     updateMetrics(data.sales);
                     updateTopProducts(data.topProducts);
                     updateLowStockAlerts(data.lowStock);
@@ -979,11 +980,27 @@
             
             if (!products.length) {
                 console.log('📭 No top products for the selected period');
-                topProductsContainer.innerHTML = `<div class="text-center text-text-secondary text-sm py-4">No top products for the selected period</div>`;
+                topProductsContainer.innerHTML = `
+                    <div class="text-center text-text-secondary text-sm py-8">
+                        <div class="w-16 h-16 mx-auto mb-4 text-gray-500">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                        <p class="text-text-secondary mb-2">No top products for the selected period</p>
+                        <p class="text-xs text-gray-500">Products will appear here once you have sales data</p>
+                    </div>
+                `;
                 return;
             }
 
             topProductsContainer.innerHTML = products.map((product, index) => {
+                // Validate product data
+                if (!product || !product.product_name) {
+                    console.warn(`⚠️ Skipping invalid product at index ${index}:`, product);
+                    return '';
+                }
+                
                 // Optimize Cloudinary image URL for crisp thumbnails
                 let imageUrl = product.image_url || '';
                 console.log(`🖼️ Product ${index + 1} image:`, imageUrl);
@@ -995,11 +1012,15 @@
                     console.log(`🔄 Transformed Cloudinary URL:`, originalUrl, '→', imageUrl);
                 }
                 
+                // Ensure numeric values are properly handled
+                const totalSold = parseInt(product.total_sold) || 0;
+                const totalRevenue = parseFloat(product.total_revenue) || 0;
+                
                 return `
                     <div class="flex items-center space-x-4 p-3 bg-surface-dark rounded-lg hover:bg-surface-light transition-colors duration-200">
                         <div class="relative">
                             <img src="${imageUrl}" 
-                                 alt="${product.product_name || 'Product'}" 
+                                 alt="${product.product_name}" 
                                  class="w-16 h-16 rounded-lg object-cover border border-surface-light" 
                                  loading="lazy" 
                                  onerror="this.src='https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=80&auto=format&fit=crop'; this.onerror=null;" />
@@ -1008,11 +1029,11 @@
                             </div>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-white font-medium text-sm">${product.product_name || 'Product Name'}</h4>
-                            <p class="text-text-secondary text-xs">${product.total_sold || 0} sold this week</p>
+                            <h4 class="text-white font-medium text-sm">${product.product_name}</h4>
+                            <p class="text-text-secondary text-xs">${totalSold} sold this week</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-accent font-bold text-sm">$${(product.total_revenue || 0).toFixed(2)}</p>
+                            <p class="text-accent font-bold text-sm">$${totalRevenue.toFixed(2)}</p>
                             <p class="text-success text-xs">+${Math.floor(Math.random() * 20 + 10)}%</p>
                         </div>
                     </div>
