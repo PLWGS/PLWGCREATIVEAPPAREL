@@ -315,7 +315,11 @@
 
                     <!-- Profile -->
                     <div class="flex items-center space-x-3">
-                        <img src="https://images.unsplash.com/photo-1494790108755-2616c0763c5c?q=80&w=100&auto=format&fit=crop" alt="Lori Nelton" class="w-10 h-10 rounded-full border-2 border-accent" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;" />
+                        <div class="w-10 h-10 rounded-full border-2 border-accent bg-accent bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
                         <div class="hidden md:block">
                             <p class="text-white font-medium text-sm">Lori Nelton</p>
                             <p class="text-text-secondary text-xs">Store Owner</p>
@@ -981,6 +985,7 @@
 
         // Update top products
         function updateTopProducts(products) {
+            console.log('TOP PRODUCTS DATA:', products); // ONE debug line to see what we get
             const topProductsContainer = document.getElementById('topProductsContainer');
             if (!topProductsContainer) {
                 console.error('Top products container not found');
