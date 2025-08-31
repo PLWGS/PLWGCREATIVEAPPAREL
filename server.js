@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const { uploadProductImages, uploadImageToCloudinary, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
 const { body, validationResult } = require('express-validator');
 require('dotenv').config();
@@ -673,33 +675,31 @@ app.post('/api/admin/login',
       logger.info('🔐 Password check result:', isValidPassword);
       
       if (isValidPassword) {
-        // 2FA gate (email OTP) enabled by default unless disabled
-        const twoFAEnabled = (process.env.ADMIN_2FA_ENABLED || 'true') !== 'false';
-        if (twoFAEnabled) {
-          const code = generateNumericCode(6);
-          const twoFactorToken = crypto.randomBytes(24).toString('hex');
-          const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
-          twoFactorStore.set(twoFactorToken, { email, code, expiresAt });
-
-          const toEmail = process.env.ADMIN_2FA_EMAIL || process.env.ADMIN_EMAIL || 'letsgetcreative@myyahoo.com';
-          const sent = await sendEmail(
-            toEmail,
-            'Your Admin 2FA Code',
-            `<p>Your login verification code is:</p><p style="font-size:22px;font-weight:bold;letter-spacing:2px;">${code}</p><p>This code expires in 5 minutes.</p>`
-          );
-          if (!sent) {
-            logger.warn('⚠️ 2FA email failed to send; denying login');
-            return res.status(500).json({ error: 'Failed to send 2FA code' });
+        // TOTP gate (Google Authenticator) enabled by default unless disabled
+        const totpEnabled = (process.env.ADMIN_2FA_ENABLED || 'true') !== 'false';
+        if (totpEnabled) {
+          // Check if TOTP is configured
+          const totpSecret = totpSecrets.get('admin');
+          if (totpSecret) {
+            // TOTP is configured, require it
+            return res.json({ totpRequired: true });
+          } else {
+            // TOTP not configured, allow direct login
+            logger.warn('⚠️ TOTP not configured, allowing direct login');
+            const token = jwt.sign(
+              { email, role: 'admin' },
+              process.env.JWT_SECRET,
+              { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+            );
+            return res.json({ success: true, token, user: { email, role: 'admin' } });
           }
-
-          return res.json({ twoFactorRequired: true, twoFactorToken });
         } else {
+          // TOTP disabled
           const token = jwt.sign(
             { email, role: 'admin' },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
           );
-
           return res.json({ success: true, token, user: { email, role: 'admin' } });
         }
       } else {
@@ -755,6 +755,143 @@ app.post('/api/admin/2fa/verify', validate2FAVerification, async (req, res) => {
   } catch (err) {
     logger.error('2FA verify error:', err);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// =============================================================================
+// TOTP (Google Authenticator) Endpoints
+// =============================================================================
+
+// In-memory TOTP secret storage (in production, use database)
+const totpSecrets = new Map();
+
+// Generate new TOTP secret
+app.post('/api/admin/totp/generate', async (req, res) => {
+  try {
+    // Generate a new TOTP secret
+    const secret = speakeasy.generateSecret({
+      name: 'PLWGCREATIVEAPPAREL Admin',
+      issuer: 'PLWGCREATIVEAPPAREL',
+      length: 32
+    });
+
+    // Store the secret (in production, store in database)
+    totpSecrets.set('admin', secret.base32);
+    
+    res.json({
+      secret: secret.base32,
+      secretKey: secret.base32,
+      qrCode: secret.otpauth_url
+    });
+  } catch (error) {
+    logger.error('TOTP generation error:', error);
+    res.status(500).json({ error: 'Failed to generate TOTP secret' });
+  }
+});
+
+// Verify TOTP code for setup
+app.post('/api/admin/totp/verify', async (req, res) => {
+  try {
+    const { secret, code } = req.body;
+    
+    if (!secret || !code) {
+      return res.status(400).json({ error: 'Secret and code required' });
+    }
+
+    // Verify the TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: secret,
+      encoding: 'base32',
+      token: code,
+      window: 2 // Allow 2 time steps (60 seconds) for clock skew
+    });
+
+    if (verified) {
+      // Mark TOTP as active
+      totpSecrets.set('admin', secret);
+      res.json({ valid: true, message: 'TOTP verified successfully' });
+    } else {
+      res.json({ valid: false, message: 'Invalid TOTP code' });
+    }
+  } catch (error) {
+    logger.error('TOTP verification error:', error);
+    res.status(500).json({ error: 'Failed to verify TOTP code' });
+  }
+});
+
+// Verify TOTP code for login
+app.post('/api/admin/totp/verify-login', async (req, res) => {
+  try {
+    const { email, password, code } = req.body;
+    
+    if (!email || !password || !code) {
+      return res.status(400).json({ error: 'Email, password, and code required' });
+    }
+
+    // First verify admin credentials
+    if (email.toLowerCase() !== process.env.ADMIN_EMAIL.toLowerCase()) {
+      return res.status(401).json({ error: 'Invalid email' });
+    }
+
+    let isValidPassword = false;
+    const activeHash = await getActiveAdminPasswordHash();
+    if (activeHash) {
+      isValidPassword = await bcrypt.compare(password, activeHash);
+    } else if (process.env.ADMIN_PASSWORD) {
+      isValidPassword = (password === process.env.ADMIN_PASSWORD);
+    }
+
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+
+    // Get stored TOTP secret
+    const storedSecret = totpSecrets.get('admin');
+    if (!storedSecret) {
+      return res.status(400).json({ error: 'TOTP not configured. Please setup Google Authenticator first.' });
+    }
+
+    // Verify TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: storedSecret,
+      encoding: 'base32',
+      token: code,
+      window: 2
+    });
+
+    if (verified) {
+      // Generate JWT token
+      const token = jwt.sign(
+        { email, role: 'admin' },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      );
+      
+      res.json({ 
+        success: true, 
+        token, 
+        user: { email, role: 'admin' } 
+      });
+    } else {
+      res.status(401).json({ error: 'Invalid TOTP code' });
+    }
+  } catch (error) {
+    logger.error('TOTP login verification error:', error);
+    res.status(500).json({ error: 'Failed to verify TOTP code' });
+  }
+});
+
+// Get TOTP status
+app.get('/api/admin/totp/status', async (req, res) => {
+  try {
+    const secret = totpSecrets.get('admin');
+    res.json({ 
+      active: !!secret,
+      configured: !!secret
+    });
+  } catch (error) {
+    logger.error('TOTP status error:', error);
+    res.status(500).json({ error: 'Failed to get TOTP status' });
   }
 });
 

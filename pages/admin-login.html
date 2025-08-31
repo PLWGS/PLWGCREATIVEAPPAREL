@@ -174,10 +174,10 @@
                 </button>
             </form>
 
-            <!-- 2FA Verification -->
+            <!-- TOTP Verification -->
             <div id="twoFASection" class="mt-6 hidden">
                 <label for="twoFactorCode" class="block text-sm font-medium text-text-secondary mb-2">
-                    Enter the 6-digit verification code sent to your email
+                    Enter the 6-digit code from Google Authenticator
                 </label>
                 <div class="flex space-x-3">
                     <input
@@ -191,6 +191,11 @@
                         autocomplete="one-time-code"
                     />
                     <button id="verify2FABtn" class="btn-primary px-6 py-3">Verify</button>
+                </div>
+                <div class="mt-3 text-center">
+                    <a href="admin-totp-setup.html" class="text-accent hover:text-accent-light text-sm underline">
+                        🔐 Need to setup Google Authenticator?
+                    </a>
                 </div>
             </div>
 
@@ -265,11 +270,10 @@
                     return;
                 }
 
-                // Two-factor required path
-                if (data.twoFactorRequired && data.twoFactorToken) {
-                    pendingTwoFactorToken = data.twoFactorToken;
+                // TOTP required path
+                if (data.totpRequired) {
                     twoFASection.classList.remove('hidden');
-                    showMessage('A verification code was sent to your email. Enter it below.', 'success');
+                    showMessage('Enter the 6-digit code from Google Authenticator.', 'success');
                     twoFactorCodeInput.focus();
                     return;
                 }
@@ -290,23 +294,27 @@
             }
         }
 
-        // Verify 2FA code
+        // Verify TOTP code
         async function verifyTwoFactor() {
             const code = twoFactorCodeInput.value.trim();
-            if (!pendingTwoFactorToken || code.length !== 6) {
+            if (code.length !== 6) {
                 showMessage('Enter the 6-digit code.');
                 return;
             }
             try {
                 verify2FABtn.disabled = true;
-                const response = await fetch('/api/admin/2fa/verify', {
+                const response = await fetch('/api/admin/totp/verify-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ twoFactorToken: pendingTwoFactorToken, code })
+                    body: JSON.stringify({ 
+                        email: emailInput.value.trim(),
+                        password: passwordInput.value,
+                        code: code 
+                    })
                 });
                 const data = await response.json();
                 if (!response.ok) {
-                    showMessage(data.error || 'Invalid or expired code.');
+                    showMessage(data.error || 'Invalid code.');
                     verify2FABtn.disabled = false;
                     return;
                 }
@@ -315,7 +323,7 @@
                 showMessage('Verification successful! Redirecting...', 'success');
                 setTimeout(() => { window.location.href = 'admin.html'; }, 800);
             } catch (err) {
-                console.error('2FA verify error:', err);
+                console.error('TOTP verify error:', err);
                 showMessage('Network error during verification.');
                 verify2FABtn.disabled = false;
             }

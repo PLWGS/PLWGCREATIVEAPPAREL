@@ -756,6 +756,9 @@
             // Image upload handling
             setupImageUpload();
             
+            // Remove any duplicate colors first
+            removeDuplicateColorOptions();
+            
             // Color and size selection
             setupColorSelection();
             setupSizeSelection();
@@ -1012,6 +1015,9 @@
         }
 
         function setupColorSelection() {
+            // First, ensure no duplicate color options exist
+            removeDuplicateColorOptions();
+            
             document.querySelectorAll('.color-option').forEach(option => {
                 option.addEventListener('click', () => {
                     const color = option.dataset.color;
@@ -1023,6 +1029,47 @@
                         selectedColors.push(color);
                     }
                 });
+            });
+        }
+
+        // Function to remove duplicate color options
+        function removeDuplicateColorOptions() {
+            console.log('🔍 Checking for duplicate color options...');
+            const colorOptions = document.querySelectorAll('.color-option');
+            console.log(`📊 Found ${colorOptions.length} total color options`);
+            
+            const seenColors = new Set();
+            const duplicates = [];
+            
+            colorOptions.forEach((option, index) => {
+                const color = option.dataset.color;
+                console.log(`  ${index + 1}. Color: "${color}"`);
+                if (seenColors.has(color)) {
+                    duplicates.push(option);
+                    console.log(`    ❌ DUPLICATE FOUND: "${color}"`);
+                } else {
+                    seenColors.add(color);
+                    console.log(`    ✅ New color: "${color}"`);
+                }
+            });
+            
+            // Remove duplicate elements
+            duplicates.forEach(duplicate => {
+                console.log(`🗑️ Removing duplicate: "${duplicate.dataset.color}"`);
+                duplicate.remove();
+            });
+            
+            if (duplicates.length > 0) {
+                console.log(`🧹 Removed ${duplicates.length} duplicate color options`);
+            } else {
+                console.log(`✅ No duplicate color options found`);
+            }
+            
+            // Log final state
+            const finalColorOptions = document.querySelectorAll('.color-option');
+            console.log(`📊 Final color options count: ${finalColorOptions.length}`);
+            finalColorOptions.forEach((option, index) => {
+                console.log(`  ${index + 1}. Final color: "${option.dataset.color}"`);
             });
         }
 
