@@ -1295,24 +1295,17 @@
         // Load custom requests and orders with custom input
         async function loadCustomRequests() {
             try {
-                console.log('🔍 Loading custom requests...');
-                console.log('🔍 Starting loadCustomRequests function...');
-                
                 // Load both custom requests and orders with custom input
                 const [customRequestsResponse, customOrdersResponse] = await Promise.all([
                     apiRequest('/api/custom-requests?limit=3'),
                     apiRequest('/api/orders/custom-input?limit=3')
                 ]);
                 
-                console.log('🔍 Custom requests response:', customRequestsResponse);
-                console.log('🔍 Custom orders response:', customOrdersResponse);
-                
                 let allRequests = [];
                 
                 // Add custom requests
                 if (customRequestsResponse && customRequestsResponse.ok) {
                     const customData = await customRequestsResponse.json();
-                    console.log('🔍 Custom requests data:', customData);
                     // Filter out completed custom requests
                     const activeCustomRequests = (customData.requests || []).filter(request => request.status !== 'completed');
                     allRequests = allRequests.concat(activeCustomRequests);
@@ -1321,7 +1314,6 @@
                 // Add orders with custom input
                 if (customOrdersResponse && customOrdersResponse.ok) {
                     const ordersData = await customOrdersResponse.json();
-                    console.log('🔍 Orders with custom input data:', ordersData);
                     const customOrders = (ordersData.orders || [])
                         .filter(order => order.order_status !== 'completed') // Filter out completed orders
                         .map(order => ({
@@ -1341,49 +1333,32 @@
                     allRequests = allRequests.concat(customOrders);
                 }
                 
-                console.log('🔍 All requests combined:', allRequests);
-                
                 // Sort by creation date (newest first)
                 allRequests.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 
                 // Take the first 5
                 allRequests = allRequests.slice(0, 5);
                 
-                console.log('🔍 About to call updateCustomRequests with:', allRequests);
                 updateCustomRequests(allRequests);
-                console.log('🔍 updateCustomRequests completed');
             } catch (error) {
-                console.error('❌ Error loading custom requests:', error);
-                console.error('❌ Full error details:', error);
+                console.error('Error loading custom requests:', error);
             }
         }
 
         // Update custom requests
         function updateCustomRequests(requests) {
-            console.log('🔍 updateCustomRequests called with:', requests);
-            console.log('🔍 requests length:', requests ? requests.length : 'null');
-            
             const container = document.getElementById('customRequestsContainer');
             const loading = document.getElementById('customRequestsLoading');
             const empty = document.getElementById('customRequestsEmpty');
             
-            console.log('🔍 Container elements found:', {
-                container: !!container,
-                loading: !!loading,
-                empty: !!empty
-            });
-            
             if (!container) {
-                console.error('❌ Container not found!');
+                console.error('Container not found!');
                 return;
             }
             
             // Hide loading
             if (loading) {
-                console.log('🔍 Hiding loading state');
                 loading.classList.add('hidden');
-            } else {
-                console.log('❌ Loading element not found');
             }
             
             if (!requests || requests.length === 0) {
