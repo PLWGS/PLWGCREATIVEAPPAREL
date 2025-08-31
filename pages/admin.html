@@ -843,8 +843,6 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    console.log('📊 Dashboard data loaded:', data);
-                    console.log('📊 Top products raw data:', JSON.stringify(data.topProducts, null, 2));
                     updateMetrics(data.sales);
                     updateTopProducts(data.topProducts);
                     updateLowStockAlerts(data.lowStock);
@@ -964,7 +962,6 @@
 
         // Force refresh top products
         function forceRefreshTopProducts() {
-            console.log('🔄 Force refreshing top products...');
             // Clear the container and show loading
             const topProductsContainer = document.getElementById('topProductsContainer');
             if (topProductsContainer) {
@@ -980,30 +977,20 @@
             loadDashboardData();
         }
 
-        // Test Cloudinary image loading
-        function testCloudinaryImage(url) {
-            console.log('🧪 Testing Cloudinary image:', url);
-            const img = new Image();
-            img.onload = () => console.log('✅ Image loaded successfully:', url);
-            img.onerror = () => console.log('❌ Image failed to load:', url);
-            img.src = url;
-        }
+
 
         // Update top products
         function updateTopProducts(products) {
-            console.log('🎯 Updating top products:', products);
             const topProductsContainer = document.getElementById('topProductsContainer');
             if (!topProductsContainer) {
-                console.error('❌ Top products container not found');
+                console.error('Top products container not found');
                 return;
             }
             if (!products) {
-                console.log('⚠️ No products data provided');
                 return;
             }
             
             if (!products.length) {
-                console.log('📭 No top products for the selected period');
                 topProductsContainer.innerHTML = `
                     <div class="text-center text-text-secondary text-sm py-8">
                         <div class="w-16 h-16 mx-auto mb-4 text-gray-500">
@@ -1025,20 +1012,12 @@
                     return '';
                 }
                 
-                // Optimize Cloudinary image URL for crisp thumbnails
+                // Get image URL from product data
                 let imageUrl = product.image_url || '';
-                console.log(`🖼️ Product ${index + 1} image:`, imageUrl);
-                console.log(`🖼️ Product ${index + 1} full data:`, product);
                 
                 if (imageUrl && imageUrl.includes('cloudinary.com')) {
                     // Transform Cloudinary URL for optimal thumbnail size and quality
-                    const originalUrl = imageUrl;
                     imageUrl = imageUrl.replace('/upload/', '/upload/c_fill,g_auto,w_80,h_80,q_auto,f_auto/');
-                    console.log(`🔄 Transformed Cloudinary URL:`, originalUrl, '→', imageUrl);
-                } else if (!imageUrl) {
-                    console.warn(`⚠️ Product ${index + 1} has no image_url:`, product);
-                } else {
-                    console.warn(`⚠️ Product ${index + 1} image_url is not Cloudinary:`, imageUrl);
                 }
                 
                 // Ensure numeric values are properly handled
