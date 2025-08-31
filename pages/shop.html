@@ -2115,6 +2115,11 @@
             const colorFilter = document.getElementById('color-filter');
             const clearFiltersBtn = document.getElementById('clear-filters-btn');
             
+            // Remove duplicate color options if they exist
+            if (colorFilter) {
+                removeDuplicateColorOptions(colorFilter);
+            }
+            
             if (sizeFilter) {
                 sizeFilter.addEventListener('change', () => {
                     selectedSize = sizeFilter.value;
@@ -2152,6 +2157,37 @@
                 });
             }
         });
+        
+        // Function to remove duplicate color options from a select element
+        function removeDuplicateColorOptions(colorFilter) {
+            console.log('🔍 Checking for duplicate color options in shop page...');
+            const options = Array.from(colorFilter.options);
+            const seenColors = new Set();
+            const duplicates = [];
+            
+            options.forEach((option, index) => {
+                const color = option.value;
+                if (color && seenColors.has(color)) {
+                    duplicates.push(option);
+                    console.log(`    ❌ DUPLICATE FOUND: "${color}"`);
+                } else if (color) {
+                    seenColors.add(color);
+                    console.log(`    ✅ Color: "${color}"`);
+                }
+            });
+            
+            // Remove duplicate elements
+            duplicates.forEach(duplicate => {
+                console.log(`🗑️ Removing duplicate: "${duplicate.value}"`);
+                duplicate.remove();
+            });
+            
+            if (duplicates.length > 0) {
+                console.log(`🧹 Removed ${duplicates.length} duplicate color options`);
+            } else {
+                console.log(`✅ No duplicate color options found`);
+            }
+        }
         
         // Function to apply all filters (category, size, color)
         async function applyAllFilters() {

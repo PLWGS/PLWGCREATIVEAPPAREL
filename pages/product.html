@@ -2116,7 +2116,12 @@
                         // Clear existing options and add new ones
                         colorSelector.innerHTML = '<option value="">Select a color...</option>';
                         
-                        productColors.forEach((color, idx) => {
+                        // Remove duplicates from productColors before creating options
+                        const uniqueColors = [...new Set(productColors)];
+                        console.log('🎨 Original colors:', productColors);
+                        console.log('🎨 Unique colors:', uniqueColors);
+                        
+                        uniqueColors.forEach((color, idx) => {
                             const option = document.createElement('option');
                             option.value = String(color).replace(/"/g,'&quot;');
                             option.textContent = color;
