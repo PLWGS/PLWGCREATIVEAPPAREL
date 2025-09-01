@@ -377,6 +377,93 @@ Welcome to your new PLWG CREATIVE APPAREL platform! This section will guide you 
    - Production costs are higher
    - Market standard for extended sizes
 
+#### Step 6: Configure Size Chart (NEW FEATURE!)
+
+##### Size Chart System Overview
+The size chart system allows you to provide detailed size measurements to customers, helping them choose the right size for their apparel. This builds trust and reduces returns.
+
+**Size Chart Features:**
+- **Professional Display**: Size charts appear in a dedicated "Size Guide & Care Instructions" tab on product pages
+- **Garment Type Presets**: Quick setup for Adult/Kids T-shirts and Hoodies
+- **Custom Measurements**: Manual input for unique garment types
+- **5 Size Options**: S, M, L, XL, 2XL with chest width and length measurements
+
+##### How to Set Up Size Charts
+
+**For New Products (Admin Uploads):**
+1. **Scroll to "Size Chart (inches)" section** in the upload form
+2. **Select Garment Type** from dropdown:
+   - **Adult Unisex T-Shirt (Default)**: Standard measurements
+   - **Adult Hoodie**: Slightly larger for layering
+   - **Kids T-Shirt**: Smaller measurements for children
+   - **Kids Hoodie**: Youth hoodie sizing
+   - **Custom (Manual Input)**: Enter your own measurements
+
+3. **Auto-Fill or Manual Entry**:
+   - **Preset Selection**: Measurements auto-populate when you select a garment type
+   - **Manual Adjustments**: Edit any measurement as needed
+   - **Chest Width**: Measured across the chest (inches)
+   - **Length**: Measured from shoulder to bottom hem (inches)
+
+4. **Example Adult T-Shirt Measurements**:
+   ```
+   Size S:  Chest 18" × Length 28"
+   Size M:  Chest 20" × Length 29"
+   Size L:  Chest 22" × Length 30"
+   Size XL: Chest 24" × Length 31"
+   Size 2XL: Chest 26" × Length 32"
+   ```
+
+**For Existing Products (Product Editor):**
+1. **Navigate to Product Editor**: Use the generic edit page or individual product pages
+2. **Find "Size Chart (inches)" section**: Located in the product details area
+3. **Update Measurements**: Modify existing measurements or change garment type
+4. **Save Changes**: Size chart updates immediately for customers
+
+##### Size Chart Display for Customers
+
+**How Customers See Your Size Chart:**
+1. **Product Page**: Customers visit any product page
+2. **Size Guide Tab**: Click "Size Guide & Care Instructions" tab
+3. **Professional Table**: Clean table showing all your measurements
+4. **Easy Comparison**: Customers can compare sizes side-by-side
+
+**Customer Experience:**
+- ✅ **Trust Building**: Professional measurements increase confidence
+- ✅ **Return Reduction**: Better size selection reduces returns
+- ✅ **User-Friendly**: Easy-to-read table format
+- ✅ **Mobile Responsive**: Works perfectly on phones and tablets
+
+##### Size Chart Best Practices
+
+**Measurement Accuracy:**
+- **Use Real Garments**: Measure actual products you sell
+- **Consistent Units**: Always use inches for consistency
+- **Body Measurements**: Consider how garments fit on the body
+- **Fabric Stretch**: Account for fabric type and stretch
+
+**Customer Communication:**
+- **Clear Labels**: Use standard size names (S, M, L, XL, 2XL)
+- **Measurement Context**: Explain if measurements are garment or body measurements
+- **Fit Information**: Include notes about fit (slim, relaxed, oversized)
+
+**Maintenance:**
+- **Regular Updates**: Update measurements as you source new garments
+- **Quality Control**: Double-check measurements before publishing
+- **Customer Feedback**: Monitor returns and adjust sizing as needed
+
+##### Size Chart Troubleshooting
+
+**Common Issues:**
+- **"Size chart not showing"**: Check that measurements are saved and page is refreshed
+- **"Wrong measurements"**: Verify garment type selection and manual edits
+- **"Table looks wrong"**: Ensure all 5 sizes have both chest and length values
+
+**Quick Fixes:**
+- **Reset to Preset**: Select a garment type preset to auto-fill measurements
+- **Manual Entry**: Enter measurements directly in the input fields
+- **Save and Refresh**: Always save changes and refresh the customer page to verify
+
 #### Step 6: Test Your Setup
 
 ##### Customer Experience Testing

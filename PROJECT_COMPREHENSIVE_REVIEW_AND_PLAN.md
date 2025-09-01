@@ -1,12 +1,12 @@
 # PLWG CREATIVE APPAREL - COMPREHENSIVE PROJECT REVIEW AND PLAN
 
-## Version: v4.0
-## Status: PRODUCTION READY WITH COMPLETE CUSTOM INPUT SYSTEM, ENHANCED ADMIN DASHBOARD, DYNAMIC SHIPPING COST SYSTEM, AND CUSTOMER SHIPPING CHOICE
+## Version: v4.1
+## Status: PRODUCTION READY WITH COMPLETE SIZE CHART SYSTEM, CUSTOM INPUT SYSTEM, ENHANCED ADMIN DASHBOARD, AND DYNAMIC SHIPPING COST SYSTEM
 
-**Date:** January 27, 2025
-**Author:** Jules, AI Software Engineer
-**Last Updated:** January 27, 2025 (Major Update: Dynamic Shipping Cost System with Customer Choice Implementation)
-**Current Version:** v4.0 - Complete Custom Input System with Dynamic Shipping Costs and Customer Shipping Method Selection
+**Date:** September 2, 2025
+**Author:** Grok, AI Software Engineer
+**Last Updated:** September 2, 2025 (Major Update: Complete Size Chart Implementation with Dynamic Presets)
+**Current Version:** v4.1 - Complete Size Chart System with Custom Input, Dynamic Shipping Costs, and Customer Shipping Method Selection
 
 ## 1. Project Overview
 
@@ -44,6 +44,7 @@ The backend is a monolithic Node.js application built with Express. It handles:
 
 The application uses a PostgreSQL database with a comprehensive schema to store all data, including:
 -   Products with size-based pricing (JSONB column)
+-   **Products with size chart data (chest width, length measurements with garment type presets)**
 -   **Products with custom input configuration (birthday and lyrics customization)**
 -   **Products with dynamic shipping costs and local pickup options**
 -   Customers
@@ -69,6 +70,42 @@ The frontend consists of a collection of HTML, CSS, and JavaScript files. The pa
 -   Size-based pricing display with dynamic updates
 -   **Professional custom input forms for customer customization requests**
 
+## 2.5 Size Chart System
+
+### Overview
+The application now includes a complete size chart system that allows administrators to set custom size measurements for each product and display them to customers in a professional format.
+
+### Features
+- **Dynamic Size Chart Editor**: Admin can set chest width and length measurements for S, M, L, XL, 2XL sizes
+- **Garment Type Presets**: Pre-configured measurements for Adult T-Shirt, Adult Hoodie, Kids T-Shirt, Kids Hoodie
+- **Custom Measurements**: Manual input option for unique garment types
+- **Customer Display**: Size charts appear in "Size Guide & Care Instructions" tab on product pages
+- **Data Persistence**: Size chart data is stored in the products table and persists across edits
+
+### Technical Implementation
+- **Database Storage**: Size chart data stored as JSONB in the `size_chart` column of the products table
+- **Data Format**:
+  ```json
+  {
+    "garmentType": "adult-tshirt",
+    "sizes": {
+      "S": {"chest": "18", "length": "28"},
+      "M": {"chest": "20", "length": "29"},
+      "L": {"chest": "22", "length": "30"},
+      "XL": {"chest": "24", "length": "31"},
+      "2XL": {"chest": "26", "length": "32"}
+    }
+  }
+  ```
+- **Admin Interface**: Available in `admin-uploads.html` for new products and `product-edit.html` for existing products
+- **Customer Display**: Automatic rendering in product detail pages with professional table formatting
+
+### Integration Points
+- **admin-uploads.html**: Size chart section for new product creation
+- **product-edit.html**: Size chart editing for existing products
+- **product.html**: Size chart display in customer-facing product pages
+- **Database**: `products.size_chart` JSONB column
+
 ## 3. Functionality Status Matrix
 
 This matrix provides a verified status of each major feature, based on direct testing of the running application.
@@ -85,6 +122,7 @@ This matrix provides a verified status of each major feature, based on direct te
 | **Image Handling**         | ✅ **Working** | The application correctly uploads images to Cloudinary. While original images may be large, Cloudinary's URL-based transformations are used to serve optimized images. |
 | **Input Validation**       | ✅ **Working** | Comprehensive input validation implemented across 20+ API endpoints using express-validator middleware for security and data integrity. |
 | **Size-Based Pricing**     | ✅ **Working** | Complete size-based pricing system implemented and tested. Products display different prices based on size selection: XXL/2X = +$4.00, 3X/XXXL = +$6.00, 4X/XXXXL = +$8.00. Pricing updates dynamically on product page and correctly reflects in cart. |
+| **Size Chart System**      | ✅ **Working** | Complete size chart system with dynamic presets for Adult/Kids T-shirts & Hoodies. Admin can set custom chest/length measurements that display to customers in professional table format on product pages. |
 | **Frontend Enhancements**  | ✅ **Working** | Enhanced UI/UX with loading states, toast notifications, form validation, responsive design, and mobile menu improvements. |
 | **Category Management System** | ✅ **Working** | Complete admin category management system with CRUD operations, dynamic filtering, and real-time updates across all pages. |
 | **Dynamic Category Filtering** | ✅ **Working** | Shop page features fully functional category filtering with dynamic counts, multiple selection, and real-time product updates. |
