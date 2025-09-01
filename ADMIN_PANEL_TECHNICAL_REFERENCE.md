@@ -176,6 +176,53 @@ The Order Management section uses a sophisticated Kanban board system with four 
 - **Budget Tracking**: Estimated costs and budget ranges
 - **Action Buttons**: Start Processing, Send Quote, Update Status
 
+## **🎯 Custom Input System Management**
+
+### **Overview**
+The Custom Input System allows customers to provide specific customization details for birthday and music-themed shirts. This system includes optional custom question fields and automatic email notifications.
+
+### **Custom Input Features**
+- **Two Input Types**: Birthday customization and Lyrics customization
+- **🎯 Custom Questions**: Optional custom question fields per product
+- **📧 Email Notifications**: Automatic emails for orders with custom inputs
+- **👁️ Enhanced Visibility**: Readable display in admin dashboard
+- **📱 Professional Forms**: Clean, highlighted custom question sections
+
+### **Admin Configuration**
+1. **Enable Custom Inputs**: Toggle birthday/lyrics options per product
+2. **Field Configuration**: Set required/optional fields with custom labels
+3. **Character Limits**: Configure limits (50-1000 characters)
+4. **🎯 Custom Questions**: Add optional questions (500 char max)
+5. **Save Settings**: Configuration persists in database
+
+### **Customer Experience**
+- **Prominent Display**: Custom input forms above "Add to Cart" button
+- **Professional Styling**: Clean forms with proper validation
+- **🎯 Custom Questions**: Highlighted sections for admin questions
+- **Real-time Validation**: Immediate feedback on input requirements
+
+### **Admin Dashboard Integration**
+- **Custom Orders Section**: Real-time display of orders with custom inputs
+- **Readable Format**: No more raw JSON - actual customer responses displayed
+- **🎯 Question Highlights**: Custom questions prominently featured
+- **One-Click Access**: Direct links to detailed order information
+
+### **Email Notification System**
+- **Automatic Triggers**: Emails sent for orders with custom inputs
+- **Professional Templates**: HTML emails with custom question highlights
+- **Complete Details**: All customer information, size, color, custom responses
+- **Direct Links**: Clickable links to view orders in admin dashboard
+
+### **Database Schema**
+- **Products Table**: Custom input configuration fields
+- **Order Items Table**: Custom input data (JSONB column)
+- **Email Integration**: SMTP configuration for notifications
+
+### **API Endpoints**
+- **`/api/orders/custom-input`**: Retrieves orders with custom input data
+- **`/api/orders/:id`**: Detailed order information with custom inputs
+- **Email Integration**: Automatic notifications on order creation
+
 ---
 
 ## **📧 Newsletter Subscription Management**

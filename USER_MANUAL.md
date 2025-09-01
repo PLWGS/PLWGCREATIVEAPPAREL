@@ -1015,6 +1015,24 @@ The dashboard opens with four critical business metrics displayed in beautiful g
 
 **Business Value**: Manage high-value custom projects professionally
 
+##### Custom Input System
+**Function**: Handle orders with custom personalization (birthday/lyrics shirts)
+**Features**:
+- **🎯 Custom Questions**: Add your own questions per product
+- **📧 Email Notifications**: Instant alerts for custom orders
+- **👁️ Enhanced Visibility**: Readable display in admin dashboard
+- **📱 Professional Forms**: Highlighted custom question sections
+- **📋 Complete Order Details**: Size, color, and custom responses
+
+**Business Value**: Never miss custom order details with automatic notifications and enhanced visibility
+
+**How to Use**:
+1. **Enable Custom Inputs**: In product edit, toggle birthday/lyrics options
+2. **Add Custom Questions**: Type your own questions (optional, 500 char max)
+3. **Monitor Dashboard**: Custom orders appear in "Custom Orders" section
+4. **Receive Emails**: Automatic notifications for orders with custom inputs
+5. **View Details**: Click order cards for complete information including custom responses
+
 ##### Customers Section
 **Function**: Customer database and relationship management
 **Features**:

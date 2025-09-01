@@ -13,6 +13,20 @@ We've implemented a **comprehensive custom input system** that allows you to giv
 
 **🎉 GREAT NEWS: The system is now 100% complete and fully functional! All customer custom requests are properly saved and visible in your admin dashboard.**
 
+## 🚀 LATEST ENHANCEMENT: Custom Question Fields (v4.0) ✅
+
+### What's New in v4.0
+- **🎯 Optional Custom Question Fields**: Add your own custom questions for both birthday and lyrics customizations
+- **📧 Automatic Email Notifications**: Instant emails sent to admin for orders with custom inputs
+- **👁️ Enhanced Admin Visibility**: Custom questions prominently displayed in admin dashboard and order details
+- **📱 Seamless Customer Experience**: Custom questions appear alongside standard fields with professional styling
+
+### Custom Question Features
+- **Per-Product Control**: Enable custom questions individually for each product
+- **Flexible Content**: Ask anything you want (themes, styles, preferences, etc.)
+- **Character Limits**: Configurable limits (500 characters max)
+- **Professional Display**: Questions appear in highlighted sections with clear labeling
+
 ---
 
 ## 🚀 Key Benefits
@@ -57,6 +71,8 @@ We've implemented a **comprehensive custom input system** that allows you to giv
   - Name
   - Additional Information
 - **Custom Labels**: Write your own field descriptions
+- **🎯 Custom Question**: Add your own question (optional, 500 char max)
+- **Example**: "What theme would you like for the birthday design?"
 
 ### Lyrics Custom Input
 - **Required/Optional**: Make fields mandatory or optional
@@ -66,6 +82,8 @@ We've implemented a **comprehensive custom input system** that allows you to giv
   - Song Name
   - Song Lyrics (Optional)
 - **Custom Labels**: Write your own field descriptions
+- **🎯 Custom Question**: Add your own question (optional, 500 char max)
+- **Example**: "What style would you like for the song lyrics design?"
 
 ---
 
@@ -78,13 +96,16 @@ When a product has custom inputs enabled, customers will see:
 2. **Professional form fields** with your custom labels
 3. **Character counters** showing limits
 4. **Required field indicators** (*) if you've set fields as mandatory
+5. **🎯 Custom Question Section** (if you've added a custom question) with highlighted styling and clear labeling
 
 ### How It Works
 1. Customer selects size/color as usual
-2. Fills out custom input fields (if required)
-3. Adds to cart or buys now
-4. **✅ Custom input data is automatically saved with their order**
-5. **✅ You can see their custom request in the admin dashboard immediately**
+2. Fills out standard custom input fields (if required)
+3. **Fills out your custom question** (if you've added one) in a dedicated textarea
+4. Adds to cart or buys now
+5. **✅ Custom input data is automatically saved with their order**
+6. **✅ You receive an instant email notification** with all custom request details
+7. **✅ You can see their custom request in the admin dashboard immediately**
 
 ---
 
@@ -108,6 +129,9 @@ All custom input data is stored as structured JSON, making it easy to:
 
 ### Database Updates
 - ✅ **Added new columns** to `products` table for custom input configuration
+- ✅ **Added custom question columns** to `products` table:
+  - `custom_birthday_question` TEXT
+  - `custom_lyrics_question` TEXT
 - ✅ **Added `custom_input` column** to cart tables for storing customer data
 - ✅ **Added `custom_input` column** to order_items table for order persistence
 - ✅ **Created performance indexes** for fast data retrieval
@@ -115,9 +139,16 @@ All custom input data is stored as structured JSON, making it easy to:
 ### API Enhancements
 - ✅ **Updated product creation/editing endpoints**
 - ✅ **Modified cart API** to handle custom input data
-- ✅ **Added validation** for all custom input fields
+- ✅ **Added validation** for all custom input fields including custom questions
 - ✅ **Fixed checkout process** to transfer custom input data from cart to orders
 - ✅ **New API endpoint** `/api/orders/custom-input` for admin dashboard
+- ✅ **Email notification system** integrated with order creation
+
+### Email System Integration
+- ✅ **Automatic email notifications** for orders with custom inputs
+- ✅ **Professional HTML email templates** with custom question highlights
+- ✅ **SMTP configuration** for reliable email delivery
+- ✅ **Admin email address configuration** via environment variables
 
 ### Frontend Features
 - ✅ **Dynamic form generation** based on your configuration
@@ -133,15 +164,23 @@ All custom input data is stored as structured JSON, making it easy to:
 **Product**: "Happy Birthday" T-Shirt
 **Custom Input Enabled**: Birthday Custom Input
 **Fields**: Birthdate (required), Name (required), Additional Info (optional)
-**Customer Input**: "12/25/1990", "John Smith", "Add 'Happy 34th Birthday!'"
+**🎯 Custom Question**: "What theme would you like for the birthday design?"
+**Customer Input**:
+- Standard: "12/25/1990", "John Smith", "Add 'Happy 34th Birthday!'"
+- Custom Question: "I'd like a space theme with stars and rockets"
 **✅ Result**: Custom request visible in admin dashboard with complete order details
+**📧 Email**: Instant notification sent to admin with all details highlighted
 
 ### Music Shirt Example
 **Product**: "Pink Floyd" T-Shirt
 **Custom Input Enabled**: Lyrics Custom Input
 **Fields**: Artist (required), Song (required), Lyrics (optional)
-**Customer Input**: "Pink Floyd", "Comfortably Numb", "Add first verse lyrics"
+**🎯 Custom Question**: "What style would you like for the song lyrics design?"
+**Customer Input**:
+- Standard: "Pink Floyd", "Comfortably Numb", "Add first verse lyrics"
+- Custom Question: "I'd like a vintage, distressed look with faded colors"
 **✅ Result**: Custom request visible in admin dashboard with complete order details
+**📧 Email**: Instant notification sent to admin with all details highlighted
 
 ---
 
@@ -189,6 +228,14 @@ All custom input data is stored as structured JSON, making it easy to:
 - **✅ Custom Requests Section**: **REAL-TIME DISPLAY** of actual customer requests
 - **✅ Search & Filter**: Find orders with specific custom input types
 - **✅ Complete Data Flow**: See custom requests from initial input to final order
+- **✅ Detailed Order Modal**: Click any order for complete information including custom questions
+- **✅ Readable Custom Input Display**: No more raw JSON - see actual customer responses
+
+### Email Notifications
+- **📧 Instant Email Alerts**: Automatic emails sent to admin for orders with custom inputs
+- **🎯 Custom Question Highlights**: Your custom questions prominently featured in emails
+- **📋 Complete Order Details**: All customer information, size, color, and custom responses
+- **🔗 Direct Dashboard Links**: Click links to view orders directly in admin dashboard
 
 ### Data Export
 - **✅ Export orders** with custom input data
@@ -268,17 +315,20 @@ All custom input data is stored as structured JSON, making it easy to:
 
 You now have a **professional-grade custom input system** that:
 
-✅ **Gives you full control** over which products get custom input options  
-✅ **Provides flexibility** in field configuration and requirements  
-✅ **Offers professional appearance** that matches your brand  
-✅ **Integrates seamlessly** with existing cart and checkout  
-✅ **Stores data efficiently** for easy management  
-✅ **Scales with your business** as you add more products  
-✅ **✅ COMPLETE DATA PERSISTENCE** from cart to orders  
-✅ **✅ REAL-TIME ADMIN DASHBOARD** showing actual customer requests  
-✅ **✅ PROFESSIONAL WORKFLOW** from customer input to order fulfillment  
+✅ **Gives you full control** over which products get custom input options
+✅ **Provides flexibility** in field configuration and requirements
+✅ **Offers professional appearance** that matches your brand
+✅ **Integrates seamlessly** with existing cart and checkout
+✅ **Stores data efficiently** for easy management
+✅ **Scales with your business** as you add more products
+✅ **✅ COMPLETE DATA PERSISTENCE** from cart to orders
+✅ **✅ REAL-TIME ADMIN DASHBOARD** showing actual customer requests
+✅ **✅ PROFESSIONAL WORKFLOW** from customer input to order fulfillment
+✅ **🎯 CUSTOM QUESTION SUPPORT** - Add your own questions per product
+✅ **📧 AUTOMATIC EMAIL NOTIFICATIONS** - Instant alerts for custom orders
+✅ **👁️ ENHANCED VISIBILITY** - Custom questions prominently displayed everywhere
 
-**🎉 The system is now 100% complete and fully functional! All customer custom requests are properly saved, transferred to orders during checkout, and visible in your admin dashboard in real-time.**
+**🎉 The system is now 100% complete and fully functional! All customer custom requests are properly saved, transferred to orders during checkout, and visible in your admin dashboard in real-time. You also receive instant email notifications for orders with custom inputs, ensuring you never miss a customer's special requests.**
 
 ---
 

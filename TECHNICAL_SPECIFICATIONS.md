@@ -191,6 +191,43 @@ GET /api/recommendations/public - Public recommendations
 - **CORS Configuration**: Controlled cross-origin access
 - **Rate Limiting**: API abuse prevention
 
+### Custom Input System API
+```javascript
+// Custom input data retrieval
+GET /api/orders/custom-input - Get orders with custom input data
+GET /api/orders/:id - Get detailed order information with custom inputs
+
+// Email notification system
+POST /api/orders - Automatic email notifications for custom orders
+```
+
+#### Custom Input Database Schema
+```sql
+-- Products table custom input configuration
+custom_birthday_enabled BOOLEAN DEFAULT false
+custom_birthday_required BOOLEAN DEFAULT false
+custom_birthday_fields JSONB
+custom_birthday_labels JSONB
+custom_birthday_char_limit INTEGER DEFAULT 250
+custom_birthday_question TEXT -- NEW: Custom question field
+
+custom_lyrics_enabled BOOLEAN DEFAULT false
+custom_lyrics_required BOOLEAN DEFAULT false
+custom_lyrics_fields JSONB
+custom_lyrics_labels JSONB
+custom_lyrics_char_limit INTEGER DEFAULT 250
+custom_lyrics_question TEXT -- NEW: Custom question field
+
+-- Order items table custom input data
+custom_input JSONB -- Stores customer responses including custom questions
+```
+
+#### Email Notification System
+- **SMTP Configuration**: Environment-based email service setup
+- **Automatic Triggers**: Emails sent on orders with custom inputs
+- **Professional Templates**: HTML email templates with custom question highlights
+- **Admin Email**: Configurable admin email address via `ADMIN_EMAIL` environment variable
+
 ## Frontend Architecture
 
 ### Page Structure
