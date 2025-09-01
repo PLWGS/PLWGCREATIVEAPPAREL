@@ -675,8 +675,8 @@ app.post('/api/admin/login',
       logger.info('🔐 Password check result:', isValidPassword);
       
       if (isValidPassword) {
-        // TOTP gate (Google Authenticator) enabled by default unless disabled
-        const totpEnabled = (process.env.ADMIN_2FA_ENABLED || 'true') !== 'false';
+        // TOTP gate (Google Authenticator)
+        const totpEnabled = process.env.ADMIN_2FA_ENABLED === 'true';
         if (totpEnabled) {
           // Check if TOTP is configured
           const totpSecret = totpSecrets.get('admin');
