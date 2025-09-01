@@ -888,13 +888,14 @@
            custom_lyrics_labels: body.custom_lyrics_labels
          });
          
-         console.log('🚀 Sending request body:', body);
-         console.log('🔍 Specifications being sent:', body.specifications);
-         console.log('🔍 Image URLs being sent:', {
-           image_url: body.image_url,
-           sub_images: body.sub_images,
-           uploadedImages: uploadedImages
-         });
+                 console.log('🚀 Sending request body:', body);
+        console.log('🔍 Specifications being sent:', body.specifications);
+        console.log('🔍 Size chart being sent:', body.size_chart);
+        console.log('🔍 Image URLs being sent:', {
+          image_url: body.image_url,
+          sub_images: body.sub_images,
+          uploadedImages: uploadedImages
+        });
          
          const resp = await fetch(`/api/admin/products/${productId}`, {
            method:'PUT',

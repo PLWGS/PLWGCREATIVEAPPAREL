@@ -2168,9 +2168,15 @@
             } catch (e) { console.warn('Brand/specs notes render failed', e); }
             
             // Update size chart dynamically
+            console.log('🔍 Raw product.size_chart:', product.size_chart);
+            console.log('🔍 product.size_chart type:', typeof product.size_chart);
+            console.log('🔍 product.size_chart truthy check:', !!product.size_chart);
+
             if (product.size_chart) {
+                console.log('✅ Using product size chart data');
                 updateSizeChart(product.size_chart);
             } else {
+                console.log('⚠️ No size chart data found, using defaults');
                 // Use default adult t-shirt measurements if no size chart is provided
                 const defaultSizeChart = {
                     S: { chest: '18', length: '28' },
