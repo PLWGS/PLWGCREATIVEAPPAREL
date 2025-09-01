@@ -215,6 +215,9 @@ function checkDatabase() {
   if (!pool) {
     return { available: false, error: 'Database not configured' };
   }
+  if (!databaseAvailable) {
+    return { available: false, error: 'Database connection failed' };
+  }
   return { available: true };
 }
 
@@ -682,21 +685,7 @@ app.post('/api/admin/login',
         // TOTP gate (Google Authenticator) enabled by default unless disabled
         const totpEnabled = (process.env.ADMIN_2FA_ENABLED || 'true') !== 'false';
         
-        // Database connection check for fallback mode
-        if (!databaseAvailable) {
-          logger.warn('⚠️ Database unavailable - using emergency fallback authentication');
-          const token = jwt.sign(
-            { email, role: 'admin', fallback: true },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-          );
-          return res.json({ 
-            success: true, 
-            token, 
-            user: { email, role: 'admin' },
-            warning: 'Database unavailable - limited functionality'
-          });
-        }
+        // REMOVED: Emergency fallback - forcing proper TOTP authentication
         
         if (totpEnabled) {
           // Check if TOTP is configured
