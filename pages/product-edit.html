@@ -591,6 +591,13 @@
       const contentElement = document.getElementById(contentId);
       const imageSrc = imageSlots[slotName];
 
+      console.log(`🔍 Rendering ${slotName}:`, {
+        hasImage: !!imageSrc,
+        url: imageSrc,
+        startsWithHttp: imageSrc && imageSrc.startsWith('http'),
+        startsWithData: imageSrc && imageSrc.startsWith('data:')
+      });
+
       if (imageSrc) {
         // Show image with remove button
         contentElement.innerHTML = `
@@ -824,13 +831,27 @@
 
       // Load main image
       if (p.image_url) {
+        console.log('🔍 Loading main image:', {
+          url: p.image_url,
+          type: typeof p.image_url,
+          startsWithHttp: p.image_url.startsWith('http'),
+          startsWithData: p.image_url.startsWith('data:'),
+          length: p.image_url.length
+        });
         imageSlots.main = p.image_url;
       }
 
       // Load thumbnail images
       if (Array.isArray(p.sub_images)) {
+        console.log('🔍 Loading sub_images array:', p.sub_images.length, 'images');
         p.sub_images.forEach((img, index) => {
           if (index < 4 && img) { // Only load up to 4 thumbnails
+            console.log(`🔍 Loading thumbnail ${index + 1}:`, {
+              url: img,
+              type: typeof img,
+              startsWithHttp: img.startsWith('http'),
+              startsWithData: img.startsWith('data:')
+            });
             const slotName = `thumb${index + 1}`;
             imageSlots[slotName] = img;
           }
@@ -1100,7 +1121,15 @@
           image_url: body.image_url,
           sub_images: body.sub_images,
           imageSlots: imageSlots,
-          imageArray: imageArray
+          imageArray: imageArray,
+          hasBase64: hasBase64,
+          imageArrayTypes: imageArray.map((img, i) => ({
+            index: i,
+            type: typeof img,
+            startsWithData: img && typeof img === 'string' && img.startsWith('data:'),
+            startsWithHttp: img && typeof img === 'string' && img.startsWith('http'),
+            length: img ? img.length : 0
+          }))
         });
          
          const resp = await fetch(`/api/admin/products/${productId}`, {
