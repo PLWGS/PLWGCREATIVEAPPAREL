@@ -255,12 +255,16 @@
         // Login function
         async function handleLogin(email, password) {
             try {
+                console.log('🔍 DEBUG: Login attempt with:', { email, password: password ? '[HIDDEN]' : 'undefined' });
+                const loginData = { email, password };
+                console.log('🔍 DEBUG: JSON to send:', JSON.stringify(loginData));
+                
                 const response = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify(loginData)
                 });
 
                 const data = await response.json();

@@ -106,11 +106,11 @@
         let currentSecretKey = '';
 
         // Generate new TOTP secret
-        document.getElementById('generateSecret').addEventListener('click', async () => {
+        document.getElementById('generateSecret').addEventListener('click', async (event) => {
+            const button = event.target;
+            const originalText = button.textContent;
             try {
                 // Show loading state
-                const button = document.getElementById('generateSecret');
-                const originalText = button.textContent;
                 button.textContent = '🔄 Generating...';
                 button.disabled = true;
 
