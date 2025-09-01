@@ -181,13 +181,13 @@ let pool = null;
 let databaseAvailable = false;
 
 const LOCAL_DEV_MODE = process.env.NODE_ENV === 'development';
-if (process.env.DATABASE_URL && !LOCAL_DEV_MODE) {
+if (process.env.DATABASE_URL) {
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   });
 } else {
-  logger.warn('🚫 Database disabled for local development - using mock data');
+  logger.warn('🚫 Database URL not configured - using mock data');
 }
 
 // Email transporter
