@@ -2519,20 +2519,30 @@
                 
                 // Generate table rows
                 const rows = sizeOrder.map(size => {
-                    const measurements = sizeChart[size];
-                    if (!measurements) return '';
-                    
-                    return `
+                    const measurements = sizeChart.sizes ? sizeChart.sizes[size] : sizeChart[size];
+                    console.log(`🔍 Processing size ${size}:`, measurements);
+
+                    if (!measurements) {
+                        console.log(`⚠️ No measurements found for size ${size}`);
+                        return '';
+                    }
+
+                    const rowHtml = `
                         <tr class="border-b border-surface-light">
                             <td class="py-3 font-semibold">${size}</td>
-                            <td class="py-3">${measurements.chest}"</td>
-                            <td class="py-3">${measurements.length}"</td>
+                            <td class="py-3">${measurements.chest || 'N/A'}"</td>
+                            <td class="py-3">${measurements.length || 'N/A'}"</td>
                         </tr>
                     `;
+                    console.log(`🔍 Generated row for ${size}:`, rowHtml);
+                    return rowHtml;
                 }).filter(row => row !== '').join('');
                 
                 tbody.innerHTML = rows;
                 console.log('✅ Size chart updated successfully');
+                console.log('🔍 Generated rows HTML:', rows);
+                console.log('🔍 Table body element:', tbody);
+                console.log('🔍 Table body HTML after update:', tbody.innerHTML);
             } catch (error) {
                 console.error('❌ Error updating size chart:', error);
                 // Fallback to default adult t-shirt sizes
