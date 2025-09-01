@@ -771,7 +771,6 @@ app.post('/api/admin/2fa/verify', validate2FAVerification, async (req, res) => {
 // =============================================================================
 
 // Persistent TOTP secret storage
-const path = require('path');
 const TOTP_SECRETS_FILE = path.join(__dirname, '.totp-secrets.json');
 
 // Load TOTP secrets from file
