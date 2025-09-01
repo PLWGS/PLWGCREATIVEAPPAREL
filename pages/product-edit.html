@@ -48,6 +48,77 @@
           </div>
         </div>
 
+        <!-- Individual Image Slots System -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <label class="block text-sm font-medium text-text-primary">Product Images</label>
+            <div class="text-xs text-text-secondary">Click any slot to upload or replace</div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <!-- Main Image Slot -->
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-accent">Main Image</label>
+              <div id="main-image-slot" class="relative w-full h-32 border-2 border-dashed border-accent border-opacity-50 rounded-lg cursor-pointer hover:border-accent transition-colors bg-surface bg-opacity-20 flex items-center justify-center group">
+                <div id="main-image-content" class="text-center">
+                  <div class="text-2xl mb-1">📷</div>
+                  <div class="text-xs text-text-secondary">Click to add</div>
+                </div>
+              </div>
+              <input id="main-image-input" type="file" accept="image/*" class="hidden" />
+            </div>
+
+            <!-- Thumbnail Slots -->
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-text-secondary">Thumbnail 1</label>
+              <div id="thumb1-slot" class="relative w-full h-24 border-2 border-dashed border-surface-light border-opacity-50 rounded-lg cursor-pointer hover:border-accent transition-colors bg-surface bg-opacity-20 flex items-center justify-center group">
+                <div id="thumb1-content" class="text-center">
+                  <div class="text-xl mb-1">🖼️</div>
+                  <div class="text-xs text-text-secondary">Click to add</div>
+                </div>
+              </div>
+              <input id="thumb1-input" type="file" accept="image/*" class="hidden" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-text-secondary">Thumbnail 2</label>
+              <div id="thumb2-slot" class="relative w-full h-24 border-2 border-dashed border-surface-light border-opacity-50 rounded-lg cursor-pointer hover:border-accent transition-colors bg-surface bg-opacity-20 flex items-center justify-center group">
+                <div id="thumb2-content" class="text-center">
+                  <div class="text-xl mb-1">🖼️</div>
+                  <div class="text-xs text-text-secondary">Click to add</div>
+                </div>
+              </div>
+              <input id="thumb2-input" type="file" accept="image/*" class="hidden" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-text-secondary">Thumbnail 3</label>
+              <div id="thumb3-slot" class="relative w-full h-24 border-2 border-dashed border-surface-light border-opacity-50 rounded-lg cursor-pointer hover:border-accent transition-colors bg-surface bg-opacity-20 flex items-center justify-center group">
+                <div id="thumb3-content" class="text-center">
+                  <div class="text-xl mb-1">🖼️</div>
+                  <div class="text-xs text-text-secondary">Click to add</div>
+                </div>
+              </div>
+              <input id="thumb3-input" type="file" accept="image/*" class="hidden" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-text-secondary">Thumbnail 4</label>
+              <div id="thumb4-slot" class="relative w-full h-24 border-2 border-dashed border-surface-light border-opacity-50 rounded-lg cursor-pointer hover:border-accent transition-colors bg-surface bg-opacity-20 flex items-center justify-center group">
+                <div id="thumb4-content" class="text-center">
+                  <div class="text-xl mb-1">🖼️</div>
+                  <div class="text-xs text-text-secondary">Click to add</div>
+                </div>
+              </div>
+              <input id="thumb4-input" type="file" accept="image/*" class="hidden" />
+            </div>
+          </div>
+
+          <div class="text-xs text-text-secondary">
+            💡 Tip: Each image slot is independent. Delete or replace any image without affecting others.
+          </div>
+        </div>
+
         <div>
           <label class="block text-sm font-medium text-text-primary mb-2">Description</label>
           <textarea id="description" rows="3" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg"></textarea>
@@ -446,43 +517,105 @@
     const params = new URLSearchParams(location.search);
     const productId = params.get('id');
     let productData = null;
-    let uploadedImages = [];
+    // Individual image slots instead of array
+    let imageSlots = {
+      main: null,    // Main image
+      thumb1: null,  // Thumbnail 1
+      thumb2: null,  // Thumbnail 2
+      thumb3: null,  // Thumbnail 3
+      thumb4: null   // Thumbnail 4
+    };
+
     let selectedColors = [];
     let selectedSizes = ['S','M','L','XL','XXL'];
 
-    document.getElementById('browse').addEventListener('click', () => {
-      document.getElementById('image-upload').click();
-    });
-
-    document.getElementById('image-upload').addEventListener('change', (e) => {
-      const files = Array.from(e.target.files || []);
-      files.forEach(file => {
-        if (!file.type.startsWith('image/')) return;
-        if (uploadedImages.length >= 5) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-          uploadedImages.push(ev.target.result);
-          renderPreviews();
-        };
-        reader.readAsDataURL(file);
+    // Setup click handlers for each image slot
+    function setupImageSlotHandlers() {
+      // Main image slot
+      document.getElementById('main-image-slot').addEventListener('click', () => {
+        document.getElementById('main-image-input').click();
       });
-      e.target.value = '';
-    });
 
-    function renderPreviews(){
-      const wrap = document.getElementById('image-previews');
-      wrap.innerHTML = '';
-      uploadedImages.slice(0,5).forEach((src, i) => {
-        const div = document.createElement('div');
-        div.className = 'image-preview';
-        div.innerHTML = `<img src="${src}"><button type="button" class="remove" data-i="${i}">×</button>`;
-        wrap.appendChild(div);
+      document.getElementById('main-image-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            imageSlots.main = ev.target.result;
+            renderImageSlots();
+          };
+          reader.readAsDataURL(file);
+        }
+        e.target.value = '';
       });
-      wrap.querySelectorAll('button.remove').forEach(btn => btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.i, 10);
-        uploadedImages.splice(idx, 1);
-        renderPreviews();
-      }));
+
+      // Thumbnail slots
+      ['thumb1', 'thumb2', 'thumb3', 'thumb4'].forEach((slotName, index) => {
+        const slotId = slotName + '-slot';
+        const inputId = slotName + '-input';
+
+        document.getElementById(slotId).addEventListener('click', () => {
+          document.getElementById(inputId).click();
+        });
+
+        document.getElementById(inputId).addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = ev => {
+              imageSlots[slotName] = ev.target.result;
+              renderImageSlots();
+            };
+            reader.readAsDataURL(file);
+          }
+          e.target.value = '';
+        });
+      });
+    }
+
+    // Render all image slots
+    function renderImageSlots() {
+      // Render main image
+      renderImageSlot('main', 'main-image-slot', 'main-image-content', '📷', 'Main Image', 160);
+
+      // Render thumbnails
+      ['thumb1', 'thumb2', 'thumb3', 'thumb4'].forEach(slotName => {
+        const displayName = slotName.replace('thumb', 'Thumbnail ');
+        renderImageSlot(slotName, slotName + '-slot', slotName + '-content', '🖼️', displayName, 96);
+      });
+    }
+
+    // Render individual image slot
+    function renderImageSlot(slotName, slotId, contentId, icon, displayName, height) {
+      const slotElement = document.getElementById(slotId);
+      const contentElement = document.getElementById(contentId);
+      const imageSrc = imageSlots[slotName];
+
+      if (imageSrc) {
+        // Show image with remove button
+        contentElement.innerHTML = `
+          <img src="${imageSrc}" class="w-full h-full object-cover rounded-lg" style="height: ${height}px;">
+          <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 remove-image-btn" data-slot="${slotName}">×</button>
+        `;
+
+        // Add remove button handler
+        setTimeout(() => {
+          const removeBtn = contentElement.querySelector('.remove-image-btn');
+          if (removeBtn) {
+            removeBtn.addEventListener('click', (e) => {
+              e.stopPropagation(); // Prevent slot click
+              imageSlots[slotName] = null;
+              renderImageSlots();
+            });
+          }
+        }, 10);
+      } else {
+        // Show placeholder
+        contentElement.innerHTML = `
+          <div class="text-${icon === '📷' ? '2xl' : 'xl'} mb-1">${icon}</div>
+          <div class="text-xs text-text-secondary">Click to add ${displayName.toLowerCase()}</div>
+        `;
+      }
     }
 
     function setupColorSelection(){
@@ -680,11 +813,31 @@
         setChecked(el, selectedSizes.includes(el.dataset.size));
       });
 
-      // Images
-      uploadedImages = [];
-      if (p.image_url) uploadedImages.push(p.image_url);
-      if (Array.isArray(p.sub_images)) uploadedImages.push(...p.sub_images);
-      renderPreviews();
+      // Images - Load into individual slots
+      imageSlots = {
+        main: null,
+        thumb1: null,
+        thumb2: null,
+        thumb3: null,
+        thumb4: null
+      };
+
+      // Load main image
+      if (p.image_url) {
+        imageSlots.main = p.image_url;
+      }
+
+      // Load thumbnail images
+      if (Array.isArray(p.sub_images)) {
+        p.sub_images.forEach((img, index) => {
+          if (index < 4 && img) { // Only load up to 4 thumbnails
+            const slotName = `thumb${index + 1}`;
+            imageSlots[slotName] = img;
+          }
+        });
+      }
+
+      renderImageSlots();
 
       document.getElementById('loading').style.display = 'none';
       document.getElementById('form').style.display = 'block';
@@ -885,19 +1038,36 @@
             size_chart: getSizeChartData()
          };
 
-        // Images: send base64 array when present, else keep existing URLs
-        const hasBase64 = uploadedImages.some(src => typeof src === 'string' && src.startsWith('data:'));
+        // Images: Build from individual slots
+        const imageArray = [];
+
+        // Add main image if exists
+        if (imageSlots.main) {
+          imageArray.push(imageSlots.main);
+        }
+
+        // Add thumbnail images
+        ['thumb1', 'thumb2', 'thumb3', 'thumb4'].forEach(slotName => {
+          if (imageSlots[slotName]) {
+            imageArray.push(imageSlots[slotName]);
+          }
+        });
+
+        // Check if we have any base64 images (new uploads)
+        const hasBase64 = imageArray.some(src => typeof src === 'string' && src.startsWith('data:'));
+
         if (hasBase64) {
-          body.images = uploadedImages.slice(0,5);
+          // Send base64 images for upload to Cloudinary
+          body.images = imageArray;
         } else {
-          // Clean URLs to remove any potential invisible characters or encoding issues
+          // Send existing URLs
           const cleanUrl = (url) => {
             if (!url || typeof url !== 'string') return null;
             return url.trim().replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
           };
-          
-          body.image_url = cleanUrl(uploadedImages[0]);
-          body.sub_images = uploadedImages.slice(1,5).map(cleanUrl).filter(Boolean);
+
+          body.image_url = cleanUrl(imageArray[0]);
+          body.sub_images = imageArray.slice(1, 5).map(cleanUrl).filter(Boolean);
         }
 
                  // Debug each field individually
@@ -929,7 +1099,8 @@
         console.log('🔍 Image URLs being sent:', {
           image_url: body.image_url,
           sub_images: body.sub_images,
-          uploadedImages: uploadedImages
+          imageSlots: imageSlots,
+          imageArray: imageArray
         });
          
          const resp = await fetch(`/api/admin/products/${productId}`, {
@@ -1007,12 +1178,13 @@
        });
      }
 
-     // Wait for DOM to be fully loaded before initializing
-     document.addEventListener('DOMContentLoaded', () => {
-       setupColorSelection();
-       setupSizeSelection();
-       setupCustomInputOptions();
-       setupSizeChart();
+         // Wait for DOM to be fully loaded before initializing
+    document.addEventListener('DOMContentLoaded', () => {
+      setupColorSelection();
+      setupSizeSelection();
+      setupCustomInputOptions();
+      setupSizeChart();
+      setupImageSlotHandlers();
        if (!productId) {
          document.getElementById('loading').textContent = 'Missing product ID';
        } else {
