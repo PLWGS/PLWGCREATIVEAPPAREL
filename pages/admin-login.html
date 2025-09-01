@@ -266,6 +266,14 @@
                 const data = await response.json();
 
                 if (!response.ok) {
+                    // Check if TOTP setup is required
+                    if (data.requiresSetup) {
+                        showMessage('Google Authenticator setup required. Redirecting to setup page...', 'warning');
+                        setTimeout(() => {
+                            window.location.href = data.setupUrl || 'admin-totp-setup.html';
+                        }, 2000);
+                        return;
+                    }
                     showMessage(data.error || 'Login failed. Please check your credentials.');
                     return;
                 }

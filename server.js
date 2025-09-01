@@ -684,14 +684,13 @@ app.post('/api/admin/login',
             // TOTP is configured, require it
             return res.json({ totpRequired: true });
           } else {
-            // TOTP not configured, allow direct login
-            logger.warn('⚠️ TOTP not configured, allowing direct login');
-            const token = jwt.sign(
-              { email, role: 'admin' },
-              process.env.JWT_SECRET,
-              { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-            );
-            return res.json({ success: true, token, user: { email, role: 'admin' } });
+            // TOTP not configured - require setup before allowing login
+            logger.warn('⚠️ TOTP not configured - requiring setup');
+            return res.status(403).json({ 
+              error: 'TOTP authentication required but not configured. Please setup Google Authenticator.',
+              requiresSetup: true,
+              setupUrl: '/pages/admin-totp-setup.html'
+            });
           }
         } else {
           // TOTP disabled
@@ -4309,7 +4308,8 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       custom_lyrics_labels,
       custom_lyrics_char_limit,
       shipping_cost,
-      local_pickup_enabled
+      local_pickup_enabled,
+      size_chart
     } = req.body;
 
     // Process tags to ensure it's always a JavaScript array
@@ -4390,8 +4390,8 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
         track_inventory, brand_preference, specs_notes,
         custom_birthday_enabled, custom_birthday_required, custom_birthday_fields, custom_birthday_labels, custom_birthday_char_limit,
         custom_lyrics_enabled, custom_lyrics_required, custom_lyrics_fields, custom_lyrics_labels, custom_lyrics_char_limit,
-        shipping_cost, local_pickup_enabled
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35)
+        shipping_cost, local_pickup_enabled, size_chart
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36)
       RETURNING *
     `, [
       nextId, name, description, price, original_price, image_url, category, 'Featured',
@@ -4408,7 +4408,14 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       custom_lyrics_fields || '["artist_band", "song_name", "song_lyrics"]',
       custom_lyrics_labels || '{"artist_band": "Artist or Band Name", "song_name": "Song Name", "song_lyrics": "Song Lyrics (Optional)"}',
       custom_lyrics_char_limit || 250,
-      shipping_cost || 4.50, local_pickup_enabled !== false
+      shipping_cost || 4.50, local_pickup_enabled !== false,
+      JSON.stringify(size_chart || {
+        S: { chest: '18', length: '28' },
+        M: { chest: '20', length: '29' },
+        L: { chest: '22', length: '30' },
+        XL: { chest: '24', length: '31' },
+        '2XL': { chest: '26', length: '32' }
+      })
     ]);
 
     logger.info(`✅ Product created with ID ${nextId}`);
@@ -4489,7 +4496,8 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       custom_lyrics_labels,
       custom_lyrics_char_limit,
       shipping_cost,
-      local_pickup_enabled
+      local_pickup_enabled,
+      size_chart
     } = req.body;
     
     // Debug: Log the extracted custom input values
@@ -4635,9 +4643,9 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
         size_stock = $16, track_inventory = $17, brand_preference = $18, specs_notes = $19,
         custom_birthday_enabled = $20, custom_birthday_required = $21, custom_birthday_fields = $22, custom_birthday_labels = $23, custom_birthday_char_limit = $24,
         custom_lyrics_enabled = $25, custom_lyrics_required = $26, custom_lyrics_fields = $27, custom_lyrics_labels = $28, custom_lyrics_char_limit = $29,
-        shipping_cost = $30, local_pickup_enabled = $31,
+        shipping_cost = $30, local_pickup_enabled = $31, size_chart = $32,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $32
+      WHERE id = $33
       RETURNING *
     `, [
       name, description, price, original_price, final_image_url, category,
@@ -4655,6 +4663,13 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       custom_lyrics_labels || '{"artist_band": "Artist or Band Name", "song_name": "Song Name", "song_lyrics": "Song Lyrics (Optional)"}',
       custom_lyrics_char_limit || 250,
       shipping_cost || 4.50, local_pickup_enabled !== false,
+      JSON.stringify(size_chart || {
+        S: { chest: '18', length: '28' },
+        M: { chest: '20', length: '29' },
+        L: { chest: '22', length: '30' },
+        XL: { chest: '24', length: '31' },
+        '2XL': { chest: '26', length: '32' }
+      }),
       productId
     ]);
 

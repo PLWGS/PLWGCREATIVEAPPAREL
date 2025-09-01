@@ -751,40 +751,12 @@
                                         <thead>
                                             <tr class="border-b border-surface-light">
                                                 <th class="text-left py-3 text-accent">Size</th>
-                                                <th class="text-left py-3 text-accent">Chest</th>
+                                                <th class="text-left py-3 text-accent">Chest Width</th>
                                                 <th class="text-left py-3 text-accent">Length</th>
-                                                <th class="text-left py-3 text-accent">Shoulder</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="text-text-secondary">
-                                            <tr class="border-b border-surface-light">
-                                                
-                                                <td class="py-3">15.5</td>
-                                            </tr>
-                                            <tr class="border-b border-surface-light">
-                                                <td class="py-3 font-semibold">S</td>
-                                                <td class="py-3">34-37</td>
-                                                <td class="py-3">28</td>
-                                                <td class="py-3">16.5</td>
-                                            </tr>
-                                            <tr class="border-b border-surface-light">
-                                                <td class="py-3 font-semibold">M</td>
-                                                <td class="py-3">38-41</td>
-                                                <td class="py-3">29</td>
-                                                <td class="py-3">17.5</td>
-                                            </tr>
-                                            <tr class="border-b border-surface-light">
-                                                <td class="py-3 font-semibold">L</td>
-                                                <td class="py-3">42-45</td>
-                                                <td class="py-3">30</td>
-                                                <td class="py-3">18.5</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="py-3 font-semibold">XL</td>
-                                                <td class="py-3">46-49</td>
-                                                <td class="py-3">31</td>
-                                                <td class="py-3">19.5</td>
-                                            </tr>
+                                        <tbody id="size-chart-tbody" class="text-text-secondary">
+                                            <!-- Dynamic content will be populated by JavaScript -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -2195,6 +2167,21 @@
                 }
             } catch (e) { console.warn('Brand/specs notes render failed', e); }
             
+            // Update size chart dynamically
+            if (product.size_chart) {
+                updateSizeChart(product.size_chart);
+            } else {
+                // Use default adult t-shirt measurements if no size chart is provided
+                const defaultSizeChart = {
+                    S: { chest: '18', length: '28' },
+                    M: { chest: '20', length: '29' },
+                    L: { chest: '22', length: '30' },
+                    XL: { chest: '24', length: '31' },
+                    '2XL': { chest: '26', length: '32' }
+                };
+                updateSizeChart(defaultSizeChart);
+            }
+            
             // Update sizes and stock dynamically
             // Always generate size options, even if product data is incomplete
             if (true) { // Changed from conditional to always generate
@@ -2510,6 +2497,69 @@
         // Update cart counter on page load
         updateCartCounter();
 
+        // Update size chart table with dynamic data
+        function updateSizeChart(sizeChartData) {
+            const tbody = document.getElementById('size-chart-tbody');
+            if (!tbody) return;
+            
+            try {
+                // Parse size chart data if it's a string
+                const sizeChart = typeof sizeChartData === 'string' 
+                    ? JSON.parse(sizeChartData) 
+                    : sizeChartData;
+                
+                // Define size order
+                const sizeOrder = ['S', 'M', 'L', 'XL', '2XL'];
+                
+                // Generate table rows
+                const rows = sizeOrder.map(size => {
+                    const measurements = sizeChart[size];
+                    if (!measurements) return '';
+                    
+                    return `
+                        <tr class="border-b border-surface-light">
+                            <td class="py-3 font-semibold">${size}</td>
+                            <td class="py-3">${measurements.chest}"</td>
+                            <td class="py-3">${measurements.length}"</td>
+                        </tr>
+                    `;
+                }).filter(row => row !== '').join('');
+                
+                tbody.innerHTML = rows;
+                console.log('✅ Size chart updated successfully');
+            } catch (error) {
+                console.error('❌ Error updating size chart:', error);
+                // Fallback to default adult t-shirt sizes
+                tbody.innerHTML = `
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-semibold">S</td>
+                        <td class="py-3">18"</td>
+                        <td class="py-3">28"</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-semibold">M</td>
+                        <td class="py-3">20"</td>
+                        <td class="py-3">29"</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-semibold">L</td>
+                        <td class="py-3">22"</td>
+                        <td class="py-3">30"</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-semibold">XL</td>
+                        <td class="py-3">24"</td>
+                        <td class="py-3">31"</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 font-semibold">2XL</td>
+                        <td class="py-3">26"</td>
+                        <td class="py-3">32"</td>
+                    </tr>
+                `;
+            }
+        }
+        
         // Load product data when page loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('📄 DOMContentLoaded event fired');
