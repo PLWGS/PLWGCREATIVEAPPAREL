@@ -770,8 +770,36 @@ app.post('/api/admin/2fa/verify', validate2FAVerification, async (req, res) => {
 // TOTP (Google Authenticator) Endpoints
 // =============================================================================
 
-// In-memory TOTP secret storage (in production, use database)
-const totpSecrets = new Map();
+// Persistent TOTP secret storage
+const fs = require('fs');
+const path = require('path');
+const TOTP_SECRETS_FILE = path.join(__dirname, '.totp-secrets.json');
+
+// Load TOTP secrets from file
+function loadTotpSecrets() {
+  try {
+    if (fs.existsSync(TOTP_SECRETS_FILE)) {
+      const data = fs.readFileSync(TOTP_SECRETS_FILE, 'utf8');
+      return new Map(JSON.parse(data));
+    }
+  } catch (error) {
+    logger.warn('Could not load TOTP secrets:', error.message);
+  }
+  return new Map();
+}
+
+// Save TOTP secrets to file
+function saveTotpSecrets(secrets) {
+  try {
+    const data = JSON.stringify(Array.from(secrets.entries()));
+    fs.writeFileSync(TOTP_SECRETS_FILE, data, 'utf8');
+    logger.info('✅ TOTP secrets saved to file');
+  } catch (error) {
+    logger.error('❌ Could not save TOTP secrets:', error.message);
+  }
+}
+
+const totpSecrets = loadTotpSecrets();
 
 // Generate new TOTP secret
 app.post('/api/admin/totp/generate', async (req, res) => {
@@ -783,8 +811,9 @@ app.post('/api/admin/totp/generate', async (req, res) => {
       length: 32
     });
 
-    // Store the secret (in production, store in database)
+    // Store the secret persistently
     totpSecrets.set('admin', secret.base32);
+    saveTotpSecrets(totpSecrets);
     
     res.json({
       secret: secret.base32,
@@ -815,8 +844,9 @@ app.post('/api/admin/totp/verify', async (req, res) => {
     });
 
     if (verified) {
-      // Mark TOTP as active
+      // Mark TOTP as active and save persistently
       totpSecrets.set('admin', secret);
+      saveTotpSecrets(totpSecrets);
       res.json({ valid: true, message: 'TOTP verified successfully' });
     } else {
       res.json({ valid: false, message: 'Invalid TOTP code' });
@@ -5218,18 +5248,24 @@ If you receive this, your email configuration is working!`,
   }
 });
 
-// Initialize database and start server
-Promise.all([
-  initializeAdminCredentials(),
-  initializeDatabase()
-]).then(() => {
+// Initialize admin credentials and start server
+initializeAdminCredentials().then(() => {
+  // Start server first
   app.listen(PORT, () => {
     logger.info(`🚀 Admin Dashboard API server running on port ${PORT}`);
     logger.info(`📧 Email configured: ${process.env.EMAIL_FROM}`);
     logger.info(`🗄️ Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
     logger.info(`🔐 Admin email: ${ADMIN_EMAIL_MEMO}`);
     logger.info(`🏷️ Category management system active`);
+    
+    // Try to initialize database in background (non-blocking)
+    initializeDatabase().catch(err => {
+      logger.error('❌ Database initialization failed, but server continues:', err.message);
+    });
   });
+}).catch(err => {
+  logger.error('❌ Failed to initialize admin credentials:', err);
+  process.exit(1);
 });
 
 module.exports = app; 
