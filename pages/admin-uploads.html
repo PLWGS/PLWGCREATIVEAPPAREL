@@ -1591,25 +1591,28 @@
         // Size Chart Management Functions
         function getSizeChartData() {
             return {
-                S: {
-                    chest: document.getElementById('size-s-chest').value || '18',
-                    length: document.getElementById('size-s-length').value || '28'
-                },
-                M: {
-                    chest: document.getElementById('size-m-chest').value || '20',
-                    length: document.getElementById('size-m-length').value || '29'
-                },
-                L: {
-                    chest: document.getElementById('size-l-chest').value || '22',
-                    length: document.getElementById('size-l-length').value || '30'
-                },
-                XL: {
-                    chest: document.getElementById('size-xl-chest').value || '24',
-                    length: document.getElementById('size-xl-length').value || '31'
-                },
-                '2XL': {
-                    chest: document.getElementById('size-2xl-chest').value || '26',
-                    length: document.getElementById('size-2xl-length').value || '32'
+                garmentType: document.getElementById('garment-type')?.value || 'adult-tshirt',
+                sizes: {
+                    S: {
+                        chest: document.getElementById('size-s-chest').value || '18',
+                        length: document.getElementById('size-s-length').value || '28'
+                    },
+                    M: {
+                        chest: document.getElementById('size-m-chest').value || '20',
+                        length: document.getElementById('size-m-length').value || '29'
+                    },
+                    L: {
+                        chest: document.getElementById('size-l-chest').value || '22',
+                        length: document.getElementById('size-l-length').value || '30'
+                    },
+                    XL: {
+                        chest: document.getElementById('size-xl-chest').value || '24',
+                        length: document.getElementById('size-xl-length').value || '31'
+                    },
+                    '2XL': {
+                        chest: document.getElementById('size-2xl-chest').value || '26',
+                        length: document.getElementById('size-2xl-length').value || '32'
+                    }
                 }
             };
         }

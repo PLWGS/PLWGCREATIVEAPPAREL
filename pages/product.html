@@ -2168,22 +2168,19 @@
             } catch (e) { console.warn('Brand/specs notes render failed', e); }
             
             // Update size chart dynamically
-            console.log('🔍 Raw product.size_chart:', product.size_chart);
-            console.log('🔍 product.size_chart type:', typeof product.size_chart);
-            console.log('🔍 product.size_chart truthy check:', !!product.size_chart);
-
             if (product.size_chart) {
-                console.log('✅ Using product size chart data');
                 updateSizeChart(product.size_chart);
             } else {
-                console.log('⚠️ No size chart data found, using defaults');
                 // Use default adult t-shirt measurements if no size chart is provided
                 const defaultSizeChart = {
-                    S: { chest: '18', length: '28' },
-                    M: { chest: '20', length: '29' },
-                    L: { chest: '22', length: '30' },
-                    XL: { chest: '24', length: '31' },
-                    '2XL': { chest: '26', length: '32' }
+                    garmentType: 'adult-tshirt',
+                    sizes: {
+                        S: { chest: '18', length: '28' },
+                        M: { chest: '20', length: '29' },
+                        L: { chest: '22', length: '30' },
+                        XL: { chest: '24', length: '31' },
+                        '2XL': { chest: '26', length: '32' }
+                    }
                 };
                 updateSizeChart(defaultSizeChart);
             }
@@ -2520,29 +2517,21 @@
                 // Generate table rows
                 const rows = sizeOrder.map(size => {
                     const measurements = sizeChart.sizes ? sizeChart.sizes[size] : sizeChart[size];
-                    console.log(`🔍 Processing size ${size}:`, measurements);
 
                     if (!measurements) {
-                        console.log(`⚠️ No measurements found for size ${size}`);
                         return '';
                     }
 
-                    const rowHtml = `
+                    return `
                         <tr class="border-b border-surface-light">
                             <td class="py-3 font-semibold">${size}</td>
                             <td class="py-3">${measurements.chest || 'N/A'}"</td>
                             <td class="py-3">${measurements.length || 'N/A'}"</td>
                         </tr>
                     `;
-                    console.log(`🔍 Generated row for ${size}:`, rowHtml);
-                    return rowHtml;
                 }).filter(row => row !== '').join('');
                 
                 tbody.innerHTML = rows;
-                console.log('✅ Size chart updated successfully');
-                console.log('🔍 Generated rows HTML:', rows);
-                console.log('🔍 Table body element:', tbody);
-                console.log('🔍 Table body HTML after update:', tbody.innerHTML);
             } catch (error) {
                 console.error('❌ Error updating size chart:', error);
                 // Fallback to default adult t-shirt sizes
