@@ -273,6 +273,13 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Custom Question Field -->
+              <div id="birthday-custom-question" class="hidden">
+                <label class="block text-sm text-text-secondary mb-1">Custom Question (Optional)</label>
+                <textarea id="custom_birthday_question" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Enter your custom question here (e.g., 'What theme would you like for the birthday design?')" rows="3" maxlength="500"></textarea>
+                <p class="text-xs text-text-secondary mt-1">This optional question will appear to customers along with the standard birthday fields.</p>
+              </div>
             </div>
           </div>
 
@@ -330,6 +337,13 @@
                     <input type="text" id="lyrics-label-lyrics" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Song Lyrics (Optional)">
                   </div>
                 </div>
+              </div>
+
+              <!-- Custom Question Field -->
+              <div id="lyrics-custom-question" class="hidden">
+                <label class="block text-sm text-text-secondary mb-1">Custom Question (Optional)</label>
+                <textarea id="custom_lyrics_question" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" placeholder="Enter your custom question here (e.g., 'What style would you like for the song lyrics design?')" rows="3" maxlength="500"></textarea>
+                <p class="text-xs text-text-secondary mt-1">This optional question will appear to customers along with the standard song lyrics fields.</p>
               </div>
             </div>
           </div>
@@ -622,6 +636,8 @@
       
       // Show/hide birthday options
       document.getElementById('birthday-options').classList.toggle('hidden', !p.custom_birthday_enabled);
+      document.getElementById('birthday-custom-question').classList.toggle('hidden', !p.custom_birthday_enabled);
+      document.getElementById('custom_birthday_question').value = p.custom_birthday_question || '';
 
       // Lyrics custom input
       document.getElementById('custom_lyrics_enabled').checked = !!p.custom_lyrics_enabled;
@@ -646,6 +662,8 @@
       
       // Show/hide lyrics options
       document.getElementById('lyrics-options').classList.toggle('hidden', !p.custom_lyrics_enabled);
+      document.getElementById('lyrics-custom-question').classList.toggle('hidden', !p.custom_lyrics_enabled);
+      document.getElementById('custom_lyrics_question').value = p.custom_lyrics_question || '';
 
       // Colors
       selectedColors = Array.isArray(p.colors) ? p.colors.slice() : [];
@@ -699,6 +717,22 @@
       if (lyricsEnabled && lyricsOptions) {
         lyricsEnabled.addEventListener('change', function() {
           lyricsOptions.classList.toggle('hidden', !this.checked);
+        });
+      }
+
+      // Custom question toggles - show when main options are enabled
+      const birthdayCustomQuestion = document.getElementById('birthday-custom-question');
+      const lyricsCustomQuestion = document.getElementById('lyrics-custom-question');
+
+      if (birthdayEnabled && birthdayCustomQuestion) {
+        birthdayEnabled.addEventListener('change', function() {
+          birthdayCustomQuestion.classList.toggle('hidden', !this.checked);
+        });
+      }
+
+      if (lyricsEnabled && lyricsCustomQuestion) {
+        lyricsEnabled.addEventListener('change', function() {
+          lyricsCustomQuestion.classList.toggle('hidden', !this.checked);
         });
       }
     }
@@ -841,11 +875,13 @@
             custom_birthday_fields: JSON.stringify(getEnabledBirthdayFields()),
             custom_birthday_labels: JSON.stringify(getBirthdayLabels()),
             custom_birthday_char_limit: parseInt(document.getElementById('custom_birthday_char_limit').value) || 250,
+            custom_birthday_question: document.getElementById('custom_birthday_question').value.trim() || '',
             custom_lyrics_enabled: document.getElementById('custom_lyrics_enabled').checked,
             custom_lyrics_required: document.getElementById('custom_lyrics_required').checked,
             custom_lyrics_fields: JSON.stringify(getEnabledLyricsFields()),
             custom_lyrics_labels: JSON.stringify(getLyricsLabels()),
             custom_lyrics_char_limit: parseInt(document.getElementById('custom_lyrics_char_limit').value) || 250,
+            custom_lyrics_question: document.getElementById('custom_lyrics_question').value.trim() || '',
             size_chart: getSizeChartData()
          };
 

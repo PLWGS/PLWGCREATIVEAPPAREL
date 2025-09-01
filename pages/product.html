@@ -446,6 +446,15 @@
                                     <div id="birthdayFields" class="space-y-3">
                                         <!-- Fields will be populated dynamically -->
                                     </div>
+
+                                    <!-- Custom Question Field -->
+                                    <div id="birthdayCustomQuestion" class="mt-4 hidden">
+                                        <label class="block text-sm text-text-secondary mb-2 font-medium">Additional Information Request</label>
+                                        <div class="bg-surface bg-opacity-50 rounded-lg p-3 border border-surface-light">
+                                            <p id="birthdayCustomQuestionText" class="text-text-primary text-sm"></p>
+                                        </div>
+                                        <textarea id="birthdayCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -455,6 +464,15 @@
                                     <h5 class="font-semibold text-accent mb-3">Music Lyrics Customization</h5>
                                     <div id="lyricsFields" class="space-y-3">
                                         <!-- Fields will be populated dynamically -->
+                                    </div>
+
+                                    <!-- Custom Question Field -->
+                                    <div id="lyricsCustomQuestion" class="mt-4 hidden">
+                                        <label class="block text-sm text-text-secondary mb-2 font-medium">Additional Information Request</label>
+                                        <div class="bg-surface bg-opacity-50 rounded-lg p-3 border border-surface-light">
+                                            <p id="lyricsCustomQuestionText" class="text-text-primary text-sm"></p>
+                                        </div>
+                                        <textarea id="lyricsCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -1560,8 +1578,19 @@
                                 }
                             }
                         });
+
+                        // Collect custom question response for birthday
+                        if (productData.custom_birthday_question && productData.custom_birthday_question.trim()) {
+                            const birthdayQuestionElement = document.getElementById('birthdayCustomQuestionInput');
+                            if (birthdayQuestionElement) {
+                                const value = birthdayQuestionElement.value.trim();
+                                if (value) {
+                                    customInputData['birthday_custom_question'] = value;
+                                }
+                            }
+                        }
                     }
-                    
+
                     // Check if lyrics custom input is enabled
                     if (productData && productData.custom_lyrics_enabled) {
                         const lyricsFields = productData.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
@@ -1574,8 +1603,19 @@
                                 }
                             }
                         });
+
+                        // Collect custom question response for lyrics
+                        if (productData.custom_lyrics_question && productData.custom_lyrics_question.trim()) {
+                            const lyricsQuestionElement = document.getElementById('lyricsCustomQuestionInput');
+                            if (lyricsQuestionElement) {
+                                const value = lyricsQuestionElement.value.trim();
+                                if (value) {
+                                    customInputData['lyrics_custom_question'] = value;
+                                }
+                            }
+                        }
                     }
-                    
+
                     // Store default shipping preferences if not already set
                     if (!sessionStorage.getItem('selectedShippingMethod')) {
                         sessionStorage.setItem('selectedShippingMethod', 'standard');
@@ -1713,8 +1753,19 @@
                                 }
                             }
                         });
+
+                        // Collect custom question response for birthday
+                        if (productData.custom_birthday_question && productData.custom_birthday_question.trim()) {
+                            const birthdayQuestionElement = document.getElementById('birthdayCustomQuestionInput');
+                            if (birthdayQuestionElement) {
+                                const value = birthdayQuestionElement.value.trim();
+                                if (value) {
+                                    customInputData['birthday_custom_question'] = value;
+                                }
+                            }
+                        }
                     }
-                    
+
                     // Check if lyrics custom input is enabled
                     if (productData && productData.custom_lyrics_enabled) {
                         const lyricsFields = productData.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
@@ -2368,8 +2419,18 @@
                             </div>
                         `;
                     }).join('');
+
+                    // Handle Custom Question for Birthday
+                    if (product.custom_birthday_question && product.custom_birthday_question.trim()) {
+                        const birthdayCustomQuestion = document.getElementById('birthdayCustomQuestion');
+                        const birthdayCustomQuestionText = document.getElementById('birthdayCustomQuestionText');
+                        if (birthdayCustomQuestion && birthdayCustomQuestionText) {
+                            birthdayCustomQuestion.classList.remove('hidden');
+                            birthdayCustomQuestionText.textContent = product.custom_birthday_question;
+                        }
+                    }
                 }
-                
+
                 // Handle Lyrics Custom Input
                 if (product.custom_lyrics_enabled) {
                     lyricsCustomInput.classList.remove('hidden');
@@ -2409,8 +2470,18 @@
                             </div>
                         `;
                     }).join('');
+
+                    // Handle Custom Question for Lyrics
+                    if (product.custom_lyrics_question && product.custom_lyrics_question.trim()) {
+                        const lyricsCustomQuestion = document.getElementById('lyricsCustomQuestion');
+                        const lyricsCustomQuestionText = document.getElementById('lyricsCustomQuestionText');
+                        if (lyricsCustomQuestion && lyricsCustomQuestionText) {
+                            lyricsCustomQuestion.classList.remove('hidden');
+                            lyricsCustomQuestionText.textContent = product.custom_lyrics_question;
+                        }
+                    }
                 }
-                
+
                 console.log('✅ Custom input fields updated successfully');
             } else {
                 console.log('ℹ️ No custom input fields enabled for this product');
