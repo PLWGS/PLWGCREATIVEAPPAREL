@@ -4677,11 +4677,13 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     
     // Debug: Log the extracted custom input values
     logger.info('🔍 Custom input values extracted:', {
+      custom_birthday_question,
       custom_lyrics_enabled,
       custom_lyrics_required,
       custom_lyrics_fields,
       custom_lyrics_labels,
-      custom_lyrics_char_limit
+      custom_lyrics_char_limit,
+      custom_lyrics_question
     });
 
     // Process tags to ensure it's always a JavaScript array
