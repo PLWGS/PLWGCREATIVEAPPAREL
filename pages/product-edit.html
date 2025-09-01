@@ -564,6 +564,31 @@
         document.getElementById('spec_brand_preference').value = brandPrefValue;
         console.log('🔍 Field value after setting:', document.getElementById('spec_brand_preference').value);
 
+        // Load size chart data
+        if (p.size_chart) {
+          const sizeChart = typeof p.size_chart === 'string' ? JSON.parse(p.size_chart) : p.size_chart;
+          console.log('🔍 Loading size chart data:', sizeChart);
+
+          // Set garment type
+          if (sizeChart.garmentType && document.getElementById('garment-type')) {
+            document.getElementById('garment-type').value = sizeChart.garmentType;
+          }
+
+          // Set size measurements
+          if (sizeChart.sizes) {
+            Object.keys(sizeChart.sizes).forEach(size => {
+              const sizeData = sizeChart.sizes[size];
+              if (sizeData) {
+                const chestInput = document.getElementById(`size-${size.toLowerCase()}-chest`);
+                const lengthInput = document.getElementById(`size-${size.toLowerCase()}-length`);
+
+                if (chestInput) chestInput.value = sizeData.chest || '';
+                if (lengthInput) lengthInput.value = sizeData.length || '';
+              }
+            });
+          }
+        }
+
         // Shipping information
         document.getElementById('shipping_cost').value = p.shipping_cost ?? 4.50;
         document.getElementById('local_pickup_enabled').checked = p.local_pickup_enabled ?? true;
@@ -709,6 +734,35 @@
         song_lyrics: document.getElementById('lyrics-label-lyrics').value
       };
     }
+
+    // Size Chart Functions
+    function getSizeChartData() {
+      return {
+        garmentType: document.getElementById('garment-type')?.value || 'adult-tshirt',
+        sizes: {
+          S: {
+            chest: document.getElementById('size-s-chest')?.value || '18',
+            length: document.getElementById('size-s-length')?.value || '28'
+          },
+          M: {
+            chest: document.getElementById('size-m-chest')?.value || '20',
+            length: document.getElementById('size-m-length')?.value || '29'
+          },
+          L: {
+            chest: document.getElementById('size-l-chest')?.value || '22',
+            length: document.getElementById('size-l-length')?.value || '30'
+          },
+          XL: {
+            chest: document.getElementById('size-xl-chest')?.value || '24',
+            length: document.getElementById('size-xl-length')?.value || '31'
+          },
+          '2XL': {
+            chest: document.getElementById('size-2xl-chest')?.value || '26',
+            length: document.getElementById('size-2xl-length')?.value || '32'
+          }
+        }
+      };
+    }
     
     // Load categories dynamically from database
     async function loadCategories() {
@@ -791,7 +845,8 @@
             custom_lyrics_required: document.getElementById('custom_lyrics_required').checked,
             custom_lyrics_fields: JSON.stringify(getEnabledLyricsFields()),
             custom_lyrics_labels: JSON.stringify(getLyricsLabels()),
-            custom_lyrics_char_limit: parseInt(document.getElementById('custom_lyrics_char_limit').value) || 250
+            custom_lyrics_char_limit: parseInt(document.getElementById('custom_lyrics_char_limit').value) || 250,
+            size_chart: getSizeChartData()
          };
 
         // Images: send base64 array when present, else keep existing URLs
