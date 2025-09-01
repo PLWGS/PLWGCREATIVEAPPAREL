@@ -176,17 +176,18 @@ app.use('/public', express.static('public'));
 // Removed etsy_images static route - now using Cloudinary for image hosting
 app.use('/favicon.ico', express.static('public/favicon.ico'));
 
-// Database connection
+// Database connection - DISABLED FOR LOCAL DEVELOPMENT
 let pool = null;
 let databaseAvailable = false;
 
-if (process.env.DATABASE_URL) {
+const LOCAL_DEV_MODE = process.env.NODE_ENV === 'development';
+if (process.env.DATABASE_URL && !LOCAL_DEV_MODE) {
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   });
 } else {
-  logger.warn('⚠️ No DATABASE_URL found - running in development mode without database');
+  logger.warn('🚫 Database disabled for local development - using mock data');
 }
 
 // Email transporter
@@ -1182,6 +1183,9 @@ app.get('/api/orders/export', authenticateToken, async (req, res) => {
 // Get orders with custom input data
 app.get('/api/orders/custom-input', async (req, res) => {
   try {
+    if (!pool) {
+      return res.json({ orders: [] });
+    }
     // Check if the order_items table has the custom_input column
     const tableCheck = await pool.query(`
       SELECT column_name, data_type 
@@ -1596,6 +1600,9 @@ app.get('/api/custom-requests', authenticateToken, async (req, res) => {
     
     query += ' ORDER BY created_at DESC';
     
+    if (!pool) {
+      return res.json({ requests: [] });
+    }
     const result = await pool.query(query, params);
     res.json({ requests: result.rows });
   } catch (error) {
