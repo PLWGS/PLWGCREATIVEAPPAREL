@@ -335,6 +335,84 @@
           </div>
         </div>
 
+        <!-- Size Chart (inches) -->
+        <div class="space-y-4">
+          <label class="block text-sm font-medium text-text-primary mb-2">Size Chart (inches)</label>
+          <div class="glass-card rounded-lg p-4 border border-accent border-opacity-20">
+            <!-- Garment Type Presets -->
+            <div class="mb-4">
+              <label class="block text-sm text-text-secondary mb-2">Garment Type</label>
+              <select id="garment-type" class="w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none">
+                <option value="adult-tshirt" selected>Adult Unisex T-Shirt (Default)</option>
+                <option value="adult-hoodie">Adult Hoodie</option>
+                <option value="kids-tshirt">Kids T-Shirt</option>
+                <option value="kids-hoodie">Kids Hoodie</option>
+                <option value="custom">Custom (Manual Input)</option>
+              </select>
+              <p class="text-xs text-text-secondary mt-1">Select a preset to auto-fill measurements, or choose Custom to enter manually</p>
+            </div>
+
+            <!-- Size Chart Inputs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div class="space-y-2">
+                <label class="block text-xs font-medium text-accent uppercase tracking-wide">Size S</label>
+                <div>
+                  <label class="block text-xs text-text-secondary">Chest Width</label>
+                  <input type="text" id="size-s-chest" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="18" placeholder="18">
+                </div>
+                <div>
+                  <label class="block text-xs text-text-secondary">Length</label>
+                  <input type="text" id="size-s-length" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="28" placeholder="28">
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="block text-xs font-medium text-accent uppercase tracking-wide">Size M</label>
+                <div>
+                  <label class="block text-xs text-text-secondary">Chest Width</label>
+                  <input type="text" id="size-m-chest" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="20" placeholder="20">
+                </div>
+                <div>
+                  <label class="block text-xs text-text-secondary">Length</label>
+                  <input type="text" id="size-m-length" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="29" placeholder="29">
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="block text-xs font-medium text-accent uppercase tracking-wide">Size L</label>
+                <div>
+                  <label class="block text-xs text-text-secondary">Chest Width</label>
+                  <input type="text" id="size-l-chest" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="22" placeholder="22">
+                </div>
+                <div>
+                  <label class="block text-xs text-text-secondary">Length</label>
+                  <input type="text" id="size-l-length" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="30" placeholder="30">
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="block text-xs font-medium text-accent uppercase tracking-wide">Size XL</label>
+                <div>
+                  <label class="block text-xs text-text-secondary">Chest Width</label>
+                  <input type="text" id="size-xl-chest" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="24" placeholder="24">
+                </div>
+                <div>
+                  <label class="block text-xs text-text-secondary">Length</label>
+                  <input type="text" id="size-xl-length" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="31" placeholder="31">
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="block text-xs font-medium text-accent uppercase tracking-wide">Size 2XL</label>
+                <div>
+                  <label class="block text-xs text-text-secondary">Chest Width</label>
+                  <input type="text" id="size-2xl-chest" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="26" placeholder="26">
+                </div>
+                <div>
+                  <label class="block text-xs text-text-secondary">Length</label>
+                  <input type="text" id="size-2xl-length" class="w-full px-2 py-1 bg-surface border border-surface-light rounded text-text-primary text-sm focus:border-accent focus:outline-none" value="32" placeholder="32">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="mt-4">
           <label class="block text-sm font-medium text-text-primary mb-2">Tags</label>
           <input type="text" id="tags" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg" placeholder="custom, printed, quality" />
@@ -784,15 +862,70 @@
 
          // Categories are now loaded in fetchProduct()
      
+     // Size Chart Presets
+     const sizePresets = {
+       'adult-tshirt': {
+         s: { chest: '18', length: '28' },
+         m: { chest: '20', length: '29' },
+         l: { chest: '22', length: '30' },
+         xl: { chest: '24', length: '31' },
+         '2xl': { chest: '26', length: '32' }
+       },
+       'adult-hoodie': {
+         s: { chest: '20', length: '27' },
+         m: { chest: '22', length: '28' },
+         l: { chest: '24', length: '29' },
+         xl: { chest: '26', length: '30' },
+         '2xl': { chest: '28', length: '31' }
+       },
+       'kids-tshirt': {
+         s: { chest: '16', length: '22' },
+         m: { chest: '17', length: '23' },
+         l: { chest: '18', length: '24' },
+         xl: { chest: '19', length: '25' },
+         '2xl': { chest: '20', length: '26' }
+       },
+       'kids-hoodie': {
+         s: { chest: '16', length: '20' },
+         m: { chest: '17', length: '21' },
+         l: { chest: '18', length: '22' },
+         xl: { chest: '19', length: '23' },
+         '2xl': { chest: '20', length: '24' }
+       }
+     };
+
+     function setupSizeChart() {
+       const garmentTypeSelect = document.getElementById('garment-type');
+       if (!garmentTypeSelect) return;
+
+       garmentTypeSelect.addEventListener('change', (e) => {
+         const preset = e.target.value;
+         if (preset === 'custom') return;
+
+         const sizes = sizePresets[preset];
+         if (sizes) {
+           // Update all size inputs
+           Object.keys(sizes).forEach(size => {
+             const chestInput = document.getElementById(`size-${size}-chest`);
+             const lengthInput = document.getElementById(`size-${size}-length`);
+
+             if (chestInput) chestInput.value = sizes[size].chest;
+             if (lengthInput) lengthInput.value = sizes[size].length;
+           });
+         }
+       });
+     }
+
      // Wait for DOM to be fully loaded before initializing
      document.addEventListener('DOMContentLoaded', () => {
        setupColorSelection();
        setupSizeSelection();
        setupCustomInputOptions();
-       if (!productId) { 
-         document.getElementById('loading').textContent = 'Missing product ID'; 
-       } else { 
-         fetchProduct(); 
+       setupSizeChart();
+       if (!productId) {
+         document.getElementById('loading').textContent = 'Missing product ID';
+       } else {
+         fetchProduct();
        }
      });
   </script>
