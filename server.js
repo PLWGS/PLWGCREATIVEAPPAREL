@@ -178,6 +178,7 @@ app.use('/favicon.ico', express.static('public/favicon.ico'));
 
 // Database connection
 let pool = null;
+let databaseAvailable = false;
 
 if (process.env.DATABASE_URL) {
   pool = new Pool({
@@ -239,6 +240,7 @@ const authenticateToken = async (req, res, next) => {
 async function initializeDatabase() {
   if (!pool) {
     logger.warn('⚠️ Skipping database initialization - no database connection');
+    databaseAvailable = false;
     return;
   }
   
@@ -575,8 +577,10 @@ async function initializeDatabase() {
     logger.info('📦 Products table initialized - ready for fresh product uploads');
 
     logger.info('✅ Database tables initialized successfully');
+    databaseAvailable = true;
   } catch (error) {
     logger.error('❌ Error initializing database:', error);
+    databaseAvailable = false;
   }
 }
 
@@ -679,7 +683,7 @@ app.post('/api/admin/login',
         const totpEnabled = (process.env.ADMIN_2FA_ENABLED || 'true') !== 'false';
         
         // Database connection check for fallback mode
-        if (!pool) {
+        if (!databaseAvailable) {
           logger.warn('⚠️ Database unavailable - using emergency fallback authentication');
           const token = jwt.sign(
             { email, role: 'admin', fallback: true },
@@ -4189,7 +4193,7 @@ app.get('/api/products/search', async (req, res) => {
 
 // Admin Product Management Endpoints
 app.get('/api/admin/products', authenticateToken, async (req, res) => {
-  if (!pool) {
+  if (!databaseAvailable) {
     logger.warn('⚠️ Database unavailable - returning mock products for testing');
     return res.json([
       {
