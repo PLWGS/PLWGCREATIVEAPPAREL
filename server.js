@@ -4816,11 +4816,11 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
         low_stock_threshold = $9, sale_percentage = $10, colors = $11,
         sizes = $12, specifications = $13, features = $14, sub_images = $15,
         size_stock = $16, track_inventory = $17, brand_preference = $18, specs_notes = $19,
-        custom_birthday_enabled = $20, custom_birthday_required = $21, custom_birthday_fields = $22, custom_birthday_labels = $23, custom_birthday_char_limit = $24,
-        custom_lyrics_enabled = $25, custom_lyrics_required = $26, custom_lyrics_fields = $27, custom_lyrics_labels = $28, custom_lyrics_char_limit = $29,
-        shipping_cost = $30, local_pickup_enabled = $31, size_chart = $32,
+        custom_birthday_enabled = $20, custom_birthday_required = $21, custom_birthday_fields = $22, custom_birthday_labels = $23, custom_birthday_char_limit = $24, custom_birthday_question = $25,
+        custom_lyrics_enabled = $26, custom_lyrics_required = $27, custom_lyrics_fields = $28, custom_lyrics_labels = $29, custom_lyrics_char_limit = $30, custom_lyrics_question = $31,
+        shipping_cost = $32, local_pickup_enabled = $33, size_chart = $34,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $33
+      WHERE id = $35
       RETURNING *
     `, [
       name, description, price, original_price, final_image_url, category,
