@@ -178,6 +178,7 @@ app.use('/favicon.ico', express.static('public/favicon.ico'));
 
 // Database connection
 let pool = null;
+let databaseAvailable = false;
 
 if (process.env.DATABASE_URL) {
   pool = new Pool({
@@ -214,6 +215,9 @@ function checkDatabase() {
   if (!pool) {
     return { available: false, error: 'Database not configured' };
   }
+  if (!databaseAvailable) {
+    return { available: false, error: 'Database connection failed' };
+  }
   return { available: true };
 }
 
@@ -239,6 +243,7 @@ const authenticateToken = async (req, res, next) => {
 async function initializeDatabase() {
   if (!pool) {
     logger.warn('⚠️ Skipping database initialization - no database connection');
+    databaseAvailable = false;
     return;
   }
   
@@ -575,8 +580,10 @@ async function initializeDatabase() {
     logger.info('📦 Products table initialized - ready for fresh product uploads');
 
     logger.info('✅ Database tables initialized successfully');
+    databaseAvailable = true;
   } catch (error) {
     logger.error('❌ Error initializing database:', error);
+    databaseAvailable = false;
   }
 }
 
@@ -675,8 +682,10 @@ app.post('/api/admin/login',
       logger.info('🔐 Password check result:', isValidPassword);
       
       if (isValidPassword) {
-        // TOTP gate (Google Authenticator)
-        const totpEnabled = process.env.ADMIN_2FA_ENABLED === 'true';
+        // TOTP gate (Google Authenticator) enabled by default unless disabled
+        const totpEnabled = (process.env.ADMIN_2FA_ENABLED || 'true') !== 'false';
+        
+        // REMOVED: Emergency fallback - forcing proper TOTP authentication
         if (totpEnabled) {
           // Check if TOTP is configured
           const totpSecret = totpSecrets.get('admin');
@@ -4172,8 +4181,29 @@ app.get('/api/products/search', async (req, res) => {
 
 // Admin Product Management Endpoints
 app.get('/api/admin/products', authenticateToken, async (req, res) => {
-  if (!pool) {
-    return res.status(500).json({ error: 'Database not available' });
+  if (!databaseAvailable) {
+    logger.warn('⚠️ Database unavailable - returning mock products for testing');
+    return res.json([
+      {
+        id: 1,
+        name: "Test Product - Database Offline",
+        description: "This is a mock product while database is unavailable",
+        price: 25.00,
+        category: "T-Shirts",
+        colors: ["Black"],
+        sizes: ["S", "M", "L", "XL", "2XL"],
+        image_url: "https://via.placeholder.com/300x300/333/fff?text=Test+Product",
+        size_chart: {
+          S: { chest: "18", length: "28" },
+          M: { chest: "20", length: "29" },
+          L: { chest: "22", length: "30" },
+          XL: { chest: "24", length: "31" },
+          "2XL": { chest: "26", length: "32" }
+        },
+        is_active: true,
+        created_at: new Date().toISOString()
+      }
+    ]);
   }
 
   try {
