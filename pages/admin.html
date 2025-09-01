@@ -1296,6 +1296,43 @@
             return `${Math.floor(diffInHours / 24)}d ago`;
         }
 
+        // Format custom input data for display
+        function formatCustomInputDescription(customInput) {
+            if (!customInput) return 'No custom input';
+
+            let description = '';
+            const inputData = typeof customInput === 'string' ? JSON.parse(customInput) : customInput;
+
+            // Display standard custom inputs
+            const standardFields = Object.keys(inputData).filter(key =>
+                (key.includes('birthday_') || key.includes('lyrics_')) &&
+                !key.includes('custom_question')
+            );
+
+            if (standardFields.length > 0) {
+                description += 'Custom details: ';
+                const displayFields = standardFields.map(key => {
+                    const displayKey = key.replace('birthday_', '').replace('lyrics_', '').replace(/_/g, ' ');
+                    return `${displayKey}: ${inputData[key]}`;
+                });
+                description += displayFields.join(', ');
+            }
+
+            // Display custom questions prominently
+            const customQuestions = Object.keys(inputData).filter(key => key.includes('custom_question'));
+            if (customQuestions.length > 0) {
+                if (description) description += ' | ';
+                description += '🎯 CUSTOM QUESTIONS: ';
+                const questionResponses = customQuestions.map(key => {
+                    const questionType = key.includes('birthday') ? 'Birthday' : 'Lyrics';
+                    return `${questionType}: "${inputData[key]}"`;
+                });
+                description += questionResponses.join(' | ');
+            }
+
+            return description || 'Custom order with additional details';
+        }
+
         // Load custom requests and orders with custom input
         async function loadCustomRequests() {
             try {
@@ -1325,7 +1362,7 @@
                             type: 'order',
                             customer_name: order.customer_name,
                             product_type: order.product_name,
-                            concept_description: `Custom input: ${JSON.stringify(order.custom_input)}`,
+                            concept_description: formatCustomInputDescription(order.custom_input),
                             quantity: order.quantity,
                             timeline: 'standard',
                             budget_range: `$${order.total_price}`,
@@ -1434,6 +1471,12 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // View order with custom input details
+        window.viewOrderWithCustomInput = async function(orderNumber) {
+            // Redirect to orders page and open the modal for this order
+            window.location.href = `orders.html?highlight=${orderNumber}`;
         }
 
         // View custom request details

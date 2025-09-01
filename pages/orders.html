@@ -282,6 +282,16 @@
           document.getElementById('orderModal').classList.add('hidden');
         }
       });
+
+      // Check for highlight parameter (when coming from admin dashboard)
+      const urlParams = new URLSearchParams(window.location.search);
+      const highlightOrder = urlParams.get('highlight');
+      if (highlightOrder) {
+        // Wait for orders to load, then find and open the highlighted order
+        setTimeout(() => {
+          // This will be handled by the loadOrders callback
+        }, 1000);
+      }
     });
   </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>

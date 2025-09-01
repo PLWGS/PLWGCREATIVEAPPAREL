@@ -1368,13 +1368,113 @@ app.post('/api/orders', validateOrder, async (req, res) => {
     const order = orderResult.rows[0];
     
     // Create order items
+    let hasCustomInput = false;
     for (const item of items) {
       await pool.query(`
         INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color, image_url, custom_input)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       `, [order.id, item.product_id, item.product_name, item.quantity, item.unit_price, item.total_price, item.size, item.color, item.image_url, item.custom_input]);
+
+      // Check if this item has custom input
+      if (item.custom_input && item.custom_input !== '{}' && item.custom_input !== 'null') {
+        hasCustomInput = true;
+      }
     }
-    
+
+    // Send email notification to admin if order has custom input
+    if (hasCustomInput) {
+      try {
+        const adminEmail = process.env.ADMIN_EMAIL || 'lori@plwgcreativeapparel.com';
+
+        // Build custom input summary
+        let customInputSummary = '';
+        items.forEach((item, index) => {
+          if (item.custom_input && item.custom_input !== '{}' && item.custom_input !== 'null') {
+            const inputData = typeof item.custom_input === 'string' ? JSON.parse(item.custom_input) : item.custom_input;
+
+            customInputSummary += `\n\n📦 ITEM ${index + 1}: ${item.product_name}\n`;
+            customInputSummary += `   Size: ${item.size}, Color: ${item.color}, Quantity: ${item.quantity}\n`;
+
+            // Standard custom inputs
+            const standardFields = Object.keys(inputData).filter(key =>
+              (key.includes('birthday_') || key.includes('lyrics_')) &&
+              !key.includes('custom_question')
+            );
+
+            if (standardFields.length > 0) {
+              customInputSummary += `   Standard Details:\n`;
+              standardFields.forEach(key => {
+                const displayKey = key.replace('birthday_', '').replace('lyrics_', '').replace(/_/g, ' ');
+                customInputSummary += `     ${displayKey}: ${inputData[key]}\n`;
+              });
+            }
+
+            // Custom questions
+            const customQuestions = Object.keys(inputData).filter(key => key.includes('custom_question'));
+            if (customQuestions.length > 0) {
+              customInputSummary += `   🎯 CUSTOM QUESTIONS:\n`;
+              customQuestions.forEach(key => {
+                const questionType = key.includes('birthday') ? 'Birthday Question' : 'Lyrics Question';
+                customInputSummary += `     ${questionType}: "${inputData[key]}"\n`;
+              });
+            }
+          }
+        });
+
+        const mailOptions = {
+          from: process.env.SMTP_USER,
+          to: adminEmail,
+          subject: `🚨 NEW ORDER WITH CUSTOM INPUT - ${orderNumber}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #00bcd4; border-bottom: 2px solid #00bcd4; padding-bottom: 10px;">
+                🎨 New Order with Custom Input!
+              </h1>
+
+              <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #333;">Order Details:</h2>
+                <p><strong>Order #:</strong> ${orderNumber}</p>
+                <p><strong>Customer:</strong> ${customer_name}</p>
+                <p><strong>Email:</strong> ${customer_email}</p>
+                <p><strong>Total:</strong> $${total_amount}</p>
+                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+              </div>
+
+              <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #856404;">🎯 CUSTOM INPUT DETAILS:</h2>
+                <pre style="white-space: pre-wrap; font-family: monospace; background: white; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">${customInputSummary}</pre>
+              </div>
+
+              <div style="background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                <p style="margin: 0;"><strong>📧 Action Required:</strong> This order contains custom personalization requests that need your attention.</p>
+              </div>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.ADMIN_URL || 'http://localhost:3000'}/pages/admin.html"
+                   style="background: #00bcd4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                  View in Admin Dashboard
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #dee2e6; margin: 30px 0;">
+
+              <p style="color: #6c757d; font-size: 12px;">
+                This is an automated notification for orders containing custom input.
+                Please log into your admin dashboard to process this order.
+              </p>
+            </div>
+          `
+        };
+
+        await transporter.sendMail(mailOptions);
+        logger.info(`✅ Admin notification sent for custom order ${orderNumber}`);
+
+      } catch (emailError) {
+        logger.error('❌ Failed to send admin notification email:', emailError);
+        // Don't fail the order creation if email fails
+      }
+    }
+
     res.json({ order });
   } catch (error) {
     logger.error('Error creating order:', error);
