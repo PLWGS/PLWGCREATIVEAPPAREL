@@ -6,6 +6,10 @@
     <title id="pageTitle">Product Details - PlwgsCreativeApparel | Be Loud. Be Seen. Be You.</title>
     <meta name="description" content="Embrace the darkness with our spine-chilling Midnight Horror Skull design. Premium quality t-shirt featuring intricate gothic artwork that speaks to bold personalities." />
     <link rel="stylesheet" href="../css/main.css" />
+    
+    <!-- OpenSeadragon Deep Zoom Library -->
+    <script src="https://unpkg.com/openseadragon@3.1.1/build/openseadragon/openseadragon.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/openseadragon@3.1.1/build/openseadragon/openseadragon.css" />
     <style>
         /* Particle Animation Styles */
         .particles-container {
@@ -188,6 +192,53 @@
             max-height: 90%;
             object-fit: contain;
         }
+        
+        /* OpenSeadragon Deep Zoom Modal */
+        .openseadragon-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+        }
+
+        .openseadragon-modal.active {
+            display: block;
+        }
+
+        .openseadragon-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .close-deep-zoom-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(0, 188, 212, 0.9);
+            color: black;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-deep-zoom-btn:hover {
+            background: rgba(0, 188, 212, 1);
+            transform: scale(1.1);
+        }
     </style>
 
 </head>
@@ -317,9 +368,9 @@
                                 </svg>
                             </div>
                             
-                            <!-- 360° View Badge -->
+                            <!-- Deep Zoom Badge -->
                             <div class="absolute bottom-4 left-4 bg-accent text-black px-3 py-1 rounded-full text-xs font-bold">
-                                360° View Available
+                                Deep Zoom Available
                             </div>
                         </div>
                     </div>
@@ -1043,6 +1094,12 @@
     <!-- Zoom Modal -->
     <div id="zoomModal" class="zoom-modal">
         <img id="zoomedImage" src alt="Zoomed Product Image" />
+    </div>
+    
+    <!-- OpenSeadragon Deep Zoom Modal -->
+    <div id="openseadragonModal" class="openseadragon-modal">
+        <div id="openseadragonViewer" class="openseadragon-container"></div>
+        <button id="closeDeepZoomBtn" class="close-deep-zoom-btn">×</button>
     </div>
 
     <!-- JavaScript -->
@@ -2645,6 +2702,93 @@
         // Also try calling it immediately
         console.log('🔍 Calling loadProductData immediately');
         loadProductData();
+        
+        // OpenSeadragon Deep Zoom Implementation
+        let openseadragonViewer = null;
+        
+        // Initialize OpenSeadragon when main image is clicked
+        document.getElementById('mainImage').addEventListener('click', function() {
+            if (this.src && !this.src.includes('data:image/svg+xml')) {
+                openDeepZoom(this.src);
+            }
+        });
+        
+        // Close deep zoom modal
+        document.getElementById('closeDeepZoomBtn').addEventListener('click', closeDeepZoom);
+        document.getElementById('openseadragonModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeepZoom();
+            }
+        });
+        
+        // Handle escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('openseadragonModal').classList.contains('active')) {
+                closeDeepZoom();
+            }
+        });
+        
+        function openDeepZoom(imageSrc) {
+            console.log('🔍 Opening deep zoom for:', imageSrc);
+            
+            // Check if OpenSeadragon is available
+            if (typeof OpenSeadragon === 'undefined') {
+                console.error('❌ OpenSeadragon not loaded');
+                alert('Deep zoom not available. Please refresh the page.');
+                return;
+            }
+            
+            // Show modal
+            document.getElementById('openseadragonModal').classList.add('active');
+            
+            // Initialize viewer
+            try {
+                openseadragonViewer = OpenSeadragon({
+                    id: 'openseadragonViewer',
+                    prefixUrl: 'https://unpkg.com/openseadragon@3.1.1/build/openseadragon/images/',
+                    tileSources: {
+                        type: 'image',
+                        url: imageSrc
+                    },
+                    showNavigator: true,
+                    navigatorPosition: 'BOTTOM_RIGHT',
+                    navigatorSizeRatio: 0.15,
+                    showNavigationControl: false,
+                    showZoomControl: false,
+                    showHomeControl: false,
+                    showFullPageControl: false,
+                    showRotationControl: false,
+                    gestureSettingsMouse: {
+                        clickToZoom: true,
+                        dblClickToZoom: true,
+                        scrollToZoom: true
+                    },
+                    gestureSettingsTouch: {
+                        pinchToZoom: true,
+                        flickEnabled: true
+                    },
+                    zoomPerClick: 2.0,
+                    zoomPerScroll: 1.2,
+                    minZoomLevel: 0.5,
+                    maxZoomLevel: 10
+                });
+                
+                console.log('✅ OpenSeadragon viewer initialized');
+            } catch (error) {
+                console.error('❌ OpenSeadragon initialization failed:', error);
+                alert('Failed to initialize deep zoom. Please try again.');
+                closeDeepZoom();
+            }
+        }
+        
+        function closeDeepZoom() {
+            if (openseadragonViewer) {
+                openseadragonViewer.destroy();
+                openseadragonViewer = null;
+            }
+            document.getElementById('openseadragonModal').classList.remove('active');
+            console.log('🔍 Deep zoom closed');
+        }
     </script>
 <script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
 <script>
