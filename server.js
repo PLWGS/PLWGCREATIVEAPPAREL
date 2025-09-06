@@ -207,9 +207,14 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASSWORD
   },
   // Add a timeout to prevent long waits on connection issues
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000, // 10 seconds
-  socketTimeout: 10000, // 10 seconds
+  connectionTimeout: 30000, // 30 seconds
+  greetingTimeout: 30000,   // 30 seconds
+  socketTimeout: 30000,     // 30 seconds
+  // Add additional options for better reliability
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  rateLimit: 10 // max 10 messages per second
 });
 
 // Helper function to check database availability
@@ -5969,6 +5974,54 @@ app.get('/api/admin/products/:id/custom-inputs', authenticateToken, async (req, 
   } catch (error) {
     logger.error('Error fetching product custom inputs:', error);
     res.status(500).json({ error: 'Failed to fetch product custom inputs' });
+  }
+});
+
+// Manual email trigger for testing (bypasses webhook)
+app.post('/api/trigger-payment-email', async (req, res) => {
+  try {
+    const { orderNumber } = req.body;
+    
+    if (!orderNumber) {
+      return res.status(400).json({ error: 'Order number is required' });
+    }
+
+    // Get order details
+    const orderResult = await pool.query(`
+      SELECT o.*, c.email, c.first_name, c.last_name
+      FROM orders o
+      LEFT JOIN customers c ON o.customer_id = c.id
+      WHERE o.order_number = $1
+    `, [orderNumber]);
+
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const order = orderResult.rows[0];
+
+    // Get order items
+    const itemsResult = await pool.query(`
+      SELECT oi.*, p.name as product_name, p.image_url
+      FROM order_items oi
+      LEFT JOIN products p ON oi.product_id = p.id
+      WHERE oi.order_id = $1
+    `, [order.id]);
+
+    const orderItems = itemsResult.rows;
+
+    // Send emails
+    await sendPaymentConfirmationEmails(order, orderItems, { id: 'manual-trigger' });
+
+    res.json({ 
+      success: true, 
+      message: 'Payment confirmation emails sent manually',
+      orderNumber: order.order_number
+    });
+
+  } catch (error) {
+    logger.error('❌ Error triggering payment email:', error);
+    res.status(500).json({ error: 'Failed to send emails' });
   }
 });
 
