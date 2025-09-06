@@ -4115,6 +4115,41 @@ app.get('/api/products/featured', async (req, res) => {
   }
 });
 
+// Get top categories for shop dropdown (public endpoint)
+app.get('/api/categories/top', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT category, COUNT(*) as product_count 
+      FROM products 
+      WHERE category IS NOT NULL AND category != '' AND is_active = true
+      GROUP BY category 
+      ORDER BY product_count DESC 
+      LIMIT 4
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    logger.error('Error fetching top categories:', error);
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+// Get featured products for shop dropdown (public endpoint)
+app.get('/api/products/dropdown-featured', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, name, price, image_url, category
+      FROM products 
+      WHERE is_active = true AND (is_featured = true OR in_featured = true)
+      ORDER BY created_at DESC 
+      LIMIT 3
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    logger.error('Error fetching dropdown featured products:', error);
+    res.status(500).json({ error: 'Failed to fetch featured products' });
+  }
+});
+
 // Smart Product Recommendations API (authenticated users)
 app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
   if (!pool) {

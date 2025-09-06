@@ -1277,6 +1277,45 @@
             return femaleNames.includes(name.split(' ')[0]);
         }
 
+        // Load dynamic shop dropdown data
+        async function loadShopDropdownData() {
+            try {
+                // Fetch categories and featured products in parallel
+                const [categoriesResponse, featuredResponse] = await Promise.all([
+                    fetch('/api/categories/top'),
+                    fetch('/api/products/dropdown-featured')
+                ]);
+                
+                const categories = await categoriesResponse.json();
+                const featuredProducts = await featuredResponse.json();
+                
+                // Update categories in dropdown
+                const categoriesList = document.querySelector('.glass-card .grid .space-y-2');
+                if (categoriesList && categories.length > 0) {
+                    categoriesList.innerHTML = categories.map(category => 
+                        `<li><a href="shop.html?category=${encodeURIComponent(category.category)}" class="text-text-secondary hover:text-accent transition-colors">${category.category}</a></li>`
+                    ).join('');
+                }
+                
+                // Update featured products in dropdown
+                const featuredSection = document.querySelector('.glass-card .grid > div:last-child .space-y-2');
+                if (featuredSection && featuredProducts.length > 0) {
+                    const firstProduct = featuredProducts[0];
+                    featuredSection.innerHTML = `
+                        <a href="product.html?id=${firstProduct.id}" class="block group">
+                            <img src="${firstProduct.image_url}" alt="${firstProduct.name}" class="w-full h-20 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                            <p class="text-xs text-text-secondary mt-2 group-hover:text-accent transition-colors">${firstProduct.name.length > 50 ? firstProduct.name.substring(0, 50) + '...' : firstProduct.name} - $${firstProduct.price}</p>
+                        </a>
+                    `;
+                }
+                
+                console.log('✅ Shop dropdown data loaded successfully');
+            } catch (error) {
+                console.error('❌ Error loading shop dropdown data:', error);
+                // Keep the existing hardcoded content as fallback
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
           const [hero, featured, products] = await Promise.all([fetchHero(), fetchFeatured(), fetchPublicProducts()]);
           
@@ -1297,6 +1336,9 @@
 
           // Load all 755 Etsy reviews from JSON file
           await loadEtsyReviews();
+          
+          // Load dynamic shop dropdown data
+          await loadShopDropdownData();
           
           // Add event listener for show more reviews button
           const showMoreBtn = document.getElementById('showMoreReviewsBtn');
