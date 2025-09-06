@@ -5453,12 +5453,13 @@ app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async
       return res.status(400).json({ error: 'Invalid webhook data format' });
     }
     
-    logger.info('🔔 PayPal webhook received:', webhookData.event_type);
+    logger.info('🔔 PayPal webhook received - Event Type:', webhookData.event_type);
     logger.info('🔔 Webhook data:', JSON.stringify(webhookData, null, 2));
     logger.info('🔔 Webhook headers:', req.headers);
 
     // Handle different webhook events
     if (webhookData.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+      logger.info('✅ Processing PAYMENT.CAPTURE.COMPLETED event');
       await handlePaymentCompleted(webhookData);
     } else if (webhookData.event_type === 'PAYMENT.CAPTURE.DENIED') {
       await handlePaymentDenied(webhookData);
@@ -5476,11 +5477,18 @@ app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async
 // Handle completed payment
 async function handlePaymentCompleted(webhookData) {
   try {
+    logger.info('🔍 Full webhook data structure:', JSON.stringify(webhookData, null, 2));
+    
     const capture = webhookData.resource;
-    const orderId = capture.custom_id; // This should contain our order ID
+    logger.info('🔍 Webhook resource:', JSON.stringify(capture, null, 2));
+    
+    const orderId = capture?.custom_id; // This should contain our order ID
+    logger.info('🔍 Extracted order ID:', orderId);
     
     if (!orderId) {
       logger.error('❌ No order ID found in webhook data');
+      logger.error('❌ Available keys in resource:', capture ? Object.keys(capture) : 'No resource');
+      logger.error('❌ Available keys in webhook data:', Object.keys(webhookData));
       return;
     }
 
