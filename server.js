@@ -5560,15 +5560,32 @@ async function handlePaymentRefunded(webhookData) {
 // Send payment confirmation emails
 async function sendPaymentConfirmationEmails(order, orderItems, paymentDetails) {
   try {
+    logger.info('📧 Starting to send payment confirmation emails...');
+    logger.info('📧 Customer email:', order.email);
+    logger.info('📧 Admin emails:', process.env.ADMIN_EMAIL, process.env.PLWGSCREATIVEAPPAREL_EMAIL);
+    
     // Customer confirmation email
-    await sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDetails);
+    try {
+      await sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDetails);
+      logger.info('✅ Customer confirmation email sent');
+    } catch (customerError) {
+      logger.error('❌ Customer email failed:', customerError);
+      throw customerError;
+    }
     
     // Admin notification email
-    await sendAdminPaymentNotificationEmail(order, orderItems, paymentDetails);
+    try {
+      await sendAdminPaymentNotificationEmail(order, orderItems, paymentDetails);
+      logger.info('✅ Admin notification emails sent');
+    } catch (adminError) {
+      logger.error('❌ Admin email failed:', adminError);
+      throw adminError;
+    }
     
     logger.info('✅ Payment confirmation emails sent for order:', order.order_number);
   } catch (error) {
     logger.error('❌ Error sending payment confirmation emails:', error);
+    throw error; // Re-throw to be caught by caller
   }
 }
 
@@ -5999,6 +6016,13 @@ app.post('/api/trigger-payment-email', async (req, res) => {
     }
 
     const order = orderResult.rows[0];
+    
+    logger.info('📧 Order details for email:', {
+      orderNumber: order.order_number,
+      customerEmail: order.email,
+      customerName: order.first_name + ' ' + order.last_name,
+      totalAmount: order.total_amount
+    });
 
     // Get order items
     const itemsResult = await pool.query(`
@@ -6009,19 +6033,33 @@ app.post('/api/trigger-payment-email', async (req, res) => {
     `, [order.id]);
 
     const orderItems = itemsResult.rows;
+    
+    logger.info('📦 Order items:', orderItems.length);
 
-    // Send emails
-    await sendPaymentConfirmationEmails(order, orderItems, { id: 'manual-trigger' });
+    // Send emails with detailed error handling
+    try {
+      await sendPaymentConfirmationEmails(order, orderItems, { id: 'manual-trigger' });
+      logger.info('✅ Payment confirmation emails sent successfully');
+    } catch (emailError) {
+      logger.error('❌ Email sending failed:', emailError);
+      return res.status(500).json({ 
+        success: false,
+        error: 'Email sending failed', 
+        details: emailError.message,
+        orderNumber: order.order_number
+      });
+    }
 
     res.json({ 
       success: true, 
       message: 'Payment confirmation emails sent manually',
-      orderNumber: order.order_number
+      orderNumber: order.order_number,
+      customerEmail: order.email
     });
 
   } catch (error) {
     logger.error('❌ Error triggering payment email:', error);
-    res.status(500).json({ error: 'Failed to send emails' });
+    res.status(500).json({ error: 'Failed to send emails', details: error.message });
   }
 });
 
