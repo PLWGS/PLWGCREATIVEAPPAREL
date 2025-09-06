@@ -5413,10 +5413,15 @@ app.post('/api/orders/create', authenticateCustomer, async (req, res) => {
 // PAYPAL WEBHOOK ENDPOINT
 // ========================================
 
-// Test webhook endpoint
-app.post('/api/test-webhook', express.json(), async (req, res) => {
-  logger.info('🧪 Test webhook called with data:', JSON.stringify(req.body, null, 2));
-  res.json({ success: true, message: 'Test webhook received', data: req.body });
+// Test webhook endpoint with error handling
+app.post('/api/test-webhook', express.json({ limit: '10mb' }), async (req, res) => {
+  try {
+    logger.info('🧪 Test webhook called with data:', JSON.stringify(req.body, null, 2));
+    res.json({ success: true, message: 'Test webhook received', data: req.body });
+  } catch (error) {
+    logger.error('❌ Test webhook error:', error.message);
+    res.status(400).json({ error: 'Invalid JSON data' });
+  }
 });
 
 // PayPal webhook endpoint for payment notifications
@@ -5490,13 +5495,23 @@ async function handlePaymentCompleted(webhookData) {
     const capture = webhookData.resource;
     logger.info('🔍 Webhook resource:', JSON.stringify(capture, null, 2));
     
-    const orderId = capture?.custom_id; // This should contain our order ID
+    // Try multiple possible locations for order ID
+    let orderId = capture?.custom_id || 
+                  capture?.invoice_id || 
+                  capture?.id || 
+                  webhookData?.resource?.id ||
+                  webhookData?.id;
+    
     logger.info('🔍 Extracted order ID:', orderId);
+    logger.info('🔍 Trying custom_id:', capture?.custom_id);
+    logger.info('🔍 Trying invoice_id:', capture?.invoice_id);
+    logger.info('🔍 Trying resource.id:', capture?.id);
     
     if (!orderId) {
       logger.error('❌ No order ID found in webhook data');
       logger.error('❌ Available keys in resource:', capture ? Object.keys(capture) : 'No resource');
       logger.error('❌ Available keys in webhook data:', Object.keys(webhookData));
+      logger.error('❌ Full webhook data:', JSON.stringify(webhookData, null, 2));
       return;
     }
 
@@ -6483,6 +6498,32 @@ If you receive this, your email configuration is working!`,
       }
     });
   }
+});
+
+// ========================================
+// GLOBAL ERROR HANDLING
+// ========================================
+
+// Global error handler for unhandled errors
+process.on('uncaughtException', (error) => {
+  logger.error('❌ Uncaught Exception:', error);
+  // Don't exit the process, just log the error
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit the process, just log the error
+});
+
+// JSON parsing error handler
+app.use((error, req, res, next) => {
+  if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
+    logger.error('❌ JSON parsing error:', error.message);
+    logger.error('❌ Request URL:', req.url);
+    logger.error('❌ Request method:', req.method);
+    return res.status(400).json({ error: 'Invalid JSON format' });
+  }
+  next(error);
 });
 
 // Initialize admin credentials and start server
