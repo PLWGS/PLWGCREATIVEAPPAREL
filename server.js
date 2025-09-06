@@ -5594,8 +5594,10 @@ async function handlePaymentCompleted(webhookData) {
     logger.info('🔍 Capture ID:', capture?.id);
     logger.info('🔍 Webhook resource ID:', webhookData?.resource?.id);
     logger.info('🔍 Custom ID (our database order ID):', capture?.custom_id);
+    logger.info('🔍 Full webhook data:', JSON.stringify(webhookData, null, 2));
     logger.info('🔍 Full capture object:', JSON.stringify(capture, null, 2));
     logger.info('🔍 All capture keys:', capture ? Object.keys(capture) : 'No capture');
+    logger.info('🔍 All webhook keys:', Object.keys(webhookData));
     
     if (!orderId) {
       logger.error('❌ No order ID found in webhook data');
