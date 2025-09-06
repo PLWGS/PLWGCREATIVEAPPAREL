@@ -85,20 +85,28 @@
 - **Webhook data structure**: PayPal sends Payment ID in webhook, but we need Order ID to find order
 - **Current approach**: Using `capture.custom_id` (our database order ID) to find orders
 
+### 6. Critical Discovery (September 6, 2025 - 3:38 PM):
+- **Webhook is being received**: Server logs show webhook calls are reaching the server
+- **Missing custom_id**: PayPal webhook data does not contain `custom_id` field
+- **Error**: "❌ No custom_id found in webhook data"
+- **Root cause**: PayPal is not sending the `custom_id` we set during order creation
+- **Added comprehensive debugging**: Full webhook data structure logging to identify where order ID is located
+
 ## 🚨 CRITICAL ISSUES REMAINING
 
-### 1. Webhook Processing Status Unknown:
-**Problem**: Recent changes to order lookup logic need testing
+### 1. Missing custom_id in PayPal Webhook:
+**Problem**: PayPal webhook does not contain `custom_id` field needed for order lookup
 **Evidence**: 
-- Changed from using `payment_id` to `custom_id` for order lookup
-- Server was crashing due to syntax error (now fixed)
-- Need to test if webhook now processes orders correctly
+- Webhook is being received by server ✅
+- Error: "❌ No custom_id found in webhook data"
+- We set `custom_id: order.id.toString()` during order creation
+- PayPal is not sending this field back in the webhook
 
-**Testing Required**:
-- Make test purchase and check server logs
-- Verify webhook receives and processes order correctly
-- Confirm order status updates to "completed"
-- Verify emails are sent
+**Possible Solutions**:
+- Check if `custom_id` is in a different location in webhook data
+- Use alternative method to match webhook to order (e.g., by PayPal Order ID)
+- Verify PayPal webhook configuration includes custom_id
+- Check if we need to use a different field name
 
 ### 2. Order Status Not Updating:
 **Problem**: Orders stay in "pending" status instead of "completed"
@@ -110,24 +118,23 @@
 
 ## 🎯 IMMEDIATE ACTION REQUIRED
 
-### Step 1: Test Current Fix
-1. **Make a test purchase** to verify webhook processing
-2. **Check server logs** for webhook reception and processing
-3. **Verify order status** updates to "completed"
-4. **Check email delivery** to both customer and admin
+### Step 1: Analyze Webhook Data Structure
+1. **Make a test purchase** to get full webhook data
+2. **Check server logs** for complete webhook data structure
+3. **Find where order ID is located** in the webhook data
+4. **Identify alternative fields** to match webhook to order
 
-### Step 2: If Still Not Working
-1. Test webhook URL accessibility:
-   ```bash
-   curl -X GET https://plwgscreativeapparel.com/api/paypal/webhook
-   ```
-2. Use PayPal webhook simulator in PayPal dashboard
-3. Check server logs for webhook calls
+### Step 2: Fix Order Lookup Method
+1. **Use PayPal Order ID**: Match webhook by the Order ID we stored in `payment_id`
+2. **Check webhook data structure**: Look for order identification in different fields
+3. **Implement fallback lookup**: Try multiple methods to find the order
+4. **Test order matching**: Verify orders are found and updated correctly
 
-### Step 3: Debug Order Lookup
-1. Verify `custom_id` is being sent in webhook data
-2. Check if order lookup by `custom_id` works
-3. Add more debugging logs if needed
+### Step 3: Verify PayPal Configuration
+1. Check if `custom_id` needs to be enabled in PayPal webhook settings
+2. Verify webhook event types include custom data
+3. Test with PayPal webhook simulator
+4. Check PayPal documentation for custom_id handling
 
 ### Step 4: Manual Order Processing (Backup)
 1. Create manual endpoint to process completed orders
@@ -222,4 +229,4 @@ railway logs
 **Status**: CRITICAL - Webhook processing needs testing
 **Priority**: URGENT - Customer experience impacted
 **Assigned**: New agent needed
-**Last Updated**: September 6, 2025 - Fixed syntax error, changed order lookup logic
+**Last Updated**: September 6, 2025 - 3:38 PM - Discovered missing custom_id in webhook data
