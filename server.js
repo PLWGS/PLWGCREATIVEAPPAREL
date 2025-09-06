@@ -170,7 +170,24 @@ app.use(cors({
 }));
 
 
-app.use(express.json({ limit: '50mb' }));
+// Raw body parser for webhooks
+app.use('/api/paypal/webhook', express.raw({ type: 'application/json' }));
+
+// JSON parser with error handling
+app.use(express.json({ 
+  limit: '50mb',
+  verify: (req, res, buf) => {
+    try {
+      JSON.parse(buf);
+    } catch (e) {
+      logger.error('❌ Malformed JSON detected:', e.message);
+      logger.error('❌ Request URL:', req.url);
+      logger.error('❌ Raw body:', buf.toString());
+      throw new Error('Invalid JSON');
+    }
+  }
+}));
+
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static('.'));
 app.use('/public', express.static('public'));
@@ -6592,6 +6609,19 @@ process.on('unhandledRejection', (reason, promise) => {
 app.use((error, req, res, next) => {
   if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
     logger.error('❌ JSON parsing error:', error.message);
+    logger.error('❌ Request URL:', req.url);
+    logger.error('❌ Request method:', req.method);
+    logger.error('❌ Request headers:', req.headers);
+    logger.error('❌ Raw body:', req.body);
+    return res.status(400).json({ error: 'Invalid JSON format' });
+  }
+  next(error);
+});
+
+// Additional error handler for unhandled JSON parsing
+app.use((error, req, res, next) => {
+  if (error.message && error.message.includes('JSON')) {
+    logger.error('❌ JSON Error:', error.message);
     logger.error('❌ Request URL:', req.url);
     logger.error('❌ Request method:', req.method);
     return res.status(400).json({ error: 'Invalid JSON format' });
