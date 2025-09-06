@@ -94,6 +94,10 @@ jspm_packages/
 # Project documentation with sensitive information
 COMPREHENSIVE_PROJECT_REVIEW.md
 
+# PayPal setup files with sensitive credentials
+PAYPAL_WEBHOOK_SETUP.md
+paypal_env_setup.md
+
 # Test files that might contain sensitive data
 *test*.js
 *smtp*.js
