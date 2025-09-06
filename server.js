@@ -5248,7 +5248,7 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
 
     const response = await paypalClient.execute(request);
     
-    // Update order with PayPal order ID
+    // Update order with PayPal order ID (we'll update with payment_id when webhook comes)
     await pool.query(`
       UPDATE orders SET payment_id = $1 WHERE id = $2
     `, [response.result.id, order.id]);
@@ -5606,121 +5606,44 @@ async function handlePaymentCompleted(webhookData) {
     }
 
     // Update order status in database using PayPal payment ID
+    // First, find the order by the PayPal Order ID (stored in payment_id)
+    const orderResult = await pool.query(`
+      SELECT id FROM orders WHERE payment_id = $1
+    `, [orderId]);
+    
+    if (orderResult.rows.length === 0) {
+      logger.error('❌ Order not found for PayPal Order ID:', orderId);
+      return;
+    }
+    
+    const orderIdToUpdate = orderResult.rows[0].id;
+    
+    // Update the order with the actual payment ID from the webhook
     await pool.query(`
       UPDATE orders 
       SET payment_status = 'completed', 
           payment_details = $1,
+          payment_id = $2,
           updated_at = CURRENT_TIMESTAMP
-      WHERE payment_id = $2
-    `, [JSON.stringify(capture), orderId]);
+      WHERE id = $3
+    `, [JSON.stringify(capture), capture.id, orderIdToUpdate]);
 
-    // Get order details for email - try multiple approaches
-    // First try to find by payment_id (PayPal order ID)
+    // Get order details for email - use the order ID we just found
     let orderResult = await pool.query(`
       SELECT o.*, c.email, c.first_name, c.last_name
       FROM orders o
       JOIN customers c ON o.customer_id = c.id
-      WHERE o.payment_id = $1
-    `, [orderId]);
+      WHERE o.id = $1
+    `, [orderIdToUpdate]);
     
-    // If not found, try to find by capture ID in payment_details
+    // Order should be found since we just updated it
     if (orderResult.rows.length === 0) {
-      logger.info('🔍 Trying to find order by capture ID in payment_details...');
-      orderResult = await pool.query(`
-        SELECT o.*, c.email, c.first_name, c.last_name
-        FROM orders o
-        JOIN customers c ON o.customer_id = c.id
-        WHERE o.payment_details->>'id' = $1
-      `, [captureId]);
-    }
-    
-    // If still not found, try to find by any PayPal ID in payment_details
-    if (orderResult.rows.length === 0) {
-      logger.info('🔍 Trying to find order by any PayPal ID in payment_details...');
-      orderResult = await pool.query(`
-        SELECT o.*, c.email, c.first_name, c.last_name
-        FROM orders o
-        JOIN customers c ON o.customer_id = c.id
-        WHERE o.payment_details::text LIKE $1
-      `, [`%${orderId}%`]);
-    }
-
-    // If not found by payment_id, try to find by custom_id (our database order ID)
-    if (orderResult.rows.length === 0) {
-      logger.warn('⚠️ Order not found by payment_id, trying database order ID lookup...');
-      
-      // Try to find by custom_id (our database order ID)
-      const customId = capture?.custom_id;
-      if (customId) {
-        logger.info('🔍 Trying to find order by database ID:', customId);
-        // Check if customId is a valid integer for database ID lookup
-        const numericId = parseInt(customId);
-        if (!isNaN(numericId)) {
-          orderResult = await pool.query(`
-            SELECT o.*, c.email, c.first_name, c.last_name
-            FROM orders o
-            JOIN customers c ON o.customer_id = c.id
-            WHERE o.id = $1
-          `, [numericId]);
-        } else {
-          logger.warn('⚠️ Custom ID is not numeric, cannot use for database lookup:', customId);
-        }
-      }
-      
-      // Try to find by order number if custom_id contains it
-      if (orderResult.rows.length === 0 && customId && customId.startsWith('PLW-')) {
-        logger.info('🔍 Trying to find order by order number:', customId);
-        orderResult = await pool.query(`
-          SELECT o.*, c.email, c.first_name, c.last_name
-          FROM orders o
-          JOIN customers c ON o.customer_id = c.id
-          WHERE o.order_number = $1
-        `, [customId]);
-      }
-    }
-
-    if (orderResult.rows.length === 0) {
-      logger.error('❌ Order not found for any ID. Payment ID:', orderId);
-      logger.error('❌ Capture custom_id:', capture?.custom_id);
-      logger.error('❌ Available capture fields:', capture ? Object.keys(capture) : 'No capture');
-      logger.error('❌ Full webhook data for debugging:', JSON.stringify(webhookData, null, 2));
-      
-      // Try to find any recent orders to see what payment_ids exist
-      const recentOrders = await pool.query(`
-        SELECT id, payment_id, order_number, created_at 
-        FROM orders 
-        WHERE created_at > NOW() - INTERVAL '1 hour'
-        ORDER BY created_at DESC 
-        LIMIT 5
-      `);
-      logger.error('❌ Recent orders in database:', recentOrders.rows);
-      
-      // Try to find order by partial payment ID match
-      const partialMatch = await pool.query(`
-        SELECT id, payment_id, order_number, created_at 
-        FROM orders 
-        WHERE payment_id LIKE $1
-        ORDER BY created_at DESC 
-        LIMIT 5
-      `, [`%${orderId.substring(0, 10)}%`]);
-      
-      logger.error('❌ Partial payment ID matches:', partialMatch.rows);
-      
-      // Try to find order by order number if custom_id contains it
-      if (capture?.custom_id) {
-        const orderNumberMatch = await pool.query(`
-          SELECT id, payment_id, order_number, created_at 
-          FROM orders 
-          WHERE order_number = $1
-          ORDER BY created_at DESC 
-          LIMIT 5
-        `, [capture.custom_id]);
-        
-        logger.error('❌ Order number matches:', orderNumberMatch.rows);
-      }
-      
+      logger.error('❌ Order not found for ID:', orderIdToUpdate);
       return;
     }
+    
+
+
 
     const order = orderResult.rows[0];
 
