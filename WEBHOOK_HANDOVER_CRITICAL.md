@@ -39,6 +39,54 @@
 - **Email**: Resend API (working)
 - **PayPal SDK**: @paypal/checkout-server-sdk
 
+### Database Schema (Orders Table):
+```sql
+CREATE TABLE orders (
+  id SERIAL PRIMARY KEY,
+  order_number VARCHAR(50) UNIQUE NOT NULL,
+  customer_id INTEGER REFERENCES customers(id),
+  customer_email VARCHAR(255),
+  customer_name VARCHAR(255),
+  total_amount NUMERIC(10,2) NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending',
+  shipping_address TEXT,
+  tracking_number VARCHAR(100),
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  subtotal NUMERIC(10,2),
+  shipping_amount NUMERIC(10,2) DEFAULT 0.00,
+  tax_amount NUMERIC(10,2) DEFAULT 0.00,
+  discount_amount NUMERIC(10,2) DEFAULT 0.00,
+  payment_method VARCHAR(50),
+  payment_id VARCHAR(255),  -- Stores PayPal Order ID
+  payment_status VARCHAR(50) DEFAULT 'pending',
+  payment_details JSONB
+);
+```
+
+**Key Fields:**
+- `id`: Our internal database order ID (auto-increment)
+- `payment_id`: Stores PayPal Order ID (set during order creation)
+- `order_number`: Human-readable order number (e.g., "PLW-2025-6068")
+- `payment_status`: Order payment status ("pending", "completed", "denied", "refunded")
+- `payment_details`: JSONB field storing PayPal webhook data
+
+**Current Database Data (Recent Orders):**
+```
+ id |    payment_id     | order_number  |         created_at
+----+-------------------+---------------+----------------------------
+ 47 | 5UX88325JV1550052 | PLW-2025-6068 | 2025-09-06 21:22:16.061784
+ 46 | 6R895101W6635542Y | PLW-2025-6792 | 2025-09-06 21:18:26.802364
+ 45 | 86H66577KS488670L | PLW-2025-7423 | 2025-09-06 21:09:57.42984
+ 44 | 02378978G95080823 | PLW-2025-4583 | 2025-09-06 21:03:24.5834
+ 43 | 6U50158015084220C | PLW-2025-8040 | 2025-09-06 20:39:28.040829
+```
+
+**Database Connection:**
+- **URL**: `postgresql://postgres:VUnnjQcJRFyEWKlrJbCiWsshrEpYkUbp@trolley.proxy.rlwy.net:19611/railway`
+- **PSQL Command**: `bin\psql.exe postgresql://postgres:VUnnjQcJRFyEWKlrJbCiWsshrEpYkUbp@trolley.proxy.rlwy.net:19611/railway`
+
 ### Key Files Modified:
 1. **`server.js`**: 
    - PayPal webhook endpoint at line 5498
