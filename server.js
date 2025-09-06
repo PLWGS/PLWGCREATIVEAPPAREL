@@ -5656,6 +5656,31 @@ async function handlePaymentCompleted(webhookData) {
         LIMIT 5
       `);
       logger.error('❌ Recent orders in database:', recentOrders.rows);
+      
+      // Try to find order by partial payment ID match
+      const partialMatch = await pool.query(`
+        SELECT id, payment_id, order_number, created_at 
+        FROM orders 
+        WHERE payment_id LIKE $1
+        ORDER BY created_at DESC 
+        LIMIT 5
+      `, [`%${orderId.substring(0, 10)}%`]);
+      
+      logger.error('❌ Partial payment ID matches:', partialMatch.rows);
+      
+      // Try to find order by order number if custom_id contains it
+      if (capture?.custom_id) {
+        const orderNumberMatch = await pool.query(`
+          SELECT id, payment_id, order_number, created_at 
+          FROM orders 
+          WHERE order_number = $1
+          ORDER BY created_at DESC 
+          LIMIT 5
+        `, [capture.custom_id]);
+        
+        logger.error('❌ Order number matches:', orderNumberMatch.rows);
+      }
+      
       return;
     }
 
