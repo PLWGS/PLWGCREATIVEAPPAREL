@@ -5696,7 +5696,7 @@ async function handlePaymentCompleted(webhookData) {
     // Send confirmation emails
     logger.info('📧 About to send confirmation emails for order:', orderIdToUpdate);
     try {
-      await sendPaymentConfirmationEmails(order, orderItems, capture);
+    await sendPaymentConfirmationEmails(order, orderItems, capture);
       logger.info('✅ Confirmation emails sent successfully for order:', orderIdToUpdate);
     } catch (emailError) {
       logger.error('❌ Email sending failed for order:', orderIdToUpdate, emailError);
