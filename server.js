@@ -5452,6 +5452,19 @@ app.post('/api/test-webhook', express.json({ limit: '10mb' }), async (req, res) 
   }
 });
 
+// Simple webhook test endpoint
+app.get('/api/paypal/webhook', (req, res) => {
+  logger.info('🔔 PayPal webhook GET request received!');
+  logger.info('🔔 Request URL:', req.url);
+  logger.info('🔔 Full URL:', req.protocol + '://' + req.get('host') + req.originalUrl);
+  res.json({ 
+    success: true, 
+    message: 'PayPal webhook endpoint is accessible',
+    timestamp: new Date().toISOString(),
+    url: req.protocol + '://' + req.get('host') + req.originalUrl
+  });
+});
+
 // Test PayPal webhook simulation
 app.post('/api/test-paypal-webhook', express.json(), async (req, res) => {
   try {
