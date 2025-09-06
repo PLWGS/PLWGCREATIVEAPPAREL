@@ -5534,18 +5534,24 @@ app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async
     
     let webhookData;
     try {
-      // Handle both string and object body types
-      if (typeof req.body === 'string') {
+      // Handle Buffer, string, and object body types
+      if (Buffer.isBuffer(req.body)) {
+        // Convert Buffer to string and parse JSON
+        const bodyString = req.body.toString('utf8');
+        logger.info('🔍 Webhook body string:', bodyString.substring(0, 200) + '...');
+        webhookData = JSON.parse(bodyString);
+      } else if (typeof req.body === 'string') {
         webhookData = JSON.parse(req.body);
       } else if (typeof req.body === 'object' && req.body !== null) {
         webhookData = req.body;
       } else {
-        throw new Error('Invalid webhook body type');
+        throw new Error('Invalid webhook body type: ' + typeof req.body);
       }
     } catch (parseError) {
       logger.error('❌ PayPal webhook JSON parsing error:', parseError.message);
       logger.error('❌ Webhook body type:', typeof req.body);
-      logger.error('❌ Webhook body content:', req.body);
+      logger.error('❌ Webhook body length:', req.body ? req.body.length : 'no body');
+      logger.error('❌ Webhook body preview:', req.body ? req.body.toString().substring(0, 200) : 'no body');
       return res.status(400).json({ error: 'Invalid webhook data format' });
     }
     
@@ -5620,12 +5626,18 @@ async function handlePaymentCompleted(webhookData) {
       const customId = capture?.custom_id;
       if (customId) {
         logger.info('🔍 Trying to find order by database ID:', customId);
-        orderResult = await pool.query(`
-          SELECT o.*, c.email, c.first_name, c.last_name
-          FROM orders o
-          JOIN customers c ON o.customer_id = c.id
-          WHERE o.id = $1
-        `, [customId]);
+        // Check if customId is a valid integer for database ID lookup
+        const numericId = parseInt(customId);
+        if (!isNaN(numericId)) {
+          orderResult = await pool.query(`
+            SELECT o.*, c.email, c.first_name, c.last_name
+            FROM orders o
+            JOIN customers c ON o.customer_id = c.id
+            WHERE o.id = $1
+          `, [numericId]);
+        } else {
+          logger.warn('⚠️ Custom ID is not numeric, cannot use for database lookup:', customId);
+        }
       }
     }
 
