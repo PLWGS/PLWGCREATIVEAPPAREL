@@ -207,14 +207,14 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASSWORD
   },
   // Add a timeout to prevent long waits on connection issues
-  connectionTimeout: 30000, // 30 seconds
-  greetingTimeout: 30000,   // 30 seconds
-  socketTimeout: 30000,     // 30 seconds
+  connectionTimeout: 15000, // 15 seconds
+  greetingTimeout: 15000,   // 15 seconds
+  socketTimeout: 15000,     // 15 seconds
   // Add additional options for better reliability
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
-  rateLimit: 10 // max 10 messages per second
+  pool: false, // Disable pooling for now
+  // Add debug logging
+  debug: process.env.NODE_ENV === 'development',
+  logger: process.env.NODE_ENV === 'development'
 });
 
 // Helper function to check database availability
@@ -5627,7 +5627,7 @@ async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDe
           
           <div class="item total">
             <div>Total Amount:</div>
-            <div>$${order.total_amount.toFixed(2)}</div>
+            <div>$${parseFloat(order.total_amount || 0).toFixed(2)}</div>
           </div>
         </div>
         
@@ -5715,7 +5715,7 @@ async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetai
           
           <div class="item total">
             <div>Total Amount:</div>
-            <div>$${order.total_amount.toFixed(2)}</div>
+            <div>$${parseFloat(order.total_amount || 0).toFixed(2)}</div>
           </div>
           
           <h4>Shipping Address:</h4>
@@ -5738,7 +5738,7 @@ async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetai
     const mailOptions = {
       from: `"${process.env.EMAIL_FROM_NAME || 'PLWG Creative Apparel'}" <${process.env.EMAIL_FROM}>`,
       to: adminEmail,
-      subject: `💰 New Payment: ${order.order_number} - $${order.total_amount.toFixed(2)}`,
+      subject: `💰 New Payment: ${order.order_number} - $${parseFloat(order.total_amount || 0).toFixed(2)}`,
       html: adminEmailHTML
     };
 
