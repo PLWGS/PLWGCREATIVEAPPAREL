@@ -7,9 +7,6 @@
     <meta name="description" content="Embrace the darkness with our spine-chilling Midnight Horror Skull design. Premium quality t-shirt featuring intricate gothic artwork that speaks to bold personalities." />
     <link rel="stylesheet" href="../css/main.css" />
     
-    <!-- OpenSeadragon Deep Zoom Library -->
-    <script src="https://unpkg.com/openseadragon@3.1.1/build/openseadragon/openseadragon.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/openseadragon@3.1.1/build/openseadragon/openseadragon.css" />
     <style>
         /* Particle Animation Styles */
         .particles-container {
@@ -193,27 +190,6 @@
             object-fit: contain;
         }
         
-        /* OpenSeadragon Deep Zoom Modal */
-        .openseadragon-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-        }
-
-        .openseadragon-modal.active {
-            display: block;
-        }
-
-        .openseadragon-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
 
         .close-deep-zoom-btn {
             position: absolute;
@@ -1096,11 +1072,6 @@
         <img id="zoomedImage" src alt="Zoomed Product Image" />
     </div>
     
-    <!-- OpenSeadragon Deep Zoom Modal -->
-    <div id="openseadragonModal" class="openseadragon-modal">
-        <div id="openseadragonViewer" class="openseadragon-container"></div>
-        <button id="closeDeepZoomBtn" class="close-deep-zoom-btn">×</button>
-    </div>
 
     <!-- JavaScript -->
     <script>
@@ -1590,6 +1561,25 @@
             });
         }
         
+        // Show login prompt function
+        function showLoginPrompt(message = 'Please log in to continue') {
+            const loginPrompt = document.createElement('div');
+            loginPrompt.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            loginPrompt.innerHTML = `
+                <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
+                    <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Login Required</h2>
+                    <p class="text-text-secondary mb-6">${message}</p>
+                    <div class="space-y-4">
+                        <button class="btn-primary w-full" onclick="window.location.href='customer-login.html'">Log In</button>
+                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" onclick="window.location.href='customer-login.html'">Create Account</button>
+                        <button class="text-text-secondary w-full py-2 hover:text-accent transition-colors" onclick="this.closest('.fixed').remove()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(loginPrompt);
+        }
+
         // Add to Cart functionality
         const addToCartBtn = document.getElementById('addToCartBtn');
         if (addToCartBtn) {
@@ -1598,8 +1588,17 @@
                     // Check if user is logged in
                     const token = localStorage.getItem('customerToken');
                     if (!token) {
-                        alert('Please log in to add items to cart');
-                        window.location.href = 'customer-login.html';
+                        // Show a better notification
+                        showLoginPrompt('You need to log in to add items to cart');
+                        return;
+                    }
+                    
+                    // Validate token format (basic check)
+                    if (typeof token !== 'string' || token.length < 10) {
+                        // Invalid token format, clear it and show login prompt
+                        localStorage.removeItem('customerToken');
+                        localStorage.removeItem('customerData');
+                        showLoginPrompt('Your session has expired. Please log in again.');
                         return;
                     }
                     
@@ -1714,6 +1713,15 @@
                     
                     if (!response.ok) {
                         const error = await response.json();
+                        
+                        // If token is invalid, clear it and show login prompt
+                        if (response.status === 401 || response.status === 403) {
+                            localStorage.removeItem('customerToken');
+                            localStorage.removeItem('customerData');
+                            showLoginPrompt('Your session has expired. Please log in again.');
+                            return;
+                        }
+                        
                         throw new Error(error.error || 'Failed to add to cart');
                     }
                     
@@ -2703,92 +2711,6 @@
         console.log('🔍 Calling loadProductData immediately');
         loadProductData();
         
-        // OpenSeadragon Deep Zoom Implementation
-        let openseadragonViewer = null;
-        
-        // Initialize OpenSeadragon when main image is clicked
-        document.getElementById('mainImage').addEventListener('click', function() {
-            if (this.src && !this.src.includes('data:image/svg+xml')) {
-                openDeepZoom(this.src);
-            }
-        });
-        
-        // Close deep zoom modal
-        document.getElementById('closeDeepZoomBtn').addEventListener('click', closeDeepZoom);
-        document.getElementById('openseadragonModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeDeepZoom();
-            }
-        });
-        
-        // Handle escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.getElementById('openseadragonModal').classList.contains('active')) {
-                closeDeepZoom();
-            }
-        });
-        
-        function openDeepZoom(imageSrc) {
-            console.log('🔍 Opening deep zoom for:', imageSrc);
-            
-            // Check if OpenSeadragon is available
-            if (typeof OpenSeadragon === 'undefined') {
-                console.error('❌ OpenSeadragon not loaded');
-                alert('Deep zoom not available. Please refresh the page.');
-                return;
-            }
-            
-            // Show modal
-            document.getElementById('openseadragonModal').classList.add('active');
-            
-            // Initialize viewer
-            try {
-                openseadragonViewer = OpenSeadragon({
-                    id: 'openseadragonViewer',
-                    prefixUrl: 'https://unpkg.com/openseadragon@3.1.1/build/openseadragon/images/',
-                    tileSources: {
-                        type: 'image',
-                        url: imageSrc
-                    },
-                    showNavigator: true,
-                    navigatorPosition: 'BOTTOM_RIGHT',
-                    navigatorSizeRatio: 0.15,
-                    showNavigationControl: false,
-                    showZoomControl: false,
-                    showHomeControl: false,
-                    showFullPageControl: false,
-                    showRotationControl: false,
-                    gestureSettingsMouse: {
-                        clickToZoom: true,
-                        dblClickToZoom: true,
-                        scrollToZoom: true
-                    },
-                    gestureSettingsTouch: {
-                        pinchToZoom: true,
-                        flickEnabled: true
-                    },
-                    zoomPerClick: 2.0,
-                    zoomPerScroll: 1.2,
-                    minZoomLevel: 0.5,
-                    maxZoomLevel: 10
-                });
-                
-                console.log('✅ OpenSeadragon viewer initialized');
-            } catch (error) {
-                console.error('❌ OpenSeadragon initialization failed:', error);
-                alert('Failed to initialize deep zoom. Please try again.');
-                closeDeepZoom();
-            }
-        }
-        
-        function closeDeepZoom() {
-            if (openseadragonViewer) {
-                openseadragonViewer.destroy();
-                openseadragonViewer = null;
-            }
-            document.getElementById('openseadragonModal').classList.remove('active');
-            console.log('🔍 Deep zoom closed');
-        }
     </script>
 <script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
 <script>

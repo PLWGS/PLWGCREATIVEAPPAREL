@@ -620,36 +620,9 @@
         }
 
         // Checkout function
-        async function checkout() {
-            try {
-                const token = localStorage.getItem('customerToken');
-                const shippingAddress = '123 Main St, City, State 12345'; // Default address for testing
-
-                const response = await fetch('/api/cart/checkout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ shipping_address: shippingAddress })
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Checkout successful:', result);
-                    
-                    alert(`Order created successfully! Order number: ${result.orderNumber}`);
-                    
-                    // Redirect to account page to see the new order
-                    window.location.href = 'account.html';
-                } else {
-                    const errorData = await response.json();
-                    alert('Checkout failed: ' + (errorData.error || 'Unknown error'));
-                }
-            } catch (error) {
-                console.error('Error during checkout:', error);
-                alert('Error during checkout. Please try again.');
-            }
+        function checkout() {
+            // Redirect to checkout page
+            window.location.href = 'checkout.html';
         }
 
         // Create thumbnail gallery

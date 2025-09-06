@@ -1098,20 +1098,32 @@
             }
         }
 
+        // Show login prompt function
+        function showLoginPrompt(message = 'Please log in to continue') {
+            const loginPrompt = document.createElement('div');
+            loginPrompt.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            loginPrompt.innerHTML = `
+                <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
+                    <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Login Required</h2>
+                    <p class="text-text-secondary mb-6">${message}</p>
+                    <div class="space-y-4">
+                        <button class="btn-primary w-full" onclick="window.location.href='customer-login.html'">Log In</button>
+                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" onclick="window.location.href='customer-login.html'">Create Account</button>
+                        <button class="text-text-secondary w-full py-2 hover:text-accent transition-colors" onclick="this.closest('.fixed').remove()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(loginPrompt);
+        }
+
         // Function to add item to cart via API
         async function addToCartAPI(productData, selectedSize = 'M') {
             try {
                 const token = localStorage.getItem('customerToken');
                 if (!token) {
-                    // Show a better notification instead of alert
-                    showNotification('Please log in to add items to cart', 'error');
-                    
-                    // Wait a moment then redirect
-                    setTimeout(() => {
-                        if (confirm('You need to log in to add items to cart. Would you like to go to the login page?')) {
-                    window.location.href = 'customer-login.html';
-                        }
-                    }, 1500);
+                    // Show login prompt
+                    showLoginPrompt('You need to log in to add items to cart');
                     return;
                 }
 

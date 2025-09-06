@@ -751,11 +751,19 @@
                     const cartData = await response.json();
                     const totalItems = cartData.items ? cartData.items.reduce((total, item) => total + item.quantity, 0) : 0;
                     document.getElementById('cart-counter').textContent = totalItems.toString();
+                } else if (response.status === 403) {
+                    // User not authenticated - this is expected, don't log as error
+                    document.getElementById('cart-counter').textContent = '0';
                 } else {
+                    // Other errors - log but don't show to user
+                    console.warn('Cart API error:', response.status);
                     document.getElementById('cart-counter').textContent = '0';
                 }
             } catch (error) {
-                console.error('Error updating cart counter:', error);
+                // Network errors - only log if not a CORS/network issue
+                if (!error.message.includes('Failed to fetch')) {
+                    console.warn('Cart counter error:', error.message);
+                }
                 document.getElementById('cart-counter').textContent = '0';
             }
         }
@@ -916,14 +924,14 @@
         let femaleAvatarIndex = 0;
         let maleAvatarIndex = 0;
 
-        // Comprehensive collection of unique avatars
+        // Comprehensive collection of unique avatars (using placeholder service to avoid CORS issues)
         const femaleAvatars = [
-            'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face',
+            'https://i.pravatar.cc/150?img=1',
+            'https://i.pravatar.cc/150?img=2',
+            'https://i.pravatar.cc/150?img=3',
+            'https://i.pravatar.cc/150?img=4',
+            'https://i.pravatar.cc/150?img=5',
+            'https://i.pravatar.cc/150?img=6',
             'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&h=150&fit=crop&crop=face',
@@ -970,12 +978,12 @@
         ];
         
         const maleAvatars = [
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
-            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face',
+            'https://i.pravatar.cc/150?img=7',
+            'https://i.pravatar.cc/150?img=8',
+            'https://i.pravatar.cc/150?img=9',
+            'https://i.pravatar.cc/150?img=10',
+            'https://i.pravatar.cc/150?img=11',
+            'https://i.pravatar.cc/150?img=12',
             'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',

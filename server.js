@@ -11,6 +11,7 @@ const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const { uploadProductImages, uploadImageToCloudinary, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
 const { body, validationResult } = require('express-validator');
+const paypal = require('@paypal/checkout-server-sdk');
 require('dotenv').config();
 
 // -----------------------------------------------------------------------------
@@ -220,6 +221,24 @@ function checkDatabase() {
     return { available: false, error: 'Database connection failed' };
   }
   return { available: true };
+}
+
+// PayPal Configuration
+const paypalClientId = process.env.PAYPAL_CLIENT_ID;
+const paypalClientSecret = process.env.PAYPAL_CLIENT_SECRET;
+const paypalEnvironment = process.env.PAYPAL_ENVIRONMENT || 'sandbox'; // 'sandbox' or 'live'
+
+// PayPal client configuration
+let paypalClient = null;
+if (paypalClientId && paypalClientSecret) {
+  const environment = paypalEnvironment === 'live' 
+    ? new paypal.core.LiveEnvironment(paypalClientId, paypalClientSecret)
+    : new paypal.core.SandboxEnvironment(paypalClientId, paypalClientSecret);
+  
+  paypalClient = new paypal.core.PayPalHttpClient(environment);
+  logger.info('✅ PayPal client configured for', paypalEnvironment, 'environment');
+} else {
+  logger.warn('⚠️ PayPal credentials not configured - payment processing disabled');
 }
 
 // Authentication middleware
@@ -461,6 +480,12 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE order_items ADD COLUMN IF NOT EXISTS custom_input JSONB`);
       await pool.query(`ALTER TABLE cart ADD COLUMN IF NOT EXISTS custom_input JSONB`);
       await pool.query(`ALTER TABLE cart_items ADD COLUMN IF NOT EXISTS custom_input JSONB`);
+      
+      // Add payment tracking columns if they don't exist
+      await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50)`);
+      await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_id VARCHAR(255)`);
+      await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) DEFAULT 'pending'`);
+      await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_details JSONB`);
     } catch (error) {
       logger.error('Some columns may already exist:', error.message);
     }
@@ -495,6 +520,10 @@ async function initializeDatabase() {
         notes TEXT,
         loyalty_points_earned INTEGER DEFAULT 0,
         loyalty_points_used INTEGER DEFAULT 0,
+        payment_method VARCHAR(50),
+        payment_id VARCHAR(255),
+        payment_status VARCHAR(50) DEFAULT 'pending',
+        payment_details JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -3018,8 +3047,8 @@ async function sendCustomRequestEmail(customRequest) {
     </html>
   `;
 
-  // Send to both admin emails
-  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com'].filter(Boolean);
+  // Send to all admin emails
+  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PLWGSCREATIVEAPPAREL@yahoo.com'].filter(Boolean);
   
   for (const adminEmail of adminEmails) {
     const mailOptions = {
@@ -5059,6 +5088,659 @@ app.post('/api/cart/checkout', authenticateCustomer, validateCheckout, async (re
     res.status(500).json({ error: 'Failed to process checkout' });
   }
 });
+
+// ========================================
+// PAYPAL PAYMENT API ENDPOINTS
+// ========================================
+
+// Get PayPal Client ID (for frontend)
+app.get('/api/paypal/client-id', (req, res) => {
+  if (!paypalClientId) {
+    logger.error('❌ PayPal Client ID not configured');
+    return res.status(500).json({ error: 'PayPal not configured' });
+  }
+  res.json({ clientId: paypalClientId });
+});
+
+// Create PayPal order
+app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
+  if (!paypalClient) {
+    return res.status(500).json({ error: 'PayPal not configured' });
+  }
+
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const customerId = req.customer.id;
+    const { shipping_address } = req.body;
+
+    // Get customer info
+    const customerResult = await pool.query(`
+      SELECT id, email, first_name, last_name FROM customers WHERE id = $1
+    `, [customerId]);
+
+    if (customerResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    const customer = customerResult.rows[0];
+
+    // Get cart items
+    const cartResult = await pool.query(`
+      SELECT * FROM cart WHERE customer_id = $1
+    `, [customerId]);
+
+    if (cartResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    const cartItems = cartResult.rows;
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const shipping = subtotal >= 50 ? 0 : 5.99;
+    const tax = subtotal * 0.085; // 8.5% tax
+    const total = subtotal + shipping + tax;
+
+    // Generate order number
+    const orderNumber = 'PLW-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-4);
+
+    // Create order in database first (with pending status)
+    const orderResult = await pool.query(`
+      INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address, payment_method, payment_status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *
+    `, [
+      orderNumber, 
+      customerId, 
+      customer.email, 
+      `${customer.first_name} ${customer.last_name}`,
+      total,
+      JSON.stringify(shipping_address),
+      'paypal',
+      'pending'
+    ]);
+
+    const order = orderResult.rows[0];
+
+    // Create order items
+    for (const item of cartItems) {
+      await pool.query(`
+        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color, custom_input)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [
+        order.id, 
+        item.product_id, 
+        item.product_name, 
+        item.quantity, 
+        item.unit_price, 
+        (item.quantity * item.unit_price), 
+        item.size, 
+        item.color, 
+        item.custom_input
+      ]);
+    }
+
+    // Create PayPal order with our order ID as custom_id
+    const request = new paypal.orders.OrdersCreateRequest();
+    request.prefer("return=representation");
+    request.requestBody({
+      intent: 'CAPTURE',
+      purchase_units: [{
+        custom_id: order.id.toString(), // This is crucial for webhook identification
+        amount: {
+          currency_code: 'USD',
+          value: total.toFixed(2),
+          breakdown: {
+            item_total: {
+              currency_code: 'USD',
+              value: subtotal.toFixed(2)
+            },
+            shipping: {
+              currency_code: 'USD',
+              value: shipping.toFixed(2)
+            },
+            tax_total: {
+              currency_code: 'USD',
+              value: tax.toFixed(2)
+            }
+          }
+        },
+        items: cartItems.map(item => ({
+          name: item.product_name,
+          unit_amount: {
+            currency_code: 'USD',
+            value: item.unit_price.toFixed(2)
+          },
+          quantity: item.quantity.toString(),
+          category: 'PHYSICAL_GOODS'
+        })),
+        shipping: {
+          name: {
+            full_name: `${shipping_address.first_name} ${shipping_address.last_name}`
+          },
+          address: {
+            address_line_1: shipping_address.address,
+            admin_area_2: shipping_address.city,
+            admin_area_1: shipping_address.state,
+            postal_code: shipping_address.zip,
+            country_code: 'US'
+          }
+        }
+      }]
+    });
+
+    const response = await paypalClient.execute(request);
+    
+    // Update order with PayPal order ID
+    await pool.query(`
+      UPDATE orders SET payment_id = $1 WHERE id = $2
+    `, [response.result.id, order.id]);
+
+    res.json({ 
+      orderId: response.result.id,
+      orderNumber: orderNumber,
+      total: total
+    });
+  } catch (error) {
+    logger.error('PayPal create order error:', error);
+    res.status(500).json({ error: 'Failed to create PayPal order' });
+  }
+});
+
+// Capture PayPal order
+app.post('/api/paypal/capture-order', authenticateCustomer, async (req, res) => {
+  if (!paypalClient) {
+    return res.status(500).json({ error: 'PayPal not configured' });
+  }
+
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const { orderId } = req.body;
+    const customerId = req.customer.id;
+
+    // Capture the order
+    const request = new paypal.orders.OrdersCaptureRequest(orderId);
+    request.requestBody({});
+    const response = await paypalClient.execute(request);
+
+    if (response.result.status === 'COMPLETED') {
+      // Find the order by PayPal order ID
+      const orderResult = await pool.query(`
+        SELECT * FROM orders WHERE payment_id = $1
+      `, [orderId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      const order = orderResult.rows[0];
+
+      // Update order status to completed
+      await pool.query(`
+        UPDATE orders 
+        SET payment_status = 'completed', 
+            payment_details = $1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+      `, [JSON.stringify(response.result), order.id]);
+
+      // Clear cart
+      await pool.query(`
+        DELETE FROM cart WHERE customer_id = $1
+      `, [customerId]);
+
+      // Update customer stats
+      await pool.query(`
+        UPDATE customers 
+        SET total_orders = total_orders + 1,
+            total_spent = total_spent + $1,
+            average_order_value = (total_spent + $1) / (total_orders + 1),
+            loyalty_points = loyalty_points + FLOOR($1 * 0.1)
+        WHERE id = $2
+      `, [order.total_amount, customerId]);
+
+      res.json({ 
+        message: 'Payment captured successfully', 
+        order: order,
+        orderNumber: order.order_number,
+        paymentDetails: response.result
+      });
+    } else {
+      res.status(400).json({ error: 'Payment not completed' });
+    }
+  } catch (error) {
+    logger.error('PayPal capture order error:', error);
+    res.status(500).json({ error: 'Failed to capture PayPal order' });
+  }
+});
+
+// Create order with payment details (for checkout page)
+app.post('/api/orders/create', authenticateCustomer, async (req, res) => {
+  if (!pool) {
+    return res.status(500).json({ error: 'Database not available' });
+  }
+
+  try {
+    const customerId = req.customer.id;
+    const { shipping_address, payment_method, payment_id, payment_details } = req.body;
+
+    // Get customer info
+    const customerResult = await pool.query(`
+      SELECT id, email, first_name, last_name FROM customers WHERE id = $1
+    `, [customerId]);
+
+    if (customerResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    const customer = customerResult.rows[0];
+
+    // Get cart items
+    const cartResult = await pool.query(`
+      SELECT * FROM cart WHERE customer_id = $1
+    `, [customerId]);
+
+    if (cartResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    const cartItems = cartResult.rows;
+    const total_amount = cartItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+
+    // Generate order number
+    const orderNumber = 'PLW-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-4);
+
+    // Create order
+    const orderResult = await pool.query(`
+      INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address, payment_method, payment_id, payment_status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    `, [
+      orderNumber, 
+      customerId, 
+      customer.email, 
+      `${customer.first_name} ${customer.last_name}`, 
+      total_amount, 
+      JSON.stringify(shipping_address),
+      payment_method || 'paypal',
+      payment_id,
+      'completed'
+    ]);
+
+    const order = orderResult.rows[0];
+
+    // Create order items
+    for (const item of cartItems) {
+      await pool.query(`
+        INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price, size, color, custom_input)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, [
+        order.id, 
+        item.product_id, 
+        item.product_name, 
+        item.quantity, 
+        item.unit_price, 
+        (item.quantity * item.unit_price), 
+        item.size, 
+        item.color, 
+        item.custom_input
+      ]);
+    }
+
+    // Clear cart
+    await pool.query(`
+      DELETE FROM cart WHERE customer_id = $1
+    `, [customerId]);
+
+    // Update customer stats
+    await pool.query(`
+      UPDATE customers 
+      SET total_orders = total_orders + 1,
+          total_spent = total_spent + $1,
+          average_order_value = (total_spent + $1) / (total_orders + 1),
+          loyalty_points = loyalty_points + FLOOR($1 * 0.1)
+      WHERE id = $2
+    `, [total_amount, customerId]);
+
+    res.json({ 
+      message: 'Order created successfully', 
+      order: order,
+      orderNumber: orderNumber
+    });
+  } catch (error) {
+    logger.error('Error creating order:', error);
+    res.status(500).json({ error: 'Failed to create order' });
+  }
+});
+
+// ========================================
+// PAYPAL WEBHOOK ENDPOINT
+// ========================================
+
+// PayPal webhook endpoint for payment notifications
+app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  try {
+    const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+    const webhookSignature = req.headers['paypal-transmission-id'];
+    const webhookCertId = req.headers['paypal-cert-id'];
+    const webhookAuthAlgo = req.headers['paypal-auth-algo'];
+    const webhookTransmissionTime = req.headers['paypal-transmission-time'];
+    
+    if (!webhookId || !webhookSignature || !webhookCertId || !webhookAuthAlgo || !webhookTransmissionTime) {
+      logger.error('❌ Missing PayPal webhook headers');
+      return res.status(400).json({ error: 'Missing required headers' });
+    }
+
+    // Verify webhook signature (in production, you should verify the signature)
+    // For now, we'll process the webhook without verification for testing
+    const webhookData = JSON.parse(req.body);
+    
+    logger.info('🔔 PayPal webhook received:', webhookData.event_type);
+
+    // Handle different webhook events
+    if (webhookData.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+      await handlePaymentCompleted(webhookData);
+    } else if (webhookData.event_type === 'PAYMENT.CAPTURE.DENIED') {
+      await handlePaymentDenied(webhookData);
+    } else if (webhookData.event_type === 'PAYMENT.CAPTURE.REFUNDED') {
+      await handlePaymentRefunded(webhookData);
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    logger.error('❌ PayPal webhook error:', error);
+    res.status(500).json({ error: 'Webhook processing failed' });
+  }
+});
+
+// Handle completed payment
+async function handlePaymentCompleted(webhookData) {
+  try {
+    const capture = webhookData.resource;
+    const orderId = capture.custom_id; // This should contain our order ID
+    
+    if (!orderId) {
+      logger.error('❌ No order ID found in webhook data');
+      return;
+    }
+
+    // Update order status in database
+    await pool.query(`
+      UPDATE orders 
+      SET payment_status = 'completed', 
+          payment_details = $1,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+    `, [JSON.stringify(capture), orderId]);
+
+    // Get order details for email
+    const orderResult = await pool.query(`
+      SELECT o.*, c.email, c.first_name, c.last_name
+      FROM orders o
+      JOIN customers c ON o.customer_id = c.id
+      WHERE o.id = $1
+    `, [orderId]);
+
+    if (orderResult.rows.length === 0) {
+      logger.error('❌ Order not found for ID:', orderId);
+      return;
+    }
+
+    const order = orderResult.rows[0];
+
+    // Get order items
+    const itemsResult = await pool.query(`
+      SELECT * FROM order_items WHERE order_id = $1
+    `, [orderId]);
+
+    const orderItems = itemsResult.rows;
+
+    // Send confirmation emails
+    await sendPaymentConfirmationEmails(order, orderItems, capture);
+
+    logger.info('✅ Payment completed webhook processed successfully for order:', orderId);
+  } catch (error) {
+    logger.error('❌ Error handling payment completed:', error);
+  }
+}
+
+// Handle denied payment
+async function handlePaymentDenied(webhookData) {
+  try {
+    const capture = webhookData.resource;
+    const orderId = capture.custom_id;
+    
+    if (orderId) {
+      await pool.query(`
+        UPDATE orders 
+        SET payment_status = 'denied', 
+            payment_details = $1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+      `, [JSON.stringify(capture), orderId]);
+    }
+
+    logger.info('❌ Payment denied for order:', orderId);
+  } catch (error) {
+    logger.error('❌ Error handling payment denied:', error);
+  }
+}
+
+// Handle refunded payment
+async function handlePaymentRefunded(webhookData) {
+  try {
+    const capture = webhookData.resource;
+    const orderId = capture.custom_id;
+    
+    if (orderId) {
+      await pool.query(`
+        UPDATE orders 
+        SET payment_status = 'refunded', 
+            payment_details = $1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+      `, [JSON.stringify(capture), orderId]);
+    }
+
+    logger.info('💰 Payment refunded for order:', orderId);
+  } catch (error) {
+    logger.error('❌ Error handling payment refunded:', error);
+  }
+}
+
+// Send payment confirmation emails
+async function sendPaymentConfirmationEmails(order, orderItems, paymentDetails) {
+  try {
+    // Customer confirmation email
+    await sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDetails);
+    
+    // Admin notification email
+    await sendAdminPaymentNotificationEmail(order, orderItems, paymentDetails);
+    
+    logger.info('✅ Payment confirmation emails sent for order:', order.order_number);
+  } catch (error) {
+    logger.error('❌ Error sending payment confirmation emails:', error);
+  }
+}
+
+// Send customer payment confirmation email
+async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDetails) {
+  const customerEmailHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Payment Confirmation - PLWG Creative Apparel</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 3px solid #007bff; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: bold; color: #007bff; margin-bottom: 10px; }
+        .success-icon { font-size: 48px; color: #28a745; margin-bottom: 20px; }
+        .order-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .item:last-child { border-bottom: none; }
+        .total { font-weight: bold; font-size: 18px; color: #007bff; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; }
+        .button { display: inline-block; background: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="logo">PLWG Creative Apparel</div>
+          <div class="success-icon">✅</div>
+          <h1>Payment Confirmed!</h1>
+          <p>Thank you for your order! Your payment has been successfully processed.</p>
+        </div>
+        
+        <div class="order-details">
+          <h3>Order Details</h3>
+          <p><strong>Order Number:</strong> ${order.order_number}</p>
+          <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
+          <p><strong>Payment Method:</strong> PayPal</p>
+          <p><strong>Transaction ID:</strong> ${paymentDetails.id}</p>
+          
+          <h4>Items Ordered:</h4>
+          ${orderItems.map(item => `
+            <div class="item">
+              <div>
+                <strong>${item.product_name}</strong><br>
+                <small>Size: ${item.size} | Color: ${item.color}</small>
+                ${item.custom_input ? `<br><small>Custom: ${item.custom_input}</small>` : ''}
+              </div>
+              <div>
+                ${item.quantity} × $${item.unit_price} = $${(item.quantity * item.unit_price).toFixed(2)}
+              </div>
+            </div>
+          `).join('')}
+          
+          <div class="item total">
+            <div>Total Amount:</div>
+            <div>$${order.total_amount.toFixed(2)}</div>
+          </div>
+        </div>
+        
+        <div style="text-align: center;">
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/pages/order-success.html?order=${order.order_number}" class="button">View Order Details</a>
+        </div>
+        
+        <div class="footer">
+          <p><strong>Shipping Information:</strong></p>
+          <p>${order.shipping_address}</p>
+          <p>Your order will be processed and shipped within 24 hours.</p>
+          <p><strong>Questions?</strong> Contact us at <a href="mailto:support@plwgscreativeapparel.com">support@plwgscreativeapparel.com</a></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"${process.env.EMAIL_FROM_NAME || 'PLWG Creative Apparel'}" <${process.env.EMAIL_FROM}>`,
+    to: order.email,
+    subject: `Payment Confirmed - Order ${order.order_number}`,
+    html: customerEmailHTML
+  };
+
+  await transporter.sendMail(mailOptions);
+  logger.info(`✅ Customer payment confirmation email sent to ${order.email}`);
+}
+
+// Send admin payment notification email
+async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetails) {
+  const adminEmailHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>New Payment Received - PLWG Creative Apparel</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 3px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: bold; color: #28a745; margin-bottom: 10px; }
+        .alert { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .order-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .item:last-child { border-bottom: none; }
+        .total { font-weight: bold; font-size: 18px; color: #28a745; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="logo">PLWG Creative Apparel</div>
+          <h1>💰 New Payment Received!</h1>
+        </div>
+        
+        <div class="alert">
+          <strong>Payment Status:</strong> COMPLETED<br>
+          <strong>Payment Method:</strong> PayPal<br>
+          <strong>Transaction ID:</strong> ${paymentDetails.id}
+        </div>
+        
+        <div class="order-details">
+          <h3>Order Information</h3>
+          <p><strong>Order Number:</strong> ${order.order_number}</p>
+          <p><strong>Customer:</strong> ${order.customer_name}</p>
+          <p><strong>Email:</strong> ${order.email}</p>
+          <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
+          
+          <h4>Items Ordered:</h4>
+          ${orderItems.map(item => `
+            <div class="item">
+              <div>
+                <strong>${item.product_name}</strong><br>
+                <small>Size: ${item.size} | Color: ${item.color}</small>
+                ${item.custom_input ? `<br><small>Custom: ${item.custom_input}</small>` : ''}
+              </div>
+              <div>
+                ${item.quantity} × $${item.unit_price} = $${(item.quantity * item.unit_price).toFixed(2)}
+              </div>
+            </div>
+          `).join('')}
+          
+          <div class="item total">
+            <div>Total Amount:</div>
+            <div>$${order.total_amount.toFixed(2)}</div>
+          </div>
+          
+          <h4>Shipping Address:</h4>
+          <p>${order.shipping_address}</p>
+        </div>
+        
+        <div class="footer">
+          <p>This is an automated notification. Please process this order for shipping.</p>
+          <p>Admin Dashboard: <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin-dashboard.html">View Orders</a></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Send to all admin emails
+  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PLWGSCREATIVEAPPAREL@yahoo.com'].filter(Boolean);
+  
+  for (const adminEmail of adminEmails) {
+    const mailOptions = {
+      from: `"${process.env.EMAIL_FROM_NAME || 'PLWG Creative Apparel'}" <${process.env.EMAIL_FROM}>`,
+      to: adminEmail,
+      subject: `💰 New Payment: ${order.order_number} - $${order.total_amount.toFixed(2)}`,
+      html: adminEmailHTML
+    };
+
+    await transporter.sendMail(mailOptions);
+    logger.info(`✅ Admin payment notification sent to ${adminEmail}`);
+  }
+}
 
 // ========================================
 // CATEGORY MANAGEMENT API ENDPOINTS

@@ -207,6 +207,16 @@
                         <span class="hidden md:block text-sm font-medium" id="customerName">Loading...</span>
                     </div>
                     
+                    <!-- Login/Logout Button -->
+                    <div id="auth-buttons" class="flex items-center space-x-2">
+                        <button id="login-btn" class="btn-primary px-4 py-2 text-sm hidden" onclick="window.location.href='customer-login.html'">
+                            Log In
+                        </button>
+                        <button id="logout-btn" class="border border-accent text-accent px-4 py-2 text-sm rounded-lg hover:bg-accent hover:text-black transition-all duration-300 hidden" onclick="logout()">
+                            Log Out
+                        </button>
+                    </div>
+                    
                     <!-- Mobile Menu Button -->
                     <button class="lg:hidden text-text-primary hover:text-accent transition-colors duration-300">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1289,9 +1299,12 @@
 
         // Initialize customer dashboard
         async function initCustomerDashboard() {
+            // Update auth buttons first
+            updateAuthButtons();
+            
             if (!isCustomerLoggedIn()) {
-                // Show login prompt or redirect
-                showLoginPrompt();
+                // Redirect to login page instead of showing the page
+                window.location.href = 'customer-login.html';
                 return;
             }
 
@@ -1964,6 +1977,31 @@
             `;
             
             document.body.appendChild(loginPrompt);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('customerToken');
+            localStorage.removeItem('customerData');
+            updateAuthButtons();
+            showLoginPrompt();
+        }
+
+        // Update authentication buttons visibility
+        function updateAuthButtons() {
+            const isLoggedIn = isCustomerLoggedIn();
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            if (loginBtn && logoutBtn) {
+                if (isLoggedIn) {
+                    loginBtn.classList.add('hidden');
+                    logoutBtn.classList.remove('hidden');
+                } else {
+                    loginBtn.classList.remove('hidden');
+                    logoutBtn.classList.add('hidden');
+                }
+            }
         }
 
         // Update customer UI
