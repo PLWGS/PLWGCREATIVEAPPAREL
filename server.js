@@ -5584,9 +5584,11 @@ async function handlePaymentCompleted(webhookData) {
     const capture = webhookData.resource;
     logger.info('🔍 Webhook resource:', JSON.stringify(capture, null, 2));
     
-    // The webhook sends the PayPal order ID in the resource.id field
+    // The webhook sends the PayPal capture ID in the resource.id field
     // We need to find the order by payment_id (which stores the PayPal order ID)
+    // But we also need to check for capture ID matches
     let orderId = capture?.id || webhookData?.resource?.id;
+    let captureId = orderId; // This is the capture ID from webhook
     
     logger.info('🔍 PayPal Order ID from webhook:', orderId);
     logger.info('🔍 Capture ID:', capture?.id);
@@ -5611,12 +5613,24 @@ async function handlePaymentCompleted(webhookData) {
     `, [JSON.stringify(capture), orderId]);
 
     // Get order details for email - try multiple approaches
+    // First try to find by payment_id (PayPal order ID)
     let orderResult = await pool.query(`
       SELECT o.*, c.email, c.first_name, c.last_name
       FROM orders o
       JOIN customers c ON o.customer_id = c.id
       WHERE o.payment_id = $1
     `, [orderId]);
+    
+    // If not found, try to find by capture ID in payment_details
+    if (orderResult.rows.length === 0) {
+      logger.info('🔍 Trying to find order by capture ID in payment_details...');
+      orderResult = await pool.query(`
+        SELECT o.*, c.email, c.first_name, c.last_name
+        FROM orders o
+        JOIN customers c ON o.customer_id = c.id
+        WHERE o.payment_details->>'id' = $1
+      `, [captureId]);
+    }
 
     // If not found by payment_id, try to find by custom_id (our database order ID)
     if (orderResult.rows.length === 0) {
