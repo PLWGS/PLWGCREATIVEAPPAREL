@@ -644,12 +644,7 @@ function generateNumericCode(length = 6) {
 
 async function sendEmail(to, subject, html) {
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
-      to,
-      subject,
-      html
-    });
+    await sendResendEmail(to, subject, html);
     return true;
   } catch (e) {
     logger.error('❌ Failed to send email:', e.message);
@@ -1459,52 +1454,51 @@ app.post('/api/orders', validateOrder, async (req, res) => {
           }
         });
 
-        const mailOptions = {
-          from: process.env.SMTP_USER,
-          to: adminEmail,
-          subject: `🚨 NEW ORDER WITH CUSTOM INPUT - ${orderNumber}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h1 style="color: #00bcd4; border-bottom: 2px solid #00bcd4; padding-bottom: 10px;">
-                🎨 New Order with Custom Input!
-              </h1>
+        const customOrderHTML = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #00bcd4; border-bottom: 2px solid #00bcd4; padding-bottom: 10px;">
+              🎨 New Order with Custom Input!
+            </h1>
 
-              <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h2 style="margin-top: 0; color: #333;">Order Details:</h2>
-                <p><strong>Order #:</strong> ${orderNumber}</p>
-                <p><strong>Customer:</strong> ${customer_name}</p>
-                <p><strong>Email:</strong> ${customer_email}</p>
-                <p><strong>Total:</strong> $${total_amount}</p>
-                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
-              </div>
-
-              <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h2 style="margin-top: 0; color: #856404;">🎯 CUSTOM INPUT DETAILS:</h2>
-                <pre style="white-space: pre-wrap; font-family: monospace; background: white; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">${customInputSummary}</pre>
-              </div>
-
-              <div style="background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 4px; margin: 20px 0;">
-                <p style="margin: 0;"><strong>📧 Action Required:</strong> This order contains custom personalization requests that need your attention.</p>
-              </div>
-
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.ADMIN_URL || 'http://localhost:3000'}/pages/admin.html"
-                   style="background: #00bcd4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
-                  View in Admin Dashboard
-                </a>
-              </div>
-
-              <hr style="border: none; border-top: 1px solid #dee2e6; margin: 30px 0;">
-
-              <p style="color: #6c757d; font-size: 12px;">
-                This is an automated notification for orders containing custom input.
-                Please log into your admin dashboard to process this order.
-              </p>
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #333;">Order Details:</h2>
+              <p><strong>Order #:</strong> ${orderNumber}</p>
+              <p><strong>Customer:</strong> ${customer_name}</p>
+              <p><strong>Email:</strong> ${customer_email}</p>
+              <p><strong>Total:</strong> $${total_amount}</p>
+              <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
             </div>
-          `
-        };
 
-        await transporter.sendMail(mailOptions);
+            <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0; color: #856404;">🎯 CUSTOM INPUT DETAILS:</h2>
+              <pre style="white-space: pre-wrap; font-family: monospace; background: white; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">${customInputSummary}</pre>
+            </div>
+
+            <div style="background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 4px; margin: 20px 0;">
+              <p style="margin: 0;"><strong>📧 Action Required:</strong> This order contains custom personalization requests that need your attention.</p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.ADMIN_URL || 'http://localhost:3000'}/pages/admin.html"
+                 style="background: #00bcd4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                View in Admin Dashboard
+              </a>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 30px 0;">
+
+            <p style="color: #6c757d; font-size: 12px;">
+              This is an automated notification for orders containing custom input.
+              Please log into your admin dashboard to process this order.
+            </p>
+          </div>
+        `;
+
+        await sendResendEmail(
+          adminEmail,
+          `🚨 NEW ORDER WITH CUSTOM INPUT - ${orderNumber}`,
+          customOrderHTML
+        );
         logger.info(`✅ Admin notification sent for custom order ${orderNumber}`);
 
       } catch (emailError) {
@@ -2646,15 +2640,12 @@ async function sendWelcomeEmail(email, name) {
     </html>
   `;
 
-  const mailOptions = {
-    from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
-    to: email,
-    subject: '🎉 Welcome to PlwgsCreativeApparel - Your 20% OFF Code Inside!',
-    html: welcomeEmailHTML
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
+    await sendResendEmail(
+      email,
+      '🎉 Welcome to PlwgsCreativeApparel - Your 20% OFF Code Inside!',
+      welcomeEmailHTML
+    );
     logger.info(`✅ Welcome email sent to ${email}`);
   } catch (error) {
     logger.error(`❌ Error sending welcome email to ${email}:`, error);
@@ -2829,15 +2820,12 @@ async function sendCustomerConfirmationEmail(customRequest) {
     </html>
   `;
 
-  const mailOptions = {
-    from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
-    to: customRequest.customer_email,
-    subject: `🎨 Custom Design Request #${customRequest.id} Received - PlwgsCreativeApparel`,
-    html: customerEmailHTML
-  };
-
   try {
-    await transporter.sendMail(mailOptions);
+    await sendResendEmail(
+      customRequest.customer_email,
+      `🎨 Custom Design Request #${customRequest.id} Received - PlwgsCreativeApparel`,
+      customerEmailHTML
+    );
     logger.info(`✅ Customer confirmation email sent for request ${customRequest.id}`);
   } catch (error) {
     logger.error(`❌ Error sending customer confirmation email:`, error);
@@ -3059,20 +3047,15 @@ async function sendCustomRequestEmail(customRequest) {
   // Send to all admin emails
   const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PLWGSCREATIVEAPPAREL@yahoo.com'].filter(Boolean);
   
-  for (const adminEmail of adminEmails) {
-    const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
-      to: adminEmail,
-      subject: `🎨 New Custom Design Request from ${customRequest.customer_name}`,
-      html: customRequestEmailHTML
-    };
-
-    try {
-      await transporter.sendMail(mailOptions);
-      logger.info(`✅ Custom request email sent to ${adminEmail} for request ${customRequest.id}`);
-    } catch (error) {
-      logger.error(`❌ Error sending custom request email to ${adminEmail}:`, error);
-    }
+  try {
+    await sendResendEmail(
+      adminEmails,
+      `🎨 New Custom Design Request from ${customRequest.customer_name}`,
+      customRequestEmailHTML
+    );
+    logger.info(`✅ Custom request email sent to ${adminEmails.join(', ')} for request ${customRequest.id}`);
+  } catch (error) {
+    logger.error(`❌ Error sending custom request email:`, error);
   }
 }
 
@@ -5593,6 +5576,37 @@ async function sendPaymentConfirmationEmails(order, orderItems, paymentDetails) 
   }
 }
 
+// Resend API email sending function
+async function sendResendEmail(to, subject, html) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    throw new Error('RESEND_API_KEY not configured');
+  }
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: 'admin@plwgscreativeapparel.com',
+      to: Array.isArray(to) ? to : [to],
+      subject: subject,
+      html: html
+    })
+  });
+
+  const result = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(`Resend API error: ${result.message || 'Unknown error'}`);
+  }
+
+  logger.info(`✅ Email sent via Resend API. ID: ${result.id}`);
+  return result;
+}
+
 // Send customer payment confirmation email
 async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDetails) {
   const customerEmailHTML = `
@@ -5667,14 +5681,11 @@ async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDe
     </html>
   `;
 
-  const mailOptions = {
-    from: `"${process.env.EMAIL_FROM_NAME || 'PLWG Creative Apparel'}" <${process.env.EMAIL_FROM}>`,
-    to: order.email,
-    subject: `Payment Confirmed - Order ${order.order_number}`,
-    html: customerEmailHTML
-  };
-
-  await transporter.sendMail(mailOptions);
+  await sendResendEmail(
+    order.email,
+    `Payment Confirmed - Order ${order.order_number}`,
+    customerEmailHTML
+  );
   logger.info(`✅ Customer payment confirmation email sent to ${order.email}`);
 }
 
@@ -5755,17 +5766,12 @@ async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetai
   // Send to all admin emails
   const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PLWGSCREATIVEAPPAREL@yahoo.com'].filter(Boolean);
   
-  for (const adminEmail of adminEmails) {
-    const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME || 'PLWG Creative Apparel'}" <${process.env.EMAIL_FROM}>`,
-      to: adminEmail,
-      subject: `💰 New Payment: ${order.order_number} - $${parseFloat(order.total_amount || 0).toFixed(2)}`,
-      html: adminEmailHTML
-    };
-
-    await transporter.sendMail(mailOptions);
-    logger.info(`✅ Admin payment notification sent to ${adminEmail}`);
-  }
+  await sendResendEmail(
+    adminEmails,
+    `💰 New Payment: ${order.order_number} - $${parseFloat(order.total_amount || 0).toFixed(2)}`,
+    adminEmailHTML
+  );
+  logger.info(`✅ Admin payment notification sent to ${adminEmails.join(', ')}`);
 }
 
 // ========================================
@@ -6088,7 +6094,7 @@ app.get('/api/test-resend', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev',
+        from: 'admin@plwgscreativeapparel.com',
         to: ['mariaisabeljuarezgomez85@gmail.com'],
         subject: '🧪 Resend API Test - PLWG Creative Apparel',
         html: '<h2>🧪 Resend API Test</h2><p>This is a test email using Resend API.</p><p>Time: ' + new Date().toISOString() + '</p>'
