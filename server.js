@@ -6083,7 +6083,7 @@ app.get('/api/test-smtp-simple', async (req, res) => {
       try {
         logger.info(`🧪 Testing ${config.name}: ${config.host}:${config.port} (secure: ${config.secure})`);
         
-        const testTransporter = nodemailer.createTransporter({
+        const testTransporter = nodemailer.createTransport({
           host: config.host,
           port: config.port,
           secure: config.secure,
@@ -6189,7 +6189,7 @@ app.get('/api/test-email', async (req, res) => {
         try {
           logger.info(`🧪 Testing: ${config.host}:${config.port} (secure: ${config.secure})`);
           
-          const testTransporter = nodemailer.createTransporter({
+          const testTransporter = nodemailer.createTransport({
             host: config.host,
             port: config.port,
             secure: config.secure,
