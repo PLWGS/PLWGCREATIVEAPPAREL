@@ -5594,6 +5594,8 @@ async function handlePaymentCompleted(webhookData) {
     logger.info('🔍 Capture ID:', capture?.id);
     logger.info('🔍 Webhook resource ID:', webhookData?.resource?.id);
     logger.info('🔍 Custom ID (our database order ID):', capture?.custom_id);
+    logger.info('🔍 Full capture object:', JSON.stringify(capture, null, 2));
+    logger.info('🔍 All capture keys:', capture ? Object.keys(capture) : 'No capture');
     
     if (!orderId) {
       logger.error('❌ No order ID found in webhook data');
@@ -5631,6 +5633,17 @@ async function handlePaymentCompleted(webhookData) {
         WHERE o.payment_details->>'id' = $1
       `, [captureId]);
     }
+    
+    // If still not found, try to find by any PayPal ID in payment_details
+    if (orderResult.rows.length === 0) {
+      logger.info('🔍 Trying to find order by any PayPal ID in payment_details...');
+      orderResult = await pool.query(`
+        SELECT o.*, c.email, c.first_name, c.last_name
+        FROM orders o
+        JOIN customers c ON o.customer_id = c.id
+        WHERE o.payment_details::text LIKE $1
+      `, [`%${orderId}%`]);
+    }
 
     // If not found by payment_id, try to find by custom_id (our database order ID)
     if (orderResult.rows.length === 0) {
@@ -5652,6 +5665,17 @@ async function handlePaymentCompleted(webhookData) {
         } else {
           logger.warn('⚠️ Custom ID is not numeric, cannot use for database lookup:', customId);
         }
+      }
+      
+      // Try to find by order number if custom_id contains it
+      if (orderResult.rows.length === 0 && customId && customId.startsWith('PLW-')) {
+        logger.info('🔍 Trying to find order by order number:', customId);
+        orderResult = await pool.query(`
+          SELECT o.*, c.email, c.first_name, c.last_name
+          FROM orders o
+          JOIN customers c ON o.customer_id = c.id
+          WHERE o.order_number = $1
+        `, [customId]);
       }
     }
 
