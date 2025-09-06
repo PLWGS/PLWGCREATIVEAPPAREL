@@ -5228,6 +5228,10 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
     await pool.query(`
       UPDATE orders SET payment_id = $1 WHERE id = $2
     `, [response.result.id, order.id]);
+    
+    logger.info('🔍 Order created with PayPal ID:', response.result.id);
+    logger.info('🔍 Database order ID:', order.id);
+    logger.info('🔍 Order number:', orderNumber);
 
     res.json({ 
       orderId: response.result.id,
@@ -5552,6 +5556,17 @@ async function handlePaymentCompleted(webhookData) {
       logger.error('❌ Order not found for any ID. Payment ID:', orderId);
       logger.error('❌ Capture custom_id:', capture?.custom_id);
       logger.error('❌ Available capture fields:', capture ? Object.keys(capture) : 'No capture');
+      logger.error('❌ Full webhook data for debugging:', JSON.stringify(webhookData, null, 2));
+      
+      // Try to find any recent orders to see what payment_ids exist
+      const recentOrders = await pool.query(`
+        SELECT id, payment_id, order_number, created_at 
+        FROM orders 
+        WHERE created_at > NOW() - INTERVAL '1 hour'
+        ORDER BY created_at DESC 
+        LIMIT 5
+      `);
+      logger.error('❌ Recent orders in database:', recentOrders.rows);
       return;
     }
 
