@@ -6067,6 +6067,51 @@ app.post('/api/trigger-payment-email', async (req, res) => {
   }
 });
 
+// Gmail SMTP test endpoint
+app.get('/api/test-gmail-smtp', async (req, res) => {
+  try {
+    logger.info('🧪 Testing Gmail SMTP...');
+    
+    const gmailTransporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'mariaisabeljuarezgomez85@gmail.com',
+        pass: 'your-gmail-app-password' // You'll need to generate this
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000
+    });
+    
+    const testEmail = {
+      from: 'mariaisabeljuarezgomez85@gmail.com',
+      to: 'mariaisabeljuarezgomez85@gmail.com',
+      subject: '🧪 Gmail SMTP Test - PLWG Creative Apparel',
+      text: 'This is a test email using Gmail SMTP.',
+      html: '<h2>🧪 Gmail SMTP Test</h2><p>This is a test email using Gmail SMTP.</p>'
+    };
+    
+    const info = await gmailTransporter.sendMail(testEmail);
+    logger.info('✅ Gmail SMTP test successful:', info.messageId);
+    
+    res.json({
+      success: true,
+      message: 'Gmail SMTP test successful',
+      messageId: info.messageId
+    });
+    
+  } catch (error) {
+    logger.error('❌ Gmail SMTP test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Gmail SMTP test failed',
+      details: error.message
+    });
+  }
+});
+
 // Simple SMTP test endpoint - try all Zoho configurations
 app.get('/api/test-smtp-simple', async (req, res) => {
   try {
