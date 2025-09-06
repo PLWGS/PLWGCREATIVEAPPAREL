@@ -5689,14 +5689,14 @@ async function handlePaymentCompleted(webhookData) {
     // Get order items
     const itemsResult = await pool.query(`
       SELECT * FROM order_items WHERE order_id = $1
-    `, [orderId]);
+    `, [orderIdToUpdate]);
 
     const orderItems = itemsResult.rows;
 
     // Send confirmation emails
     await sendPaymentConfirmationEmails(order, orderItems, capture);
 
-    logger.info('✅ Payment completed webhook processed successfully for order:', orderId);
+    logger.info('✅ Payment completed webhook processed successfully for order:', orderIdToUpdate);
   } catch (error) {
     logger.error('❌ Error handling payment completed:', error);
   }
@@ -5706,19 +5706,32 @@ async function handlePaymentCompleted(webhookData) {
 async function handlePaymentDenied(webhookData) {
   try {
     const capture = webhookData.resource;
-    const orderId = capture.custom_id;
+    const paypalOrderId = capture?.parent_payment || capture?.order_id || capture?.id;
     
-    if (orderId) {
-      await pool.query(`
-        UPDATE orders 
-        SET payment_status = 'denied', 
-            payment_details = $1,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE payment_id = $2
-      `, [JSON.stringify(capture), orderId]);
+    if (paypalOrderId) {
+      // Find order by payment_id
+      const orderResult = await pool.query(`
+        SELECT id FROM orders WHERE payment_id = $1
+      `, [paypalOrderId]);
+      
+      if (orderResult.rows.length > 0) {
+        const orderIdToUpdate = orderResult.rows[0].id;
+        
+        await pool.query(`
+          UPDATE orders 
+          SET payment_status = 'denied', 
+              payment_details = $1,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = $2
+        `, [JSON.stringify(capture), orderIdToUpdate]);
+        
+        logger.info('❌ Payment denied for order:', orderIdToUpdate);
+      } else {
+        logger.error('❌ Order not found for PayPal Order ID:', paypalOrderId);
+      }
+    } else {
+      logger.error('❌ No PayPal Order ID found in denied webhook data');
     }
-
-    logger.info('❌ Payment denied for order:', orderId);
   } catch (error) {
     logger.error('❌ Error handling payment denied:', error);
   }
@@ -5728,19 +5741,32 @@ async function handlePaymentDenied(webhookData) {
 async function handlePaymentRefunded(webhookData) {
   try {
     const capture = webhookData.resource;
-    const orderId = capture.custom_id;
+    const paypalOrderId = capture?.parent_payment || capture?.order_id || capture?.id;
     
-    if (orderId) {
-      await pool.query(`
-        UPDATE orders 
-        SET payment_status = 'refunded', 
-            payment_details = $1,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE payment_id = $2
-      `, [JSON.stringify(capture), orderId]);
+    if (paypalOrderId) {
+      // Find order by payment_id
+      const orderResult = await pool.query(`
+        SELECT id FROM orders WHERE payment_id = $1
+      `, [paypalOrderId]);
+      
+      if (orderResult.rows.length > 0) {
+        const orderIdToUpdate = orderResult.rows[0].id;
+        
+        await pool.query(`
+          UPDATE orders 
+          SET payment_status = 'refunded', 
+              payment_details = $1,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = $2
+        `, [JSON.stringify(capture), orderIdToUpdate]);
+        
+        logger.info('💰 Payment refunded for order:', orderIdToUpdate);
+      } else {
+        logger.error('❌ Order not found for PayPal Order ID:', paypalOrderId);
+      }
+    } else {
+      logger.error('❌ No PayPal Order ID found in refunded webhook data');
     }
-
-    logger.info('💰 Payment refunded for order:', orderId);
   } catch (error) {
     logger.error('❌ Error handling payment refunded:', error);
   }
