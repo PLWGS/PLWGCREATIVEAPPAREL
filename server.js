@@ -5248,9 +5248,9 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
 
     const response = await paypalClient.execute(request);
     
-    // Store PayPal Order ID in a separate field, not payment_id
+    // Store PayPal Order ID in payment_id for webhook matching
     await pool.query(`
-      UPDATE orders SET paypal_order_id = $1 WHERE id = $2
+      UPDATE orders SET payment_id = $1 WHERE id = $2
     `, [response.result.id, order.id]);
     
     logger.info('🔍 Order created with PayPal ID:', response.result.id);
@@ -5608,18 +5608,25 @@ async function handlePaymentCompleted(webhookData) {
     }
 
     // Update order status in database using PayPal payment ID
-    // Find the order by the custom_id (our database order ID)
-    const customId = capture?.custom_id;
-    if (!customId) {
-      logger.error('❌ No custom_id found in webhook data');
+    // Find the order by payment_id (PayPal Order ID)
+    const paypalOrderId = orderId; // This is the PayPal Order ID from webhook
+    
+    if (!paypalOrderId) {
+      logger.error('❌ No PayPal Order ID found in webhook data');
       return;
     }
     
-    const orderIdToUpdate = parseInt(customId);
-    if (isNaN(orderIdToUpdate)) {
-      logger.error('❌ Invalid custom_id:', customId);
+    // Find order by payment_id
+    const orderResult = await pool.query(`
+      SELECT id FROM orders WHERE payment_id = $1
+    `, [paypalOrderId]);
+    
+    if (orderResult.rows.length === 0) {
+      logger.error('❌ Order not found for PayPal Order ID:', paypalOrderId);
       return;
     }
+    
+    const orderIdToUpdate = orderResult.rows[0].id;
     
     // Update the order with the actual payment ID from the webhook
     await pool.query(`
