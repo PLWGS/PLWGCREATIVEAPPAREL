@@ -1479,43 +1479,43 @@ app.post('/api/orders', validateOrder, async (req, res) => {
         });
 
         const customOrderHTML = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #00bcd4; border-bottom: 2px solid #00bcd4; padding-bottom: 10px;">
-              🎨 New Order with Custom Input!
-            </h1>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #00bcd4; border-bottom: 2px solid #00bcd4; padding-bottom: 10px;">
+                🎨 New Order with Custom Input!
+              </h1>
 
-            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="margin-top: 0; color: #333;">Order Details:</h2>
-              <p><strong>Order #:</strong> ${orderNumber}</p>
-              <p><strong>Customer:</strong> ${customer_name}</p>
-              <p><strong>Email:</strong> ${customer_email}</p>
-              <p><strong>Total:</strong> $${total_amount}</p>
-              <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+              <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #333;">Order Details:</h2>
+                <p><strong>Order #:</strong> ${orderNumber}</p>
+                <p><strong>Customer:</strong> ${customer_name}</p>
+                <p><strong>Email:</strong> ${customer_email}</p>
+                <p><strong>Total:</strong> $${total_amount}</p>
+                <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+              </div>
+
+              <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #856404;">🎯 CUSTOM INPUT DETAILS:</h2>
+                <pre style="white-space: pre-wrap; font-family: monospace; background: white; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">${customInputSummary}</pre>
+              </div>
+
+              <div style="background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                <p style="margin: 0;"><strong>📧 Action Required:</strong> This order contains custom personalization requests that need your attention.</p>
+              </div>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.ADMIN_URL || 'http://localhost:3000'}/pages/admin.html"
+                   style="background: #00bcd4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                  View in Admin Dashboard
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #dee2e6; margin: 30px 0;">
+
+              <p style="color: #6c757d; font-size: 12px;">
+                This is an automated notification for orders containing custom input.
+                Please log into your admin dashboard to process this order.
+              </p>
             </div>
-
-            <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="margin-top: 0; color: #856404;">🎯 CUSTOM INPUT DETAILS:</h2>
-              <pre style="white-space: pre-wrap; font-family: monospace; background: white; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">${customInputSummary}</pre>
-            </div>
-
-            <div style="background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 4px; margin: 20px 0;">
-              <p style="margin: 0;"><strong>📧 Action Required:</strong> This order contains custom personalization requests that need your attention.</p>
-            </div>
-
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.ADMIN_URL || 'http://localhost:3000'}/pages/admin.html"
-                 style="background: #00bcd4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
-                View in Admin Dashboard
-              </a>
-            </div>
-
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 30px 0;">
-
-            <p style="color: #6c757d; font-size: 12px;">
-              This is an automated notification for orders containing custom input.
-              Please log into your admin dashboard to process this order.
-            </p>
-          </div>
         `;
 
         await sendResendEmail(
@@ -3078,7 +3078,7 @@ async function sendCustomRequestEmail(customRequest) {
       customRequestEmailHTML
     );
     logger.info(`✅ Custom request email sent to ${adminEmails.join(', ')} for request ${customRequest.id}`);
-  } catch (error) {
+    } catch (error) {
     logger.error(`❌ Error sending custom request email:`, error);
   }
 }
@@ -5639,7 +5639,7 @@ async function handlePaymentCompleted(webhookData) {
     `, [JSON.stringify(capture), capture.id, orderIdToUpdate]);
 
     // Get order details for email - use the order ID we just found
-    const orderResult = await pool.query(`
+    const orderDetailsResult = await pool.query(`
       SELECT o.*, c.email, c.first_name, c.last_name
       FROM orders o
       JOIN customers c ON o.customer_id = c.id
@@ -5647,15 +5647,15 @@ async function handlePaymentCompleted(webhookData) {
     `, [orderIdToUpdate]);
     
     // Order should be found since we just updated it
-    if (orderResult.rows.length === 0) {
+    if (orderDetailsResult.rows.length === 0) {
       logger.error('❌ Order not found for ID:', orderIdToUpdate);
       return;
     }
-    
 
 
 
-    const order = orderResult.rows[0];
+
+    const order = orderDetailsResult.rows[0];
 
     // Get order items
     const itemsResult = await pool.query(`
