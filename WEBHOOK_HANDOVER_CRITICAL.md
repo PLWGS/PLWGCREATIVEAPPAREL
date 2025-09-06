@@ -7,8 +7,10 @@
 - ✅ **Payments are working**: Customers can complete purchases successfully
 - ✅ **Webhook is configured**: PayPal webhook is properly set up in PayPal dashboard
 - ✅ **Server is stable**: No more crashes after JSON error handling fixes
+- ❓ **Webhook reception**: Server may be receiving webhook calls (needs testing)
+- ❓ **Order lookup**: Changed to use custom_id instead of payment_id (needs testing)
 - ❌ **Emails not sending**: No confirmation emails are being sent to customers or admin
-- ❌ **No webhook logs**: Server logs show NO webhook calls being received
+- ❌ **Order status not updating**: Orders remain in "pending" status
 
 ## 🔍 PROBLEM ANALYSIS
 
@@ -19,9 +21,9 @@
 4. **Webhook Endpoint**: `/api/paypal/webhook` endpoint exists and has extensive debugging
 
 ### What's NOT Working:
-1. **PayPal Webhooks**: PayPal is NOT sending webhook calls to the server
-2. **Email Notifications**: No payment confirmation emails are being sent
-3. **Order Status Updates**: Orders remain in "pending" status instead of "completed"
+1. **Email Notifications**: No payment confirmation emails are being sent
+2. **Order Status Updates**: Orders remain in "pending" status instead of "completed"
+3. **Webhook Processing**: Webhooks are received but order processing may be failing
 
 ## 🛠️ TECHNICAL DETAILS
 
@@ -76,20 +78,27 @@
 - Added fallback order lookup mechanisms
 - Fixed payment ID vs database ID mismatches
 
+### 5. Latest Changes (September 6, 2025):
+- **Fixed syntax error**: Removed duplicate `orderResult` declaration that was crashing server
+- **Changed order lookup**: Now using `custom_id` from webhook instead of `payment_id`
+- **Database analysis**: Confirmed we store PayPal Order IDs in `payment_id` column
+- **Webhook data structure**: PayPal sends Payment ID in webhook, but we need Order ID to find order
+- **Current approach**: Using `capture.custom_id` (our database order ID) to find orders
+
 ## 🚨 CRITICAL ISSUES REMAINING
 
-### 1. PayPal Webhook Not Triggering:
-**Problem**: PayPal is not sending webhook calls to the server
+### 1. Webhook Processing Status Unknown:
+**Problem**: Recent changes to order lookup logic need testing
 **Evidence**: 
-- Server logs show NO webhook calls received
-- Orders remain in "pending" status
-- No email confirmations sent
+- Changed from using `payment_id` to `custom_id` for order lookup
+- Server was crashing due to syntax error (now fixed)
+- Need to test if webhook now processes orders correctly
 
-**Possible Causes**:
-- PayPal webhook URL not accessible from PayPal's servers
-- Webhook configuration issue in PayPal dashboard
-- PayPal sandbox environment issue
-- Server not responding to webhook calls properly
+**Testing Required**:
+- Make test purchase and check server logs
+- Verify webhook receives and processes order correctly
+- Confirm order status updates to "completed"
+- Verify emails are sent
 
 ### 2. Order Status Not Updating:
 **Problem**: Orders stay in "pending" status instead of "completed"
@@ -101,29 +110,29 @@
 
 ## 🎯 IMMEDIATE ACTION REQUIRED
 
-### Step 1: Verify Webhook Accessibility
+### Step 1: Test Current Fix
+1. **Make a test purchase** to verify webhook processing
+2. **Check server logs** for webhook reception and processing
+3. **Verify order status** updates to "completed"
+4. **Check email delivery** to both customer and admin
+
+### Step 2: If Still Not Working
 1. Test webhook URL accessibility:
    ```bash
    curl -X GET https://plwgscreativeapparel.com/api/paypal/webhook
    ```
-2. Check if server responds correctly
-3. Verify webhook URL in PayPal dashboard
-
-### Step 2: Test PayPal Webhook Simulation
-1. Use PayPal webhook simulator in PayPal dashboard
-2. Send test webhook to verify server receives it
+2. Use PayPal webhook simulator in PayPal dashboard
 3. Check server logs for webhook calls
 
-### Step 3: Manual Order Processing
+### Step 3: Debug Order Lookup
+1. Verify `custom_id` is being sent in webhook data
+2. Check if order lookup by `custom_id` works
+3. Add more debugging logs if needed
+
+### Step 4: Manual Order Processing (Backup)
 1. Create manual endpoint to process completed orders
 2. Send test emails to verify email system works
 3. Update order status manually for testing
-
-### Step 4: PayPal Configuration Review
-1. Verify webhook URL in PayPal dashboard
-2. Check webhook event types are correct
-3. Verify webhook is enabled and active
-4. Test with PayPal webhook simulator
 
 ## 📁 KEY FILES TO REVIEW
 
@@ -210,6 +219,7 @@ railway logs
 ---
 
 **Created**: September 6, 2025
-**Status**: CRITICAL - Webhook not working
+**Status**: CRITICAL - Webhook processing needs testing
 **Priority**: URGENT - Customer experience impacted
 **Assigned**: New agent needed
+**Last Updated**: September 6, 2025 - Fixed syntax error, changed order lookup logic
