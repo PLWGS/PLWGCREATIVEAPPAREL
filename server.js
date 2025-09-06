@@ -198,23 +198,27 @@ if (process.env.DATABASE_URL) {
 const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
 const smtpSecure = process.env.SMTP_SECURE === 'true';
 
+// Try different Zoho SMTP configurations
+const smtpConfigs = [
+  { host: 'smtp.zoho.com', port: 587, secure: false, name: 'Zoho TLS' },
+  { host: 'smtp.zoho.com', port: 465, secure: true, name: 'Zoho SSL' },
+  { host: 'smtp.zoho.eu', port: 587, secure: false, name: 'Zoho EU TLS' },
+  { host: 'smtp.zoho.eu', port: 465, secure: true, name: 'Zoho EU SSL' }
+];
+
+// Create transporter with first config, will be updated if needed
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: smtpPort,
-  secure: smtpPort === 465 ? true : smtpSecure,
+  host: smtpConfigs[0].host,
+  port: smtpConfigs[0].port,
+  secure: smtpConfigs[0].secure,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD
   },
-  // Add a timeout to prevent long waits on connection issues
-  connectionTimeout: 15000, // 15 seconds
-  greetingTimeout: 15000,   // 15 seconds
-  socketTimeout: 15000,     // 15 seconds
-  // Add additional options for better reliability
-  pool: false, // Disable pooling for now
-  // Add debug logging
-  debug: process.env.NODE_ENV === 'development',
-  logger: process.env.NODE_ENV === 'development'
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
+  pool: false
 });
 
 // Helper function to check database availability
@@ -6063,51 +6067,91 @@ app.post('/api/trigger-payment-email', async (req, res) => {
   }
 });
 
-// Simple SMTP test endpoint - send test email to Gmail
+// Simple SMTP test endpoint - try all Zoho configurations
 app.get('/api/test-smtp-simple', async (req, res) => {
   try {
-    logger.info('🧪 Testing SMTP with direct email to Gmail...');
+    logger.info('🧪 Testing all Zoho SMTP configurations...');
     
-    // Create a simple test email
-    const testEmail = {
-      from: process.env.EMAIL_FROM,
-      to: 'mariaisabeljuarezgomez85@gmail.com',
-      subject: '🧪 SMTP Test - PLWG Creative Apparel',
-      text: 'This is a test email to verify SMTP connection works.',
-      html: '<h2>🧪 SMTP Test</h2><p>This is a test email to verify SMTP connection works.</p><p>Time: ' + new Date().toISOString() + '</p>'
-    };
-
-    // Try to send the email
-    const info = await transporter.sendMail(testEmail);
+    let workingConfig = null;
+    let lastError = null;
     
-    logger.info('✅ Test email sent successfully:', info.messageId);
-    
-    res.json({
-      success: true,
-      message: 'Test email sent to mariaisabeljuarezgomez85@gmail.com',
-      messageId: info.messageId,
-      config: {
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_SECURE,
-        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
-        from: process.env.EMAIL_FROM
+    for (const config of smtpConfigs) {
+      try {
+        logger.info(`🧪 Testing ${config.name}: ${config.host}:${config.port} (secure: ${config.secure})`);
+        
+        const testTransporter = nodemailer.createTransport({
+          host: config.host,
+          port: config.port,
+          secure: config.secure,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD
+          },
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 8000
+        });
+        
+        // Test connection
+        await testTransporter.verify();
+        logger.info(`✅ Connection successful with ${config.name}`);
+        
+        // Try to send a test email
+        const testEmail = {
+          from: process.env.EMAIL_FROM,
+          to: 'mariaisabeljuarezgomez85@gmail.com',
+          subject: `🧪 SMTP Test - ${config.name}`,
+          text: `This is a test email using ${config.name} configuration.`,
+          html: `<h2>🧪 SMTP Test - ${config.name}</h2><p>This is a test email using ${config.name} configuration.</p><p>Time: ${new Date().toISOString()}</p>`
+        };
+        
+        const info = await testTransporter.sendMail(testEmail);
+        logger.info(`✅ Email sent successfully with ${config.name}:`, info.messageId);
+        
+        workingConfig = config;
+        break;
+        
+      } catch (error) {
+        logger.info(`❌ ${config.name} failed:`, error.message);
+        lastError = error;
       }
-    });
+    }
+    
+    if (workingConfig) {
+      res.json({
+        success: true,
+        message: `SMTP test successful with ${workingConfig.name}`,
+        workingConfig: workingConfig,
+        config: {
+          host: workingConfig.host,
+          port: workingConfig.port,
+          secure: workingConfig.secure,
+          user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+          from: process.env.EMAIL_FROM
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'All SMTP configurations failed',
+        details: lastError ? lastError.message : 'Unknown error',
+        testedConfigs: smtpConfigs.map(c => `${c.name}: ${c.host}:${c.port}`),
+        config: {
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          secure: process.env.SMTP_SECURE,
+          user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+          from: process.env.EMAIL_FROM
+        }
+      });
+    }
     
   } catch (error) {
     logger.error('❌ SMTP test failed:', error);
     res.status(500).json({
       success: false,
       error: 'SMTP test failed',
-      details: error.message,
-      config: {
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_SECURE,
-        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
-        from: process.env.EMAIL_FROM
-      }
+      details: error.message
     });
   }
 });
