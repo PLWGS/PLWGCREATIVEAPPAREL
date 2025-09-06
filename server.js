@@ -5694,7 +5694,14 @@ async function handlePaymentCompleted(webhookData) {
     const orderItems = itemsResult.rows;
 
     // Send confirmation emails
-    await sendPaymentConfirmationEmails(order, orderItems, capture);
+    logger.info('📧 About to send confirmation emails for order:', orderIdToUpdate);
+    try {
+      await sendPaymentConfirmationEmails(order, orderItems, capture);
+      logger.info('✅ Confirmation emails sent successfully for order:', orderIdToUpdate);
+    } catch (emailError) {
+      logger.error('❌ Email sending failed for order:', orderIdToUpdate, emailError);
+      // Don't throw - continue processing even if emails fail
+    }
 
     logger.info('✅ Payment completed webhook processed successfully for order:', orderIdToUpdate);
   } catch (error) {
@@ -5717,11 +5724,11 @@ async function handlePaymentDenied(webhookData) {
       if (orderResult.rows.length > 0) {
         const orderIdToUpdate = orderResult.rows[0].id;
         
-        await pool.query(`
-          UPDATE orders 
-          SET payment_status = 'denied', 
-              payment_details = $1,
-              updated_at = CURRENT_TIMESTAMP
+      await pool.query(`
+        UPDATE orders 
+        SET payment_status = 'denied', 
+            payment_details = $1,
+            updated_at = CURRENT_TIMESTAMP
           WHERE id = $2
         `, [JSON.stringify(capture), orderIdToUpdate]);
         
@@ -5752,11 +5759,11 @@ async function handlePaymentRefunded(webhookData) {
       if (orderResult.rows.length > 0) {
         const orderIdToUpdate = orderResult.rows[0].id;
         
-        await pool.query(`
-          UPDATE orders 
-          SET payment_status = 'refunded', 
-              payment_details = $1,
-              updated_at = CURRENT_TIMESTAMP
+      await pool.query(`
+        UPDATE orders 
+        SET payment_status = 'refunded', 
+            payment_details = $1,
+            updated_at = CURRENT_TIMESTAMP
           WHERE id = $2
         `, [JSON.stringify(capture), orderIdToUpdate]);
         
@@ -5776,8 +5783,15 @@ async function handlePaymentRefunded(webhookData) {
 async function sendPaymentConfirmationEmails(order, orderItems, paymentDetails) {
   try {
     logger.info('📧 Starting to send payment confirmation emails...');
-    logger.info('📧 Customer email:', order.email);
+    logger.info('📧 Order details:', {
+      orderNumber: order.order_number,
+      customerEmail: order.email,
+      customerName: order.customer_name,
+      totalAmount: order.total_amount
+    });
+    logger.info('📧 Order items count:', orderItems.length);
     logger.info('📧 Admin emails:', process.env.ADMIN_EMAIL, process.env.PLWGSCREATIVEAPPAREL_EMAIL);
+    logger.info('📧 Resend API key configured:', !!process.env.RESEND_API_KEY);
     
     // Customer confirmation email
     try {
