@@ -6063,6 +6063,55 @@ app.post('/api/trigger-payment-email', async (req, res) => {
   }
 });
 
+// Simple SMTP test endpoint
+app.get('/api/test-smtp-simple', async (req, res) => {
+  try {
+    logger.info('🧪 Testing simple SMTP connection...');
+    
+    // Create a simple test email
+    const testEmail = {
+      from: process.env.EMAIL_FROM,
+      to: 'letsgetcreative@myyahoo.com', // Your email for testing
+      subject: '🧪 SMTP Test - PLWG Creative Apparel',
+      text: 'This is a simple test email to verify SMTP connection.',
+      html: '<h2>🧪 SMTP Test</h2><p>This is a simple test email to verify SMTP connection.</p>'
+    };
+
+    // Try to send the email
+    const info = await transporter.sendMail(testEmail);
+    
+    logger.info('✅ Simple SMTP test successful:', info.messageId);
+    
+    res.json({
+      success: true,
+      message: 'Simple SMTP test successful',
+      messageId: info.messageId,
+      config: {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_SECURE,
+        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+        from: process.env.EMAIL_FROM
+      }
+    });
+    
+  } catch (error) {
+    logger.error('❌ Simple SMTP test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Simple SMTP test failed',
+      details: error.message,
+      config: {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_SECURE,
+        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+        from: process.env.EMAIL_FROM
+      }
+    });
+  }
+});
+
 // Email test endpoint
 app.get('/api/test-email', async (req, res) => {
   try {
