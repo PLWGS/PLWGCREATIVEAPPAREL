@@ -4137,7 +4137,7 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
     // Strategy 3: Purchase history based recommendations
     if (recommendations.length < limit) {
       const purchaseHistory = await pool.query(`
-        SELECT DISTINCT p.category
+        SELECT DISTINCT p.category, o.created_at
         FROM order_items oi
         INNER JOIN products p ON oi.product_id = p.id
         INNER JOIN orders o ON oi.order_id = o.id
@@ -6070,6 +6070,53 @@ app.post('/api/trigger-payment-email', async (req, res) => {
   } catch (error) {
     logger.error('❌ Error triggering payment email:', error);
     res.status(500).json({ error: 'Failed to send emails', details: error.message });
+  }
+});
+
+// Test payment confirmation email endpoint
+app.post('/api/test-payment-email', async (req, res) => {
+  try {
+    logger.info('🧪 Testing payment confirmation email...');
+    
+    // Create a mock order for testing
+    const mockOrder = {
+      order_number: 'TEST-' + Date.now(),
+      email: 'letsgetcreative@myyahoo.com',
+      customer_name: 'Test Customer',
+      total_amount: '25.99',
+      shipping_address: '123 Test St, Test City, TC 12345',
+      created_at: new Date().toISOString()
+    };
+    
+    const mockOrderItems = [{
+      product_name: 'Test Product',
+      size: 'M',
+      color: 'Black',
+      quantity: 1,
+      unit_price: '25.99'
+    }];
+    
+    const mockPaymentDetails = {
+      id: 'TEST-PAYMENT-' + Date.now()
+    };
+    
+    // Send test emails
+    await sendCustomerPaymentConfirmationEmail(mockOrder, mockOrderItems, mockPaymentDetails);
+    await sendAdminPaymentNotificationEmail(mockOrder, mockOrderItems, mockPaymentDetails);
+    
+    logger.info('✅ Test payment emails sent successfully');
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Test payment emails sent to letsgetcreative@myyahoo.com',
+      orderNumber: mockOrder.order_number
+    });
+    
+  } catch (error) {
+    logger.error('❌ Test payment email failed:', error);
+    return res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
   }
 });
 
