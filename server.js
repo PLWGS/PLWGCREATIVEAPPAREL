@@ -5515,13 +5515,13 @@ async function handlePaymentCompleted(webhookData) {
       return;
     }
 
-    // Update order status in database
+    // Update order status in database using PayPal payment ID
     await pool.query(`
       UPDATE orders 
       SET payment_status = 'completed', 
           payment_details = $1,
           updated_at = CURRENT_TIMESTAMP
-      WHERE id = $2
+      WHERE payment_id = $2
     `, [JSON.stringify(capture), orderId]);
 
     // Get order details for email
@@ -5567,7 +5567,7 @@ async function handlePaymentDenied(webhookData) {
         SET payment_status = 'denied', 
             payment_details = $1,
             updated_at = CURRENT_TIMESTAMP
-        WHERE id = $2
+        WHERE payment_id = $2
       `, [JSON.stringify(capture), orderId]);
     }
 
@@ -5589,7 +5589,7 @@ async function handlePaymentRefunded(webhookData) {
         SET payment_status = 'refunded', 
             payment_details = $1,
             updated_at = CURRENT_TIMESTAMP
-        WHERE id = $2
+        WHERE payment_id = $2
       `, [JSON.stringify(capture), orderId]);
     }
 
