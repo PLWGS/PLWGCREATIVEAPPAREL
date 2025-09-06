@@ -5428,6 +5428,48 @@ app.post('/api/test-webhook', express.json({ limit: '10mb' }), async (req, res) 
   }
 });
 
+// Test PayPal webhook simulation
+app.post('/api/test-paypal-webhook', express.json(), async (req, res) => {
+  try {
+    const { paymentId, orderId } = req.body;
+    
+    if (!paymentId || !orderId) {
+      return res.status(400).json({ error: 'paymentId and orderId are required' });
+    }
+    
+    // Simulate PayPal webhook data
+    const webhookData = {
+      id: `WH-${Date.now()}`,
+      event_type: 'PAYMENT.CAPTURE.COMPLETED',
+      create_time: new Date().toISOString(),
+      resource_type: 'capture',
+      resource: {
+        id: paymentId,
+        custom_id: orderId.toString(),
+        status: 'COMPLETED',
+        amount: {
+          currency_code: 'USD',
+          value: '25.00'
+        }
+      }
+    };
+    
+    logger.info('🧪 Simulating PayPal webhook with data:', JSON.stringify(webhookData, null, 2));
+    
+    // Process the webhook
+    await handlePaymentCompleted(webhookData);
+    
+    res.json({ 
+      success: true, 
+      message: 'PayPal webhook simulation completed',
+      webhookData: webhookData
+    });
+  } catch (error) {
+    logger.error('❌ Test PayPal webhook error:', error.message);
+    res.status(500).json({ error: 'Webhook simulation failed' });
+  }
+});
+
 // PayPal webhook endpoint for payment notifications
 app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   logger.info('🔔 PayPal webhook endpoint called!');
