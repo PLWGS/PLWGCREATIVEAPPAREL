@@ -5606,17 +5606,18 @@ async function handlePaymentCompleted(webhookData) {
     }
 
     // Update order status in database using PayPal payment ID
-    // First, find the order by the PayPal Order ID (stored in payment_id)
-    const orderResult = await pool.query(`
-      SELECT id FROM orders WHERE payment_id = $1
-    `, [orderId]);
-    
-    if (orderResult.rows.length === 0) {
-      logger.error('❌ Order not found for PayPal Order ID:', orderId);
+    // Find the order by the custom_id (our database order ID)
+    const customId = capture?.custom_id;
+    if (!customId) {
+      logger.error('❌ No custom_id found in webhook data');
       return;
     }
     
-    const orderIdToUpdate = orderResult.rows[0].id;
+    const orderIdToUpdate = parseInt(customId);
+    if (isNaN(orderIdToUpdate)) {
+      logger.error('❌ Invalid custom_id:', customId);
+      return;
+    }
     
     // Update the order with the actual payment ID from the webhook
     await pool.query(`
