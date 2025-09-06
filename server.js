@@ -176,14 +176,21 @@ app.use('/api/paypal/webhook', express.raw({ type: 'application/json' }));
 // JSON parser with error handling
 app.use(express.json({ 
   limit: '50mb',
+  strict: false,
   verify: (req, res, buf) => {
     try {
-      JSON.parse(buf);
+      if (buf && buf.length > 0) {
+        JSON.parse(buf);
+      }
     } catch (e) {
       logger.error('❌ Malformed JSON detected:', e.message);
       logger.error('❌ Request URL:', req.url);
-      logger.error('❌ Raw body:', buf.toString());
-      throw new Error('Invalid JSON');
+      logger.error('❌ Request method:', req.method);
+      logger.error('❌ Content-Type:', req.get('Content-Type'));
+      logger.error('❌ Raw body length:', buf ? buf.length : 'no body');
+      logger.error('❌ Raw body preview:', buf ? buf.toString().substring(0, 200) : 'no body');
+      // Don't throw error, just log it and let the request continue
+      logger.warn('⚠️ Continuing with malformed JSON request');
     }
   }
 }));
@@ -6627,6 +6634,20 @@ app.use((error, req, res, next) => {
     return res.status(400).json({ error: 'Invalid JSON format' });
   }
   next(error);
+});
+
+// Catch-all error handler to prevent server crashes
+app.use((error, req, res, next) => {
+  logger.error('❌ Unhandled error:', error.message);
+  logger.error('❌ Request URL:', req.url);
+  logger.error('❌ Request method:', req.method);
+  logger.error('❌ Error stack:', error.stack);
+  
+  // Don't crash the server, just return an error response
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: 'Something went wrong. Please try again.'
+  });
 });
 
 // Initialize admin credentials and start server
