@@ -6068,46 +6068,94 @@ app.get('/api/test-smtp-simple', async (req, res) => {
   try {
     logger.info('🧪 Testing simple SMTP connection...');
     
-    // Create a simple test email
-    const testEmail = {
-      from: process.env.EMAIL_FROM,
-      to: 'letsgetcreative@myyahoo.com', // Your email for testing
-      subject: '🧪 SMTP Test - PLWG Creative Apparel',
-      text: 'This is a simple test email to verify SMTP connection.',
-      html: '<h2>🧪 SMTP Test</h2><p>This is a simple test email to verify SMTP connection.</p>'
-    };
-
-    // Try to send the email
-    const info = await transporter.sendMail(testEmail);
+    // Test multiple Zoho SMTP configurations
+    const zohoConfigs = [
+      { host: 'smtp.zoho.com', port: 587, secure: false, name: 'Zoho TLS' },
+      { host: 'smtp.zoho.com', port: 465, secure: true, name: 'Zoho SSL' },
+      { host: 'smtp.zoho.eu', port: 587, secure: false, name: 'Zoho EU TLS' },
+      { host: 'smtp.zoho.eu', port: 465, secure: true, name: 'Zoho EU SSL' }
+    ];
     
-    logger.info('✅ Simple SMTP test successful:', info.messageId);
+    let workingConfig = null;
+    let lastError = null;
     
-    res.json({
-      success: true,
-      message: 'Simple SMTP test successful',
-      messageId: info.messageId,
-      config: {
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_SECURE,
-        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
-        from: process.env.EMAIL_FROM
+    for (const config of zohoConfigs) {
+      try {
+        logger.info(`🧪 Testing ${config.name}: ${config.host}:${config.port} (secure: ${config.secure})`);
+        
+        const testTransporter = nodemailer.createTransporter({
+          host: config.host,
+          port: config.port,
+          secure: config.secure,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD
+          },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 10000
+        });
+        
+        // Test connection
+        await testTransporter.verify();
+        logger.info(`✅ Connection successful with ${config.name}`);
+        
+        // Try to send a test email
+        const testEmail = {
+          from: process.env.EMAIL_FROM,
+          to: 'letsgetcreative@myyahoo.com',
+          subject: `🧪 SMTP Test - ${config.name}`,
+          text: `This is a test email using ${config.name} configuration.`,
+          html: `<h2>🧪 SMTP Test - ${config.name}</h2><p>This is a test email using ${config.name} configuration.</p>`
+        };
+        
+        const info = await testTransporter.sendMail(testEmail);
+        logger.info(`✅ Email sent successfully with ${config.name}:`, info.messageId);
+        
+        workingConfig = config;
+        break;
+        
+      } catch (error) {
+        logger.info(`❌ ${config.name} failed:`, error.message);
+        lastError = error;
       }
-    });
+    }
+    
+    if (workingConfig) {
+      res.json({
+        success: true,
+        message: `SMTP test successful with ${workingConfig.name}`,
+        workingConfig: workingConfig,
+        config: {
+          host: workingConfig.host,
+          port: workingConfig.port,
+          secure: workingConfig.secure,
+          user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+          from: process.env.EMAIL_FROM
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'All SMTP configurations failed',
+        details: lastError ? lastError.message : 'Unknown error',
+        testedConfigs: zohoConfigs.map(c => `${c.name}: ${c.host}:${c.port}`),
+        config: {
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          secure: process.env.SMTP_SECURE,
+          user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+          from: process.env.EMAIL_FROM
+        }
+      });
+    }
     
   } catch (error) {
     logger.error('❌ Simple SMTP test failed:', error);
     res.status(500).json({
       success: false,
       error: 'Simple SMTP test failed',
-      details: error.message,
-      config: {
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_SECURE,
-        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
-        from: process.env.EMAIL_FROM
-      }
+      details: error.message
     });
   }
 });
