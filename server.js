@@ -5435,7 +5435,23 @@ app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async
 
     // Verify webhook signature (in production, you should verify the signature)
     // For now, we'll process the webhook without verification for testing
-    const webhookData = JSON.parse(req.body);
+    
+    let webhookData;
+    try {
+      // Handle both string and object body types
+      if (typeof req.body === 'string') {
+        webhookData = JSON.parse(req.body);
+      } else if (typeof req.body === 'object' && req.body !== null) {
+        webhookData = req.body;
+      } else {
+        throw new Error('Invalid webhook body type');
+      }
+    } catch (parseError) {
+      logger.error('❌ PayPal webhook JSON parsing error:', parseError.message);
+      logger.error('❌ Webhook body type:', typeof req.body);
+      logger.error('❌ Webhook body content:', req.body);
+      return res.status(400).json({ error: 'Invalid webhook data format' });
+    }
     
     logger.info('🔔 PayPal webhook received:', webhookData.event_type);
     logger.info('🔔 Webhook data:', JSON.stringify(webhookData, null, 2));
