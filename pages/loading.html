@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading - PlwgsCreativeApparel</title>
+    <link rel="stylesheet" href="../css/main.css" />
+    <style>
+        /* Loading Page Specific Styles */
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        /* Animated Background */
+        .loading-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 188, 212, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 188, 212, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 188, 212, 0.05) 0%, transparent 50%);
+            animation: backgroundPulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+        
+        /* Floating Particles */
+        .loading-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00bcd4;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg); 
+                opacity: 0.6;
+            }
+            50% { 
+                transform: translateY(-30px) rotate(180deg); 
+                opacity: 1;
+            }
+        }
+        
+        .particle:nth-child(odd) {
+            animation-delay: -2s;
+            animation-duration: 8s;
+        }
+        
+        .particle:nth-child(even) {
+            animation-delay: -4s;
+            animation-duration: 10s;
+        }
+        
+        /* Main Loading Content */
+        .loading-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 500px;
+            padding: 2rem;
+        }
+        
+        /* Logo Animation */
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+        
+        .logo-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top: 3px solid #00bcd4;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+        }
+        
+        .logo-ring:nth-child(2) {
+            animation-delay: -0.5s;
+            border-top-color: rgba(0, 188, 212, 0.5);
+            width: 90%;
+            height: 90%;
+            top: 5%;
+            left: 5%;
+        }
+        
+        .logo-ring:nth-child(3) {
+            animation-delay: -1s;
+            border-top-color: rgba(0, 188, 212, 0.3);
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .logo-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00bcd4;
+            text-shadow: 0 0 20px rgba(0, 188, 212, 0.5);
+        }
+        
+        /* Loading Text */
+        .loading-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(0, 188, 212, 0.3);
+            animation: textGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes textGlow {
+            from { text-shadow: 0 0 30px rgba(0, 188, 212, 0.3); }
+            to { text-shadow: 0 0 40px rgba(0, 188, 212, 0.6); }
+        }
+        
+        .loading-subtitle {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00bcd4, #00acc1, #00bcd4);
+            background-size: 200% 100%;
+            border-radius: 3px;
+            animation: progressMove 2s ease-in-out infinite;
+        }
+        
+        @keyframes progressMove {
+            0% { 
+                background-position: 200% 0;
+                width: 0%;
+            }
+            50% { 
+                width: 70%;
+            }
+            100% { 
+                background-position: -200% 0;
+                width: 100%;
+            }
+        }
+        
+        /* Loading Dots */
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #00bcd4;
+            border-radius: 50%;
+            animation: dotBounce 1.4s ease-in-out infinite both;
+        }
+        
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(3) { animation-delay: 0s; }
+        
+        @keyframes dotBounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Status Messages */
+        .status-message {
+            margin-top: 2rem;
+            font-size: 1rem;
+            color: #888;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .loading-title {
+                font-size: 2rem;
+            }
+            
+            .loading-logo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .logo-text {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <!-- Animated Background -->
+        <div class="loading-bg"></div>
+        
+        <!-- Floating Particles -->
+        <div class="loading-particles" id="particles"></div>
+        
+        <!-- Main Loading Content -->
+        <div class="loading-content">
+            <!-- Animated Logo -->
+            <div class="loading-logo">
+                <div class="logo-ring"></div>
+                <div class="logo-ring"></div>
+                <div class="logo-ring"></div>
+                <div class="logo-text">PCA</div>
+            </div>
+            
+            <!-- Loading Title -->
+            <h1 class="loading-title">PlwgsCreativeApparel</h1>
+            <p class="loading-subtitle">Preparing your creative experience...</p>
+            
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            
+            <!-- Loading Dots -->
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            
+            <!-- Status Message -->
+            <div class="status-message" id="statusMessage">
+                Loading products...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random positioning
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // Random animation delay
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Simulate loading progress with status messages
+        const statusMessages = [
+            'Loading products...',
+            'Preparing filters...',
+            'Optimizing images...',
+            'Setting up cart...',
+            'Almost ready...',
+            'Welcome to PlwgsCreativeApparel!'
+        ];
+        
+        let currentMessage = 0;
+        const statusElement = document.getElementById('statusMessage');
+        
+        function updateStatus() {
+            if (currentMessage < statusMessages.length) {
+                statusElement.textContent = statusMessages[currentMessage];
+                statusElement.style.animation = 'none';
+                statusElement.offsetHeight; // Trigger reflow
+                statusElement.style.animation = 'fadeInUp 0.5s ease-out forwards';
+                currentMessage++;
+                setTimeout(updateStatus, 1000);
+            }
+        }
+        
+        // Initialize loading page
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            updateStatus();
+            
+            // Simulate loading completion after 6 seconds
+            setTimeout(() => {
+                // Add completion animation
+                document.querySelector('.loading-container').style.animation = 'fadeOut 0.5s ease-out forwards';
+                
+                // Redirect to shop page after animation
+                setTimeout(() => {
+                    window.location.href = 'shop.html';
+                }, 500);
+            }, 6000);
+        });
+        
+        // Add fade out animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
