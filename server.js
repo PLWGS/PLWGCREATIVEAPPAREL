@@ -5415,6 +5415,11 @@ app.post('/api/orders/create', authenticateCustomer, async (req, res) => {
 
 // PayPal webhook endpoint for payment notifications
 app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  logger.info('🔔 PayPal webhook endpoint called!');
+  logger.info('🔔 Request method:', req.method);
+  logger.info('🔔 Request headers:', req.headers);
+  logger.info('🔔 Request body length:', req.body ? req.body.length : 'no body');
+  
   try {
     const webhookId = process.env.PAYPAL_WEBHOOK_ID;
     const webhookSignature = req.headers['paypal-transmission-id'];
@@ -5433,6 +5438,8 @@ app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async
     const webhookData = JSON.parse(req.body);
     
     logger.info('🔔 PayPal webhook received:', webhookData.event_type);
+    logger.info('🔔 Webhook data:', JSON.stringify(webhookData, null, 2));
+    logger.info('🔔 Webhook headers:', req.headers);
 
     // Handle different webhook events
     if (webhookData.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
