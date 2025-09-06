@@ -5585,10 +5585,16 @@ async function handlePaymentCompleted(webhookData) {
     logger.info('🔍 Webhook resource:', JSON.stringify(capture, null, 2));
     
     // The webhook sends the PayPal capture ID in the resource.id field
-    // But we stored the PayPal Order ID in payment_id, not the Capture ID
-    // We need to get the Order ID from the capture's parent_payment or order_id field
+    // We need to find the order by looking for the PayPal Order ID in different possible fields
     let captureId = capture?.id || webhookData?.resource?.id;
-    let paypalOrderId = capture?.parent_payment || capture?.order_id || webhookData?.resource?.parent_payment || webhookData?.resource?.order_id;
+    
+    // Try multiple possible fields for the PayPal Order ID
+    let paypalOrderId = capture?.parent_payment || 
+                       capture?.order_id || 
+                       webhookData?.resource?.parent_payment || 
+                       webhookData?.resource?.order_id ||
+                       capture?.supplementary_data?.related_ids?.order_id ||
+                       webhookData?.resource?.supplementary_data?.related_ids?.order_id;
     
     logger.info('🔍 Capture ID from webhook:', captureId);
     logger.info('🔍 PayPal Order ID from capture:', paypalOrderId);
@@ -5596,11 +5602,19 @@ async function handlePaymentCompleted(webhookData) {
     logger.info('🔍 Capture order_id:', capture?.order_id);
     logger.info('🔍 Webhook resource parent_payment:', webhookData?.resource?.parent_payment);
     logger.info('🔍 Webhook resource order_id:', webhookData?.resource?.order_id);
+    logger.info('🔍 Capture supplementary_data:', capture?.supplementary_data);
     logger.info('🔍 Custom ID (our database order ID):', capture?.custom_id);
     logger.info('🔍 Full webhook data:', JSON.stringify(webhookData, null, 2));
     logger.info('🔍 Full capture object:', JSON.stringify(capture, null, 2));
     logger.info('🔍 All capture keys:', capture ? Object.keys(capture) : 'No capture');
     logger.info('🔍 All webhook keys:', Object.keys(webhookData));
+    
+    // If we still can't find the Order ID, try using the capture ID itself
+    // Sometimes PayPal sends the Order ID as the capture ID
+    if (!paypalOrderId) {
+      logger.warn('⚠️ No PayPal Order ID found in expected fields, trying capture ID as Order ID');
+      paypalOrderId = captureId;
+    }
     
     if (!paypalOrderId) {
       logger.error('❌ No PayPal Order ID found in webhook data');
@@ -5610,15 +5624,33 @@ async function handlePaymentCompleted(webhookData) {
       return;
     }
     
-    // Find order by payment_id
-    const orderResult = await pool.query(`
+    // Find order by payment_id (PayPal Order ID)
+    let orderResult = await pool.query(`
       SELECT id FROM orders WHERE payment_id = $1
     `, [paypalOrderId]);
+    
+    // If not found by Order ID, try searching by capture ID as fallback
+    if (orderResult.rows.length === 0 && captureId && captureId !== paypalOrderId) {
+      logger.warn('⚠️ Order not found by Order ID, trying capture ID as fallback');
+      orderResult = await pool.query(`
+        SELECT id FROM orders WHERE payment_id = $1
+      `, [captureId]);
+    }
     
     if (orderResult.rows.length === 0) {
       logger.error('❌ Order not found for PayPal Order ID:', paypalOrderId);
       logger.error('❌ Capture ID was:', captureId);
-      logger.error('❌ Looking for Order ID in payment_id field');
+      logger.error('❌ Tried both Order ID and Capture ID in payment_id field');
+      logger.error('❌ Available orders in database:');
+      
+      // Show recent orders for debugging
+      const recentOrders = await pool.query(`
+        SELECT id, payment_id, order_number, created_at 
+        FROM orders 
+        ORDER BY created_at DESC 
+        LIMIT 5
+      `);
+      logger.error('❌ Recent orders:', recentOrders.rows);
       return;
     }
     
