@@ -6067,46 +6067,57 @@ app.post('/api/trigger-payment-email', async (req, res) => {
   }
 });
 
-// Gmail SMTP test endpoint
-app.get('/api/test-gmail-smtp', async (req, res) => {
+// Resend API test endpoint (FREE - 3000 emails/month)
+app.get('/api/test-resend', async (req, res) => {
   try {
-    logger.info('🧪 Testing Gmail SMTP...');
+    logger.info('🧪 Testing Resend API...');
     
-    const gmailTransporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'mariaisabeljuarezgomez85@gmail.com',
-        pass: 'your-gmail-app-password' // You'll need to generate this
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      return res.status(500).json({
+        success: false,
+        error: 'RESEND_API_KEY not configured',
+        message: 'Please add RESEND_API_KEY to Railway environment variables'
+      });
+    }
+    
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json'
       },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000
+      body: JSON.stringify({
+        from: 'admin@plwgscreativeapparel.com',
+        to: ['mariaisabeljuarezgomez85@gmail.com'],
+        subject: '🧪 Resend API Test - PLWG Creative Apparel',
+        html: '<h2>🧪 Resend API Test</h2><p>This is a test email using Resend API.</p><p>Time: ' + new Date().toISOString() + '</p>'
+      })
     });
     
-    const testEmail = {
-      from: 'mariaisabeljuarezgomez85@gmail.com',
-      to: 'mariaisabeljuarezgomez85@gmail.com',
-      subject: '🧪 Gmail SMTP Test - PLWG Creative Apparel',
-      text: 'This is a test email using Gmail SMTP.',
-      html: '<h2>🧪 Gmail SMTP Test</h2><p>This is a test email using Gmail SMTP.</p>'
-    };
+    const result = await response.json();
     
-    const info = await gmailTransporter.sendMail(testEmail);
-    logger.info('✅ Gmail SMTP test successful:', info.messageId);
-    
-    res.json({
-      success: true,
-      message: 'Gmail SMTP test successful',
-      messageId: info.messageId
-    });
+    if (response.ok) {
+      logger.info('✅ Resend API test successful:', result.id);
+      res.json({
+        success: true,
+        message: 'Resend API test successful',
+        emailId: result.id
+      });
+    } else {
+      logger.error('❌ Resend API test failed:', result);
+      res.status(500).json({
+        success: false,
+        error: 'Resend API test failed',
+        details: result
+      });
+    }
     
   } catch (error) {
-    logger.error('❌ Gmail SMTP test failed:', error);
+    logger.error('❌ Resend API test failed:', error);
     res.status(500).json({
       success: false,
-      error: 'Gmail SMTP test failed',
+      error: 'Resend API test failed',
       details: error.message
     });
   }
