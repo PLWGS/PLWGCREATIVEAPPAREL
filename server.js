@@ -6035,42 +6035,53 @@ app.get('/api/test-email', async (req, res) => {
     logger.info('📧 SMTP Secure:', process.env.SMTP_SECURE);
     logger.info('📧 Email From:', process.env.EMAIL_FROM);
     
-    // Test multiple Zoho SMTP configurations
-    const zohoConfigs = [
-      { host: 'smtp.zoho.com', port: 465, secure: true },
-      { host: 'smtp.zoho.com', port: 587, secure: false },
-      { host: 'smtp.zoho.eu', port: 465, secure: true },
-      { host: 'smtp.zoho.eu', port: 587, secure: false }
-    ];
-    
-    for (const config of zohoConfigs) {
-      try {
-        logger.info(`🧪 Testing Zoho config: ${config.host}:${config.port} (secure: ${config.secure})`);
-        
-        const testTransporter = nodemailer.createTransporter({
-          host: config.host,
-          port: config.port,
-          secure: config.secure,
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASSWORD
-          },
-          connectionTimeout: 10000,
-          greetingTimeout: 10000,
-          socketTimeout: 10000
-        });
-        
-        await testTransporter.verify();
-        logger.info(`✅ SUCCESS with ${config.host}:${config.port}`);
-        
-        // If this config works, update the main transporter
-        transporter.options.host = config.host;
-        transporter.options.port = config.port;
-        transporter.options.secure = config.secure;
-        
-        break; // Exit loop on first successful config
-      } catch (error) {
-        logger.info(`❌ FAILED with ${config.host}:${config.port} - ${error.message}`);
+    // Test current configuration first
+    try {
+      await transporter.verify();
+      logger.info('✅ Current SMTP configuration is working!');
+    } catch (error) {
+      logger.info('❌ Current config failed, trying alternatives...');
+      
+      // Test alternative Zoho configurations
+      const zohoConfigs = [
+        { host: 'smtp.zoho.com', port: 587, secure: false },
+        { host: 'smtp.zoho.eu', port: 465, secure: true },
+        { host: 'smtp.zoho.eu', port: 587, secure: false }
+      ];
+      
+      let workingConfig = null;
+      for (const config of zohoConfigs) {
+        try {
+          logger.info(`🧪 Testing: ${config.host}:${config.port} (secure: ${config.secure})`);
+          
+          const testTransporter = nodemailer.createTransporter({
+            host: config.host,
+            port: config.port,
+            secure: config.secure,
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASSWORD
+            },
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 15000
+          });
+          
+          await testTransporter.verify();
+          logger.info(`✅ SUCCESS with ${config.host}:${config.port}`);
+          workingConfig = config;
+          break;
+        } catch (error) {
+          logger.info(`❌ FAILED with ${config.host}:${config.port} - ${error.message}`);
+        }
+      }
+      
+      if (workingConfig) {
+        // Update the main transporter with working config
+        transporter.options.host = workingConfig.host;
+        transporter.options.port = workingConfig.port;
+        transporter.options.secure = workingConfig.secure;
+        logger.info('🔄 Updated transporter with working configuration');
       }
     }
     
