@@ -5524,16 +5524,34 @@ async function handlePaymentCompleted(webhookData) {
       WHERE payment_id = $2
     `, [JSON.stringify(capture), orderId]);
 
-    // Get order details for email
-    const orderResult = await pool.query(`
+    // Get order details for email - try multiple approaches
+    let orderResult = await pool.query(`
       SELECT o.*, c.email, c.first_name, c.last_name
       FROM orders o
       JOIN customers c ON o.customer_id = c.id
       WHERE o.payment_id = $1
     `, [orderId]);
 
+    // If not found by payment_id, try to find by custom_id or other fields
     if (orderResult.rows.length === 0) {
-      logger.error('❌ Order not found for ID:', orderId);
+      logger.warn('⚠️ Order not found by payment_id, trying alternative lookup...');
+      
+      // Try to find by custom_id in the capture data
+      const customId = capture?.custom_id;
+      if (customId) {
+        orderResult = await pool.query(`
+          SELECT o.*, c.email, c.first_name, c.last_name
+          FROM orders o
+          JOIN customers c ON o.customer_id = c.id
+          WHERE o.id = $1
+        `, [customId]);
+      }
+    }
+
+    if (orderResult.rows.length === 0) {
+      logger.error('❌ Order not found for any ID. Payment ID:', orderId);
+      logger.error('❌ Capture custom_id:', capture?.custom_id);
+      logger.error('❌ Available capture fields:', capture ? Object.keys(capture) : 'No capture');
       return;
     }
 
