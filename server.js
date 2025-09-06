@@ -6063,13 +6063,53 @@ app.post('/api/trigger-payment-email', async (req, res) => {
   }
 });
 
-// Simple SMTP test endpoint (disabled to prevent server crashes)
+// Simple SMTP test endpoint - send test email to Gmail
 app.get('/api/test-smtp-simple', async (req, res) => {
-  res.json({
-    success: false,
-    message: 'SMTP test temporarily disabled',
-    error: 'Server stability issue - use manual email trigger instead'
-  });
+  try {
+    logger.info('🧪 Testing SMTP with direct email to Gmail...');
+    
+    // Create a simple test email
+    const testEmail = {
+      from: process.env.EMAIL_FROM,
+      to: 'mariaisabeljuarezgomez85@gmail.com',
+      subject: '🧪 SMTP Test - PLWG Creative Apparel',
+      text: 'This is a test email to verify SMTP connection works.',
+      html: '<h2>🧪 SMTP Test</h2><p>This is a test email to verify SMTP connection works.</p><p>Time: ' + new Date().toISOString() + '</p>'
+    };
+
+    // Try to send the email
+    const info = await transporter.sendMail(testEmail);
+    
+    logger.info('✅ Test email sent successfully:', info.messageId);
+    
+    res.json({
+      success: true,
+      message: 'Test email sent to mariaisabeljuarezgomez85@gmail.com',
+      messageId: info.messageId,
+      config: {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_SECURE,
+        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+        from: process.env.EMAIL_FROM
+      }
+    });
+    
+  } catch (error) {
+    logger.error('❌ SMTP test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'SMTP test failed',
+      details: error.message,
+      config: {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_SECURE,
+        user: process.env.SMTP_USER ? '***configured***' : 'NOT SET',
+        from: process.env.EMAIL_FROM
+      }
+    });
+  }
 });
 
 // Email test endpoint
