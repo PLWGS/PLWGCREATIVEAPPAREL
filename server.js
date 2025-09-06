@@ -5413,12 +5413,20 @@ app.post('/api/orders/create', authenticateCustomer, async (req, res) => {
 // PAYPAL WEBHOOK ENDPOINT
 // ========================================
 
+// Test webhook endpoint
+app.post('/api/test-webhook', express.json(), async (req, res) => {
+  logger.info('🧪 Test webhook called with data:', JSON.stringify(req.body, null, 2));
+  res.json({ success: true, message: 'Test webhook received', data: req.body });
+});
+
 // PayPal webhook endpoint for payment notifications
 app.post('/api/paypal/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   logger.info('🔔 PayPal webhook endpoint called!');
   logger.info('🔔 Request method:', req.method);
   logger.info('🔔 Request headers:', req.headers);
   logger.info('🔔 Request body length:', req.body ? req.body.length : 'no body');
+  logger.info('🔔 Request body type:', typeof req.body);
+  logger.info('🔔 Request body preview:', req.body ? req.body.toString().substring(0, 200) + '...' : 'no body');
   
   try {
     const webhookId = process.env.PAYPAL_WEBHOOK_ID;
