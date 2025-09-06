@@ -5529,7 +5529,7 @@ async function handlePaymentCompleted(webhookData) {
       SELECT o.*, c.email, c.first_name, c.last_name
       FROM orders o
       JOIN customers c ON o.customer_id = c.id
-      WHERE o.id = $1
+      WHERE o.payment_id = $1
     `, [orderId]);
 
     if (orderResult.rows.length === 0) {
