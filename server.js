@@ -6088,7 +6088,7 @@ app.get('/api/test-resend', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'admin@plwgscreativeapparel.com',
+        from: 'onboarding@resend.dev',
         to: ['mariaisabeljuarezgomez85@gmail.com'],
         subject: '🧪 Resend API Test - PLWG Creative Apparel',
         html: '<h2>🧪 Resend API Test</h2><p>This is a test email using Resend API.</p><p>Time: ' + new Date().toISOString() + '</p>'
