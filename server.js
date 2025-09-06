@@ -5248,9 +5248,9 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
 
     const response = await paypalClient.execute(request);
     
-    // Update order with PayPal order ID (we'll update with payment_id when webhook comes)
+    // Store PayPal Order ID in a separate field, not payment_id
     await pool.query(`
-      UPDATE orders SET payment_id = $1 WHERE id = $2
+      UPDATE orders SET paypal_order_id = $1 WHERE id = $2
     `, [response.result.id, order.id]);
     
     logger.info('🔍 Order created with PayPal ID:', response.result.id);
@@ -5629,7 +5629,7 @@ async function handlePaymentCompleted(webhookData) {
     `, [JSON.stringify(capture), capture.id, orderIdToUpdate]);
 
     // Get order details for email - use the order ID we just found
-    let orderResult = await pool.query(`
+    const orderResult = await pool.query(`
       SELECT o.*, c.email, c.first_name, c.last_name
       FROM orders o
       JOIN customers c ON o.customer_id = c.id
