@@ -5499,17 +5499,14 @@ async function handlePaymentCompleted(webhookData) {
     const capture = webhookData.resource;
     logger.info('🔍 Webhook resource:', JSON.stringify(capture, null, 2));
     
-    // Try multiple possible locations for order ID
-    let orderId = capture?.custom_id || 
-                  capture?.invoice_id || 
-                  capture?.id || 
-                  webhookData?.resource?.id ||
-                  webhookData?.id;
+    // The webhook sends the PayPal order ID in the resource.id field
+    // We need to find the order by payment_id (which stores the PayPal order ID)
+    let orderId = capture?.id || webhookData?.resource?.id;
     
-    logger.info('🔍 Extracted order ID:', orderId);
-    logger.info('🔍 Trying custom_id:', capture?.custom_id);
-    logger.info('🔍 Trying invoice_id:', capture?.invoice_id);
-    logger.info('🔍 Trying resource.id:', capture?.id);
+    logger.info('🔍 PayPal Order ID from webhook:', orderId);
+    logger.info('🔍 Capture ID:', capture?.id);
+    logger.info('🔍 Webhook resource ID:', webhookData?.resource?.id);
+    logger.info('🔍 Custom ID (our database order ID):', capture?.custom_id);
     
     if (!orderId) {
       logger.error('❌ No order ID found in webhook data');
@@ -5536,13 +5533,14 @@ async function handlePaymentCompleted(webhookData) {
       WHERE o.payment_id = $1
     `, [orderId]);
 
-    // If not found by payment_id, try to find by custom_id or other fields
+    // If not found by payment_id, try to find by custom_id (our database order ID)
     if (orderResult.rows.length === 0) {
-      logger.warn('⚠️ Order not found by payment_id, trying alternative lookup...');
+      logger.warn('⚠️ Order not found by payment_id, trying database order ID lookup...');
       
-      // Try to find by custom_id in the capture data
+      // Try to find by custom_id (our database order ID)
       const customId = capture?.custom_id;
       if (customId) {
+        logger.info('🔍 Trying to find order by database ID:', customId);
         orderResult = await pool.query(`
           SELECT o.*, c.email, c.first_name, c.last_name
           FROM orders o
