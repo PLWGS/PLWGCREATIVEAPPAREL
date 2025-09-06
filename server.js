@@ -5851,6 +5851,21 @@ async function sendResendEmail(to, subject, html) {
 
 // Send customer payment confirmation email
 async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDetails) {
+  // Parse shipping address JSON
+  let shippingAddress = 'Address not available';
+  try {
+    const addressData = JSON.parse(order.shipping_address);
+    shippingAddress = `
+      <strong>${addressData.first_name} ${addressData.last_name}</strong><br>
+      ${addressData.address}<br>
+      ${addressData.city}, ${addressData.state} ${addressData.zip}<br>
+      Phone: ${addressData.phone}
+    `;
+  } catch (e) {
+    // If parsing fails, use the raw string
+    shippingAddress = order.shipping_address;
+  }
+
   const customerEmailHTML = `
     <!DOCTYPE html>
     <html>
@@ -5859,21 +5874,282 @@ async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDe
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Payment Confirmation - PLWG Creative Apparel</title>
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background-color: #f4f4f4; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 3px solid #007bff; padding-bottom: 20px; margin-bottom: 30px; }
-        .logo { font-size: 28px; font-weight: bold; color: #007bff; margin-bottom: 10px; }
-        .success-icon { font-size: 48px; color: #28a745; margin-bottom: 20px; }
-        .order-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .item:last-child { border-bottom: none; }
-        .total { font-weight: bold; font-size: 18px; color: #007bff; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; }
-        .button { display: inline-block; background: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+          font-family: 'Inter', Arial, sans-serif; 
+          line-height: 1.6; 
+          color: #e0e0e0; 
+          margin: 0; 
+          padding: 0; 
+          background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+          min-height: 100vh;
+        }
+        
+        .email-container { 
+          max-width: 600px; 
+          margin: 0 auto; 
+          background: linear-gradient(145deg, #1f1f1f 0%, #2a2a2a 100%);
+          border-radius: 20px; 
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 188, 212, 0.1);
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .email-container::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #00bcd4, #4dd0e1, #00bcd4);
+          background-size: 200% 100%;
+          animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+          0%, 100% { background-position: 200% 0; }
+          50% { background-position: -200% 0; }
+        }
+        
+        .header { 
+          text-align: center; 
+          padding: 40px 30px 30px; 
+          background: linear-gradient(135deg, rgba(0, 188, 212, 0.1) 0%, rgba(77, 208, 225, 0.05) 100%);
+          position: relative;
+        }
+        
+        .logo { 
+          font-family: 'Orbitron', monospace;
+          font-size: 32px; 
+          font-weight: 900; 
+          background: linear-gradient(135deg, #00bcd4, #4dd0e1);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 15px;
+          text-shadow: 0 0 30px rgba(0, 188, 212, 0.3);
+        }
+        
+        .success-icon { 
+          font-size: 64px; 
+          margin-bottom: 20px;
+          filter: drop-shadow(0 0 20px rgba(0, 188, 212, 0.6));
+        }
+        
+        .header h1 {
+          font-family: 'Orbitron', monospace;
+          font-size: 28px;
+          font-weight: 700;
+          color: #00bcd4;
+          margin: 0 0 10px 0;
+          text-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+        }
+        
+        .header p {
+          color: #b0b0b0;
+          font-size: 16px;
+          margin: 0;
+        }
+        
+        .order-details { 
+          background: linear-gradient(145deg, rgba(0, 188, 212, 0.05) 0%, rgba(77, 208, 225, 0.02) 100%);
+          padding: 30px; 
+          margin: 0;
+          border-top: 1px solid rgba(0, 188, 212, 0.2);
+          border-bottom: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .order-details h3 {
+          font-family: 'Orbitron', monospace;
+          color: #00bcd4;
+          font-size: 20px;
+          margin: 0 0 20px 0;
+          text-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+        }
+        
+        .order-info {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 25px;
+        }
+        
+        .info-item {
+          background: rgba(0, 0, 0, 0.3);
+          padding: 15px;
+          border-radius: 10px;
+          border-left: 3px solid #00bcd4;
+        }
+        
+        .info-label {
+          color: #00bcd4;
+          font-weight: 600;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 5px;
+        }
+        
+        .info-value {
+          color: #e0e0e0;
+          font-size: 14px;
+        }
+        
+        .items-section {
+          margin-top: 25px;
+        }
+        
+        .items-section h4 {
+          font-family: 'Orbitron', monospace;
+          color: #00bcd4;
+          font-size: 18px;
+          margin: 0 0 15px 0;
+        }
+        
+        .item { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: flex-start;
+          padding: 20px; 
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 12px;
+          margin-bottom: 15px;
+          border: 1px solid rgba(0, 188, 212, 0.1);
+          transition: all 0.3s ease;
+        }
+        
+        .item:hover {
+          background: rgba(0, 188, 212, 0.05);
+          border-color: rgba(0, 188, 212, 0.3);
+          transform: translateY(-2px);
+        }
+        
+        .item:last-child { 
+          margin-bottom: 0; 
+        }
+        
+        .item-details {
+          flex: 1;
+        }
+        
+        .item-name {
+          font-weight: 600;
+          color: #e0e0e0;
+          font-size: 16px;
+          margin-bottom: 8px;
+        }
+        
+        .item-specs {
+          color: #b0b0b0;
+          font-size: 14px;
+          margin-bottom: 5px;
+        }
+        
+        .item-custom {
+          color: #00bcd4;
+          font-size: 13px;
+          font-style: italic;
+        }
+        
+        .item-price {
+          text-align: right;
+          color: #00bcd4;
+          font-weight: 600;
+          font-size: 16px;
+        }
+        
+        .total { 
+          font-weight: 700; 
+          font-size: 24px; 
+          color: #00bcd4;
+          background: linear-gradient(135deg, rgba(0, 188, 212, 0.1) 0%, rgba(77, 208, 225, 0.05) 100%);
+          padding: 20px;
+          border-radius: 12px;
+          border: 2px solid rgba(0, 188, 212, 0.3);
+          text-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+        }
+        
+        .button-container {
+          text-align: center;
+          padding: 30px;
+          background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 188, 212, 0.05) 100%);
+        }
+        
+        .button { 
+          display: inline-block; 
+          background: linear-gradient(135deg, #00bcd4 0%, #4dd0e1 100%);
+          color: #000; 
+          padding: 15px 35px; 
+          text-decoration: none; 
+          border-radius: 25px; 
+          margin: 0;
+          font-weight: 600;
+          font-size: 16px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          box-shadow: 0 8px 25px rgba(0, 188, 212, 0.3);
+          transition: all 0.3s ease;
+          border: none;
+        }
+        
+        .button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 35px rgba(0, 188, 212, 0.5);
+        }
+        
+        .footer { 
+          text-align: center; 
+          padding: 30px; 
+          background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 188, 212, 0.02) 100%);
+          border-top: 1px solid rgba(0, 188, 212, 0.1);
+        }
+        
+        .shipping-info {
+          background: rgba(0, 188, 212, 0.05);
+          padding: 20px;
+          border-radius: 12px;
+          margin: 20px 0;
+          border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .shipping-info h4 {
+          font-family: 'Orbitron', monospace;
+          color: #00bcd4;
+          font-size: 16px;
+          margin: 0 0 15px 0;
+        }
+        
+        .shipping-address {
+          color: #e0e0e0;
+          line-height: 1.8;
+        }
+        
+        .footer p {
+          color: #b0b0b0;
+          margin: 10px 0;
+        }
+        
+        .footer a {
+          color: #00bcd4;
+          text-decoration: none;
+        }
+        
+        .footer a:hover {
+          text-shadow: 0 0 10px rgba(0, 188, 212, 0.6);
+        }
+        
+        @media (max-width: 600px) {
+          .email-container { margin: 0; border-radius: 0; }
+          .order-info { grid-template-columns: 1fr; }
+          .item { flex-direction: column; gap: 10px; }
+          .item-price { text-align: left; }
+        }
       </style>
     </head>
     <body>
-      <div class="container">
+      <div class="email-container">
         <div class="header">
           <div class="logo">PLWG Creative Apparel</div>
           <div class="success-icon">✅</div>
@@ -5883,38 +6159,58 @@ async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDe
         
         <div class="order-details">
           <h3>Order Details</h3>
-          <p><strong>Order Number:</strong> ${order.order_number}</p>
-          <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
-          <p><strong>Payment Method:</strong> PayPal</p>
-          <p><strong>Transaction ID:</strong> ${paymentDetails.id}</p>
           
-          <h4>Items Ordered:</h4>
-          ${orderItems.map(item => `
-            <div class="item">
-              <div>
-                <strong>${item.product_name}</strong><br>
-                <small>Size: ${item.size} | Color: ${item.color}</small>
-                ${item.custom_input ? `<br><small>Custom: ${item.custom_input}</small>` : ''}
-              </div>
-              <div>
-                ${item.quantity} × $${item.unit_price} = $${(item.quantity * item.unit_price).toFixed(2)}
-              </div>
+          <div class="order-info">
+            <div class="info-item">
+              <div class="info-label">Order Number</div>
+              <div class="info-value">${order.order_number}</div>
             </div>
-          `).join('')}
+            <div class="info-item">
+              <div class="info-label">Order Date</div>
+              <div class="info-value">${new Date(order.created_at).toLocaleDateString()}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Payment Method</div>
+              <div class="info-value">PayPal</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Transaction ID</div>
+              <div class="info-value">${paymentDetails.id}</div>
+            </div>
+          </div>
           
-          <div class="item total">
-            <div>Total Amount:</div>
-            <div>$${parseFloat(order.total_amount || 0).toFixed(2)}</div>
+          <div class="items-section">
+            <h4>Items Ordered</h4>
+            ${orderItems.map(item => `
+              <div class="item">
+                <div class="item-details">
+                  <div class="item-name">${item.product_name}</div>
+                  <div class="item-specs">Size: ${item.size} | Color: ${item.color}</div>
+                  ${item.custom_input ? `<div class="item-custom">Custom: ${item.custom_input}</div>` : ''}
+                </div>
+                <div class="item-price">
+                  ${item.quantity} × $${item.unit_price} = $${(item.quantity * item.unit_price).toFixed(2)}
+                </div>
+              </div>
+            `).join('')}
+            
+            <div class="item total">
+              <div>Total Amount</div>
+              <div>$${parseFloat(order.total_amount || 0).toFixed(2)}</div>
+            </div>
           </div>
         </div>
         
-        <div style="text-align: center;">
+        <div class="button-container">
           <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/pages/order-success.html?order=${order.order_number}" class="button">View Order Details</a>
         </div>
         
         <div class="footer">
-          <p><strong>Shipping Information:</strong></p>
-          <p>${order.shipping_address}</p>
+          <div class="shipping-info">
+            <h4>Shipping Information</h4>
+            <div class="shipping-address">${shippingAddress}</div>
+          </div>
+          
           <p>Your order will be processed and shipped within 24 hours.</p>
           <p><strong>Questions?</strong> Contact us at <a href="mailto:support@plwgscreativeapparel.com">support@plwgscreativeapparel.com</a></p>
         </div>
@@ -5933,6 +6229,21 @@ async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDe
 
 // Send admin payment notification email
 async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetails) {
+  // Parse shipping address JSON
+  let shippingAddress = 'Address not available';
+  try {
+    const addressData = JSON.parse(order.shipping_address);
+    shippingAddress = `
+      <strong>${addressData.first_name} ${addressData.last_name}</strong><br>
+      ${addressData.address}<br>
+      ${addressData.city}, ${addressData.state} ${addressData.zip}<br>
+      Phone: ${addressData.phone}
+    `;
+  } catch (e) {
+    // If parsing fails, use the raw string
+    shippingAddress = order.shipping_address;
+  }
+
   const adminEmailHTML = `
     <!DOCTYPE html>
     <html>
@@ -5941,20 +6252,263 @@ async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetai
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>New Payment Received - PLWG Creative Apparel</title>
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px; background-color: #f4f4f4; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 3px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; }
-        .logo { font-size: 28px; font-weight: bold; color: #28a745; margin-bottom: 10px; }
-        .alert { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        .order-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .item:last-child { border-bottom: none; }
-        .total { font-weight: bold; font-size: 18px; color: #28a745; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+          font-family: 'Inter', Arial, sans-serif; 
+          line-height: 1.6; 
+          color: #e0e0e0; 
+          margin: 0; 
+          padding: 0; 
+          background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+          min-height: 100vh;
+        }
+        
+        .email-container { 
+          max-width: 600px; 
+          margin: 0 auto; 
+          background: linear-gradient(145deg, #1f1f1f 0%, #2a2a2a 100%);
+          border-radius: 20px; 
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 188, 212, 0.1);
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .email-container::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #00bcd4, #4dd0e1, #00bcd4);
+          background-size: 200% 100%;
+          animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+          0%, 100% { background-position: 200% 0; }
+          50% { background-position: -200% 0; }
+        }
+        
+        .header { 
+          text-align: center; 
+          padding: 40px 30px 30px; 
+          background: linear-gradient(135deg, rgba(0, 188, 212, 0.1) 0%, rgba(77, 208, 225, 0.05) 100%);
+          position: relative;
+        }
+        
+        .logo { 
+          font-family: 'Orbitron', monospace;
+          font-size: 32px; 
+          font-weight: 900; 
+          background: linear-gradient(135deg, #00bcd4, #4dd0e1);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 15px;
+          text-shadow: 0 0 30px rgba(0, 188, 212, 0.3);
+        }
+        
+        .header h1 {
+          font-family: 'Orbitron', monospace;
+          font-size: 28px;
+          font-weight: 700;
+          color: #00bcd4;
+          margin: 0 0 10px 0;
+          text-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+        }
+        
+        .alert { 
+          background: linear-gradient(135deg, rgba(0, 188, 212, 0.1) 0%, rgba(77, 208, 225, 0.05) 100%);
+          border: 2px solid rgba(0, 188, 212, 0.3); 
+          color: #00bcd4; 
+          padding: 20px; 
+          border-radius: 12px; 
+          margin: 20px 0;
+          text-align: center;
+          font-weight: 600;
+        }
+        
+        .order-details { 
+          background: linear-gradient(145deg, rgba(0, 188, 212, 0.05) 0%, rgba(77, 208, 225, 0.02) 100%);
+          padding: 30px; 
+          margin: 0;
+          border-top: 1px solid rgba(0, 188, 212, 0.2);
+          border-bottom: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .order-details h3 {
+          font-family: 'Orbitron', monospace;
+          color: #00bcd4;
+          font-size: 20px;
+          margin: 0 0 20px 0;
+          text-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+        }
+        
+        .order-info {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 25px;
+        }
+        
+        .info-item {
+          background: rgba(0, 0, 0, 0.3);
+          padding: 15px;
+          border-radius: 10px;
+          border-left: 3px solid #00bcd4;
+        }
+        
+        .info-label {
+          color: #00bcd4;
+          font-weight: 600;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 5px;
+        }
+        
+        .info-value {
+          color: #e0e0e0;
+          font-size: 14px;
+        }
+        
+        .items-section {
+          margin-top: 25px;
+        }
+        
+        .items-section h4 {
+          font-family: 'Orbitron', monospace;
+          color: #00bcd4;
+          font-size: 18px;
+          margin: 0 0 15px 0;
+        }
+        
+        .item { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: flex-start;
+          padding: 20px; 
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 12px;
+          margin-bottom: 15px;
+          border: 1px solid rgba(0, 188, 212, 0.1);
+          transition: all 0.3s ease;
+        }
+        
+        .item:hover {
+          background: rgba(0, 188, 212, 0.05);
+          border-color: rgba(0, 188, 212, 0.3);
+          transform: translateY(-2px);
+        }
+        
+        .item:last-child { 
+          margin-bottom: 0; 
+        }
+        
+        .item-details {
+          flex: 1;
+        }
+        
+        .item-name {
+          font-weight: 600;
+          color: #e0e0e0;
+          font-size: 16px;
+          margin-bottom: 8px;
+        }
+        
+        .item-specs {
+          color: #b0b0b0;
+          font-size: 14px;
+          margin-bottom: 5px;
+        }
+        
+        .item-custom {
+          color: #00bcd4;
+          font-size: 13px;
+          font-style: italic;
+        }
+        
+        .item-price {
+          text-align: right;
+          color: #00bcd4;
+          font-weight: 600;
+          font-size: 16px;
+        }
+        
+        .total { 
+          font-weight: 700; 
+          font-size: 24px; 
+          color: #00bcd4;
+          background: linear-gradient(135deg, rgba(0, 188, 212, 0.1) 0%, rgba(77, 208, 225, 0.05) 100%);
+          padding: 20px;
+          border-radius: 12px;
+          border: 2px solid rgba(0, 188, 212, 0.3);
+          text-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+        }
+        
+        .shipping-section {
+          margin-top: 25px;
+          background: rgba(0, 188, 212, 0.05);
+          padding: 20px;
+          border-radius: 12px;
+          border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .shipping-section h4 {
+          font-family: 'Orbitron', monospace;
+          color: #00bcd4;
+          font-size: 16px;
+          margin: 0 0 15px 0;
+        }
+        
+        .shipping-address {
+          color: #e0e0e0;
+          line-height: 1.8;
+        }
+        
+        .footer { 
+          text-align: center; 
+          padding: 30px; 
+          background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 188, 212, 0.02) 100%);
+          border-top: 1px solid rgba(0, 188, 212, 0.1);
+        }
+        
+        .footer p {
+          color: #b0b0b0;
+          margin: 10px 0;
+        }
+        
+        .footer a {
+          color: #00bcd4;
+          text-decoration: none;
+          font-weight: 600;
+          padding: 10px 20px;
+          background: linear-gradient(135deg, rgba(0, 188, 212, 0.1) 0%, rgba(77, 208, 225, 0.05) 100%);
+          border-radius: 8px;
+          border: 1px solid rgba(0, 188, 212, 0.3);
+          display: inline-block;
+          margin-top: 10px;
+          transition: all 0.3s ease;
+        }
+        
+        .footer a:hover {
+          background: linear-gradient(135deg, rgba(0, 188, 212, 0.2) 0%, rgba(77, 208, 225, 0.1) 100%);
+          text-shadow: 0 0 10px rgba(0, 188, 212, 0.6);
+          transform: translateY(-2px);
+        }
+        
+        @media (max-width: 600px) {
+          .email-container { margin: 0; border-radius: 0; }
+          .order-info { grid-template-columns: 1fr; }
+          .item { flex-direction: column; gap: 10px; }
+          .item-price { text-align: left; }
+        }
       </style>
     </head>
     <body>
-      <div class="container">
+      <div class="email-container">
         <div class="header">
           <div class="logo">PLWG Creative Apparel</div>
           <h1>💰 New Payment Received!</h1>
@@ -5968,37 +6522,56 @@ async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetai
         
         <div class="order-details">
           <h3>Order Information</h3>
-          <p><strong>Order Number:</strong> ${order.order_number}</p>
-          <p><strong>Customer:</strong> ${order.customer_name}</p>
-          <p><strong>Email:</strong> ${order.email}</p>
-          <p><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
           
-          <h4>Items Ordered:</h4>
-          ${orderItems.map(item => `
-            <div class="item">
-              <div>
-                <strong>${item.product_name}</strong><br>
-                <small>Size: ${item.size} | Color: ${item.color}</small>
-                ${item.custom_input ? `<br><small>Custom: ${item.custom_input}</small>` : ''}
-              </div>
-              <div>
-                ${item.quantity} × $${item.unit_price} = $${(item.quantity * item.unit_price).toFixed(2)}
-              </div>
+          <div class="order-info">
+            <div class="info-item">
+              <div class="info-label">Order Number</div>
+              <div class="info-value">${order.order_number}</div>
             </div>
-          `).join('')}
-          
-          <div class="item total">
-            <div>Total Amount:</div>
-            <div>$${parseFloat(order.total_amount || 0).toFixed(2)}</div>
+            <div class="info-item">
+              <div class="info-label">Customer</div>
+              <div class="info-value">${order.customer_name}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value">${order.email}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Order Date</div>
+              <div class="info-value">${new Date(order.created_at).toLocaleDateString()}</div>
+            </div>
           </div>
           
-          <h4>Shipping Address:</h4>
-          <p>${order.shipping_address}</p>
+          <div class="items-section">
+            <h4>Items Ordered</h4>
+            ${orderItems.map(item => `
+              <div class="item">
+                <div class="item-details">
+                  <div class="item-name">${item.product_name}</div>
+                  <div class="item-specs">Size: ${item.size} | Color: ${item.color}</div>
+                  ${item.custom_input ? `<div class="item-custom">Custom: ${item.custom_input}</div>` : ''}
+                </div>
+                <div class="item-price">
+                  ${item.quantity} × $${item.unit_price} = $${(item.quantity * item.unit_price).toFixed(2)}
+                </div>
+              </div>
+            `).join('')}
+            
+            <div class="item total">
+              <div>Total Amount</div>
+              <div>$${parseFloat(order.total_amount || 0).toFixed(2)}</div>
+            </div>
+          </div>
+          
+          <div class="shipping-section">
+            <h4>Shipping Address</h4>
+            <div class="shipping-address">${shippingAddress}</div>
+          </div>
         </div>
         
         <div class="footer">
           <p>This is an automated notification. Please process this order for shipping.</p>
-          <p>Admin Dashboard: <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin-dashboard.html">View Orders</a></p>
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin-dashboard.html">View Orders in Admin Dashboard</a>
         </div>
       </div>
     </body>
