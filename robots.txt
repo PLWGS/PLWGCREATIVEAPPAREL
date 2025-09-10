@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://plwgscreativeapparel.com/sitemap.xml
+
+# Disallow admin pages from search engines
+Disallow: /pages/admin.html
+Disallow: /pages/category-management.html
+
+# Allow all other pages
+Allow: /pages/shop.html
+Allow: /pages/custom.html
+Allow: /pages/account.html
+Allow: /pages/cart.html
+Allow: /pages/homepage.html
