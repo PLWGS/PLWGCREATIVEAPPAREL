@@ -4178,16 +4178,20 @@ app.get('/api/recommendations', authenticateCustomer, async (req, res) => {
     // Strategy 1: Recently viewed products (from current session)
     const recentlyViewed = req.query.recentlyViewed ? JSON.parse(req.query.recentlyViewed) : [];
     if (recentlyViewed.length > 0) {
-      const recentProducts = await pool.query(`
-        SELECT id, name, price, image_url, category
-        FROM products 
-        WHERE id = ANY($1) AND is_active = true
-        ORDER BY array_position($1, id)
-        LIMIT $2
-      `, [recentlyViewed, limit]);
-      
-      if (recentProducts.rows.length > 0) {
-        recommendations = recentProducts.rows;
+      // Ensure all values are integers
+      const validIds = recentlyViewed.filter(id => Number.isInteger(Number(id))).map(id => Number(id));
+      if (validIds.length > 0) {
+        const recentProducts = await pool.query(`
+          SELECT id, name, price, image_url, category
+          FROM products 
+          WHERE id = ANY($1) AND is_active = true
+          ORDER BY array_position($1, id)
+          LIMIT $2
+        `, [validIds, limit]);
+        
+        if (recentProducts.rows.length > 0) {
+          recommendations = recentProducts.rows;
+        }
       }
     }
     
