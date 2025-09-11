@@ -505,8 +505,21 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS feature_rank INTEGER`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS in_featured BOOLEAN DEFAULT false`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS featured_order INTEGER`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_birthday_enabled BOOLEAN DEFAULT false`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_birthday_required BOOLEAN DEFAULT false`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_birthday_fields TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_birthday_labels TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_birthday_char_limit INTEGER DEFAULT 250`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_birthday_question TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_lyrics_enabled BOOLEAN DEFAULT false`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_lyrics_required BOOLEAN DEFAULT false`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_lyrics_fields TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_lyrics_labels TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_lyrics_char_limit INTEGER DEFAULT 250`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS custom_lyrics_question TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS shipping_cost DECIMAL(10,2) DEFAULT 4.50`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS local_pickup_enabled BOOLEAN DEFAULT true`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS size_chart JSON`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS specs_notes TEXT`);
       
       // Add custom input columns if they don't exist
