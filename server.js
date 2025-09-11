@@ -4648,40 +4648,69 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
     
     const result = await pool.query(`
       INSERT INTO products (
-        id, name, description, price, original_price, image_url, category, subcategory, 
-        tags, stock_quantity, low_stock_threshold, is_featured, is_on_sale, sale_percentage,
-        colors, sizes, specifications, features, sub_images, size_stock,
-        track_inventory, brand_preference, specs_notes,
-        custom_birthday_enabled, custom_birthday_required, custom_birthday_fields, custom_birthday_labels, custom_birthday_char_limit, custom_birthday_question,
-        custom_lyrics_enabled, custom_lyrics_required, custom_lyrics_fields, custom_lyrics_labels, custom_lyrics_char_limit, custom_lyrics_question,
-        shipping_cost, local_pickup_enabled, size_chart
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36)
+        id, name, description, price, image_url, category, stock_quantity, low_stock_threshold, 
+        is_active, created_at, updated_at, is_featured, original_price, subcategory, tags, 
+        is_on_sale, sale_percentage, colors, sizes, specifications, features, sub_images, 
+        size_stock, track_inventory, brand_preference, specs_notes, feature_rank, in_featured, 
+        featured_order, size_pricing, custom_birthday_enabled, custom_birthday_required, 
+        custom_birthday_fields, custom_birthday_labels, custom_birthday_char_limit, 
+        custom_lyrics_enabled, custom_lyrics_required, custom_lyrics_fields, custom_lyrics_labels, 
+        custom_lyrics_char_limit, shipping_cost, local_pickup_enabled, size_chart, 
+        custom_birthday_question, custom_lyrics_question
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45)
       RETURNING *
     `, [
-      nextId, name, description, price, original_price, image_url, category, 'Featured',
-      processedTags, stock_quantity || 50, low_stock_threshold || 5,
-      true, true, sale_percentage || 15, JSON.stringify(colors || []), 
-      JSON.stringify(sizesFiltered), JSON.stringify(specifications || {}),
-      JSON.stringify(features || {}), JSON.stringify(sub_images), JSON.stringify(sizeStock),
-      !!req.body.track_inventory, (specifications && specifications.brand_preference) || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', req.body.specs_notes || '',
-      custom_birthday_enabled || false, custom_birthday_required || false, 
-      custom_birthday_fields || '["birthdate", "name", "additional_info"]',
-      custom_birthday_labels || '{"birthdate": "Birthdate", "name": "Name", "additional_info": "Any other references or information"}',
-      custom_birthday_char_limit || 250,
-      custom_birthday_question || '',
-      custom_lyrics_enabled || false, custom_lyrics_required || false,
-      custom_lyrics_fields || '["artist_band", "song_name", "song_lyrics"]',
-      custom_lyrics_labels || '{"artist_band": "Artist or Band Name", "song_name": "Song Name", "song_lyrics": "Song Lyrics (Optional)"}',
-      custom_lyrics_char_limit || 250,
-      custom_lyrics_question || '',
-      shipping_cost || 4.50, local_pickup_enabled !== false,
-      JSON.stringify(size_chart || {
+      nextId, // id
+      name, // name
+      description, // description
+      price, // price
+      image_url, // image_url
+      category, // category
+      stock_quantity || 50, // stock_quantity
+      low_stock_threshold || 5, // low_stock_threshold
+      true, // is_active
+      new Date(), // created_at
+      new Date(), // updated_at
+      true, // is_featured
+      original_price, // original_price
+      'Featured', // subcategory
+      processedTags, // tags
+      true, // is_on_sale
+      sale_percentage || 15, // sale_percentage
+      JSON.stringify(colors || []), // colors
+      JSON.stringify(sizesFiltered), // sizes
+      JSON.stringify(specifications || {}), // specifications
+      JSON.stringify(features || {}), // features
+      JSON.stringify(sub_images), // sub_images
+      JSON.stringify(sizeStock), // size_stock
+      !!req.body.track_inventory, // track_inventory
+      (specifications && specifications.brand_preference) || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)', // brand_preference
+      req.body.specs_notes || '', // specs_notes
+      null, // feature_rank
+      false, // in_featured
+      null, // featured_order
+      JSON.stringify({}), // size_pricing
+      custom_birthday_enabled || false, // custom_birthday_enabled
+      custom_birthday_required || false, // custom_birthday_required
+      custom_birthday_fields || '["birthdate", "name", "additional_info"]', // custom_birthday_fields
+      custom_birthday_labels || '{"birthdate": "Birthdate", "name": "Name", "additional_info": "Any other references or information"}', // custom_birthday_labels
+      custom_birthday_char_limit || 250, // custom_birthday_char_limit
+      custom_lyrics_enabled || false, // custom_lyrics_enabled
+      custom_lyrics_required || false, // custom_lyrics_required
+      custom_lyrics_fields || '["artist_band", "song_name", "song_lyrics"]', // custom_lyrics_fields
+      custom_lyrics_labels || '{"artist_band": "Artist or Band Name", "song_name": "Song Name", "song_lyrics": "Song Lyrics (Optional)"}', // custom_lyrics_labels
+      custom_lyrics_char_limit || 250, // custom_lyrics_char_limit
+      shipping_cost || 4.50, // shipping_cost
+      local_pickup_enabled !== false, // local_pickup_enabled
+      JSON.stringify(size_chart || { // size_chart
         S: { chest: '18', length: '28' },
         M: { chest: '20', length: '29' },
         L: { chest: '22', length: '30' },
         XL: { chest: '24', length: '31' },
         '2XL': { chest: '26', length: '32' }
-      })
+      }),
+      custom_birthday_question || '', // custom_birthday_question
+      custom_lyrics_question || '' // custom_lyrics_question
     ]);
 
     logger.info(`✅ Product created with ID ${nextId}`);
