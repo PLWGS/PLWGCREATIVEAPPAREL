@@ -4849,26 +4849,31 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
 
     if (Array.isArray(images) && images.length > 0) {
       logger.info(`📸 Received ${images.length} images from client for processing`);
+      logger.info(`🔍 DEBUG: First image structure:`, JSON.stringify(images[0], null, 2));
       processedMixedImages = [];
 
       for (let i = 0; i < Math.min(images.length, 5); i += 1) {
         const item = images[i];
+        logger.info(`🔍 DEBUG: Processing image ${i + 1}:`, typeof item, item ? (typeof item === 'object' ? Object.keys(item) : 'string') : 'null');
         try {
           // Case A: object with .data (base64)
           if (item && typeof item === 'object' && typeof item.data === 'string') {
             const url = await uploadImageToCloudinary(item.data, name, i + 1, i === 0);
             processedMixedImages.push(url);
+            logger.info(`✅ Uploaded image ${i + 1} as ${i === 0 ? 'MAIN' : 'SUB'}: ${url}`);
             continue;
           }
           // Case B: string data URL (base64) → upload
           if (typeof item === 'string' && item.startsWith('data:')) {
             const url = await uploadImageToCloudinary(item, name, i + 1, i === 0);
             processedMixedImages.push(url);
+            logger.info(`✅ Uploaded image ${i + 1} as ${i === 0 ? 'MAIN' : 'SUB'}: ${url}`);
             continue;
           }
           // Case C: string http(s) URL → keep as-is
           if (typeof item === 'string' && /^https?:\/\//i.test(item)) {
             processedMixedImages.push(item);
+            logger.info(`✅ Kept existing image ${i + 1} as ${i === 0 ? 'MAIN' : 'SUB'}: ${item}`);
             continue;
           }
         } catch (uErr) {
@@ -4878,9 +4883,11 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
 
       // Apply processed images if at least one valid
       if (processedMixedImages.length > 0) {
+        // Ensure the first image is always the main image
         final_image_url = processedMixedImages[0] || final_image_url;
         final_sub_images = processedMixedImages.slice(1);
         logger.info(`✅ Final images prepared from mixed payload. main=${final_image_url}, subs=${final_sub_images.length}`);
+        logger.info(`🔍 DEBUG: processedMixedImages array:`, processedMixedImages);
       } else {
         logger.warn('⚠️ No valid images processed from payload; retaining existing image_url/sub_images');
       }
