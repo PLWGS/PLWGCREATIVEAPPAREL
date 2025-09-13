@@ -201,6 +201,17 @@ app.use('/public', express.static('public'));
 // Removed etsy_images static route - now using Cloudinary for image hosting
 app.use('/favicon.ico', express.static('public/favicon.ico'));
 
+// Serve sitemap.xml and robots.txt with proper content type
+app.get('/sitemap.xml', (req, res) => {
+  res.set('Content-Type', 'application/xml');
+  res.sendFile(path.join(__dirname, 'sitemap.xml'));
+});
+
+app.get('/robots.txt', (req, res) => {
+  res.set('Content-Type', 'text/plain');
+  res.sendFile(path.join(__dirname, 'robots.txt'));
+});
+
 // Database connection - DISABLED FOR LOCAL DEVELOPMENT
 let pool = null;
 let databaseAvailable = false;
