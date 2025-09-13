@@ -150,70 +150,6 @@
             box-shadow: 0 0 30px rgba(0, 188, 212, 0.6);
         }
         
-        /* Mockup Carousel Styles */
-        .mockup-slide {
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-            transform: scale(0.3) translateY(50px);
-        }
-        
-        .mockup-slide.active {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-        
-        .mockup-slide:not(.active) {
-            opacity: 0;
-            transform: scale(0.3) translateY(50px);
-        }
-        
-        /* Star Wars Fade-in Effect */
-        @keyframes starWarsFadeIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.1) translateY(100px) rotateX(45deg);
-                filter: blur(10px);
-            }
-            50% {
-                opacity: 0.7;
-                transform: scale(0.6) translateY(20px) rotateX(20deg);
-                filter: blur(3px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0) rotateX(0deg);
-                filter: blur(0px);
-            }
-        }
-        
-        .mockup-slide.active img {
-            animation: starWarsFadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        
-        /* Radial Gradient for Organic Glow */
-        .bg-gradient-radial {
-            background: radial-gradient(circle, var(--tw-gradient-stops));
-        }
-        
-        /* Enhanced Backglow Animation */
-        @keyframes backglowPulse {
-            0%, 100% {
-                opacity: 0.6;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.9;
-                transform: scale(1.05);
-            }
-        }
-        
-        .mockup-slide.active .absolute:first-child {
-            animation: backglowPulse 3s ease-in-out infinite;
-        }
-        
-        .mockup-slide.active .absolute:last-child {
-            animation: backglowPulse 3s ease-in-out infinite 0.5s;
-        }
         
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
@@ -359,67 +295,6 @@
                 </p>
             </div>
 
-            <!-- Mockup Carousel Container -->
-            <div class="relative max-w-6xl mx-auto">
-                <!-- Carousel Wrapper -->
-                <div class="relative h-[28rem] lg:h-[32rem] overflow-hidden rounded-2xl">
-                    <!-- Mockup Slides -->
-                    <div id="mockup-slide-1" class="mockup-slide active absolute inset-0">
-                        <div class="relative w-full h-full flex items-center justify-center pt-8">
-                            <!-- Mockup Image -->
-                            <div class="relative">
-                                <img src="/mockups/mockup1.png" alt="Creative Apparel Mockup 1" class="w-full h-full object-cover object-top" width="1152" height="1785" fetchpriority="high" loading="eager" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="mockup-slide-2" class="mockup-slide absolute inset-0">
-                        <div class="relative w-full h-full flex items-center justify-center pt-8">
-                            <!-- Mockup Image -->
-                            <div class="relative">
-                                <img src="/mockups/mockup2.png" alt="Creative Apparel Mockup 2" class="w-full h-full object-cover object-top" width="1152" height="1859" loading="lazy" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="mockup-slide-3" class="mockup-slide absolute inset-0">
-                        <div class="relative w-full h-full flex items-center justify-center pt-8">
-                            <!-- Mockup Image -->
-                            <div class="relative">
-                                <img src="/mockups/mockup3.png" alt="Creative Apparel Mockup 3" class="w-full h-full object-cover object-top" width="1152" height="1834" loading="lazy" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="mockup-slide-4" class="mockup-slide absolute inset-0">
-                        <div class="relative w-full h-full flex items-center justify-center pt-8">
-                            <!-- Mockup Image -->
-                            <div class="relative">
-                                <img src="/mockups/mockup4.png" alt="Creative Apparel Mockup 4" class="w-full h-full object-cover object-top" width="1152" height="1834" loading="lazy" />
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Carousel Controls -->
-                <div class="flex justify-center space-x-3 mt-8">
-                    <button class="mockup-dot w-4 h-4 rounded-full bg-accent opacity-100 transition-all duration-300" data-slide="0" aria-label="Go to slide 1"></button>
-                    <button class="mockup-dot w-4 h-4 rounded-full bg-text-secondary opacity-50 hover:opacity-75 transition-all duration-300" data-slide="1" aria-label="Go to slide 2"></button>
-                    <button class="mockup-dot w-4 h-4 rounded-full bg-text-secondary opacity-50 hover:opacity-75 transition-all duration-300" data-slide="2" aria-label="Go to slide 3"></button>
-                    <button class="mockup-dot w-4 h-4 rounded-full bg-text-secondary opacity-50 hover:opacity-75 transition-all duration-300" data-slide="3" aria-label="Go to slide 4"></button>
-                </div>
-
-                <!-- Call to Action -->
-                <div class="text-center mt-12">
-                    <a href="/pages/shop.html" class="btn-primary neon-glow text-lg px-8 py-4 inline-flex items-center">
-                        <span>Explore Our Collection</span>
-                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -937,42 +812,6 @@
             }
         }
 
-        // Mockup Carousel
-        let currentMockupSlide = 0;
-        const mockupSlides = document.querySelectorAll('.mockup-slide');
-        const mockupDots = document.querySelectorAll('.mockup-dot');
-
-        function showMockupSlide(index) {
-            mockupSlides.forEach((slide, i) => {
-                slide.classList.toggle('active', i === index);
-            });
-            
-            mockupDots.forEach((dot, i) => {
-                if (i === index) {
-                    dot.classList.remove('opacity-50', 'bg-text-secondary');
-                    dot.classList.add('opacity-100', 'bg-accent');
-                } else {
-                    dot.classList.remove('opacity-100', 'bg-accent');
-                    dot.classList.add('opacity-50', 'bg-text-secondary');
-                }
-            });
-        }
-
-        function nextMockupSlide() {
-            currentMockupSlide = (currentMockupSlide + 1) % mockupSlides.length;
-            showMockupSlide(currentMockupSlide);
-        }
-
-        // Auto-advance mockup carousel
-        setInterval(nextMockupSlide, 4000);
-
-        // Mockup dot navigation
-        mockupDots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                currentMockupSlide = index;
-                showMockupSlide(currentMockupSlide);
-            });
-        });
 
         // Hero Carousel
         let currentSlide = 0;
