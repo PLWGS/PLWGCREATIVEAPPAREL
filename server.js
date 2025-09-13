@@ -2834,9 +2834,6 @@ async function sendCustomerConfirmationEmail(customRequest) {
                 </div>
 
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://plwgscreativeapparel.com/pages/custom.html" class="cta-button">
-                        📊 Check Request Status
-                    </a>
                 </div>
 
                 <p><strong>Questions?</strong> Don't hesitate to reply to this email or contact us directly.</p>
