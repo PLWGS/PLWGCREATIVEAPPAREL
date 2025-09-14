@@ -313,6 +313,7 @@
 
         async function loadReviews() {
             try {
+                // Try API first
                 const response = await fetch('/api/admin/customer-reviews', {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -327,12 +328,33 @@
                     return;
                 }
 
-                if (!response.ok) {
-                    throw new Error(`Failed to load reviews: ${response.status} ${response.statusText}`);
+                if (response.ok) {
+                    reviews = await response.json();
+                    renderReviews();
+                    return;
                 }
 
-                reviews = await response.json();
-                renderReviews();
+                // If API fails, load from JSON file as fallback
+                console.log('API not available, loading from JSON file...');
+                const jsonResponse = await fetch('/etsy_reviews.json');
+                if (jsonResponse.ok) {
+                    const etsyReviews = await jsonResponse.json();
+                    // Convert to admin format
+                    reviews = etsyReviews.map((review, index) => ({
+                        id: index + 1,
+                        reviewer_name: review.reviewer,
+                        star_rating: review.star_rating,
+                        review_message: review.message,
+                        date_reviewed: review.date_reviewed,
+                        is_active: true,
+                        display_order: index + 1,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    }));
+                    renderReviews();
+                } else {
+                    throw new Error('Failed to load reviews from both API and JSON file');
+                }
             } catch (error) {
                 console.error('Error loading reviews:', error);
                 showError('Failed to load reviews: ' + error.message);
