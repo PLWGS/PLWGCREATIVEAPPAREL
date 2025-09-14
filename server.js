@@ -163,6 +163,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FEATURE_STATIC_PRODUCT_PAGES = String(process.env.FEATURE_STATIC_PRODUCT_PAGES || 'false').toLowerCase() === 'true';
 
+// EARLY TEST ENDPOINT - should work if Express is functioning
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API routes are working!', timestamp: new Date().toISOString() });
+});
+
 // Middleware
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
@@ -7465,11 +7470,6 @@ app.use((error, req, res, next) => {
     error: 'Internal server error',
     message: 'Something went wrong. Please try again.'
   });
-});
-
-// Test endpoint to verify routes are working
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API routes are working!', timestamp: new Date().toISOString() });
 });
 
 // Customer Reviews Management API Endpoints
