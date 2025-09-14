@@ -293,6 +293,15 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if admin is authenticated
+            const adminToken = localStorage.getItem('adminToken');
+            if (!adminToken) {
+                // Redirect to admin login if not authenticated
+                alert('⚠️ Please log in as admin to access this page');
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            
             loadReviews();
             setupEventListeners();
         });
@@ -310,15 +319,23 @@
                     }
                 });
 
+                if (response.status === 401) {
+                    // Token is invalid or expired
+                    localStorage.removeItem('adminToken');
+                    alert('⚠️ Your session has expired. Please log in again.');
+                    window.location.href = 'admin-login.html';
+                    return;
+                }
+
                 if (!response.ok) {
-                    throw new Error('Failed to load reviews');
+                    throw new Error(`Failed to load reviews: ${response.status} ${response.statusText}`);
                 }
 
                 reviews = await response.json();
                 renderReviews();
             } catch (error) {
                 console.error('Error loading reviews:', error);
-                showError('Failed to load reviews');
+                showError('Failed to load reviews: ' + error.message);
             }
         }
 
@@ -424,8 +441,15 @@
                     body: JSON.stringify(formData)
                 });
 
+                if (response.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    alert('⚠️ Your session has expired. Please log in again.');
+                    window.location.href = 'admin-login.html';
+                    return;
+                }
+
                 if (!response.ok) {
-                    throw new Error('Failed to save review');
+                    throw new Error(`Failed to save review: ${response.status} ${response.statusText}`);
                 }
 
                 const result = await response.json();
@@ -459,8 +483,15 @@
                     }
                 });
 
+                if (response.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    alert('⚠️ Your session has expired. Please log in again.');
+                    window.location.href = 'admin-login.html';
+                    return;
+                }
+
                 if (!response.ok) {
-                    throw new Error('Failed to delete review');
+                    throw new Error(`Failed to delete review: ${response.status} ${response.statusText}`);
                 }
 
                 const result = await response.json();
@@ -500,5 +531,6 @@
             }
         });
     </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>
