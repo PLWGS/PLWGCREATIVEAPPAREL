@@ -7433,6 +7433,77 @@ app.use((error, req, res, next) => {
 
 // Customer Reviews Management API Endpoints
 
+// Import all Etsy reviews from JSON file to database
+app.post('/api/admin/customer-reviews/import', authenticateToken, async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    // Ensure table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_reviews (
+        id SERIAL PRIMARY KEY,
+        reviewer_name VARCHAR(255) NOT NULL,
+        star_rating INTEGER NOT NULL CHECK (star_rating >= 1 AND star_rating <= 5),
+        review_message TEXT NOT NULL,
+        date_reviewed DATE NOT NULL,
+        display_order INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Read the etsy_reviews.json file
+    const fs = require('fs');
+    const path = require('path');
+    const etsyReviewsPath = path.join(__dirname, 'etsy_reviews.json');
+    
+    if (!fs.existsSync(etsyReviewsPath)) {
+      return res.status(404).json({ error: 'etsy_reviews.json file not found' });
+    }
+
+    const etsyReviewsData = fs.readFileSync(etsyReviewsPath, 'utf8');
+    const etsyReviews = JSON.parse(etsyReviewsData);
+
+    if (!Array.isArray(etsyReviews)) {
+      return res.status(400).json({ error: 'Invalid JSON format in etsy_reviews.json' });
+    }
+
+    // Clear existing reviews
+    await pool.query('DELETE FROM customer_reviews');
+
+    // Import all reviews
+    let importedCount = 0;
+    for (let i = 0; i < etsyReviews.length; i++) {
+      const review = etsyReviews[i];
+      
+      await pool.query(`
+        INSERT INTO customer_reviews (reviewer_name, star_rating, review_message, date_reviewed, display_order, is_active)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `, [
+        review.reviewer || 'Anonymous',
+        review.star_rating || 5,
+        review.message || '',
+        review.date_reviewed || new Date().toISOString().split('T')[0],
+        i + 1, // display_order
+        true   // is_active
+      ]);
+      
+      importedCount++;
+    }
+
+    res.json({ 
+      success: true, 
+      message: `Successfully imported ${importedCount} reviews from Etsy`,
+      importedCount: importedCount
+    });
+
+  } catch (error) {
+    logger.error('Error importing customer reviews:', error);
+    res.status(500).json({ error: 'Failed to import reviews' });
+  }
+});
+
 // Get all customer reviews for admin management
 app.get('/api/admin/customer-reviews', authenticateToken, async (req, res) => {
   if (!pool) return res.status(500).json({ error: 'Database not available' });

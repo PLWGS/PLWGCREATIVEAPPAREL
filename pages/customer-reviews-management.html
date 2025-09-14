@@ -34,6 +34,26 @@
             box-shadow: 0 8px 25px rgba(0, 188, 212, 0.3);
         }
         
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+        }
+        
         .btn-danger {
             background: linear-gradient(135deg, #dc3545, #c82333);
             color: white;
@@ -200,9 +220,14 @@
                         <h1 class="text-3xl font-bold text-white mb-2">Customer Reviews Management</h1>
                         <p class="text-text-secondary">Manage Etsy reviews displayed on your homepage</p>
                     </div>
-                    <button id="addReviewBtn" class="btn-primary">
-                        <span class="mr-2">+</span>Add New Review
-                    </button>
+                    <div class="flex space-x-4">
+                        <button id="importReviewsBtn" class="btn-secondary">
+                            <span class="mr-2">📥</span>Import Etsy Reviews
+                        </button>
+                        <button id="addReviewBtn" class="btn-primary">
+                            <span class="mr-2">+</span>Add New Review
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -308,6 +333,7 @@
 
         function setupEventListeners() {
             document.getElementById('addReviewBtn').addEventListener('click', openAddModal);
+            document.getElementById('importReviewsBtn').addEventListener('click', importEtsyReviews);
             document.getElementById('reviewForm').addEventListener('submit', handleFormSubmit);
         }
 
@@ -531,6 +557,48 @@
                 closeModal();
             }
         });
+
+        // Import Etsy Reviews function
+        async function importEtsyReviews() {
+            if (!confirm('This will import all 755 Etsy reviews from your JSON file. This may take a moment. Continue?')) {
+                return;
+            }
+
+            const button = document.getElementById('importReviewsBtn');
+            const originalText = button.innerHTML;
+            
+            try {
+                // Show loading state
+                button.innerHTML = '<span class="mr-2">⏳</span>Importing...';
+                button.disabled = true;
+
+                const response = await fetch('/api/admin/customer-reviews/import', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showSuccess(`Successfully imported ${result.importedCount} reviews from Etsy!`);
+                    // Reload the reviews list
+                    await loadReviews();
+                } else {
+                    showError(result.error || 'Failed to import reviews');
+                }
+
+            } catch (error) {
+                console.error('Error importing reviews:', error);
+                showError('Failed to import reviews. Please try again.');
+            } finally {
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
     </script>
 <script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
