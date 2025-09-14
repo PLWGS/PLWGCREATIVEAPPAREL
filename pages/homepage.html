@@ -172,6 +172,9 @@
                 min-width: 48px !important;
                 min-height: 48px !important;
                 padding: 12px !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
             
             /* Ensure mobile header has generous padding */
@@ -180,6 +183,21 @@
                 padding-right: 2rem !important;
                 padding-top: 1.25rem !important;
                 padding-bottom: 1.25rem !important;
+            }
+            
+            /* Force mobile menu button to be visible */
+            #mobile-menu-toggle {
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: relative !important;
+                z-index: 999 !important;
+                background-color: #374151 !important;
+                border: 2px solid #00bcd4 !important;
+                width: 48px !important;
+                height: 48px !important;
+                min-width: 48px !important;
+                min-height: 48px !important;
             }
         }
         
@@ -324,7 +342,7 @@
                     </button>
                     
                     <!-- Menu Button -->
-                    <button id="mobile-menu-toggle" class="text-white hover:text-accent transition-colors duration-300 p-3 rounded-lg hover:bg-gray-800 bg-gray-700 border border-gray-600 flex-shrink-0" aria-label="Menu">
+                    <button id="mobile-menu-toggle" class="text-white hover:text-accent transition-colors duration-300 p-3 rounded-lg hover:bg-gray-800 bg-gray-700 border border-gray-600 flex-shrink-0 flex items-center justify-center" aria-label="Menu">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
