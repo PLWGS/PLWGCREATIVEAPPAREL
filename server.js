@@ -7467,6 +7467,11 @@ app.use((error, req, res, next) => {
   });
 });
 
+// Test endpoint to verify routes are working
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API routes are working!', timestamp: new Date().toISOString() });
+});
+
 // Customer Reviews Management API Endpoints
 
 // Get all customer reviews for admin management
