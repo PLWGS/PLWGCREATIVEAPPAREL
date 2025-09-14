@@ -7679,8 +7679,7 @@ initializeAdminCredentials().then(() => {
     // Try to initialize database in background (non-blocking)
     initializeDatabase().catch(err => {
       logger.error('❌ Database initialization failed, but server continues:', err.message);
-  });
-  });
+    });
 }).catch(err => {
   logger.error('❌ Failed to initialize admin credentials:', err);
   process.exit(1);
