@@ -173,6 +173,14 @@
                 min-height: 48px !important;
                 padding: 12px !important;
             }
+            
+            /* Ensure mobile header has generous padding */
+            .glass-nav nav {
+                padding-left: 2rem !important;
+                padding-right: 2rem !important;
+                padding-top: 1.25rem !important;
+                padding-bottom: 1.25rem !important;
+            }
         }
         
         /* Ensure buttons are never cut off */
@@ -227,7 +235,7 @@
     </div>
 
     <!-- Navigation Header -->
-    <header class="glass-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="max-width: 100vw; overflow-x: hidden;">
+    <header class="glass-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300">
         <nav class="container mx-auto px-8 py-5">
             <!-- Desktop Layout -->
             <div class="hidden lg:flex items-center justify-between">
