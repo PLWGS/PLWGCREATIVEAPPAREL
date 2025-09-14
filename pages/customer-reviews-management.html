@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Reviews Management - PLWGS Creative Apparel Admin</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .glass-nav {
+            backdrop-filter: blur(10px);
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(15px);
+            background: rgba(42, 42, 42, 0.6);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00bcd4, #0097a7);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 188, 212, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-edit {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+        
+        .input-field {
+            background: rgba(59, 69, 89, 0.8);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+        
+        .textarea-field {
+            background: rgba(59, 69, 89, 0.8);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            width: 100%;
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .textarea-field:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+        
+        .review-card {
+            background: rgba(42, 42, 42, 0.6);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .review-card:hover {
+            border-color: rgba(0, 188, 212, 0.4);
+        }
+        
+        .star-rating {
+            color: #ffd700;
+            font-size: 18px;
+            margin: 8px 0;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: rgba(42, 42, 42, 0.95);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .hidden { display: none !important; }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+        
+        .status-inactive {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background text-text-primary min-h-screen">
+    <!-- Navigation -->
+    <header class="glass-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between py-4">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-8 h-8 text-accent" viewBox="0 0 40 40" fill="currentColor">
+                        <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
+                        <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
+                        <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
+                    </svg>
+                    <span class="font-orbitron text-xl font-bold text-gradient">PLWGS Admin</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-text-secondary hover:text-accent transition-colors">View Store</a>
+                    <a href="admin.html" class="text-accent hover:text-white transition-colors">← Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="pt-20 min-h-screen">
+        <div class="container mx-auto px-6 py-8">
+            <!-- Header -->
+            <div class="glass-card rounded-xl p-8 mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white mb-2">Customer Reviews Management</h1>
+                        <p class="text-text-secondary">Manage Etsy reviews displayed on your homepage</p>
+                    </div>
+                    <button id="addReviewBtn" class="btn-primary">
+                        <span class="mr-2">+</span>Add New Review
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reviews List -->
+            <div id="reviewsList" class="space-y-4">
+                <!-- Reviews will be loaded here -->
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="text-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+                <p class="text-text-secondary">Loading reviews...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-12">
+                <div class="text-6xl mb-4">📝</div>
+                <h3 class="text-xl font-bold text-white mb-2">No Reviews Yet</h3>
+                <p class="text-text-secondary mb-6">Add your first customer review to get started</p>
+                <button onclick="openAddModal()" class="btn-primary">Add Your First Review</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Review Modal -->
+    <div id="reviewModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="flex items-center justify-between mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold text-white">Add New Review</h2>
+                <button onclick="closeModal()" class="text-text-secondary hover:text-white text-2xl">&times;</button>
+            </div>
+
+            <form id="reviewForm" class="space-y-6">
+                <input type="hidden" id="reviewId" />
+                
+                <div>
+                    <label class="block text-sm font-medium text-text-primary mb-2">Customer Name *</label>
+                    <input type="text" id="reviewerName" class="input-field" placeholder="Enter customer's name" required />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-text-primary mb-2">Star Rating *</label>
+                    <select id="starRating" class="input-field" required>
+                        <option value="">Select rating...</option>
+                        <option value="5">⭐⭐⭐⭐⭐ (5 stars)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 stars)</option>
+                        <option value="3">⭐⭐⭐ (3 stars)</option>
+                        <option value="2">⭐⭐ (2 stars)</option>
+                        <option value="1">⭐ (1 star)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-text-primary mb-2">Review Message *</label>
+                    <textarea id="reviewMessage" class="textarea-field" placeholder="Paste the customer's review message here..." required></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-text-primary mb-2">Review Date</label>
+                    <input type="text" id="dateReviewed" class="input-field" placeholder="e.g., Jan 15, 2024" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-text-primary mb-2">Display Order</label>
+                    <input type="number" id="displayOrder" class="input-field" placeholder="0 = first, higher numbers appear later" min="0" />
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" id="isActive" class="w-4 h-4 text-accent" checked />
+                    <label for="isActive" class="text-sm text-text-primary">Show on homepage</label>
+                </div>
+
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" class="btn-primary flex-1">
+                        <span id="saveButtonText">Save Review</span>
+                    </button>
+                    <button type="button" onclick="closeModal()" class="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let reviews = [];
+        let editingReviewId = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReviews();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('addReviewBtn').addEventListener('click', openAddModal);
+            document.getElementById('reviewForm').addEventListener('submit', handleFormSubmit);
+        }
+
+        async function loadReviews() {
+            try {
+                const response = await fetch('/api/admin/customer-reviews', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load reviews');
+                }
+
+                reviews = await response.json();
+                renderReviews();
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                showError('Failed to load reviews');
+            }
+        }
+
+        function renderReviews() {
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+            const reviewsList = document.getElementById('reviewsList');
+
+            loadingState.style.display = 'none';
+
+            if (reviews.length === 0) {
+                emptyState.classList.remove('hidden');
+                reviewsList.innerHTML = '';
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            reviewsList.innerHTML = reviews.map(review => `
+                <div class="review-card">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <h3 class="text-lg font-semibold text-white">${escapeHtml(review.reviewer_name)}</h3>
+                                <span class="status-badge ${review.is_active ? 'status-active' : 'status-inactive'}">
+                                    ${review.is_active ? 'Active' : 'Hidden'}
+                                </span>
+                            </div>
+                            <div class="star-rating">${'⭐'.repeat(review.star_rating)}</div>
+                            <p class="text-sm text-text-secondary mb-2">${review.date_reviewed || 'No date'}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="editReview(${review.id})" class="btn-edit">Edit</button>
+                            <button onclick="deleteReview(${review.id})" class="btn-danger">Delete</button>
+                        </div>
+                    </div>
+                    <p class="text-text-secondary leading-relaxed">${escapeHtml(review.review_message)}</p>
+                    <div class="mt-3 text-xs text-text-secondary">
+                        Display Order: ${review.display_order} | Created: ${new Date(review.created_at).toLocaleDateString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddModal() {
+            editingReviewId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Review';
+            document.getElementById('saveButtonText').textContent = 'Save Review';
+            document.getElementById('reviewForm').reset();
+            document.getElementById('isActive').checked = true;
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function editReview(reviewId) {
+            const review = reviews.find(r => r.id === reviewId);
+            if (!review) return;
+
+            editingReviewId = reviewId;
+            document.getElementById('modalTitle').textContent = 'Edit Review';
+            document.getElementById('saveButtonText').textContent = 'Update Review';
+            
+            document.getElementById('reviewId').value = review.id;
+            document.getElementById('reviewerName').value = review.reviewer_name;
+            document.getElementById('starRating').value = review.star_rating;
+            document.getElementById('reviewMessage').value = review.review_message;
+            document.getElementById('dateReviewed').value = review.date_reviewed || '';
+            document.getElementById('displayOrder').value = review.display_order || 0;
+            document.getElementById('isActive').checked = review.is_active;
+            
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
+            editingReviewId = null;
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const formData = {
+                reviewer_name: document.getElementById('reviewerName').value,
+                star_rating: parseInt(document.getElementById('starRating').value),
+                review_message: document.getElementById('reviewMessage').value,
+                date_reviewed: document.getElementById('dateReviewed').value,
+                display_order: parseInt(document.getElementById('displayOrder').value) || 0,
+                is_active: document.getElementById('isActive').checked
+            };
+
+            try {
+                const url = editingReviewId 
+                    ? `/api/admin/customer-reviews/${editingReviewId}`
+                    : '/api/admin/customer-reviews';
+                
+                const method = editingReviewId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save review');
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeModal();
+                    loadReviews();
+                    showSuccess(editingReviewId ? 'Review updated successfully!' : 'Review added successfully!');
+                } else {
+                    throw new Error(result.error || 'Failed to save review');
+                }
+            } catch (error) {
+                console.error('Error saving review:', error);
+                showError('Failed to save review: ' + error.message);
+            }
+        }
+
+        async function deleteReview(reviewId) {
+            const review = reviews.find(r => r.id === reviewId);
+            if (!review) return;
+
+            if (!confirm(`Are you sure you want to delete the review by ${review.reviewer_name}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/customer-reviews/${reviewId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete review');
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    loadReviews();
+                    showSuccess('Review deleted successfully!');
+                } else {
+                    throw new Error(result.error || 'Failed to delete review');
+                }
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                showError('Failed to delete review: ' + error.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showSuccess(message) {
+            // Simple success notification - you can enhance this
+            alert('✅ ' + message);
+        }
+
+        function showError(message) {
+            // Simple error notification - you can enhance this
+            alert('❌ ' + message);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('reviewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

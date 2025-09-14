@@ -1215,19 +1215,40 @@
         // Load all reviews from the JSON file
         async function loadEtsyReviews() {
             try {
-                const response = await fetch('/etsy_reviews.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                // Try to load from database first
+                const response = await fetch('/api/customer-reviews');
+                if (response.ok) {
+                    const dbReviews = await response.json();
+                    // Convert database format to match existing format
+                    etsyReviews = dbReviews.map(review => ({
+                        reviewer: review.reviewer_name,
+                        star_rating: review.star_rating,
+                        message: review.review_message,
+                        date_reviewed: review.date_reviewed
+                    }));
+                    console.log(`✅ Loaded ${etsyReviews.length} reviews from database`);
+                } else {
+                    throw new Error('Database reviews not available');
                 }
-                etsyReviews = await response.json();
-                console.log(`Loaded ${etsyReviews.length} reviews from etsy_reviews.json`);
                 
                 // Re-render everything after loading reviews
                 renderRatingSummary();
                 renderReviews();
             } catch (error) {
-                console.error('Error loading Etsy reviews:', error);
-                // Fallback to hardcoded reviews if JSON loading fails
+                console.error('Error loading reviews from database, trying JSON fallback:', error);
+                // Fallback to JSON file if database fails
+                try {
+                    const jsonResponse = await fetch('/etsy_reviews.json');
+                    if (!jsonResponse.ok) {
+                        throw new Error(`HTTP error! status: ${jsonResponse.status}`);
+                    }
+                    etsyReviews = await jsonResponse.json();
+                    console.log(`✅ Loaded ${etsyReviews.length} reviews from etsy_reviews.json (fallback)`);
+                    renderRatingSummary();
+                    renderReviews();
+                } catch (jsonError) {
+                    console.error('Error loading JSON reviews, using hardcoded fallback:', jsonError);
+                    // Final fallback to hardcoded reviews
                 etsyReviews = [
                     {"reviewer":"Michelle","date_reviewed":"07/21/2025","star_rating":5,"message":"Shop owner went out of her way to help me and make sure I was completely with my order","order_id":3708435983},
                     {"reviewer":"Shelley","date_reviewed":"07/21/2025","star_rating":5,"message":"Lori is awesome to work with!","order_id":3734586064},
@@ -1250,9 +1271,10 @@
                     {"reviewer":"pabbi","date_reviewed":"05/04/2025","star_rating":4,"message":"Once again. Amazingly vibrant colors and the quality and job...well done ♥️♥️","order_id":3664597485},
                     {"reviewer":"Carla","date_reviewed":"05/01/2025","star_rating":5,"message":"My husband loves the shirt. Great fit. Very neatly packaged with care instruction card and thank you sticker attached. Also business cards were enclosed. The owner sent me a message before shipping which was clear and polite which I appreciate. I will definitely order from this business again.","order_id":3663673873}
                 ];
-                console.log('Using fallback reviews:', etsyReviews.length);
-                renderRatingSummary();
-                renderReviews();
+                    console.log('✅ Using hardcoded fallback reviews:', etsyReviews.length);
+                    renderRatingSummary();
+                    renderReviews();
+                }
             }
         }
 
@@ -1260,10 +1282,7 @@
         let currentReviewIndex = 0;
         const reviewsPerPage = 8; // Show 2 rows of 4 reviews each
 
-        // Create a mapping of reviewers to unique avatars to ensure no repetition
-        const avatarMapping = new Map();
-        let femaleAvatarIndex = 0;
-        let maleAvatarIndex = 0;
+        // Reviews display without avatars for more authentic appearance
 
         // Comprehensive collection of unique avatars (using placeholder service to avoid CORS issues)
         const femaleAvatars = [
@@ -1421,22 +1440,21 @@
             const reviewsToShow = etsyReviews.slice(startIndex, endIndex);
 
             grid.innerHTML = reviewsToShow.map((review, index) => {
-                const isFemale = isFemaleName(review.reviewer);
-                const avatar = generateAvatar(review.reviewer, isFemale);
                 const stars = renderStars(review.star_rating);
                 
                 return `
                     <div class="glass-card rounded-xl p-6 transition-all duration-300 hover:scale-105">
-                        <div class="flex items-start space-x-4 mb-4">
-                            <img src="${avatar}" alt="${review.reviewer}" class="w-12 h-12 rounded-full object-cover" />
-                            <div class="flex-1">
-                                <h4 class="font-semibold text-white">${review.reviewer}</h4>
-                                <div class="flex items-center space-x-1 text-yellow-400 text-sm">
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-semibold text-white text-lg">${review.reviewer}</h4>
+                                <span class="text-text-secondary text-xs">${review.date_reviewed}</span>
+                            </div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="flex items-center space-x-1 text-yellow-400 text-lg">
                                     ${stars}
                                 </div>
-                                <span class="text-accent text-xs">Verified Purchase</span>
+                                <span class="text-accent text-sm font-medium">Verified Etsy Purchase</span>
                             </div>
-                            <span class="text-text-secondary text-xs">${review.date_reviewed}</span>
                         </div>
                         <p class="text-text-secondary text-sm leading-relaxed">${review.message}</p>
                     </div>

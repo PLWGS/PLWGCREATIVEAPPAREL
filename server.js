@@ -447,6 +447,21 @@ async function initializeDatabase() {
       )
     `);
 
+    // Create customer_reviews table for homepage Etsy reviews
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_reviews (
+        id SERIAL PRIMARY KEY,
+        reviewer_name VARCHAR(100) NOT NULL,
+        star_rating INTEGER NOT NULL CHECK (star_rating BETWEEN 1 AND 5),
+        review_message TEXT NOT NULL,
+        date_reviewed VARCHAR(20),
+        is_active BOOLEAN DEFAULT true,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Create loyalty_rewards table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS loyalty_rewards (
@@ -7450,6 +7465,130 @@ app.use((error, req, res, next) => {
     error: 'Internal server error',
     message: 'Something went wrong. Please try again.'
   });
+});
+
+// Customer Reviews Management API Endpoints
+
+// Get all customer reviews for admin management
+app.get('/api/admin/customer-reviews', authenticateToken, async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const result = await pool.query(`
+      SELECT * FROM customer_reviews 
+      ORDER BY display_order ASC, created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    logger.error('Error fetching customer reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+});
+
+// Get active customer reviews for homepage display
+app.get('/api/customer-reviews', async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const result = await pool.query(`
+      SELECT reviewer_name, star_rating, review_message, date_reviewed 
+      FROM customer_reviews 
+      WHERE is_active = true 
+      ORDER BY display_order ASC, created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    logger.error('Error fetching active customer reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+});
+
+// Add new customer review
+app.post('/api/admin/customer-reviews', authenticateToken, [
+  body('reviewer_name').notEmpty().withMessage('Reviewer name is required'),
+  body('star_rating').isInt({ min: 1, max: 5 }).withMessage('Star rating must be between 1 and 5'),
+  body('review_message').notEmpty().withMessage('Review message is required'),
+  body('date_reviewed').optional()
+], async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
+  try {
+    const { reviewer_name, star_rating, review_message, date_reviewed, display_order } = req.body;
+    
+    const result = await pool.query(`
+      INSERT INTO customer_reviews (reviewer_name, star_rating, review_message, date_reviewed, display_order)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+    `, [reviewer_name, star_rating, review_message, date_reviewed || new Date().toLocaleDateString(), display_order || 0]);
+    
+    res.json({ success: true, review: result.rows[0] });
+  } catch (error) {
+    logger.error('Error adding customer review:', error);
+    res.status(500).json({ error: 'Failed to add review' });
+  }
+});
+
+// Update customer review
+app.put('/api/admin/customer-reviews/:id', authenticateToken, [
+  body('reviewer_name').notEmpty().withMessage('Reviewer name is required'),
+  body('star_rating').isInt({ min: 1, max: 5 }).withMessage('Star rating must be between 1 and 5'),
+  body('review_message').notEmpty().withMessage('Review message is required')
+], async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
+  try {
+    const { id } = req.params;
+    const { reviewer_name, star_rating, review_message, date_reviewed, is_active, display_order } = req.body;
+    
+    const result = await pool.query(`
+      UPDATE customer_reviews 
+      SET reviewer_name = $1, star_rating = $2, review_message = $3, 
+          date_reviewed = $4, is_active = $5, display_order = $6, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $7
+      RETURNING *
+    `, [reviewer_name, star_rating, review_message, date_reviewed, is_active, display_order, id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+    
+    res.json({ success: true, review: result.rows[0] });
+  } catch (error) {
+    logger.error('Error updating customer review:', error);
+    res.status(500).json({ error: 'Failed to update review' });
+  }
+});
+
+// Delete customer review
+app.delete('/api/admin/customer-reviews/:id', authenticateToken, async (req, res) => {
+  if (!pool) return res.status(500).json({ error: 'Database not available' });
+  
+  try {
+    const { id } = req.params;
+    
+    const result = await pool.query(`
+      DELETE FROM customer_reviews WHERE id = $1 RETURNING *
+    `, [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+    
+    res.json({ success: true, message: 'Review deleted successfully' });
+  } catch (error) {
+    logger.error('Error deleting customer review:', error);
+    res.status(500).json({ error: 'Failed to delete review' });
+  }
 });
 
 // Initialize admin credentials and start server
