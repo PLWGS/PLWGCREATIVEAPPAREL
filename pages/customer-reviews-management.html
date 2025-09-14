@@ -334,27 +334,7 @@
                     return;
                 }
 
-                // If API fails, load from JSON file as fallback
-                console.log('API not available, loading from JSON file...');
-                const jsonResponse = await fetch('/etsy_reviews.json');
-                if (jsonResponse.ok) {
-                    const etsyReviews = await jsonResponse.json();
-                    // Convert to admin format
-                    reviews = etsyReviews.map((review, index) => ({
-                        id: index + 1,
-                        reviewer_name: review.reviewer,
-                        star_rating: review.star_rating,
-                        review_message: review.message,
-                        date_reviewed: review.date_reviewed,
-                        is_active: true,
-                        display_order: index + 1,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    }));
-                    renderReviews();
-                } else {
-                    throw new Error('Failed to load reviews from both API and JSON file');
-                }
+                throw new Error('API not available');
             } catch (error) {
                 console.error('Error loading reviews:', error);
                 showError('Failed to load reviews: ' + error.message);
@@ -481,18 +461,11 @@
                     }
                 }
 
-                // If API fails, show informational message
-                console.log('API not available for saving, showing informational message...');
-                closeModal();
-                alert('📝 Review changes saved locally!\n\nNote: Changes are currently saved locally since the database API is not yet deployed. When the API is available, you\'ll be able to permanently save changes to the database.\n\nFor now, the original Etsy reviews will continue to display on your homepage.');
-                loadReviews(); // Reload to show original data
+                throw new Error('API not available for saving');
                 
             } catch (error) {
                 console.error('Error saving review:', error);
-                // Show informational message instead of error
-                closeModal();
-                alert('📝 Review management is currently in read-only mode.\n\nYou can view and manage your Etsy reviews, but changes cannot be permanently saved until the database API is deployed.\n\nYour original Etsy reviews will continue to display on your homepage.');
-                loadReviews();
+                showError('Failed to save review: ' + error.message);
             }
         }
 
@@ -528,14 +501,11 @@
                     }
                 }
 
-                // If API fails, show informational message
-                console.log('API not available for deletion, showing informational message...');
-                alert('📝 Review deletion is currently not available.\n\nNote: Reviews cannot be permanently deleted until the database API is deployed. Your original Etsy reviews will continue to display on your homepage.\n\nWhen the API is available, you\'ll be able to manage which reviews are shown.');
+                throw new Error('API not available for deletion');
                 
             } catch (error) {
                 console.error('Error deleting review:', error);
-                // Show informational message instead of error
-                alert('📝 Review deletion is currently not available.\n\nNote: Reviews cannot be permanently deleted until the database API is deployed. Your original Etsy reviews will continue to display on your homepage.\n\nWhen the API is available, you\'ll be able to manage which reviews are shown.');
+                showError('Failed to delete review: ' + error.message);
             }
         }
 
