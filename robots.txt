@@ -1,15 +1,39 @@
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://plwgscreativeapparel.com/sitemap.xml
-
-# Disallow admin pages from search engines
-Disallow: /pages/admin.html
-Disallow: /pages/category-management.html
-
-# Allow all other pages
+# Important: Allow all public pages
+Allow: /pages/homepage.html
 Allow: /pages/shop.html
+Allow: /pages/customer-login.html
 Allow: /pages/account.html
 Allow: /pages/cart.html
-Allow: /pages/homepage.html
+Allow: /pages/checkout.html
+Allow: /pages/privacy-policy.html
+Allow: /pages/terms-of-service.html
+Allow: /pages/products/
+
+# Allow static assets
+Allow: /public/
+Allow: /css/
+Allow: /js/
+
+# Block admin and sensitive pages from search engines
+Disallow: /pages/admin.html
+Disallow: /pages/admin-login.html
+Disallow: /pages/admin-totp-setup.html
+Disallow: /pages/admin-uploads.html
+Disallow: /pages/category-management.html
+Disallow: /pages/customers.html
+Disallow: /pages/orders.html
+Disallow: /pages/product-edit*.html
+Disallow: /pages/product-management.js
+
+# Block API endpoints from indexing
+Disallow: /api/
+
+# Block temporary/test files
+Disallow: /test*
+Disallow: /debug*
+
+# Sitemap location
+Sitemap: https://plwgscreativeapparel.com/sitemap.xml

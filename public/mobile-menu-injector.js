@@ -1,5 +1,10 @@
 (function () {
   'use strict';
+  
+  if (window.__DISABLE_INJECTOR__) { 
+    console.debug('Injector disabled on this page'); 
+    return; 
+  }
 
   if (window.__MOBILE_MENU_INJECTOR_LOADED__) return;
   window.__MOBILE_MENU_INJECTOR_LOADED__ = true;

@@ -2,37 +2,49 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://plwgscreativeapparel.com/</loc>
-    <lastmod>2025-01-09</lastmod>
+    <lastmod>2025-09-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/homepage.html</loc>
-    <lastmod>2025-01-09</lastmod>
+    <loc>https://plwgscreativeapparel.com/pages/shop.html</loc>
+    <lastmod>2025-09-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/shop.html</loc>
-    <lastmod>2025-01-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <loc>https://plwgscreativeapparel.com/pages/customer-login.html</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://plwgscreativeapparel.com/pages/account.html</loc>
-    <lastmod>2025-01-09</lastmod>
+    <lastmod>2025-09-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://plwgscreativeapparel.com/pages/cart.html</loc>
-    <lastmod>2025-01-09</lastmod>
+    <lastmod>2025-09-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/admin.html</loc>
-    <lastmod>2025-01-09</lastmod>
+    <loc>https://plwgscreativeapparel.com/pages/checkout.html</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://plwgscreativeapparel.com/pages/privacy-policy.html</loc>
+    <lastmod>2025-09-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://plwgscreativeapparel.com/pages/terms-of-service.html</loc>
+    <lastmod>2025-09-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>

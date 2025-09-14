@@ -7395,6 +7395,49 @@ app.use((error, req, res, next) => {
   next(error);
 });
 
+// 404 handler for missing pages/files - must come BEFORE error handler
+app.use((req, res, next) => {
+  // Check if it's an API request
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ 
+      error: 'API endpoint not found',
+      path: req.path,
+      method: req.method
+    });
+  }
+  
+  // For HTML pages, serve a proper 404 page
+  if (req.path.endsWith('.html') || req.path === '/' || !req.path.includes('.')) {
+    logger.warn(`🔍 404 - Page not found: ${req.path}`);
+    return res.status(404).send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Page Not Found - PLWGS Creative Apparel</title>
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #0a0a0a; color: #fff; }
+          h1 { color: #ff6b35; }
+          a { color: #ff6b35; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+        </style>
+      </head>
+      <body>
+        <h1>404 - Page Not Found</h1>
+        <p>The page you're looking for doesn't exist.</p>
+        <p><a href="/pages/homepage.html">← Back to Homepage</a></p>
+        <p><a href="/pages/shop.html">Browse Products</a></p>
+      </body>
+      </html>
+    `);
+  }
+  
+  // For other files (CSS, JS, images), return standard 404
+  logger.warn(`🔍 404 - File not found: ${req.path}`);
+  res.status(404).send('File not found');
+});
+
 // Catch-all error handler to prevent server crashes
 app.use((error, req, res, next) => {
   logger.error('❌ Unhandled error:', error.message);
