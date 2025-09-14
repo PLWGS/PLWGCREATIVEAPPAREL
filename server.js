@@ -7474,6 +7474,21 @@ app.get('/api/admin/customer-reviews', authenticateToken, async (req, res) => {
   if (!pool) return res.status(500).json({ error: 'Database not available' });
   
   try {
+    // Ensure table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_reviews (
+        id SERIAL PRIMARY KEY,
+        reviewer_name VARCHAR(100) NOT NULL,
+        star_rating INTEGER NOT NULL CHECK (star_rating BETWEEN 1 AND 5),
+        review_message TEXT NOT NULL,
+        date_reviewed VARCHAR(20),
+        is_active BOOLEAN DEFAULT true,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     const result = await pool.query(`
       SELECT * FROM customer_reviews 
       ORDER BY display_order ASC, created_at DESC
@@ -7481,12 +7496,7 @@ app.get('/api/admin/customer-reviews', authenticateToken, async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     logger.error('Error fetching customer reviews:', error);
-    // Return fallback data if table doesn't exist
-    res.json([
-      {id: 1, reviewer_name: "Michelle", star_rating: 5, review_message: "Shop owner went out of her way to help me and make sure I was completely satisfied with my order", date_reviewed: "07/21/2025", is_active: true, display_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString()},
-      {id: 2, reviewer_name: "Shelley", star_rating: 5, review_message: "Lori is awesome to work with!", date_reviewed: "07/21/2025", is_active: true, display_order: 2, created_at: new Date().toISOString(), updated_at: new Date().toISOString()},
-      {id: 3, reviewer_name: "Raelynn", star_rating: 5, review_message: "Always a pleasure working together!", date_reviewed: "07/18/2025", is_active: true, display_order: 3, created_at: new Date().toISOString(), updated_at: new Date().toISOString()}
-    ]);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 });
 
@@ -7495,6 +7505,21 @@ app.get('/api/customer-reviews', async (req, res) => {
   if (!pool) return res.status(500).json({ error: 'Database not available' });
   
   try {
+    // Ensure table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_reviews (
+        id SERIAL PRIMARY KEY,
+        reviewer_name VARCHAR(100) NOT NULL,
+        star_rating INTEGER NOT NULL CHECK (star_rating BETWEEN 1 AND 5),
+        review_message TEXT NOT NULL,
+        date_reviewed VARCHAR(20),
+        is_active BOOLEAN DEFAULT true,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     const result = await pool.query(`
       SELECT reviewer_name, star_rating, review_message, date_reviewed 
       FROM customer_reviews 
@@ -7504,12 +7529,7 @@ app.get('/api/customer-reviews', async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     logger.error('Error fetching active customer reviews:', error);
-    // Return fallback data if table doesn't exist
-    res.json([
-      {reviewer_name: "Michelle", star_rating: 5, review_message: "Shop owner went out of her way to help me and make sure I was completely satisfied with my order", date_reviewed: "07/21/2025"},
-      {reviewer_name: "Shelley", star_rating: 5, review_message: "Lori is awesome to work with!", date_reviewed: "07/21/2025"},
-      {reviewer_name: "Raelynn", star_rating: 5, review_message: "Always a pleasure working together!", date_reviewed: "07/18/2025"}
-    ]);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 });
 
@@ -7528,13 +7548,28 @@ app.post('/api/admin/customer-reviews', authenticateToken, [
   }
   
   try {
-    const { reviewer_name, star_rating, review_message, date_reviewed, display_order } = req.body;
+    // Ensure table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_reviews (
+        id SERIAL PRIMARY KEY,
+        reviewer_name VARCHAR(100) NOT NULL,
+        star_rating INTEGER NOT NULL CHECK (star_rating BETWEEN 1 AND 5),
+        review_message TEXT NOT NULL,
+        date_reviewed VARCHAR(20),
+        is_active BOOLEAN DEFAULT true,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    const { reviewer_name, star_rating, review_message, date_reviewed, display_order, is_active } = req.body;
     
     const result = await pool.query(`
-      INSERT INTO customer_reviews (reviewer_name, star_rating, review_message, date_reviewed, display_order)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO customer_reviews (reviewer_name, star_rating, review_message, date_reviewed, display_order, is_active)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
-    `, [reviewer_name, star_rating, review_message, date_reviewed || new Date().toLocaleDateString(), display_order || 0]);
+    `, [reviewer_name, star_rating, review_message, date_reviewed || new Date().toLocaleDateString(), display_order || 0, is_active !== undefined ? is_active : true]);
     
     res.json({ success: true, review: result.rows[0] });
   } catch (error) {
@@ -7557,6 +7592,21 @@ app.put('/api/admin/customer-reviews/:id', authenticateToken, [
   }
   
   try {
+    // Ensure table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_reviews (
+        id SERIAL PRIMARY KEY,
+        reviewer_name VARCHAR(100) NOT NULL,
+        star_rating INTEGER NOT NULL CHECK (star_rating BETWEEN 1 AND 5),
+        review_message TEXT NOT NULL,
+        date_reviewed VARCHAR(20),
+        is_active BOOLEAN DEFAULT true,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     const { id } = req.params;
     const { reviewer_name, star_rating, review_message, date_reviewed, is_active, display_order } = req.body;
     
@@ -7584,6 +7634,21 @@ app.delete('/api/admin/customer-reviews/:id', authenticateToken, async (req, res
   if (!pool) return res.status(500).json({ error: 'Database not available' });
   
   try {
+    // Ensure table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS customer_reviews (
+        id SERIAL PRIMARY KEY,
+        reviewer_name VARCHAR(100) NOT NULL,
+        star_rating INTEGER NOT NULL CHECK (star_rating BETWEEN 1 AND 5),
+        review_message TEXT NOT NULL,
+        date_reviewed VARCHAR(20),
+        is_active BOOLEAN DEFAULT true,
+        display_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     const { id } = req.params;
     
     const result = await pool.query(`

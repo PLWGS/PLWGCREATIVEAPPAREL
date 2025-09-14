@@ -1,0 +1,3 @@
+[33m7fa4182[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix customer reviews management to handle API unavailability gracefully
+[33me15fd94[m Fix customer reviews management to work with existing Etsy reviews
+[33m046aaf1[m Add fallback data for customer reviews API endpoints
