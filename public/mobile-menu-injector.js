@@ -117,7 +117,7 @@
 
     drawer.innerHTML = [
       "<nav>",
-      "<a style='display:block;padding:10px 0;color:#0bd;text-decoration:none' href='/pages/homepage.html'>Home</a>",
+      "<a style='display:block;padding:10px 0;color:#0bd;text-decoration:none' href='/../index.html'>Home</a>",
       "<a style='display:block;padding:10px 0;color:#0bd;text-decoration:none' href='/pages/shop.html'>Shop</a>",
       "<a style='display:block;padding:10px 0;color:#0bd;text-decoration:none' href='/pages/account.html'>My Account</a>",
       "<a style='display:block;padding:10px 0;color:#0bd;text-decoration:none' href='/pages/cart.html'>Cart</a>",

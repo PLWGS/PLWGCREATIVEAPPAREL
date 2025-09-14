@@ -7426,7 +7426,7 @@ app.use((req, res, next) => {
       <body>
         <h1>404 - Page Not Found</h1>
         <p>The page you're looking for doesn't exist.</p>
-        <p><a href="/pages/homepage.html">← Back to Homepage</a></p>
+        <p><a href="/">← Back to Homepage</a></p>
         <p><a href="/pages/shop.html">Browse Products</a></p>
       </body>
       </html>

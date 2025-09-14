@@ -255,7 +255,7 @@ function createEditPageForProduct(productId, productName) {
                     </a>
 
                     <!-- View Store -->
-                    <a href="homepage.html" class="btn-primary text-sm px-4 py-2">
+                    <a href="../index.html" class="btn-primary text-sm px-4 py-2">
                         View Store
                     </a>
 
