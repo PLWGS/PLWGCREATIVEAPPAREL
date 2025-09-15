@@ -207,6 +207,17 @@
             width: 8px;
         }
         
+        /* Force center Featured Collections grid */
+        #featured-collections-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+            gap: 2rem !important;
+            justify-items: center !important;
+            justify-content: center !important;
+            max-width: 1000px !important;
+            margin: 0 auto !important;
+        }
+        
         ::-webkit-scrollbar-track {
             background: #1a1a1a;
         }
@@ -1251,7 +1262,7 @@
           }
           
           grid.innerHTML = featured.map(p => `
-            <div class="glass-card rounded-2xl p-6 neon-glow group cursor-pointer transition-all duration-300 hover:scale-105">
+            <div class="glass-card rounded-2xl p-6 neon-glow group cursor-pointer transition-all duration-300 hover:scale-105 w-full max-w-sm">
               <div class="relative mb-6 overflow-hidden rounded-xl">
                 <img src="${p.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='}" alt="${p.name}" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
                 <div class="absolute top-4 right-4 bg-accent text-white px-2 py-1 rounded-full text-xs font-bold">
