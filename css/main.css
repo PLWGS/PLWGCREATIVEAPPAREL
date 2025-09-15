@@ -2670,8 +2670,8 @@ code, .mono {
   /* Deep canvas for product showcase */
   --color-secondary: #1a1a1a;
   /* Subtle surface elevation and depth */
-  --color-accent: #00bcd4;
-  /* Interactive elements and progress indicators - cyan-400 */
+    --color-accent: #ff8306;
+    /* Interactive elements and progress indicators - orange */
   /* Background Colors */
   --color-background: #000000;
   /* Pure backdrop for maximum contrast - black */
@@ -2690,10 +2690,10 @@ code, .mono {
   --color-error: #ef4444;
   /* Form validation and error messaging - red-500 */
   /* Additional Shades */
-  --color-accent-light: #4dd0e1;
-  /* cyan-300 */
-  --color-accent-dark: #0097a7;
-  /* cyan-600 */
+    --color-accent-light: #ffa726;
+    /* orange-400 */
+    --color-accent-dark: #e65100;
+    /* orange-700 */
   --color-surface-light: #3a3a3a;
   /* gray-700 */
   --color-surface-dark: #1f1f1f;
