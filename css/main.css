@@ -669,15 +669,15 @@ code, .mono {
           transition-duration: 300ms;
   -webkit-transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
           transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  -webkit-box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
-          box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
+  -webkit-box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
+          box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
 }
 
 .btn-primary:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(77 208 225 / var(--tw-bg-opacity, 1));
-  -webkit-box-shadow: 0 0 30px rgba(255, 131, 6, 0.5);
-          box-shadow: 0 0 30px rgba(255, 131, 6, 0.5);
+  -webkit-box-shadow: 0 0 30px rgba(0, 188, 212, 0.5);
+          box-shadow: 0 0 30px rgba(0, 188, 212, 0.5);
 }
 
 .card{
@@ -718,8 +718,8 @@ code, .mono {
   border-color: rgb(0 188 212 / var(--tw-border-opacity, 1));
   outline: 2px solid transparent;
   outline-offset: 2px;
-  -webkit-box-shadow: 0 0 10px rgba(255, 131, 6, 0.2);
-          box-shadow: 0 0 10px rgba(255, 131, 6, 0.2);
+  -webkit-box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
+          box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
 }
 
 .text-gradient {
@@ -1646,6 +1646,11 @@ code, .mono {
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
 }
 
+.border-cyan-600{
+  --tw-border-opacity: 1;
+  border-color: rgb(8 145 178 / var(--tw-border-opacity, 1));
+}
+
 .border-error{
   --tw-border-opacity: 1;
   border-color: rgb(239 68 68 / var(--tw-border-opacity, 1));
@@ -1774,7 +1779,7 @@ code, .mono {
 
 .bg-cyan-600{
   --tw-bg-opacity: 1;
-  background-color: rgb(255 131 6 / var(--tw-bg-opacity, 1));
+  background-color: rgb(8 145 178 / var(--tw-bg-opacity, 1));
 }
 
 .bg-error{
@@ -1976,15 +1981,38 @@ code, .mono {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
+.from-cyan-500{
+  --tw-gradient-from: #06b6d4 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(6 182 212 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-cyan-600{
+  --tw-gradient-from: #0891b2 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(8 145 178 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
 .from-gray-900\/50{
   --tw-gradient-from: rgb(17 24 39 / 0.5) var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(17 24 39 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
+.from-orange-500{
+  --tw-gradient-from: #f97316 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(249 115 22 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
 .via-accent{
   --tw-gradient-to: rgb(0 188 212 / 0)  var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), #ff8306 var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
+.via-cyan-600{
+  --tw-gradient-to: rgb(8 145 178 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #0891b2 var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
 .via-transparent{
@@ -1997,11 +2025,15 @@ code, .mono {
 }
 
 .to-accent-light{
-  --tw-gradient-to: #ffa726 var(--tw-gradient-to-position);
+  --tw-gradient-to: #4dd0e1 var(--tw-gradient-to-position);
 }
 
 .to-accent\/5{
-  --tw-gradient-to: rgb(255 131 6 / 0.05) var(--tw-gradient-to-position);
+  --tw-gradient-to: rgb(0 188 212 / 0.05) var(--tw-gradient-to-position);
+}
+
+.to-cyan-600{
+  --tw-gradient-to: #0891b2 var(--tw-gradient-to-position);
 }
 
 .to-gray-800\/20{
@@ -2324,7 +2356,17 @@ code, .mono {
 
 .text-cyan-400{
   --tw-text-opacity: 1;
-  color: rgb(255 131 6 / var(--tw-text-opacity, 1));
+  color: rgb(34 211 238 / var(--tw-text-opacity, 1));
+}
+
+.text-cyan-500{
+  --tw-text-opacity: 1;
+  color: rgb(6 182 212 / var(--tw-text-opacity, 1));
+}
+
+.text-cyan-600{
+  --tw-text-opacity: 1;
+  color: rgb(8 145 178 / var(--tw-text-opacity, 1));
 }
 
 .text-error{
@@ -2642,25 +2684,25 @@ code, .mono {
 
 @-webkit-keyframes pulse-glow {
   from {
-    -webkit-box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
-            box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
+    -webkit-box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
+            box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
   }
 
   to {
-    -webkit-box-shadow: 0 0 30px rgba(255, 131, 6, 0.6);
-            box-shadow: 0 0 30px rgba(255, 131, 6, 0.6);
+    -webkit-box-shadow: 0 0 30px rgba(0, 188, 212, 0.6);
+            box-shadow: 0 0 30px rgba(0, 188, 212, 0.6);
   }
 }
 
 @keyframes pulse-glow {
   from {
-    -webkit-box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
-            box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
+    -webkit-box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
+            box-shadow: 0 0 20px rgba(0, 188, 212, 0.3);
   }
 
   to {
-    -webkit-box-shadow: 0 0 30px rgba(255, 131, 6, 0.6);
-            box-shadow: 0 0 30px rgba(255, 131, 6, 0.6);
+    -webkit-box-shadow: 0 0 30px rgba(0, 188, 212, 0.6);
+            box-shadow: 0 0 30px rgba(0, 188, 212, 0.6);
   }
 }
 
@@ -2670,8 +2712,8 @@ code, .mono {
   /* Deep canvas for product showcase */
   --color-secondary: #1a1a1a;
   /* Subtle surface elevation and depth */
-    --color-accent: #ff8306;
-    /* Interactive elements and progress indicators - orange */
+  --color-accent: #ff8306;
+  /* Interactive elements and progress indicators - orange */
   /* Background Colors */
   --color-background: #000000;
   /* Pure backdrop for maximum contrast - black */
@@ -2690,10 +2732,10 @@ code, .mono {
   --color-error: #ef4444;
   /* Form validation and error messaging - red-500 */
   /* Additional Shades */
-    --color-accent-light: #ffa726;
-    /* orange-400 */
-    --color-accent-dark: #e65100;
-    /* orange-700 */
+  --color-accent-light: #4dd0e1;
+  /* cyan-300 */
+  --color-accent-dark: #0097a7;
+  /* cyan-600 */
   --color-surface-light: #3a3a3a;
   /* gray-700 */
   --color-surface-dark: #1f1f1f;
@@ -2779,7 +2821,7 @@ code, .mono {
 
 .hover\:bg-cyan-700:hover{
   --tw-bg-opacity: 1;
-  background-color: rgb(255 131 6 / var(--tw-bg-opacity, 1));
+  background-color: rgb(14 116 144 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-gray-200:hover{
@@ -2853,7 +2895,7 @@ code, .mono {
 
 .hover\:text-cyan-300:hover{
   --tw-text-opacity: 1;
-  color: rgb(255 131 6 / var(--tw-text-opacity, 1));
+  color: rgb(103 232 249 / var(--tw-text-opacity, 1));
 }
 
 .hover\:text-error:hover{
