@@ -894,6 +894,33 @@ function generateNumericCode(length = 6) {
   return String(num).padStart(length, '0');
 }
 
+// Utility function to optimize Cloudinary URLs for better performance
+function optimizeCloudinaryUrl(url, width = 400, height = null) {
+  if (!url || !url.includes('res.cloudinary.com')) return url;
+  
+  // Extract the base URL and transformations
+  const baseUrl = url.split('/upload/')[0] + '/upload/';
+  const path = url.split('/upload/')[1];
+  
+  // Add performance optimizations: f_auto (format), q_auto (quality), c_fit (fit)
+  const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fit`;
+  
+  return `${baseUrl}${transformations}/${path}`;
+}
+
+// Utility function to optimize product data with Cloudinary URLs
+function optimizeProductImages(product) {
+  if (product.image_url) {
+    product.image_url = optimizeCloudinaryUrl(product.image_url, 400, 300);
+  }
+  if (product.sub_images && Array.isArray(product.sub_images)) {
+    product.sub_images = product.sub_images.map(img => 
+      typeof img === 'string' ? optimizeCloudinaryUrl(img, 300, 300) : img
+    );
+  }
+  return product;
+}
+
 async function sendEmail(to, subject, html) {
   try {
     await sendResendEmail(to, subject, html);
@@ -4246,11 +4273,14 @@ app.get('/api/products/public', async (req, res) => {
     
     const result = await pool.query(query, queryParams);
     
-    // Add basic schema for each product for SEO
-    const productsWithSchema = result.rows.map(product => ({
-      ...product,
-      schema: generateProductSchema(product, { count: 0, average: 0, items: [] })
-    }));
+    // Add basic schema for each product for SEO and optimize images
+    const productsWithSchema = result.rows.map(product => {
+      const optimizedProduct = optimizeProductImages(product);
+      return {
+        ...optimizedProduct,
+        schema: generateProductSchema(optimizedProduct, { count: 0, average: 0, items: [] })
+      };
+    });
     
     res.json(productsWithSchema);
   } catch (error) {
@@ -4342,7 +4372,8 @@ app.get('/api/products/hero', async (req, res) => {
       ORDER BY feature_rank ASC
       LIMIT 3
     `);
-    res.json(result.rows);
+    const optimizedProducts = result.rows.map(product => optimizeProductImages(product));
+    res.json(optimizedProducts);
   } catch (error) {
     logger.error('Error fetching hero products:', error);
     res.status(500).json({ error: 'Failed to fetch hero products' });
@@ -4358,7 +4389,8 @@ app.get('/api/products/featured', async (req, res) => {
       ORDER BY featured_order ASC
       LIMIT 6
     `);
-    res.json(result.rows);
+    const optimizedProducts = result.rows.map(product => optimizeProductImages(product));
+    res.json(optimizedProducts);
   } catch (error) {
     logger.error('Error fetching featured products:', error);
     res.status(500).json({ error: 'Failed to fetch featured products' });
@@ -4393,7 +4425,8 @@ app.get('/api/products/dropdown-featured', async (req, res) => {
       ORDER BY created_at DESC 
       LIMIT 3
     `);
-    res.json(result.rows);
+    const optimizedProducts = result.rows.map(product => optimizeProductImages(product));
+    res.json(optimizedProducts);
   } catch (error) {
     logger.error('Error fetching dropdown featured products:', error);
     res.status(500).json({ error: 'Failed to fetch featured products' });

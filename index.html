@@ -424,11 +424,11 @@
     </section>
 
     <!-- Main Hero Section with Carousel -->
-    <section id="main-hero" class="relative py-16 lg:py-24 flex items-center justify-center z-10">
+    <section id="main-hero" class="relative py-16 lg:py-24 flex items-center justify-center z-10 min-h-[600px] lg:min-h-[700px]">
         <div class="container mx-auto px-6">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Hero Content -->
-                <div class="space-y-8">
+                <div class="space-y-8 min-h-[300px] flex flex-col justify-center">
                     <div class="space-y-4">
                         <h1 class="font-orbitron text-3xl lg:text-5xl font-black leading-tight" style="font-size: 1.875rem; margin: 0;">
                             <span class="text-gradient">Custom T-Shirt</span><br />
@@ -466,20 +466,22 @@
                 </div>
 
                 <!-- Hero Image -->
-                <div class="flex justify-center lg:justify-end">
-                    <img 
-                        src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png" 
-                        srcset="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_400,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 400w,
-                                https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 800w,
-                                https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1200,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 1200w"
-                        sizes="(max-width: 768px) 400px, (max-width: 1024px) 800px, 1200px"
-                        alt="Creative Apparel Model" 
-                        class="w-full max-w-2xl lg:max-w-3xl h-auto" 
-                        fetchpriority="high"
-                        width="800"
-                        height="auto"
-                        loading="eager"
-                    />
+                <div class="flex justify-center lg:justify-end min-h-[400px] lg:min-h-[500px] flex items-center">
+                    <div class="relative w-full max-w-2xl lg:max-w-3xl aspect-[4/3]">
+                        <img 
+                            src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png" 
+                            srcset="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_400,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 400w,
+                                    https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 800w,
+                                    https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1200,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 1200w"
+                            sizes="(max-width: 768px) 400px, (max-width: 1024px) 800px, 1200px"
+                            alt="Creative Apparel Model" 
+                            class="w-full h-full object-contain" 
+                            fetchpriority="high"
+                            width="800"
+                            height="600"
+                            loading="eager"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
