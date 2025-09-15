@@ -104,6 +104,146 @@ if (isRailway) {
 }
 
 // -----------------------------------------------------------------------------
+// Schema Generation Functions for SEO
+// -----------------------------------------------------------------------------
+
+/**
+ * Generate enhanced product schema markup for SEO
+ * Includes your Etsy review data (755 reviews, 4.9 rating) for competitive advantage
+ */
+function generateProductSchema(product, reviews) {
+  const baseUrl = process.env.BASE_URL || 'https://plwgscreativeapparel.com';
+  
+  // Use Etsy review data for maximum SEO impact
+  const etsyReviewCount = 755;
+  const etsyRating = 4.9;
+  
+  // Use product reviews if available, otherwise fall back to Etsy data
+  const reviewCount = reviews.count > 0 ? reviews.count : etsyReviewCount;
+  const rating = reviews.average > 0 ? reviews.average : etsyRating;
+  
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description || `Custom ${product.category || 't-shirt'} with professional DTG printing`,
+    "image": product.image_url ? [product.image_url] : [],
+    "brand": {
+      "@type": "Brand",
+      "name": "PLWGS Creative Apparel"
+    },
+    "manufacturer": {
+      "@type": "Organization",
+      "name": "PLWGS Creative Apparel",
+      "url": baseUrl
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": product.price || 22.00,
+      "priceCurrency": "USD",
+      "availability": product.stock_quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "PLWGS Creative Apparel",
+        "url": baseUrl
+      },
+      "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": rating.toFixed(1),
+      "reviewCount": reviewCount,
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "name": "Printing Method",
+        "value": "DTG (Direct-to-Garment)"
+      },
+      {
+        "@type": "PropertyValue", 
+        "name": "Material",
+        "value": product.specifications?.material || "100% Cotton"
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "Custom Design",
+        "value": "Available"
+      }
+    ],
+    "category": product.category || "Custom T-Shirts",
+    "keywords": [
+      "custom t-shirt printing",
+      "design your own shirt", 
+      "DTG printing",
+      "custom t-shirts online",
+      "personalized t-shirts"
+    ]
+  };
+
+  // Add individual reviews if available
+  if (reviews.items && reviews.items.length > 0) {
+    schema.review = reviews.items.slice(0, 5).map(review => ({
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": review.display_name || "Customer"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": review.rating,
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "reviewBody": review.body || review.title || "Great product!",
+      "datePublished": review.created_at
+    }));
+  }
+
+  return schema;
+}
+
+/**
+ * Generate business/organization schema with Etsy review data
+ */
+function generateBusinessSchema() {
+  const baseUrl = process.env.BASE_URL || 'https://plwgscreativeapparel.com';
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "PLWGS Creative Apparel",
+    "description": "Professional custom t-shirt printing with DTG technology. Design your own shirt or choose from our creative collection.",
+    "url": baseUrl,
+    "logo": `${baseUrl}/mockups/mockup1.png`,
+    "foundingDate": "2023",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "US"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "Customer Service",
+      "email": "admin@plwgscreativeapparel.com"
+    },
+    "sameAs": [
+      "https://www.etsy.com/shop/plwgscreativeapparel"
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "755",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "serviceType": "Custom T-Shirt Printing",
+    "areaServed": "United States"
+  };
+}
+
+// -----------------------------------------------------------------------------
 // Admin credentials bootstrap
 // -----------------------------------------------------------------------------
 // We keep a single, in-memory, canonical hash so deployments never require
@@ -4061,10 +4201,28 @@ app.get('/api/products/public', async (req, res) => {
     query += ` ORDER BY created_at DESC`;
     
     const result = await pool.query(query, queryParams);
-    res.json(result.rows);
+    
+    // Add basic schema for each product for SEO
+    const productsWithSchema = result.rows.map(product => ({
+      ...product,
+      schema: generateProductSchema(product, { count: 0, average: 0, items: [] })
+    }));
+    
+    res.json(productsWithSchema);
   } catch (error) {
     logger.error('Error fetching products:', error);
     res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+// Get business schema for homepage SEO
+app.get('/api/schema/business', async (req, res) => {
+  try {
+    const businessSchema = generateBusinessSchema();
+    res.json(businessSchema);
+  } catch (error) {
+    logger.error('Error generating business schema:', error);
+    res.status(500).json({ error: 'Failed to generate business schema' });
   }
 });
 
@@ -4117,7 +4275,14 @@ app.get('/api/products/public/:id', async (req, res) => {
       LIMIT 20 OFFSET 0
     `, [productId]);
 
-    res.json({ product, reviews: { count, average, items: itemsResult.rows } });
+    // Generate enhanced schema markup for SEO
+    const schema = generateProductSchema(product, { count, average, items: itemsResult.rows });
+    
+    res.json({ 
+      product, 
+      reviews: { count, average, items: itemsResult.rows },
+      schema: schema
+    });
   } catch (error) {
     logger.error('Error fetching product:', error);
     res.status(500).json({ error: 'Failed to fetch product' });
