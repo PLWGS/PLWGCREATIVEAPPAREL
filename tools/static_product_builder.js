@@ -41,13 +41,70 @@ function renderHtml(p) {
   const subs = Array.isArray(p.sub_images) ? p.sub_images.map(u => buildImageUrl(u, 300, 120)) : [];
   const canonical = `/pages/product.html?id=${id}`;
 
+  // Enhanced schema with Etsy review data for competitive SEO
+  const etsyReviewCount = 755;
+  const etsyRating = 4.9;
+  const baseUrl = 'https://plwgscreativeapparel.com';
+  
   const jsonLd = {
-    '@context': 'https://schema.org/',
+    '@context': 'https://schema.org',
     '@type': 'Product',
     name: p.name,
+    description: p.description || `Custom ${p.category || 't-shirt'} with professional DTG printing`,
     image: [p.image_url, ...subs].filter(Boolean),
-    description: p.description || '',
-    offers: { '@type': 'Offer', priceCurrency: 'USD', price: String(p.price || ''), availability: 'https://schema.org/InStock' }
+    brand: {
+      '@type': 'Brand',
+      name: 'PLWGS Creative Apparel'
+    },
+    manufacturer: {
+      '@type': 'Organization',
+      name: 'PLWGS Creative Apparel',
+      url: baseUrl
+    },
+    offers: {
+      '@type': 'Offer',
+      price: p.price || 22.00,
+      priceCurrency: 'USD',
+      availability: p.stock_quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'PLWGS Creative Apparel',
+        url: baseUrl
+      },
+      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: etsyRating.toFixed(1),
+      reviewCount: etsyReviewCount,
+      bestRating: '5',
+      worstRating: '1'
+    },
+    additionalProperty: [
+      {
+        '@type': 'PropertyValue',
+        name: 'Printing Method',
+        value: 'DTG (Direct-to-Garment)'
+      },
+      {
+        '@type': 'PropertyValue',
+        name: 'Material',
+        value: p.specifications?.material || '100% Cotton'
+      },
+      {
+        '@type': 'PropertyValue',
+        name: 'Custom Design',
+        value: 'Available'
+      }
+    ],
+    category: p.category || 'Custom T-Shirts',
+    keywords: [
+      'custom t-shirt printing',
+      'design your own shirt',
+      'DTG printing',
+      'custom t-shirts online',
+      'personalized t-shirts'
+    ]
   };
 
   return `<!doctype html><html lang="en"><head>
