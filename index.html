@@ -70,6 +70,12 @@
         .neon-glow{box-shadow:0 0 20px rgba(255,131,6,0.4);transition:box-shadow 0.3s ease}
         .neon-glow:hover{box-shadow:0 0 30px rgba(255,131,6,0.6)}
         
+        /* Force override all accent colors to orange */
+        .text-accent, .bg-accent, .border-accent, .hover\\:text-accent:hover, .hover\\:bg-accent:hover, .hover\\:border-accent:hover { color: #ff8306 !important; background-color: #ff8306 !important; border-color: #ff8306 !important; }
+        .bg-accent { background-color: #ff8306 !important; }
+        .text-accent { color: #ff8306 !important; }
+        .border-accent { border-color: #ff8306 !important; }
+        
         /* Prevent Layout Shift */
         .mockup-slide{aspect-ratio:1152/1785;min-height:28rem}
         .mockup-slide img{width:100%;height:100%;object-fit:cover;object-position:top}
