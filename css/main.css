@@ -1947,7 +1947,7 @@ code, .mono {
 }
 
 .from-accent{
-  --tw-gradient-from: #00bcd4 var(--tw-gradient-from-position);
+  --tw-gradient-from: #ff8306 var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(0 188 212 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
@@ -1984,7 +1984,7 @@ code, .mono {
 
 .via-accent{
   --tw-gradient-to: rgb(0 188 212 / 0)  var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), #00bcd4 var(--tw-gradient-via-position), var(--tw-gradient-to);
+  --tw-gradient-stops: var(--tw-gradient-from), #ff8306 var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
 .via-transparent{
@@ -1993,15 +1993,15 @@ code, .mono {
 }
 
 .to-accent{
-  --tw-gradient-to: #00bcd4 var(--tw-gradient-to-position);
+  --tw-gradient-to: #ff8306 var(--tw-gradient-to-position);
 }
 
 .to-accent-light{
-  --tw-gradient-to: #4dd0e1 var(--tw-gradient-to-position);
+  --tw-gradient-to: #ffa726 var(--tw-gradient-to-position);
 }
 
 .to-accent\/5{
-  --tw-gradient-to: rgb(0 188 212 / 0.05) var(--tw-gradient-to-position);
+  --tw-gradient-to: rgb(255 131 6 / 0.05) var(--tw-gradient-to-position);
 }
 
 .to-gray-800\/20{
@@ -2017,7 +2017,7 @@ code, .mono {
 }
 
 .fill-accent{
-  fill: #00bcd4;
+  fill: #ff8306;
 }
 
 .fill-current{
@@ -2446,7 +2446,7 @@ code, .mono {
 }
 
 .accent-accent{
-  accent-color: #00bcd4;
+  accent-color: #ff8306;
 }
 
 .accent-current{
