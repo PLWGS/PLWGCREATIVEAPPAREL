@@ -76,6 +76,19 @@
         .text-accent { color: #ff8306 !important; }
         .border-accent { border-color: #ff8306 !important; }
         
+        /* Override specific Tailwind classes that are still cyan */
+        .text-cyan-400, .text-cyan-500, .text-cyan-600 { color: #ff8306 !important; }
+        .bg-cyan-400, .bg-cyan-500, .bg-cyan-600 { background-color: #ff8306 !important; }
+        .border-cyan-400, .border-cyan-500, .border-cyan-600 { border-color: #ff8306 !important; }
+        .from-cyan-400, .from-cyan-500, .from-cyan-600 { --tw-gradient-from: #ff8306 !important; }
+        .to-cyan-400, .to-cyan-500, .to-cyan-600 { --tw-gradient-to: #ff8306 !important; }
+        .via-cyan-400, .via-cyan-500, .via-cyan-600 { --tw-gradient-stops: var(--tw-gradient-from), #ff8306 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+        
+        /* Override specific elements we can see in the image */
+        .btn-primary, .bg-gradient-to-r { background: linear-gradient(135deg, #ff8306, #ffa726) !important; }
+        .text-cyan-500 { color: #ff8306 !important; }
+        .w-2.h-2 { background-color: #ff8306 !important; }
+        
         /* Prevent Layout Shift */
         .mockup-slide{aspect-ratio:1152/1785;min-height:28rem}
         .mockup-slide img{width:100%;height:100%;object-fit:cover;object-position:top}
