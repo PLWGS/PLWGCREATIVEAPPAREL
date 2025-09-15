@@ -79,7 +79,6 @@ server.listen(PORT, () => {
   console.log(`   • Admin Dashboard: http://localhost:${PORT}/pages/admin.html`);
   console.log(`   • Customer Account: http://localhost:${PORT}/pages/account.html`);
   console.log(`   • Custom Orders: http://localhost:${PORT}/pages/custom.html`);
-  console.log(`   • Homepage: http://localhost:${PORT}/pages/homepage.html`);
   console.log(`   • Shop: http://localhost:${PORT}/pages/shop.html`);
   console.log(`   • Cart: http://localhost:${PORT}/pages/cart.html`);
   console.log(`\n💡 Press Ctrl+C to stop the server`);

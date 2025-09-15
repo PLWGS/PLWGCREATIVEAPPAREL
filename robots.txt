@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Important: Allow all public pages
-Allow: /pages/homepage.html
+Allow: /index.html
 Allow: /pages/shop.html
 Allow: /pages/customer-login.html
 Allow: /pages/account.html

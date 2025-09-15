@@ -233,7 +233,7 @@ custom_input JSONB -- Stores customer responses including custom questions
 ### Page Structure
 
 #### Core Pages
-1. **Homepage** (`pages/homepage.html`)
+1. **Homepage** (`index.html`)
    - Hero section with call-to-action
    - Featured products showcase
    - Newsletter subscription

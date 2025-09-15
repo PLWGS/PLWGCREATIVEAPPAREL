@@ -59,7 +59,7 @@ PLWGCREATIVEAPPAREL/
 ├── railway.json                      # Railway deployment config
 ├── tailwind.config.js               # Tailwind CSS configuration
 ├── pages/                           # HTML pages
-│   ├── homepage.html                # Landing page
+│   ├── index.html                   # Landing page (homepage)
 │   ├── shop.html                    # Product catalog
 │   ├── cart.html                    # Shopping cart
 │   ├── account.html                 # Customer dashboard
