@@ -1953,6 +1953,8 @@
                 console.log('📦 Loaded product data:', apiData);
                 const product = apiData.product || apiData;
                 const reviews = apiData.reviews || { count: 0, average: 0, items: [] };
+                const schema = apiData.schema || null;
+                
                 // Store globally for cart actions
                 productData = product;
                 window.productData = product; // Make globally accessible for price updates
@@ -1961,6 +1963,11 @@
                 // Update page content with product data
                 updateProductDisplay(product);
                 updateProductReviews(reviews);
+                
+                // Inject schema markup for SEO
+                if (schema) {
+                    injectSchemaMarkup(schema);
+                }
                 
                 // Track this product as recently viewed
                 trackRecentlyViewed(productId);
@@ -2694,6 +2701,29 @@
                         <td class="py-3">32"</td>
                     </tr>
                 `;
+            }
+        }
+        
+        // Inject schema markup for SEO
+        function injectSchemaMarkup(schema) {
+            try {
+                // Remove any existing schema
+                const existingSchema = document.querySelector('script[type="application/ld+json"]');
+                if (existingSchema) {
+                    existingSchema.remove();
+                }
+                
+                // Create new schema script
+                const schemaScript = document.createElement('script');
+                schemaScript.type = 'application/ld+json';
+                schemaScript.textContent = JSON.stringify(schema, null, 2);
+                
+                // Add to head
+                document.head.appendChild(schemaScript);
+                
+                console.log('✅ Schema markup injected for SEO:', schema['@type']);
+            } catch (error) {
+                console.error('❌ Error injecting schema markup:', error);
             }
         }
         
