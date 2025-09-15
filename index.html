@@ -68,6 +68,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"></noscript>
+    
+    <!-- Preconnect to Cloudinary for faster image loading -->
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <style>
         /* Critical CSS - Above the fold styles - Uberprints Inspired */
         body{background:#fff5eb !important;color:#2d2d2d !important;font-family:Inter,sans-serif;margin:0;padding:0}
@@ -135,7 +139,7 @@
         .mockup-slide{aspect-ratio:1152/1785;min-height:28rem}
         .mockup-slide img{width:100%;height:100%;object-fit:cover;object-position:top}
         .hero-slide{aspect-ratio:16/9;min-height:24rem}
-        .hero-slide img{width:100%;height:100%;object-fit:cover}
+        .hero-slide img{width:100%;height:100%;object-fit:contain;object-position:center}
         
         /* Particle Animation Styles */
         .particles-container {
@@ -462,7 +466,19 @@
 
                 <!-- Hero Image -->
                 <div class="flex justify-center lg:justify-end">
-                    <img src="https://res.cloudinary.com/dfistxzb9/image/upload/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png" alt="Creative Apparel Model" class="w-full max-w-2xl lg:max-w-3xl h-auto" />
+                    <img 
+                        src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png" 
+                        srcset="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_400,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 400w,
+                                https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 800w,
+                                https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1200,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 1200w"
+                        sizes="(max-width: 768px) 400px, (max-width: 1024px) 800px, 1200px"
+                        alt="Creative Apparel Model" 
+                        class="w-full max-w-2xl lg:max-w-3xl h-auto" 
+                        fetchpriority="high"
+                        width="800"
+                        height="auto"
+                        loading="eager"
+                    />
                 </div>
             </div>
         </div>
@@ -1256,6 +1272,20 @@
         }
         function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
         function pickN(list, n){ return shuffle(list.slice()).slice(0,n); }
+        
+        // Optimize Cloudinary URLs for better performance
+        function optimizeCloudinaryUrl(url, width = 400, height = null) {
+          if (!url || !url.includes('res.cloudinary.com')) return url;
+          
+          // Extract the base URL and transformations
+          const baseUrl = url.split('/upload/')[0] + '/upload/';
+          const path = url.split('/upload/')[1];
+          
+          // Add optimization parameters - use c_fit to maintain aspect ratio without stretching
+          const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fit`;
+          
+          return `${baseUrl}${transformations}/${path}`;
+        }
 
         function setHero(index, p){
           const imgEl = document.getElementById(`hero-img-${index}`);
@@ -1264,7 +1294,9 @@
           const slideEl = document.getElementById(`hero-slide-${index}`);
           if(!imgEl || !titleEl || !subEl || !slideEl) return;
           if(p){
-            imgEl.src = p.image_url || imgEl.src;
+            imgEl.src = optimizeCloudinaryUrl(p.image_url, 600, 400) || imgEl.src;
+            imgEl.width = 600;
+            imgEl.height = 400;
             titleEl.textContent = p.name || 'Featured Design';
             subEl.textContent = `$${Number(p.price||0).toFixed(2)} · ${p.category||'New'}`;
             slideEl.href = `product.html?id=${p.id}`;
@@ -1276,7 +1308,19 @@
           const colImgs = document.querySelectorAll('.glass-card img[loading="lazy"][alt="Featured Product"]');
           const picks = pickN(products, Math.min(3, products.length));
           colImgs.forEach((img, i)=>{
-            const p = picks[i]; if(!p) return; img.src = p.image_url || img.src; const container = img.closest('.glass-card'); if(container){ const a = container.querySelector('a.text-accent'); if(a){ a.href = `product.html?id=${p.id}`; a.textContent = 'View Design →'; } const h3 = container.querySelector('h3'); if(h3) h3.textContent = p.name; const priceEl = container.querySelector('.text-accent.font-bold'); if(priceEl) priceEl.textContent = `$${Number(p.price||0).toFixed(2)}`; }
+            const p = picks[i]; if(!p) return; 
+            img.src = optimizeCloudinaryUrl(p.image_url, 400, 300) || img.src; 
+            img.width = 400;
+            img.height = 300;
+            const container = img.closest('.glass-card'); 
+            if(container){ 
+              const a = container.querySelector('a.text-accent'); 
+              if(a){ a.href = `product.html?id=${p.id}`; a.textContent = 'View Design →'; } 
+              const h3 = container.querySelector('h3'); 
+              if(h3) h3.textContent = p.name; 
+              const priceEl = container.querySelector('.text-accent.font-bold'); 
+              if(priceEl) priceEl.textContent = `$${Number(p.price||0).toFixed(2)}`; 
+            }
           });
         }
 
@@ -1287,7 +1331,7 @@
           grid.innerHTML = picks.map(p=>`
             <a href="product.html?id=${p.id}" class="glass-card rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
               <div class="relative">
-                <img src="${p.image_url}" alt="${p.name}" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+                <img src="${optimizeCloudinaryUrl(p.image_url, 400, 256)}" alt="${p.name}" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" width="400" height="256" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div class="absolute bottom-4 left-4 right-4">
                   <p class="text-gray-800 text-sm font-medium">${p.name}</p>

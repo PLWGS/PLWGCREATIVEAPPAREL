@@ -396,6 +396,11 @@ app.get('/robots.txt', (req, res) => {
   res.sendFile(path.join(__dirname, 'robots.txt'));
 });
 
+// Serve product.html for product detail pages
+app.get('/product.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'product.html'));
+});
+
 // Database connection - DISABLED FOR LOCAL DEVELOPMENT
 let pool = null;
 let databaseAvailable = false;

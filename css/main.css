@@ -3419,3 +3419,39 @@ code, .mono {
     line-height: 1.75rem;
   }
 }
+
+/* Performance optimizations to prevent layout shifts */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Specific aspect ratios for common image containers - use contain to prevent stretching */
+.glass-card img {
+  object-fit: contain;
+  object-position: center;
+}
+
+#spotlight-grid img {
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Hero image optimization - use contain to prevent stretching */
+#main-hero img {
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Carousel images - ensure they maintain aspect ratio without stretching */
+.carousel img, .hero-slide img {
+  object-fit: contain;
+  object-position: center;
+  width: 100%;
+  height: auto;
+}
+
+/* Prevent layout shifts during font loading */
+.font-orbitron {
+  font-display: swap;
+}
