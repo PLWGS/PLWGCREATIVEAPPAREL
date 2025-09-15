@@ -1774,7 +1774,7 @@ code, .mono {
 
 .bg-cyan-600{
   --tw-bg-opacity: 1;
-  background-color: rgb(8 145 178 / var(--tw-bg-opacity, 1));
+  background-color: rgb(255 131 6 / var(--tw-bg-opacity, 1));
 }
 
 .bg-error{
@@ -2324,7 +2324,7 @@ code, .mono {
 
 .text-cyan-400{
   --tw-text-opacity: 1;
-  color: rgb(34 211 238 / var(--tw-text-opacity, 1));
+  color: rgb(255 131 6 / var(--tw-text-opacity, 1));
 }
 
 .text-error{
@@ -2779,7 +2779,7 @@ code, .mono {
 
 .hover\:bg-cyan-700:hover{
   --tw-bg-opacity: 1;
-  background-color: rgb(14 116 144 / var(--tw-bg-opacity, 1));
+  background-color: rgb(255 131 6 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-gray-200:hover{
@@ -2853,7 +2853,7 @@ code, .mono {
 
 .hover\:text-cyan-300:hover{
   --tw-text-opacity: 1;
-  color: rgb(103 232 249 / var(--tw-text-opacity, 1));
+  color: rgb(255 131 6 / var(--tw-text-opacity, 1));
 }
 
 .hover\:text-error:hover{
