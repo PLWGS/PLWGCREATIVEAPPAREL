@@ -1982,14 +1982,9 @@ code, .mono {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.via-cyan-300{
-  --tw-gradient-to: rgb(103 232 249 / 0)  var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), #67e8f9 var(--tw-gradient-via-position), var(--tw-gradient-to);
-}
-
-.via-cyan-400{
-  --tw-gradient-to: rgb(34 211 238 / 0)  var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), #22d3ee var(--tw-gradient-via-position), var(--tw-gradient-to);
+.via-accent{
+  --tw-gradient-to: rgb(0 188 212 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #00bcd4 var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 
 .via-transparent{
@@ -2005,12 +2000,8 @@ code, .mono {
   --tw-gradient-to: #4dd0e1 var(--tw-gradient-to-position);
 }
 
-.to-cyan-300{
-  --tw-gradient-to: #67e8f9 var(--tw-gradient-to-position);
-}
-
-.to-cyan-400\/5{
-  --tw-gradient-to: rgb(34 211 238 / 0.05) var(--tw-gradient-to-position);
+.to-accent\/5{
+  --tw-gradient-to: rgb(0 188 212 / 0.05) var(--tw-gradient-to-position);
 }
 
 .to-gray-800\/20{
@@ -2679,7 +2670,7 @@ code, .mono {
   /* Deep canvas for product showcase */
   --color-secondary: #1a1a1a;
   /* Subtle surface elevation and depth */
-  --color-accent: #ff8306;
+  --color-accent: #00bcd4;
   /* Interactive elements and progress indicators - cyan-400 */
   /* Background Colors */
   --color-background: #000000;
@@ -2699,9 +2690,9 @@ code, .mono {
   --color-error: #ef4444;
   /* Form validation and error messaging - red-500 */
   /* Additional Shades */
-  --color-accent-light: #ffa726;
+  --color-accent-light: #4dd0e1;
   /* cyan-300 */
-  --color-accent-dark: #e65100;
+  --color-accent-dark: #0097a7;
   /* cyan-600 */
   --color-surface-light: #3a3a3a;
   /* gray-700 */
@@ -2977,8 +2968,8 @@ code, .mono {
           box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.group:hover .group-hover\:shadow-cyan-400\/60{
-  --tw-shadow-color: rgb(34 211 238 / 0.6);
+.group:hover .group-hover\:shadow-accent\/60{
+  --tw-shadow-color: rgb(0 188 212 / 0.6);
   --tw-shadow: var(--tw-shadow-colored);
 }
 
