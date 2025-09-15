@@ -2675,22 +2675,22 @@ code, .mono {
 
 :root {
   /* Primary Colors */
-  --color-primary: #ff8306;
-  /* Orange for banners and primary elements */
-  --color-secondary: #ffcc99;
-  /* Warm peach for shirt backgrounds */
+  --color-primary: #0a0a0a;
+  /* Deep canvas for product showcase */
+  --color-secondary: #1a1a1a;
+  /* Subtle surface elevation and depth */
   --color-accent: #ff8306;
-  /* Orange for interactive elements and CTAs */
+  /* Interactive elements and progress indicators - cyan-400 */
   /* Background Colors */
-  --color-background: #ffffff;
-  /* Clean white background like uberprints */
-  --color-surface: #fff5eb;
-  /* Very light cream for card backgrounds */
+  --color-background: #000000;
+  /* Pure backdrop for maximum contrast - black */
+  --color-surface: #2a2a2a;
+  /* Card backgrounds and content containers - gray-800 */
   /* Text Colors */
-  --color-text-primary: #2d2d2d;
-  /* Dark gray for high contrast readability */
-  --color-text-secondary: #666666;
-  /* Medium gray for secondary text */
+  --color-text-primary: #ffffff;
+  /* High contrast for readability - white */
+  --color-text-secondary: #a0a0a0;
+  /* Supporting information and metadata - gray-400 */
   /* Status Colors */
   --color-success: #10b981;
   /* Purchase confirmations and positive states - emerald-500 */
@@ -2700,13 +2700,13 @@ code, .mono {
   /* Form validation and error messaging - red-500 */
   /* Additional Shades */
   --color-accent-light: #ffa726;
-  /* Lighter orange for hover states */
+  /* cyan-300 */
   --color-accent-dark: #e65100;
-  /* Darker orange for pressed states */
-  --color-surface-light: #ffcc99;
-  /* Warm peach for light surfaces */
-  --color-surface-dark: #f3e5ab;
-  /* Slightly darker cream for depth */
+  /* cyan-600 */
+  --color-surface-light: #3a3a3a;
+  /* gray-700 */
+  --color-surface-dark: #1f1f1f;
+  /* gray-900 */
 }
 
 .after\:absolute::after{
