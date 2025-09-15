@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
@@ -307,6 +308,44 @@ const FEATURE_STATIC_PRODUCT_PAGES = String(process.env.FEATURE_STATIC_PRODUCT_P
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API routes are working!', timestamp: new Date().toISOString() });
 });
+
+// Security Headers Configuration
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.tailwindcss.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.tailwindcss.com", "https://www.paypal.com", "https://www.paypalobjects.com"],
+      scriptSrcAttr: [
+        "'unsafe-hashes'",
+        "'sha256-1jAmyYXcRq6zFldLe/GCgIDJBiOONdXjTLgEFMDnDSM='",
+        "'sha256-R6AaG80nmkGc9oFSNvZVF7OOo5gLWHC/2y0eOYYohJ8='",
+        "'sha256-GMTUiihXfPWngWeq4wqBusQMc3uhwAYGIklr70mSqTc='",
+        "'sha256-/l6w0vnC+DN7tMFOiJiEWqLyy8uJoFwM6E0yzhKXRRQ='"
+      ],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
+      connectSrc: ["'self'", "https://api.paypal.com", "https://api.sandbox.paypal.com"],
+      frameSrc: ["'self'", "https://www.paypal.com", "https://www.sandbox.paypal.com"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'none'"],
+      upgradeInsecureRequests: []
+    }
+  },
+  crossOriginEmbedderPolicy: false, // Disable COEP to avoid breaking Cloudinary images
+  crossOriginOpenerPolicy: { policy: "same-origin" },
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  },
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
+}));
 
 // Middleware
 app.use(cors({
