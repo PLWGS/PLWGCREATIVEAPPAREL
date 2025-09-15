@@ -439,6 +439,12 @@
                         </p>
                     </div>
                     
+                    <!-- Skeleton loader to prevent layout shift -->
+                    <div id="hero-skeleton" class="space-y-4" style="display: none;">
+                        <div class="h-8 bg-gray-200 rounded animate-pulse"></div>
+                        <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    </div>
+                    
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="pages/shop.html" class="btn-primary text-center neon-glow" title="Design Your Own Custom T-Shirt with DTG Printing">
                             Design Your Own Shirt
@@ -467,12 +473,12 @@
 
                 <!-- Hero Image -->
                 <div class="flex justify-center lg:justify-end min-h-[400px] lg:min-h-[500px] flex items-center">
-                    <div class="relative w-full max-w-2xl lg:max-w-3xl aspect-[4/3]">
+                    <div class="relative w-full max-w-2xl lg:max-w-3xl aspect-[4/3] h-[400px] lg:h-[500px]">
                         <img 
-                            src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png" 
-                            srcset="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_400,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 400w,
-                                    https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 800w,
-                                    https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1200,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 1200w"
+                            src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,h_600,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png" 
+                            srcset="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_400,h_300,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 400w,
+                                    https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,h_600,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 800w,
+                                    https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1200,h_900,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 1200w"
                             sizes="(max-width: 768px) 400px, (max-width: 1024px) 800px, 1200px"
                             alt="Creative Apparel Model" 
                             class="w-full h-full object-contain" 
