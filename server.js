@@ -496,7 +496,6 @@ const authenticateToken = async (req, res, next) => {
     return res.status(403).json({ error: 'Invalid token' });
   }
 };
-
 // Initialize database tables
 async function initializeDatabase() {
   if (!pool) {
@@ -907,8 +906,8 @@ function optimizeCloudinaryUrl(url, width = 400, height = null) {
   const baseUrl = url.split('/upload/')[0] + '/upload/';
   const path = url.split('/upload/')[1];
   
-  // Add performance optimizations: f_auto (format), q_auto (quality), c_fit (fit)
-  const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fit`;
+  // Add performance optimizations: f_auto (format), q_auto (quality), c_fill (fill) with g_auto (smart crop center)
+  const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fill,g_auto`;
   
   return `${baseUrl}${transformations}/${path}`;
 }
@@ -1285,7 +1284,6 @@ const validatePasswordBootstrap = [
     next();
   }
 ];
-
 // Request admin password reset (sends a token link/code to email)
 app.post('/api/admin/password/request-reset', validatePasswordResetRequest, async (req, res) => {
   try {
@@ -2071,7 +2069,6 @@ app.patch('/api/custom-requests/:id/status', authenticateToken, async (req, res)
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 // Custom request validation middleware
 const validateCustomRequest = [
   body('fullName').notEmpty().trim().withMessage('Full name is required'),
@@ -2130,7 +2127,7 @@ app.post('/api/custom-requests', validateCustomRequest, async (req, res) => {
             processedReferenceImages.push({
               originalName: image.name,
               cloudinaryUrl: cloudinaryUrl,
-              thumbnailUrl: cloudinaryUrl.replace('/upload/', '/upload/w_300,h_200,c_fill/'),
+              thumbnailUrl: cloudinaryUrl.replace('/upload/', '/upload/w_300,h_200,c_fill,g_auto/'),
               size: image.size,
               type: image.type
             });
@@ -2713,7 +2710,6 @@ app.post('/api/subscribe', validateNewsletterSubscription, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 // Send welcome email function
 async function sendWelcomeEmail(email, name) {
   const welcomeEmailHTML = `
@@ -3437,7 +3433,6 @@ const validateRegistration = [
     next();
   }
 ];
-
 app.post('/api/customer/auth', validateRegistration, async (req, res) => {
   try {
     const { email, password, action = 'login', first_name, last_name } = req.body;
@@ -4232,7 +4227,6 @@ app.delete('/api/cart/remove/:id', authenticateCustomer, async (req, res) => {
     res.status(500).json({ error: 'Failed to remove item from cart' });
   }
 });
-
 // Clear customer's cart
 app.delete('/api/cart/clear', authenticateCustomer, async (req, res) => {
   if (!pool) {
@@ -5026,7 +5020,6 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
     res.status(500).json({ error: 'Failed to create product' });
   }
 });
-
 app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (req, res) => {
   logger.info('🔍 [DEBUG] PUT endpoint called for product ID:', req.params.id);
   logger.info('🔍 [DEBUG] Request body received:', req.body);
@@ -5827,7 +5820,6 @@ app.get('/api/paypal/webhook', (req, res) => {
     url: req.protocol + '://' + req.get('host') + req.originalUrl
   });
 });
-
 // Test PayPal webhook simulation
 app.post('/api/test-paypal-webhook', express.json(), async (req, res) => {
   try {
@@ -6589,7 +6581,6 @@ async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDe
   );
   logger.info(`✅ Customer payment confirmation email sent to ${order.email}`);
 }
-
 // Send admin payment notification email
 async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetails) {
   // Parse shipping address JSON
@@ -7350,7 +7341,6 @@ app.post('/api/test-payment-email', async (req, res) => {
     });
   }
 });
-
 // Resend API test endpoint (FREE - 3000 emails/month)
 app.get('/api/test-resend', async (req, res) => {
   try {

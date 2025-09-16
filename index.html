@@ -1312,8 +1312,8 @@
           const baseUrl = url.split('/upload/')[0] + '/upload/';
           const path = url.split('/upload/')[1];
           
-          // Add optimization parameters - use c_fit to maintain aspect ratio without stretching
-          const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fit`;
+          // Add optimization parameters - use c_fill,g_auto to center subject and fill box
+          const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fill,g_auto`;
           
           return `${baseUrl}${transformations}/${path}`;
         }
