@@ -906,8 +906,8 @@ function optimizeCloudinaryUrl(url, width = 400, height = null) {
   const baseUrl = url.split('/upload/')[0] + '/upload/';
   const path = url.split('/upload/')[1];
   
-  // Add performance optimizations: f_auto (format), q_auto (quality), c_fill (fill) with g_auto (smart crop center)
-  const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fill,g_auto`;
+  // Add performance optimizations: f_auto (format), q_auto (quality), c_fill (fill) with g_face (face detection)
+  const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fill,g_face`;
   
   return `${baseUrl}${transformations}/${path}`;
 }
