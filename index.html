@@ -73,6 +73,9 @@
     <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v35/yMJRMIlzdPxtYp4m4i8vUQ.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeWoSfrBPKEzMw.woff2" as="font" type="font/woff2" crossorigin>
     
+    <!-- Preload critical hero image to prevent layout shifts -->
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,h_600,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png">
+    
     <!-- Preconnect to Cloudinary for faster image loading -->
     <link rel="preconnect" href="https://res.cloudinary.com">
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
@@ -85,7 +88,7 @@
         /* Critical CSS - Above the fold styles - Uberprints Inspired */
         body{background:#fff5eb !important;color:#2d2d2d !important;font-family:Inter,sans-serif;margin:0;padding:0}
         .container{max-width:1200px;margin:0 auto;padding:0 1.5rem}
-        .font-orbitron{font-family:Orbitron,sans-serif}
+        .font-orbitron{font-family:Orbitron, 'Arial Black', Arial, sans-serif;font-display:swap}
         .text-gradient{background:linear-gradient(135deg,#ff8306,#ffa726);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .btn-primary{background:linear-gradient(135deg,#ff8306,#ffa726);color:#ffffff;padding:0.75rem 1.5rem;border-radius:0.5rem;text-decoration:none;font-weight:600;transition:all 0.3s ease}
         .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(255,131,6,0.3)}
@@ -258,11 +261,39 @@
         /* Critical layout shift prevention */
         #main-hero {
             min-height: 600px;
+            contain: layout style;
         }
         @media (min-width: 1024px) {
             #main-hero {
                 min-height: 700px;
             }
+        }
+        
+        /* Prevent layout shifts from font loading */
+        .font-orbitron {
+            font-display: swap;
+            font-family: Orbitron, 'Arial Black', Arial, sans-serif;
+        }
+        
+        /* Ensure hero content has stable dimensions */
+        .hero-content {
+            min-height: 300px;
+            contain: layout;
+        }
+        
+        /* Prevent image layout shifts */
+        #main-hero img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4/3;
+            object-fit: contain;
+            object-position: center;
+        }
+        
+        /* Make stars more visible in reviews */
+        .text-yellow-500 {
+            color: #eab308 !important;
+            font-weight: bold;
         }
         /* Prevent forced reflows by using transform instead of changing layout properties */
         .glass-card {
@@ -435,7 +466,7 @@
         <div class="container mx-auto px-6 h-full">
             <div class="grid lg:grid-cols-2 gap-12 items-center h-full">
                 <!-- Hero Content -->
-                <div class="space-y-8 min-h-[300px] flex flex-col justify-center">
+                <div class="hero-content space-y-8 min-h-[300px] flex flex-col justify-center">
                     <div class="space-y-4">
                         <h1 class="font-orbitron text-3xl lg:text-5xl font-black leading-tight" style="font-size: 1.875rem; margin: 0;">
                             <span class="text-gradient">Custom T-Shirt</span><br />
@@ -717,10 +748,10 @@
                 <div class="grid md:grid-cols-2 gap-8 items-center">
                     <div class="text-center md:text-left">
                         <div class="text-6xl font-bold text-accent mb-2" id="averageRating">5.0</div>
-                        <div class="flex items-center justify-center md:justify-start space-x-1 text-yellow-400 text-2xl mb-2">
+                        <div class="flex items-center justify-center md:justify-start space-x-1 text-yellow-500 text-2xl mb-2 font-bold">
                             ★★★★★
                         </div>
-                        <p class="text-text-secondary" id="totalReviews">Based on Etsy reviews</p>
+                        <p class="text-gray-600" id="totalReviews">Based on Etsy reviews</p>
                     </div>
                     <div class="space-y-3">
                         <div class="flex items-center space-x-3">
@@ -1163,32 +1194,6 @@
           return url;
         }
 
-        function setHero(index, p){
-          const imgEl = document.getElementById(`hero-img-${index}`);
-          const titleEl = document.getElementById(`hero-title-${index}`);
-          const subEl = document.getElementById(`hero-sub-${index}`);
-          if(!imgEl || !titleEl || !subEl) return;
-          if(p){
-            // Prevent layout shift by setting dimensions first
-            imgEl.style.width = '100%';
-            imgEl.style.height = '100%';
-            imgEl.style.objectFit = 'cover';
-            imgEl.style.objectPosition = 'center';
-            imgEl.style.position = 'absolute';
-            imgEl.style.top = '0';
-            imgEl.style.left = '0';
-            
-            // Use requestAnimationFrame to prevent forced reflow
-            requestAnimationFrame(() => {
-              imgEl.src = optimizeCloudinaryUrl(p.image_url, 192, 192) || imgEl.src;
-              imgEl.width = 192;
-              imgEl.height = 192;
-              titleEl.textContent = p.name || 'Featured Design';
-              subEl.textContent = `$${Number(p.price||0).toFixed(2)} · ${p.category||'New'}`;
-              slideEl.href = `product.html?id=${p.id}`;
-            });
-          }
-        }
 
         function renderCollectionCards(products){
           // Replace the three collection images with random product images and links
@@ -1254,7 +1259,6 @@
           `).join('');
         }
 
-        async function fetchHero(){ try{ const r = await fetch('/api/products/hero'); if(!r.ok) return []; const d = await r.json(); return Array.isArray(d)?d:[]; }catch(e){ return []; } }
         
         async function fetchFeatured(){ try{ const r = await fetch('/api/products/featured'); if(!r.ok) return []; const d = await r.json(); return Array.isArray(d)?d:[]; }catch(e){ return []; } }
 
@@ -1530,10 +1534,10 @@
                         <div class="mb-4">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="font-semibold text-gray-800 text-lg">${review.reviewer}</h4>
-                                <span class="text-text-secondary text-xs">${review.date_reviewed}</span>
+                                <span class="text-gray-600 text-xs">${review.date_reviewed}</span>
                             </div>
                             <div class="flex items-center space-x-2 mb-2">
-                                <div class="flex items-center space-x-1 text-yellow-400 text-lg">
+                                <div class="flex items-center space-x-1 text-yellow-500 text-lg font-bold">
                                     ${stars}
                                 </div>
                                 <span class="text-accent text-sm font-medium">Verified Etsy Purchase</span>
@@ -1615,15 +1619,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-          const [hero, featured, products] = await Promise.all([fetchHero(), fetchFeatured(), fetchPublicProducts()]);
+          const [featured, products] = await Promise.all([fetchFeatured(), fetchPublicProducts()]);
           
-          // Set hero products
-          let heroFilled = 0;
-          hero.forEach((p,i)=>{ setHero(i+1, p); heroFilled++; });
-          if(heroFilled < 3 && products.length>0){
-            const fallback = pickN(products.filter(p=>!hero.some(h=>h.id===p.id)), 3-heroFilled);
-            fallback.forEach((p,i)=> setHero(heroFilled+i+1, p));
-          }
+          // Hero section is static - no dynamic updates needed
           
           // Render featured collections
           renderFeaturedCollections(featured);
