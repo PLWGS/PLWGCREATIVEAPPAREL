@@ -229,6 +229,8 @@
             justify-content: center !important;
             max-width: 1000px !important;
             margin: 0 auto !important;
+            min-height: 400px !important;
+            contain: layout style;
         }
         
         ::-webkit-scrollbar-track {
@@ -272,6 +274,24 @@
         #main-hero * {
             contain: layout;
             will-change: auto;
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
+        }
+        
+        /* Disable all animations and transitions in hero section */
+        #main-hero .animate-pulse,
+        #main-hero .transition-all,
+        #main-hero .transition-transform,
+        #main-hero .transition-opacity,
+        #main-hero .hover\\:scale-105,
+        #main-hero .hover\\:scale-110,
+        #main-hero .hover\\:rotate-12,
+        #main-hero .hover\\:translate-x-1,
+        #main-hero .hover\\:translate-x-2 {
+            animation: none !important;
+            transition: none !important;
+            transform: none !important;
         }
         @media (min-width: 1024px) {
             #main-hero {
@@ -285,6 +305,15 @@
             font-family: Orbitron, 'Arial Black', Arial, sans-serif;
             font-size: 1.875rem !important;
             line-height: 1.2 !important;
+            font-weight: 900 !important;
+        }
+        
+        /* Force font loading to prevent shifts */
+        @font-face {
+            font-family: 'Orbitron';
+            font-display: swap;
+            src: url('https://fonts.gstatic.com/s/orbitron/v35/yMJRMIlzdpvBhQQL_Qq7dy0.woff2') format('woff2');
+            font-weight: 900;
         }
         
         /* Ensure hero content has stable dimensions */
@@ -429,7 +458,7 @@
                             </svg>
                         </a>
                         <!-- Mega Menu -->
-                        <div class="absolute top-full left-0 w-96 glass-card rounded-lg p-6 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 mt-2" style="transform: translateZ(0);">
+                        <div class="absolute top-full left-0 w-96 glass-card rounded-lg p-6 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto mt-2" style="transform: translateZ(0); contain: layout style paint;">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <h3 class="font-orbitron text-accent text-sm font-bold mb-3">Categories</h3>
@@ -606,9 +635,9 @@
             </div>
 
             <div class="flex justify-center">
-                <div id="featured-collections-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center max-w-6xl">
+                <div id="featured-collections-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center max-w-6xl min-h-[400px]">
                     <!-- Featured collections will be loaded here dynamically -->
-                    <div class="text-center text-text-secondary">
+                    <div class="text-center text-text-secondary col-span-full flex items-center justify-center h-96">
                         <p>Loading featured collections...</p>
                     </div>
                 </div>
