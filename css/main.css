@@ -1155,10 +1155,6 @@ code, .mono {
   min-height: 300px;
 }
 
-.min-h-\[400px\]{
-  min-height: 400px;
-}
-
 .min-h-\[600px\]{
   min-height: 600px;
 }
@@ -1816,6 +1812,11 @@ code, .mono {
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
 }
 
+.bg-gray-200{
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
+}
+
 .bg-gray-600{
   --tw-bg-opacity: 1;
   background-color: rgb(75 85 99 / var(--tw-bg-opacity, 1));
@@ -2104,6 +2105,11 @@ code, .mono {
 .object-cover{
   -o-object-fit: cover;
      object-fit: cover;
+}
+
+.object-center{
+  -o-object-position: center;
+     object-position: center;
 }
 
 .p-12{
@@ -3319,10 +3325,6 @@ code, .mono {
 
   .lg\:h-\[500px\]{
     height: 500px;
-  }
-
-  .lg\:min-h-\[500px\]{
-    min-height: 500px;
   }
 
   .lg\:min-h-\[700px\]{
