@@ -72,6 +72,8 @@
     <!-- Preload critical font files to prevent layout shifts -->
     <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v35/yMJRMIlzdPxtYp4m4i8vUQ.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeWoSfrBPKEzMw.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v20/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v23/pxiByp8kv8J3FVd4DD.woff2" as="font" type="font/woff2" crossorigin>
     
     <!-- Preload critical hero image to prevent layout shifts -->
     <link rel="preload" as="image" href="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,h_600,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png">
@@ -261,7 +263,15 @@
         /* Critical layout shift prevention */
         #main-hero {
             min-height: 600px;
-            contain: layout style;
+            contain: layout style paint;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Force stable layout for entire hero section */
+        #main-hero * {
+            contain: layout;
+            will-change: auto;
         }
         @media (min-width: 1024px) {
             #main-hero {
@@ -273,12 +283,15 @@
         .font-orbitron {
             font-display: swap;
             font-family: Orbitron, 'Arial Black', Arial, sans-serif;
+            font-size: 1.875rem !important;
+            line-height: 1.2 !important;
         }
         
         /* Ensure hero content has stable dimensions */
         .hero-content {
             min-height: 300px;
-            contain: layout;
+            contain: layout paint;
+            position: relative;
         }
         
         /* Prevent image layout shifts */
@@ -288,6 +301,55 @@
             aspect-ratio: 4/3;
             object-fit: contain;
             object-position: center;
+            display: block;
+        }
+        
+        /* Force stable layout for hero text */
+        #main-hero h1 {
+            min-height: 3.5rem;
+            contain: layout;
+            font-size: 1.875rem !important;
+            line-height: 1.2 !important;
+        }
+        
+        #main-hero p {
+            min-height: 1.5rem;
+            contain: layout;
+            font-size: 1.125rem !important;
+            line-height: 1.5 !important;
+        }
+        
+        /* Prevent any dynamic content changes */
+        #main-hero * {
+            will-change: auto;
+        }
+        
+        /* Prevent dropdown menu layout shifts */
+        .glass-card.absolute {
+            contain: layout style paint;
+            will-change: opacity;
+        }
+        
+        /* Ensure dropdown doesn't cause layout shifts */
+        .group:hover .glass-card.absolute {
+            transform: translateZ(0);
+        }
+        
+        /* Prevent layout shifts from dynamic content updates */
+        .glass-card {
+            contain: layout style;
+        }
+        
+        /* Ensure all dynamic content has stable dimensions */
+        .glass-card h3, .glass-card p, .glass-card span {
+            min-height: 1.2em;
+            contain: layout;
+        }
+        
+        /* Prevent layout shifts from image loading */
+        .glass-card img {
+            aspect-ratio: 1;
+            object-fit: cover;
         }
         
         /* Make stars more visible in reviews */
@@ -367,7 +429,7 @@
                             </svg>
                         </a>
                         <!-- Mega Menu -->
-                        <div class="absolute top-full left-0 w-96 glass-card rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 mt-2">
+                        <div class="absolute top-full left-0 w-96 glass-card rounded-lg p-6 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 mt-2" style="transform: translateZ(0);">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <h3 class="font-orbitron text-accent text-sm font-bold mb-3">Categories</h3>
@@ -468,7 +530,7 @@
                 <!-- Hero Content -->
                 <div class="hero-content space-y-8 min-h-[300px] flex flex-col justify-center">
                     <div class="space-y-4">
-                        <h1 class="font-orbitron text-3xl lg:text-5xl font-black leading-tight" style="font-size: 1.875rem; margin: 0;">
+                        <h1 class="font-orbitron text-3xl lg:text-5xl font-black leading-tight">
                             <span class="text-gradient">Custom T-Shirt</span><br />
                             <span class="text-gray-800">Printing Online</span>
                         </h1>
