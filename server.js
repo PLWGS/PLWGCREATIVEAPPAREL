@@ -902,14 +902,8 @@ function generateNumericCode(length = 6) {
 function optimizeCloudinaryUrl(url, width = 400, height = null) {
   if (!url || !url.includes('res.cloudinary.com')) return url;
   
-  // Extract the base URL and transformations
-  const baseUrl = url.split('/upload/')[0] + '/upload/';
-  const path = url.split('/upload/')[1];
-  
-  // Add performance optimizations: f_auto (format), q_auto (quality), c_fill (fill) with g_face (face detection)
-  const transformations = `f_auto,q_auto,w_${width}${height ? `,h_${height}` : ''},c_fill,g_face`;
-  
-  return `${baseUrl}${transformations}/${path}`;
+  // Return original URL without transformations to test if that fixes centering
+  return url;
 }
 
 // Utility function to optimize product data with Cloudinary URLs
