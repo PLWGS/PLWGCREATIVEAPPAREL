@@ -77,6 +77,10 @@
     <link rel="preconnect" href="https://res.cloudinary.com">
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
     <!-- Performance optimization: preconnect to Cloudinary for faster image loading -->
+    
+    <!-- Preconnect to database API for faster data loading -->
+    <link rel="preconnect" href="https://plwgscreativeapparel.com">
+    <link rel="dns-prefetch" href="https://plwgscreativeapparel.com">
     <style>
         /* Critical CSS - Above the fold styles - Uberprints Inspired */
         body{background:#fff5eb !important;color:#2d2d2d !important;font-family:Inter,sans-serif;margin:0;padding:0}
@@ -264,6 +268,20 @@
             .lg\\:hidden button {
                 flex-shrink: 0 !important;
             }
+        }
+        
+        /* Critical layout shift prevention */
+        #main-hero {
+            min-height: 600px;
+        }
+        @media (min-width: 1024px) {
+            #main-hero {
+                min-height: 700px;
+            }
+        }
+        /* Prevent forced reflows by using transform instead of changing layout properties */
+        .glass-card {
+            will-change: transform;
         }
     </style>
 
@@ -1313,12 +1331,15 @@
             imgEl.style.objectFit = 'contain';
             imgEl.style.objectPosition = 'center';
             
-            imgEl.src = optimizeCloudinaryUrl(p.image_url, 400, 300) || imgEl.src;
-            imgEl.width = 400;
-            imgEl.height = 300;
-            titleEl.textContent = p.name || 'Featured Design';
-            subEl.textContent = `$${Number(p.price||0).toFixed(2)} · ${p.category||'New'}`;
-            slideEl.href = `product.html?id=${p.id}`;
+            // Use requestAnimationFrame to prevent forced reflow
+            requestAnimationFrame(() => {
+              imgEl.src = optimizeCloudinaryUrl(p.image_url, 400, 300) || imgEl.src;
+              imgEl.width = 400;
+              imgEl.height = 300;
+              titleEl.textContent = p.name || 'Featured Design';
+              subEl.textContent = `$${Number(p.price||0).toFixed(2)} · ${p.category||'New'}`;
+              slideEl.href = `product.html?id=${p.id}`;
+            });
           }
         }
 
@@ -1335,18 +1356,21 @@
             img.style.objectFit = 'contain';
             img.style.objectPosition = 'center';
             
-            img.src = optimizeCloudinaryUrl(p.image_url, 400, 300) || img.src; 
-            img.width = 400;
-            img.height = 300;
-            const container = img.closest('.glass-card'); 
-            if(container){ 
-              const a = container.querySelector('a.text-accent'); 
-              if(a){ a.href = `product.html?id=${p.id}`; a.textContent = 'View Design →'; } 
-              const h3 = container.querySelector('h3'); 
-              if(h3) h3.textContent = p.name; 
+            // Use requestAnimationFrame to prevent forced reflow
+            requestAnimationFrame(() => {
+              img.src = optimizeCloudinaryUrl(p.image_url, 400, 300) || img.src; 
+              img.width = 400;
+              img.height = 300;
+              const container = img.closest('.glass-card'); 
+              if(container){ 
+                const a = container.querySelector('a.text-accent'); 
+                if(a){ a.href = `product.html?id=${p.id}`; a.textContent = 'View Design →'; } 
+                const h3 = container.querySelector('h3'); 
+                if(h3) h3.textContent = p.name; 
               const priceEl = container.querySelector('.text-accent.font-bold'); 
               if(priceEl) priceEl.textContent = `$${Number(p.price||0).toFixed(2)}`; 
-            }
+              }
+            });
           });
         }
 
@@ -1354,18 +1378,22 @@
           const grid = document.getElementById('spotlight-grid'); if(!grid) return;
           const picks = pickN(products, Math.min(4, products.length));
           if(picks.length===0) return;
-          grid.innerHTML = picks.map(p=>`
-            <a href="product.html?id=${p.id}" class="glass-card rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
-              <div class="relative">
-                <img src="${optimizeCloudinaryUrl(p.image_url, 400, 256)}" alt="${p.name}" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" width="400" height="256" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div class="absolute bottom-4 left-4 right-4">
-                  <p class="text-gray-800 text-sm font-medium">${p.name}</p>
-                  <p class="text-text-secondary text-xs">$${Number(p.price||0).toFixed(2)}</p>
+          
+          // Use requestAnimationFrame to prevent forced reflow
+          requestAnimationFrame(() => {
+            grid.innerHTML = picks.map(p=>`
+              <a href="product.html?id=${p.id}" class="glass-card rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105">
+                <div class="relative">
+                  <img src="${optimizeCloudinaryUrl(p.image_url, 400, 256)}" alt="${p.name}" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" width="400" height="256" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div class="absolute bottom-4 left-4 right-4">
+                    <p class="text-gray-800 text-sm font-medium">${p.name}</p>
+                    <p class="text-text-secondary text-xs">$${Number(p.price||0).toFixed(2)}</p>
+                  </div>
                 </div>
-              </div>
-            </a>
-          `).join('');
+              </a>
+            `).join('');
+          });
         }
 
         function renderIGGrid(products){
