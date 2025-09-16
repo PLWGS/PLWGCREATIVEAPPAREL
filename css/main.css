@@ -1043,6 +1043,10 @@ code, .mono {
   display: none;
 }
 
+.aspect-\[4\/3\]{
+  aspect-ratio: 4/3;
+}
+
 .aspect-square{
   aspect-ratio: 1 / 1;
 }
@@ -1123,10 +1127,6 @@ code, .mono {
   height: 24rem;
 }
 
-.h-auto{
-  height: auto;
-}
-
 .h-full{
   height: 100%;
 }
@@ -1149,6 +1149,18 @@ code, .mono {
 
 .max-h-screen{
   max-height: 100vh;
+}
+
+.min-h-\[300px\]{
+  min-height: 300px;
+}
+
+.min-h-\[400px\]{
+  min-height: 400px;
+}
+
+.min-h-\[600px\]{
+  min-height: 600px;
 }
 
 .min-h-screen{
@@ -3309,6 +3321,14 @@ code, .mono {
     height: 500px;
   }
 
+  .lg\:min-h-\[500px\]{
+    min-height: 500px;
+  }
+
+  .lg\:min-h-\[700px\]{
+    min-height: 700px;
+  }
+
   .lg\:w-8{
     width: 2rem;
   }
@@ -3418,40 +3438,4 @@ code, .mono {
     font-size: 1.25rem;
     line-height: 1.75rem;
   }
-}
-
-/* Performance optimizations to prevent layout shifts */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Specific aspect ratios for common image containers - use contain to prevent stretching */
-.glass-card img {
-  object-fit: contain;
-  object-position: center;
-}
-
-#spotlight-grid img {
-  object-fit: contain;
-  object-position: center;
-}
-
-/* Hero image optimization - use contain to prevent stretching */
-#main-hero img {
-  object-fit: contain;
-  object-position: center;
-}
-
-/* Carousel images - ensure they maintain aspect ratio without stretching */
-.carousel img, .hero-slide img {
-  object-fit: contain;
-  object-position: center;
-  width: 100%;
-  height: auto;
-}
-
-/* Prevent layout shifts during font loading */
-.font-orbitron {
-  font-display: swap;
 }

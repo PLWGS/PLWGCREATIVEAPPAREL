@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
@@ -380,6 +381,10 @@ app.use(express.json({
 }));
 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Add compression middleware for better performance
+app.use(compression());
+
 app.use(express.static('.'));
 app.use('/public', express.static('public'));
 // Removed etsy_images static route - now using Cloudinary for image hosting

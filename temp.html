@@ -69,10 +69,6 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"></noscript>
     
-    <!-- Preload critical font files to prevent layout shifts -->
-    <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v35/yMJRMIlzdPxtYp4m4i8vUQ.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeWoSfrBPKEzMw.woff2" as="font" type="font/woff2" crossorigin>
-    
     <!-- Preconnect to Cloudinary for faster image loading -->
     <link rel="preconnect" href="https://res.cloudinary.com">
     <link rel="dns-prefetch" href="https://res.cloudinary.com">
@@ -428,9 +424,9 @@
     </section>
 
     <!-- Main Hero Section with Carousel -->
-    <section id="main-hero" class="relative py-16 lg:py-24 z-10 min-h-[600px] lg:min-h-[700px]">
-        <div class="container mx-auto px-6 h-full">
-            <div class="grid lg:grid-cols-2 gap-12 items-center h-full">
+    <section id="main-hero" class="relative py-16 lg:py-24 flex items-center justify-center z-10 min-h-[600px] lg:min-h-[700px]">
+        <div class="container mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Hero Content -->
                 <div class="space-y-8 min-h-[300px] flex flex-col justify-center">
                     <div class="space-y-4">
@@ -476,8 +472,8 @@
                 </div>
 
                 <!-- Hero Image -->
-                <div class="flex justify-center lg:justify-end">
-                    <div class="relative w-full max-w-2xl lg:max-w-3xl aspect-[4/3]">
+                <div class="flex justify-center lg:justify-end min-h-[400px] lg:min-h-[500px] flex items-center">
+                    <div class="relative w-full max-w-2xl lg:max-w-3xl aspect-[4/3] h-[400px] lg:h-[500px]">
                         <img 
                             src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,h_600,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png" 
                             srcset="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_400,h_300,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 400w,
