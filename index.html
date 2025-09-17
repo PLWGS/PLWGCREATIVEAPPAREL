@@ -215,18 +215,12 @@
         
         /* Force center Featured Collections grid and prevent layout shifts */
         #featured-collections-grid {
-            display: grid !important;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
-            gap: 2rem !important;
-            justify-items: center !important;
-            justify-content: center !important;
             min-height: 500px !important;
-            height: 500px !important;
             contain: layout style paint !important;
             position: relative !important;
             max-width: 1000px !important;
             margin: 0 auto !important;
-            overflow: hidden !important;
+            overflow: visible !important;
         }
         
         ::-webkit-scrollbar-track {
@@ -622,8 +616,10 @@
                 <p class="text-gray-800 text-xl lg:text-2xl max-w-3xl mx-auto">
                     Where Creative Rebellion Meets Wearable Art
                 </p>
+                <p class="text-gray-800 text-lg italic max-w-4xl mx-auto leading-relaxed mt-6">
+                    After five successful years on Etsy earning Star Seller status consistently month over month, I've launched this independent website to offer a more tailored and expansive collection to you, my valued customers.
+                </p>
             </div>
-
         </div>
     </section>
 
@@ -633,14 +629,30 @@
             <div class="grid lg:grid-cols-2 gap-12 items-center h-full">
                 <!-- Hero Content -->
                 <div class="hero-content space-y-8 min-h-[300px] flex flex-col justify-center">
+
                     <div class="space-y-4">
-                        <h1 class="font-orbitron text-3xl lg:text-5xl font-black leading-tight">
-                            <span class="text-gradient">Custom T-Shirt</span><br />
-                            <span class="text-gray-800">Printing Online</span>
-                        </h1>
-                        <p class="text-gray-800 text-lg lg:text-xl max-w-lg">
-                            Professional custom t-shirt printing services with DTG technology. Design your own shirt or choose from our creative collection. Fast shipping, quality guarantee.
+                        <h2 class="font-orbitron text-3xl lg:text-4xl font-black text-gray-800">
+                            CUSTOM T-SHIRT PRINTING & MORE!
+                        </h2>
+                        <p class="text-gray-800 text-lg leading-relaxed">
+                            Our DTG technology sprays your design directly onto cotton-rich apparel, creating soft, long-lasting, and detailed prints. Design your own shirt or choose from our creative collection. Fast shipping, quality guarantee.
                         </p>
+                    </div>
+
+                    <!-- Statistics Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 max-w-4xl mx-auto">
+                        <div class="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-orange-200">
+                            <div class="font-orbitron text-3xl lg:text-4xl font-bold text-accent mb-2">700+</div>
+                            <div class="text-gray-800 text-sm font-medium">5 Star Reviews</div>
+                        </div>
+                        <div class="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-orange-200">
+                            <div class="font-orbitron text-3xl lg:text-4xl font-bold text-accent mb-2">2500+</div>
+                            <div class="text-gray-800 text-sm font-medium">Completed Sales</div>
+                        </div>
+                        <div class="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-orange-200">
+                            <div class="font-orbitron text-3xl lg:text-4xl font-bold text-accent mb-2">100%</div>
+                            <div class="text-gray-800 text-sm font-medium">Satisfaction Rate</div>
+                        </div>
                     </div>
                     
                     <!-- Skeleton loader to prevent layout shift -->
@@ -649,49 +661,29 @@
                         <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
                     </div>
                     
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="pages/shop.html" class="btn-primary text-center neon-glow" title="Design Your Own Custom T-Shirt with DTG Printing">
-                            Design Your Own Shirt
+                    <!-- Call to Action Buttons -->
+                    <div class="space-y-4">
+                        <a href="https://plwgscreativeapparel.com/pages/shop.html" class="inline-flex items-center text-gray-800 text-lg font-medium hover:text-accent transition-colors duration-300">
+                            <span class="mr-2">➤</span> SHOP COLLECTIONS
                         </a>
-                        <a href="pages/shop.html" class="btn-secondary text-center" title="Browse Custom T-Shirt Collections">
-                            View Collections
+                        <br>
+                        <a href="pages/shop.html?category=Adult Music Shirts" class="inline-flex items-center text-gray-800 text-lg font-medium hover:text-accent transition-colors duration-300">
+                            <span class="mr-2">>></span> SHOP SONG LYRIC COLLECTIONS
                         </a>
                     </div>
 
-                    <!-- Stats -->
-                    <div class="grid grid-cols-3 gap-6 pt-4">
-                        <div class="text-center">
-                            <div class="font-orbitron text-2xl font-bold text-accent">500+</div>
-                            <div class="text-text-secondary text-sm">Unique Designs</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="font-orbitron text-2xl font-bold text-accent">10K+</div>
-                            <div class="text-text-secondary text-sm">Happy Customers</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="font-orbitron text-2xl font-bold text-accent">98%</div>
-                            <div class="text-text-secondary text-sm">Satisfaction Rate</div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Hero Image -->
                 <div class="flex justify-center lg:justify-end">
-                    <div class="relative w-full max-w-2xl lg:max-w-3xl aspect-[4/3]">
-                        <img 
-                            src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,h_600,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png" 
-                            srcset="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_400,h_300,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 400w,
-                                    https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,h_600,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 800w,
-                                    https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1200,h_900,c_fit/v1757940899/plwg-creative-apparel/plwg-creative-apparel/cover-girl2.png 1200w"
-                            sizes="(max-width: 768px) 400px, (max-width: 1024px) 800px, 1200px"
-                            alt="Creative Apparel Model" 
-                            class="w-full h-full object-contain" 
-                            fetchpriority="high"
-                            width="800"
-                            height="600"
-                            loading="eager"
-                        />
-                    </div>
+                    <img 
+                        src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1800,h_1800,c_fit/v1758120666/plwg-creative-apparel/mockups/covergirl.webp" 
+                        alt="Creative Apparel Model with Guitar T-Shirt" 
+                        class="h-auto" 
+                        style="width: 600px; height: auto;"
+                        fetchpriority="high"
+                        loading="eager"
+                    />
                 </div>
             </div>
         </div>
@@ -700,6 +692,17 @@
 
 
 
+
+    <!-- Bottom Tagline -->
+    <section class="py-8 relative z-10">
+        <div class="container mx-auto px-6">
+            <div class="text-center">
+                <p class="text-gray-800 text-lg italic mb-4">
+                    "The soundtrack to your life, printed one shirt at a time."
+                </p>
+            </div>
+        </div>
+    </section>
 
     <!-- Featured Collections -->
     <section class="py-12 lg:py-16 relative z-10">
@@ -710,7 +713,7 @@
             </div>
 
             <div class="flex justify-center">
-                <div id="featured-collections-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center max-w-6xl h-[500px]">
+                <div id="featured-collections-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center max-w-6xl">
                     <!-- Featured collections will be loaded here dynamically -->
                     <div class="text-center text-text-secondary col-span-full flex items-center justify-center h-full">
                         <p>Loading featured collections...</p>
