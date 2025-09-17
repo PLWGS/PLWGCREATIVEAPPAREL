@@ -380,10 +380,17 @@
             display: block;
         }
         
-        /* Ensure hero image respects inline styles but stays within bounds */
+        /* Allow hero image to be much larger and break out of grid */
         #main-hero img {
-            max-width: 100%;
             height: auto;
+            max-width: none;
+        }
+        
+        /* Override grid constraints for hero image container */
+        #main-hero .grid > div:last-child {
+            max-width: none !important;
+            width: auto !important;
+            overflow: visible !important;
         }
         
         /* Force stable layout for hero text */
@@ -680,12 +687,12 @@
                 </div>
 
                 <!-- Hero Image -->
-                <div class="flex justify-center lg:justify-end lg:col-span-1">
+                <div class="flex justify-center lg:justify-end lg:col-span-1" style="max-width: none; width: auto; overflow: visible;">
                     <img 
                         src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1800,h_1800,c_fit/v1758120666/plwg-creative-apparel/mockups/covergirl.webp" 
                         alt="Creative Apparel Model with Guitar T-Shirt" 
                         class="h-auto" 
-                        style="width: 600px; height: auto; max-width: 100%;"
+                        style="width: 1200px; height: auto; max-width: none;"
                         fetchpriority="high"
                         loading="eager"
                     />
