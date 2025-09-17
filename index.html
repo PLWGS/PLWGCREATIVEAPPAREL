@@ -373,12 +373,17 @@
         
         /* Prevent image layout shifts */
         #main-hero img {
-            width: 100%;
             height: auto;
             aspect-ratio: 4/3;
             object-fit: contain;
             object-position: center;
             display: block;
+        }
+        
+        /* Override for specific hero image with inline styles */
+        #main-hero img[style*="width"] {
+            width: 800px !important;
+            height: auto !important;
         }
         
         /* Force stable layout for hero text */
@@ -680,7 +685,7 @@
                         src="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_1800,h_1800,c_fit/v1758120666/plwg-creative-apparel/mockups/covergirl.webp" 
                         alt="Creative Apparel Model with Guitar T-Shirt" 
                         class="h-auto" 
-                        style="width: 600px; height: auto;"
+                        style="width: 800px; height: auto;"
                         fetchpriority="high"
                         loading="eager"
                     />
