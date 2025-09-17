@@ -232,13 +232,13 @@
             <div class="mt-8 pt-6 border-t border-surface-light">
                 <h3 class="text-text-secondary text-sm font-medium mb-4">Quick Actions</h3>
                 <div class="space-y-2">
-                    <button onclick="showNewProductForm()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                    <button id="add-new-product-btn" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                         Add New Product
                     </button>
-                    <button onclick="loadAllProducts()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                    <button id="refresh-products-btn" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                         Refresh Products
                     </button>
-                    <button onclick="exportProductData()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                    <button id="export-data-btn" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                         Export Data
                     </button>
                 </div>
@@ -747,13 +747,13 @@
 
                                          <!-- Action Buttons -->
                      <div class="flex space-x-4">
-                         <button id="save-product-btn" onclick="saveNewProduct()" class="btn-primary px-8 py-3">
+                         <button id="save-product-btn" class="btn-primary px-8 py-3">
                              Save Product
                          </button>
-                         <button onclick="clearForm()" class="px-8 py-3 border border-surface-light text-text-primary rounded-lg hover:bg-surface-light transition-colors">
+                         <button id="clear-form-btn" class="px-8 py-3 border border-surface-light text-text-primary rounded-lg hover:bg-surface-light transition-colors">
                              Clear Form
                          </button>
-                         <button id="back-to-edit-btn" onclick="showEditProductsForm()" class="px-8 py-3 border border-surface-light text-text-primary rounded-lg hover:bg-surface-light transition-colors hidden">
+                         <button id="back-to-edit-btn" class="px-8 py-3 border border-surface-light text-text-primary rounded-lg hover:bg-surface-light transition-colors hidden">
                              Back to Edit Products
                          </button>
                      </div>
@@ -793,6 +793,12 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthentication();
+            
+            // Add event listeners for main buttons
+            addMainButtonListeners();
+            
+            // Add event listeners for any existing product buttons
+            addProductButtonListeners();
         });
 
         async function checkAuthentication() {
@@ -1103,10 +1109,13 @@
                 const imageSrc = image.data || image.url || '';
                 preview.innerHTML = `
                     <img src="${imageSrc}" alt="Product image ${index + 1}">
-                    <div class="remove-btn" onclick="removeImage(${index})">×</div>
+                    <div class="remove-btn remove-image-btn" data-image-index="${index}">×</div>
                 `;
                 container.appendChild(preview);
             });
+            
+            // Add event listeners for the new remove buttons
+            addProductButtonListeners();
         }
 
         function removeImage(index) {
@@ -1205,6 +1214,9 @@
                     console.log(`📦 Loaded ${allProducts.length} products:`, allProducts);
                     displayProducts();
                     console.log(`✅ Products displayed successfully`);
+                    
+                    // Add event listeners for edit and delete buttons
+                    addProductButtonListeners();
                 } else {
                     console.error('❌ Failed to load products from database. Status:', response.status);
                     const errorText = await response.text();
@@ -1246,10 +1258,10 @@
                             <p class="text-text-secondary text-xs">Stock: ${product.stock_quantity}</p>
                         </div>
                         <div class="flex space-x-2">
-                        <button onclick="editProduct(${product.id})" class="btn-primary text-sm px-3 py-1">
+                        <button class="btn-primary text-sm px-3 py-1 edit-product-btn" data-product-id="${product.id}">
                             Edit
                         </button>
-                            <button onclick="deleteProduct(${product.id})" class="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded">
+                            <button class="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded delete-product-btn" data-product-id="${product.id}">
                                 Delete
                             </button>
                         </div>
@@ -1258,6 +1270,66 @@
             `).join('');
             
             console.log('✅ Products displayed successfully');
+        }
+
+        function addProductButtonListeners() {
+            // Add event listeners for edit buttons
+            document.querySelectorAll('.edit-product-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    editProduct(parseInt(productId));
+                });
+            });
+
+            // Add event listeners for delete buttons
+            document.querySelectorAll('.delete-product-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    deleteProduct(parseInt(productId));
+                });
+            });
+
+            // Add event listeners for image remove buttons
+            document.querySelectorAll('.remove-image-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const imageIndex = parseInt(this.getAttribute('data-image-index'));
+                    removeImage(imageIndex);
+                });
+            });
+        }
+
+        function addMainButtonListeners() {
+            // Quick Actions buttons
+            const addNewProductBtn = document.getElementById('add-new-product-btn');
+            if (addNewProductBtn) {
+                addNewProductBtn.addEventListener('click', showNewProductForm);
+            }
+
+            const refreshProductsBtn = document.getElementById('refresh-products-btn');
+            if (refreshProductsBtn) {
+                refreshProductsBtn.addEventListener('click', loadAllProducts);
+            }
+
+            const exportDataBtn = document.getElementById('export-data-btn');
+            if (exportDataBtn) {
+                exportDataBtn.addEventListener('click', exportProductData);
+            }
+
+            // Form action buttons
+            const saveProductBtn = document.getElementById('save-product-btn');
+            if (saveProductBtn) {
+                saveProductBtn.addEventListener('click', saveNewProduct);
+            }
+
+            const clearFormBtn = document.getElementById('clear-form-btn');
+            if (clearFormBtn) {
+                clearFormBtn.addEventListener('click', clearForm);
+            }
+
+            const backToEditBtn = document.getElementById('back-to-edit-btn');
+            if (backToEditBtn) {
+                backToEditBtn.addEventListener('click', showEditProductsForm);
+            }
         }
 
         async function saveNewProduct() {
@@ -1500,7 +1572,9 @@
             // Reset the save button and hide the back button
             const saveButton = document.getElementById('save-product-btn');
             saveButton.textContent = 'Save Product';
-            saveButton.onclick = saveNewProduct;
+            // Remove any existing event listeners and add the new one
+            saveButton.replaceWith(saveButton.cloneNode(true));
+            document.getElementById('save-product-btn').addEventListener('click', saveNewProduct);
             document.getElementById('back-to-edit-btn').classList.add('hidden');
         }
 
