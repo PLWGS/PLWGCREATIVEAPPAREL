@@ -1218,7 +1218,7 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <h3 class="font-orbitron text-lg font-bold text-white mb-2">${productTitle}</h3>
+                    <h3 class="font-inter text-lg font-semibold text-white mb-2">${productTitle}</h3>
                     <p class="text-text-secondary text-sm mb-3">${productCategory}</p>
                     
                     <!-- Size Selection -->
@@ -2096,7 +2096,7 @@
                 recommendationCard.innerHTML = `
                     <img src="${imageUrl}" alt="${product.name}" class="w-full h-40 object-cover" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='; this.onerror=null;">
                     <div class="p-4">
-                        <h3 class="font-orbitron text-sm font-bold text-white mb-1">${product.name}</h3>
+                        <h3 class="font-inter text-sm font-semibold text-white mb-1">${product.name}</h3>
                         <p class="text-accent font-bold">$${(parseFloat(product.price) || 20.00).toFixed(2)}</p>
                         ${product.category ? `<p class="text-text-secondary text-xs mt-1">${product.category}</p>` : ''}
                     </div>
