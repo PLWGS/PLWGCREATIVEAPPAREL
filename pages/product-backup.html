@@ -1,0 +1,2750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title id="pageTitle">Custom T-Shirt | Design Your Own Shirt | DTG Printing | PLWGS Creative Apparel</title>
+    <meta name="description" content="Custom t-shirt with professional DTG printing. Design your own shirt or choose from our creative collection. High-quality custom t-shirt printing with fast shipping." />
+    <link rel="stylesheet" href="../css/main.css" />
+    
+    <style>
+        /* Particle Animation Styles */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00bcd4;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        .particle:nth-child(odd) {
+            animation-delay: -2s;
+            animation-duration: 8s;
+        }
+        
+        .particle:nth-child(even) {
+            animation-delay: -4s;
+            animation-duration: 10s;
+        }
+        
+        /* Glassmorphism Effects */
+        .glass-nav {
+            backdrop-filter: blur(10px);
+            background: rgba(42, 42, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(15px);
+            background: rgba(42, 42, 42, 0.6);
+            border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        
+        /* Image Gallery Styles */
+        .image-gallery {
+            position: relative;
+        }
+        
+        .main-image {
+            transition: transform 0.3s ease;
+        }
+        
+        .main-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .thumbnail {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .thumbnail:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+        }
+        
+        .thumbnail.active {
+            border: 2px solid #00bcd4;
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.3);
+        }
+        
+        /* Size Selection Styles */
+        .size-option {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .size-option:hover {
+            background: rgba(0, 188, 212, 0.2);
+            border-color: #00bcd4;
+        }
+        
+        .size-option.selected {
+            background: #00bcd4;
+            color: #000;
+            border-color: #00bcd4;
+        }
+        
+        .size-option.unavailable {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        /* Color preview and dropdown styles */
+        #colorPreview {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #colorPreview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #colorSelector {
+            transition: all 0.3s ease;
+        }
+        
+        #colorSelector:focus {
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+        
+        /* Sticky Add to Cart */
+        .sticky-cart {
+            position: sticky;
+            top: 100px;
+            z-index: 40;
+        }
+        
+        /* Review Stars */
+        .star-rating {
+            color: #f59e0b;
+        }
+        
+        /* Neon Glow Effects */
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .neon-glow:hover {
+            box-shadow: 0 0 30px rgba(0, 188, 212, 0.6);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #00bcd4;
+            border-radius: 4px;
+        }
+        
+        /* Zoom Modal */
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            cursor: zoom-out;
+        }
+        
+        .zoom-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .zoom-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        
+
+        .close-deep-zoom-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(0, 188, 212, 0.9);
+            color: black;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-deep-zoom-btn:hover {
+            background: rgba(0, 188, 212, 1);
+            transform: scale(1.1);
+        }
+    </style>
+
+</head>
+<body class="bg-background text-text-primary overflow-x-hidden">
+    <!-- Particle Animation Background -->
+    <div class="particles-container" id="particles">
+        <!-- Particles will be generated by JavaScript -->
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="glass-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <nav class="container mx-auto px-8 py-5">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <svg class="w-10 h-10 text-accent" viewBox="0 0 40 40" fill="currentColor">
+                        <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
+                        <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
+                        <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
+                    </svg>
+                    <span class="font-inter text-xl font-bold text-gradient">PlwgsCreativeApparel</span>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="../index.html" class="text-text-primary hover:text-accent transition-colors duration-300">Home</a>
+                    <div class="relative group">
+                        <a href="shop.html" class="text-accent font-medium flex items-center">
+                            Shop
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </a>
+                        <!-- Mega Menu -->
+                        <div class="absolute top-full left-0 w-96 glass-card rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 mt-2">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h3 class="font-inter text-accent text-sm font-bold mb-3">Categories</h3>
+                                    <ul class="space-y-2">
+                                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Horror Essentials</a></li>
+                                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Pop Culture</a></li>
+                                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Humor & Sass</a></li>
+                                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Custom Designs</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h3 class="font-inter text-accent text-sm font-bold mb-3">Featured</h3>
+                                    <div class="space-y-2">
+                                        <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop" alt="Featured Product" class="w-full h-20 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=400'; this.onerror=null;" />
+                                        <p class="text-xs text-text-secondary">New Horror Collection</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="account.html" class="text-text-primary hover:text-accent transition-colors duration-300">Account</a>
+                    <a href="admin.html" class="text-text-primary hover:text-accent transition-colors duration-300">Admin</a>
+                </div>
+
+                <!-- Cart & Search -->
+                <div class="flex items-center space-x-4">
+                    <button class="text-text-primary hover:text-accent transition-colors duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
+                        </svg>
+                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-counter">3</span>
+                    </button>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="lg:hidden text-text-primary hover:text-accent transition-colors duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Breadcrumb Navigation -->
+    <section class="pt-24 pb-6 relative z-10">
+        <div class="container mx-auto px-6">
+            <nav class="flex items-center space-x-2 text-sm">
+                <a href="../index.html" class="text-text-secondary hover:text-accent transition-colors">Home</a>
+                <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+                <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Shop</a>
+                <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+                <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Horror Essentials</a>
+                <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+                <span class="text-accent" id="breadcrumbProductName">Product Details</span>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Product Detail Section -->
+    <section class="py-12 relative z-10">
+        <div class="container mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12">
+                <!-- Product Images -->
+                <div class="space-y-6">
+                    <!-- Main Image -->
+                    <div class="image-gallery">
+                        <div class="relative overflow-hidden rounded-2xl bg-surface-dark">
+                            <img id="mainImage" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Product Image" class="main-image w-full h-80 sm:h-96 lg:h-[500px] object-contain cursor-zoom-in" loading="lazy" />
+                            
+                            <!-- Zoom Icon -->
+                            <div class="absolute top-4 right-4 bg-black bg-opacity-50 rounded-full p-2 flex space-x-2">
+                                <button id="wishlistBtn" class="heart-icon" title="Add to Wishlist">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
+                                    </svg>
+                                </button>
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- Deep Zoom Badge -->
+                            <div class="absolute bottom-4 left-4 bg-accent text-black px-3 py-1 rounded-full text-xs font-bold">
+                                Deep Zoom Available
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thumbnail Gallery -->
+                    <div id="thumbStrip" class="grid grid-cols-4 gap-4"></div>
+                </div>
+
+                <!-- Product Information -->
+                <div class="space-y-8">
+                    <!-- Product Title & Rating -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="bg-error text-white px-3 py-1 rounded-full text-sm font-bold">Almost Sold Out</span>
+                            <button class="text-text-secondary hover:text-accent transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <h1 id="productTitle" class="product-name font-inter text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Product Title</h1>
+                        
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-1">
+                                <div class="star-rating flex">
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                    </svg>
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                    </svg>
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                    </svg>
+                                    <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                    </svg>
+                                    <svg class="w-5 h-5 fill-current opacity-30" viewBox="0 0 20 20">
+                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                    </svg>
+                                </div>
+                                <span id="reviewsCountHeader" class="text-text-secondary text-sm">(0 reviews)</span>
+                            </div>
+                            <span class="text-accent text-sm">★ Trending Design</span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <span id="currentPrice" class="price font-orbitron text-3xl font-bold text-accent">$22.00</span>
+                            <span id="originalPrice" class="original-price text-text-secondary line-through text-lg" style="display: none;">$26.40</span>
+                            <span class="sale-percentage bg-warning text-black px-2 py-1 rounded text-sm font-bold" style="display: none;">25% OFF</span>
+                        </div>
+                    </div>
+
+                    <!-- Design Story (tags hidden) -->
+                    <div class="glass-card rounded-xl p-6">
+                        <h3 class="font-orbitron text-xl font-bold text-white mb-4">Design Story</h3>
+                        <p id="productDescription" class="product-description text-text-secondary leading-relaxed">
+                            Quality printed design with custom artwork. Perfect for those who want to express their unique style.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mt-4 product-tags hidden"></div>
+                    </div>
+
+                    <!-- Size Selection -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-orbitron text-lg font-bold text-white">Size</h3>
+                            <button class="text-accent text-sm hover:text-accent-light transition-colors">Size Guide</button>
+                        </div>
+                        <div class="grid grid-cols-5 gap-3 size-options"></div>
+                    </div>
+
+                    <!-- Color Options -->
+                    <div class="space-y-4">
+                        <h3 class="font-orbitron text-lg font-bold text-white">Color</h3>
+                        <div class="flex items-center space-x-4">
+                            <!-- Color Preview -->
+                            <div id="colorPreview" class="w-16 h-16 rounded-lg border-2 border-surface-light shadow-lg" style="background-color: #000000;"></div>
+                            
+                            <!-- Color Dropdown -->
+                            <div class="flex-1">
+                                <select id="colorSelector" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none text-sm">
+                                    <option value="">Select a color...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Color Name Display -->
+                        <div id="colorNameDisplay" class="text-sm text-text-secondary font-medium px-2 py-1 bg-surface-light rounded-md inline-block"></div>
+                    </div>
+
+                    <!-- Quantity & Add to Cart -->
+                    <div class="sticky-cart glass-card rounded-xl p-6 space-y-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center border border-surface-light rounded-lg">
+                                <button id="qtyMinus" class="px-3 py-2 hover:bg-surface-light transition-colors">-</button>
+                                <span id="qtyValue" class="px-4 py-2 border-x border-surface-light">1</span>
+                                <button id="qtyPlus" class="px-3 py-2 hover:bg-surface-light transition-colors">+</button>
+                            </div>
+                            <span id="stockSummary" class="text-text-secondary text-sm hidden">&nbsp;</span>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button id="addToCartBtn" class="btn-primary w-full neon-glow text-lg py-4">
+                                Add to Cart - <span id="addToCartPrice">$22.00</span>
+                            </button>
+                            <button id="buyNowBtn" class="w-full border border-accent text-accent px-6 py-3 rounded-lg font-semibold hover:bg-accent hover:text-black transition-all duration-300">
+                                Buy Now
+                            </button>
+                        </div>
+                        
+                        <div id="shipping-info-section" class="space-y-3">
+                            <!-- Dynamic shipping options will appear here -->
+                        </div>
+                        
+                        <!-- Custom Input Fields - Moved here for better visibility -->
+                        <div id="customInputSection" class="border-t border-surface-light pt-6 hidden">
+                            <h4 class="font-orbitron text-lg font-bold text-white mb-4">Custom Request</h4>
+                            
+                            <!-- Birthday Custom Input -->
+                            <div id="birthdayCustomInput" class="space-y-4 hidden">
+                                <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-accent border-opacity-30">
+                                    <div id="birthdayFields" class="space-y-3">
+                                        <!-- Fields will be populated dynamically -->
+                                    </div>
+
+                                    <!-- Custom Question Field -->
+                                    <div id="birthdayCustomQuestion" class="mt-4 hidden">
+                                        <label class="block text-sm text-text-secondary mb-2 font-medium">Additional Information Request</label>
+                                        <div class="bg-surface bg-opacity-50 rounded-lg p-3 border border-surface-light">
+                                            <p id="birthdayCustomQuestionText" class="text-text-primary text-sm"></p>
+                                        </div>
+                                        <textarea id="birthdayCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Lyrics Custom Input -->
+                            <div id="lyricsCustomInput" class="space-y-4 hidden">
+                                <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-accent border-opacity-30">
+                                    <div id="lyricsFields" class="space-y-3">
+                                        <!-- Fields will be populated dynamically -->
+                                    </div>
+
+                                    <!-- Custom Question Field -->
+                                    <div id="lyricsCustomQuestion" class="mt-4 hidden">
+                                        <label class="block text-sm text-text-secondary mb-2 font-medium">Additional Information Request</label>
+                                        <div class="bg-surface bg-opacity-50 rounded-lg p-3 border border-surface-light">
+                                            <p id="lyricsCustomQuestionText" class="text-text-primary text-sm"></p>
+                                        </div>
+                                        <textarea id="lyricsCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Proof (dynamic) -->
+                    <div class="glass-card rounded-xl p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex -space-x-2 social-proof-avatars">
+                                <img src="https://i.pravatar.cc/40?img=12" alt="Recent customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" />
+                                <img src="https://i.pravatar.cc/40?img=23" alt="Recent customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" />
+                                <img src="https://i.pravatar.cc/40?img=36" alt="Recent customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" />
+                            </div>
+                            <div>
+                                <p id="social-proof-text" class="text-sm text-white">Someone from your area just bought this</p>
+                                <p id="social-proof-time" class="text-xs text-text-secondary">just now</p>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                      (function(){
+                        const names = [
+                          'Alex','Jordan','Taylor','Morgan','Casey','Riley','Avery','Parker','Quinn','Jamie',
+                          'Drew','Harper','Cameron','Kai','Rowan','Emerson','Sydney','Logan','Reese','Skyler'
+                        ];
+                        const cities = [
+                          'Portland','Seattle','Los Angeles','San Diego','Phoenix','Denver','Dallas','Austin','Chicago','Nashville',
+                          'Miami','Orlando','Atlanta','Charlotte','New York','Boston','Philadelphia','Cleveland','Detroit','Minneapolis'
+                        ];
+                        const productActionPhrases = [
+                          'just bought this','added this to cart','is checking out this design','just grabbed one','picked this up'
+                        ];
+                        const avatarBase = 'https://i.pravatar.cc/40?img=';
+                        const avatarIds = Array.from({length: 70}, (_,i)=>i+1);
+
+                        function sample(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+                        function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+                        function updateSocialProof(){
+                          const name = sample(names);
+                          const city = sample(cities);
+                          const action = sample(productActionPhrases);
+                          const minutesAgo = randInt(1, 9); // 1–9 minutes for realism
+
+                          const textEl = document.getElementById('social-proof-text');
+                          const timeEl = document.getElementById('social-proof-time');
+                          if (textEl) textEl.textContent = `${name} from ${city} ${action}`;
+                          if (timeEl) timeEl.textContent = `${minutesAgo} minute${minutesAgo===1?'':'s'} ago`;
+
+                          const imgs = document.querySelectorAll('.social-proof-avatars img');
+                          imgs.forEach(img => {
+                            const id = sample(avatarIds);
+                            img.src = `${avatarBase}${id}`;
+                            img.alt = 'Recent customer';
+                          });
+                        }
+
+                        // Initial and interval updates
+                        if (document.readyState === 'loading') {
+                          document.addEventListener('DOMContentLoaded', () => {
+                            updateSocialProof();
+                            setInterval(updateSocialProof, 10000); // every 10 seconds
+                          });
+                        } else {
+                          updateSocialProof();
+                          setInterval(updateSocialProof, 10000);
+                        }
+                      })();
+                    </script>
+                    <script>
+                      (function(){
+                        function getQueryParam(name){
+                          const params = new URLSearchParams(window.location.search);
+                          return params.get(name);
+                        }
+                        async function addCurrentProductToWishlist(){
+                          try{
+                            const token = localStorage.getItem('customerToken');
+                            if(!token){ window.location.href='customer-login.html'; return; }
+                            const id = getQueryParam('id');
+                            if(!id) return;
+                            const resp = await fetch('/api/customer/wishlist',{
+                              method:'POST',
+                              headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
+                              body: JSON.stringify({ product_id: Number(id) })
+                            });
+                            if(resp.ok){
+                              const btn = document.getElementById('wishlistBtn');
+                              if(btn) btn.classList.add('active');
+                            } else if(resp.status===401){
+                              localStorage.removeItem('customerToken');
+                              window.location.href='customer-login.html';
+                            }
+                          }catch(e){ /* silent */ }
+                        }
+                        document.addEventListener('DOMContentLoaded',()=>{
+                          const btn = document.getElementById('wishlistBtn');
+                          if(btn){ btn.addEventListener('click', (e)=>{ e.preventDefault(); addCurrentProductToWishlist(); }); }
+                        });
+                      })();
+                    </script>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Details Tabs -->
+    <section class="py-12 relative z-10">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto">
+                <!-- Tab Navigation -->
+                <div class="flex border-b border-surface-light mb-8">
+                    <button class="tab-button active px-6 py-3 font-semibold text-accent border-b-2 border-accent" data-tab="details">
+                        Product Details
+                    </button>
+                    <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="reviews" id="reviewsTabButton">
+                        Reviews (0)
+                    </button>
+                    <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="sizing">
+                        Size & Care
+                    </button>
+                    <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="shipping">
+                        Shipping
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Product Details Tab -->
+                    <div id="details" class="tab-pane active">
+                        <div class="glass-card rounded-xl p-8 space-y-6">
+                            <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Product Specifications</h3>
+                            
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Material:</span>
+                                        <span class="text-white" id="spec-material">100% Premium Cotton</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Weight:</span>
+                                        <span class="text-white" id="spec-weight">180 GSM</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Fit:</span>
+                                        <span class="text-white" id="spec-fit">Unisex Regular</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Print Method:</span>
+                                        <span class="text-white" id="spec-print-method">Direct-to-Garment</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Neck Style:</span>
+                                        <span class="text-white" id="spec-neck">Crew Neck</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Sleeve Length:</span>
+                                        <span class="text-white" id="spec-sleeve">Short Sleeve</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Origin:</span>
+                                        <span class="text-white" id="spec-origin">Made in USA</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Sustainability:</span>
+                                        <span class="text-white" id="spec-sustainability">Eco-Friendly Inks</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Brand Preference:</span>
+                                        <span class="text-white" id="brandPrefText">Either (Gildan Softstyle 64000 or Bella+Canvas 3001)</span>
+                                    </div>
+                                    <div class="flex justify-between" id="specsNotesRow" style="display:none;">
+                                        <span class="text-text-secondary">Notes:</span>
+                                        <span class="text-white" id="specsNotesText"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+
+                            
+                            <div class="border-t border-surface-light pt-6">
+                                <h4 class="font-orbitron text-lg font-bold text-white mb-4">Features</h4>
+                                <ul class="space-y-2 text-text-secondary">
+                                    <li class="flex items-center space-x-3">
+                                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span>Double-stitched seams for durability</span>
+                                    </li>
+                                    <li class="flex items-center space-x-3">
+                                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span>Fade-resistant printing technology</span>
+                                    </li>
+                                    <li class="flex items-center space-x-3">
+                                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span>Soft-touch finish for comfort</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reviews Tab -->
+                    <div id="reviews" class="tab-pane hidden">
+                        <div class="space-y-6">
+                            <!-- Review Summary -->
+                            <div class="glass-card rounded-xl p-8">
+                                <div class="grid md:grid-cols-2 gap-8">
+                                    <div class="text-center">
+                                        <div id="reviewsAverageValue" class="text-4xl font-bold text-accent mb-2">0.0</div>
+                                        <div class="star-rating flex justify-center mb-2">
+                                            <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                            </svg>
+                                            <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                            </svg>
+                                            <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                            </svg>
+                                            <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
+                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                            </svg>
+                                            <svg class="w-6 h-6 fill-current opacity-30" viewBox="0 0 20 20">
+                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                            </svg>
+                                        </div>
+                                        <div id="reviewsBasedOnText" class="text-text-secondary">Based on 0 reviews</div>
+                                    </div>
+                                    
+                                    <div class="space-y-2">
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm w-8">5★</span>
+                                            <div class="flex-1 bg-surface-dark rounded-full h-2">
+                                                <div class="bg-accent h-2 rounded-full" style="width: 65%"></div>
+                                            </div>
+                                            <span class="text-sm text-text-secondary w-8">65%</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm w-8">4★</span>
+                                            <div class="flex-1 bg-surface-dark rounded-full h-2">
+                                                <div class="bg-accent h-2 rounded-full" style="width: 20%"></div>
+                                            </div>
+                                            <span class="text-sm text-text-secondary w-8">20%</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm w-8">3★</span>
+                                            <div class="flex-1 bg-surface-dark rounded-full h-2">
+                                                <div class="bg-accent h-2 rounded-full" style="width: 10%"></div>
+                                            </div>
+                                            <span class="text-sm text-text-secondary w-8">10%</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm w-8">2★</span>
+                                            <div class="flex-1 bg-surface-dark rounded-full h-2">
+                                                <div class="bg-accent h-2 rounded-full" style="width: 3%"></div>
+                                            </div>
+                                            <span class="text-sm text-text-secondary w-8">3%</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="text-sm w-8">1★</span>
+                                            <div class="flex-1 bg-surface-dark rounded-full h-2">
+                                                <div class="bg-accent h-2 rounded-full" style="width: 2%"></div>
+                                            </div>
+                                            <span class="text-sm text-text-secondary w-8">2%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Individual Reviews -->
+                            <div id="reviewsList" class="space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Size & Care Tab -->
+                    <div id="sizing" class="tab-pane hidden">
+                        <div class="glass-card rounded-xl p-8">
+                            <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Size Guide & Care Instructions</h3>
+                            
+                            <!-- Size Chart -->
+                            <div class="mb-8">
+                                <h4 class="font-orbitron text-lg font-bold text-white mb-4">Size Chart (inches)</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="border-b border-surface-light">
+                                                <th class="text-left py-3 text-accent">Size</th>
+                                                <th class="text-left py-3 text-accent">Chest Width</th>
+                                                <th class="text-left py-3 text-accent">Length</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="size-chart-tbody" class="text-text-secondary">
+                                            <!-- Dynamic content will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Care Instructions -->
+                            <div>
+                                <h4 class="font-orbitron text-lg font-bold text-white mb-4">Care Instructions</h4>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="space-y-3">
+                                        <div class="flex items-center space-x-3">
+                                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span class="text-text-secondary">Machine Wash Cold & Dry Low</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span class="text-text-secondary">Turn inside out before Wash & Dry</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span class="text-text-secondary">Use Mild Detergent</span>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center space-x-3">
+                                            <svg class="w-5 h-5 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                            <span class="text-text-secondary">No Fabric Softener</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <svg class="w-5 h-5 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                            <span class="text-text-secondary">Do Not Use Bleach</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <svg class="w-5 h-5 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                            <span class="text-text-secondary">Do Not Dry Clean or Iron</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Tab -->
+                    <div id="shipping" class="tab-pane hidden">
+                        <div class="glass-card rounded-xl p-8">
+                            <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Shipping & Returns</h3>
+                            
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="font-orbitron text-lg font-bold text-white mb-4">Shipping Options</h4>
+                                    <div id="shipping-options" class="space-y-4">
+                                        <!-- Dynamic shipping options will be loaded here -->
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-orbitron text-lg font-bold text-white mb-4">Return Policy</h4>
+                                    <div class="space-y-4 text-text-secondary">
+                                        <div class="bg-surface-dark p-4 rounded-lg border border-surface-light">
+                                            <p class="text-sm leading-relaxed mb-3">
+                                                <strong class="text-white">Your satisfaction is important to us.</strong> We stand behind our work, and if we made a mistake with your custom order, we will gladly correct it. However, because each item is made specifically for you, <strong class="text-white">all sales are otherwise final</strong>.
+                                            </p>
+                                            <p class="text-xs text-gray-400">
+                                                <em>Note: We will, of course, accept returns and issue a replacement or refund if an error was made on our part.</em>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Products -->
+    <section class="py-20 relative z-10">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="font-orbitron text-4xl font-bold text-white mb-4">You Might Also Like</h2>
+                <p class="text-text-secondary text-lg max-w-2xl mx-auto">Discover more designs that match your dark aesthetic</p>
+            </div>
+
+            <div id="related-grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+            <script>
+              (function(){
+                async function fetchActiveProducts(){
+                  try{
+                    const resp = await fetch('/api/products/public');
+                    if(!resp.ok) return [];
+                    const list = await resp.json();
+                    return Array.isArray(list) ? list : [];
+                  }catch(e){ return []; }
+                }
+                function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+                function buildCard(p){
+                  const img = (p && p.image_url) ? p.image_url : 'https://via.placeholder.com/400x240?text=Coming+Soon';
+                  const name = (p && p.name) ? p.name : 'New Design Coming Soon';
+                  const price = (p && p.price) ? `$${Number(p.price).toFixed(2)}` : '$—';
+                  const href = (p && p.id) ? `product.html?id=${p.id}` : 'shop.html';
+                  return `
+                    <a href="${href}" class="glass-card rounded-2xl p-6 neon-glow group block cursor-pointer transition-all duration-300 hover:scale-105">
+                      <div class=\"relative mb-6 overflow-hidden rounded-xl\">
+                        <img src=\"${img}\" alt=\"${name}\" class=\"w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500\" loading=\"lazy\" />
+                      </div>
+                      <h3 class=\"font-orbitron text-lg font-bold text-white mb-2\">${name}</h3>
+                      <div class=\"flex items-center justify-between\">
+                        <span class=\"text-accent font-bold\">${price}</span>
+                        <span class=\"text-accent hover:text-accent-light transition-colors\">View Details →</span>
+                      </div>
+                    </a>`;
+                }
+                async function renderRelated(){
+                  const grid = document.getElementById('related-grid');
+                  if(!grid) return;
+                  const products = await fetchActiveProducts();
+                  const candidates = products.filter(p=>p && p.is_active !== false);
+                  const pick = shuffle(candidates).slice(0,4);
+                  const cards = (pick.length?pick:Array(4).fill(null)).map(buildCard).join('');
+                  grid.innerHTML = cards;
+                }
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', renderRelated);
+                } else { renderRelated(); }
+              })();
+            </script>
+                <!-- Related Product 1 (static removed; now dynamic) -->
+                <div class="glass-card rounded-2xl p-6 neon-glow group cursor-pointer transition-all duration-300 hover:scale-105">
+                    <div class="relative mb-6 overflow-hidden rounded-xl">
+                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=400&auto=format&fit=crop" alt="Gothic Rose Skull Tee" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=400'; this.onerror=null;" />
+                        <div class="absolute top-4 right-4 bg-warning text-black px-2 py-1 rounded-full text-xs font-bold">
+                            New
+                        </div>
+                    </div>
+                    <h3 class="font-orbitron text-lg font-bold text-white mb-2">Gothic Rose Skull Tee</h3>
+                    <div class="flex items-center space-x-2 mb-3">
+                        <div class="star-rating flex text-sm">
+                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
+                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                            </svg>
+                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
+                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                            </svg>
+                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
+                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                            </svg>
+                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
+                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                            </svg>
+                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
+                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                            </svg>
+                        </div>
+                        <span class="text-text-secondary text-sm">(89)</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-accent font-bold">$27.99</span>
+                        <a href="product.html" class="text-accent hover:text-accent-light transition-colors">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Related Product 2 (static removed; now dynamic) -->
+
+                <!-- Related Product 3 (static removed; now dynamic) -->
+
+                <!-- Related Product 4 (static removed; now dynamic) -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-surface-dark border-t border-surface-light py-16 relative z-10">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- Brand -->
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-8 h-8 text-accent" viewBox="0 0 40 40" fill="currentColor">
+                            <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
+                            <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
+                            <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
+                        </svg>
+                        <span class="font-orbitron text-lg font-bold text-gradient">PlwgsCreativeApparel</span>
+                    </div>
+                    <p class="text-text-secondary text-sm">
+                        Creative rebellion through wearable art. Transforming everyday apparel into conversation starters since 2023.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="font-orbitron text-white font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Shop All</a></li>
+                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Size Guide</a></li>
+                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Care Instructions</a></li>
+                    </ul>
+                </div>
+
+                <!-- Customer Care -->
+                <div>
+                    <h3 class="font-orbitron text-white font-bold mb-4">Customer Care</h3>
+                    <ul class="space-y-2">
+                        <li><a href="account.html" class="text-text-secondary hover:text-accent transition-colors">My Account</a></li>
+                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Order Tracking</a></li>
+                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Returns & Exchanges</a></li>
+                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Contact Support</a></li>
+                    </ul>
+                </div>
+
+                <!-- Connect -->
+                <div>
+                    <h3 class="font-orbitron text-white font-bold mb-4">Connect</h3>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                            </svg>
+                        </a>
+                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"/>
+                            </svg>
+                        </a>
+                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <p class="text-text-secondary text-sm">
+                        Follow us for daily inspiration and behind-the-scenes content.
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t border-surface-light pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-text-secondary text-sm">
+                    © 2025 PlwgsCreativeApparel. All Rights Reserved.
+                </p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                                            <a href="privacy-policy.html" class="text-text-secondary hover:text-accent transition-colors text-sm">Privacy Policy</a>
+                        <a href="terms-of-service.html" class="text-text-secondary hover:text-accent transition-colors text-sm">Terms of Service</a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors text-sm">Shipping Info</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Zoom Modal -->
+    <div id="zoomModal" class="zoom-modal">
+        <img id="zoomedImage" src alt="Zoomed Product Image" />
+    </div>
+    
+
+    <!-- JavaScript -->
+    <script>
+        console.log('🚀 PRODUCT.HTML SCRIPT LOADED');
+        
+        // Initialize variables
+        let currentImageIndex = 0;
+        let selectedSize = 'M';
+        let selectedColor = 'Black';
+        let quantity = 1;
+        let productData = null;
+        
+        // Make productData globally accessible for price updates
+        window.productData = null;
+        
+        // Load product data from URL parameter
+        function loadProductData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            
+            if (!productId) {
+                console.error('No product ID provided');
+                return;
+            }
+            
+            // Decode the product ID (product title)
+            const productTitle = decodeURIComponent(productId);
+            console.log('Loading product:', productTitle);
+            
+            // Find the product in the allProducts array from shop.html
+            // For now, we'll use a simplified approach and load from the database
+            loadProductFromDatabase(productTitle);
+        }
+        
+        // Load product data from database
+        async function loadProductFromDatabase(productTitle) {
+            try {
+                const response = await fetch(`/api/products/search?name=${encodeURIComponent(productTitle)}`);
+                if (!response.ok) {
+                    throw new Error('Product not found');
+                }
+                
+                const product = await response.json();
+                updateProductPage(product);
+            } catch (error) {
+                console.error('Error loading product:', error);
+                // Fallback to hardcoded data for now
+                loadFallbackProduct(productTitle);
+            }
+        }
+        
+        // Update the product page with dynamic data
+        function updateProductPage(product) {
+            console.log('Updating product page with:', product);
+            
+            // Update page title
+            document.title = `${product.name} - PlwgsCreativeApparel`;
+            
+            // Update breadcrumb
+            const breadcrumbElement = document.getElementById('breadcrumbProductName');
+            if (breadcrumbElement) {
+                breadcrumbElement.textContent = product.name;
+            }
+            
+            // Update product title
+            const productTitleElement = document.getElementById('productTitle');
+            if (productTitleElement) {
+                productTitleElement.textContent = product.name;
+            }
+            
+            // Update current price with size-based pricing
+            const currentPriceElement = document.getElementById('currentPrice');
+            if (currentPriceElement) {
+                // Get the selected size and calculate price
+                const selectedSizeEl = document.querySelector('.size-option.selected');
+                const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
+                const basePrice = parseFloat(product.price) || 20.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 2.00; // 2X costs $2 more
+                }
+                
+                currentPriceElement.textContent = `$${finalPrice.toFixed(2)}`;
+                currentPriceElement.dataset.basePrice = basePrice;
+                currentPriceElement.dataset.selectedSize = selectedSize;
+            }
+            
+            // Update original price
+            const originalPriceElement = document.getElementById('originalPrice');
+            if (originalPriceElement && product.original_price) {
+                originalPriceElement.textContent = `$${product.original_price}`;
+            }
+            
+            // Update main image
+            const mainImage = document.getElementById('mainImage');
+            if (mainImage && product.image_url) {
+                // Convert database path to frontend path
+                let imagePath = product.image_url;
+                if (imagePath.startsWith('etsy_images/')) {
+                    imagePath = '../' + imagePath;
+                }
+                mainImage.src = imagePath;
+                mainImage.alt = product.name;
+            }
+            
+            // Update thumbnails
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumbnail, index) => {
+                if (index === 0 && product.image_url) {
+                    let imagePath = product.image_url;
+                    if (imagePath.startsWith('etsy_images/')) {
+                        imagePath = '../' + imagePath;
+                    }
+                    thumbnail.src = imagePath;
+                    thumbnail.dataset.image = imagePath;
+                }
+            });
+            
+            // Update description
+            const descriptionElement = document.getElementById('productDescription');
+            if (descriptionElement && product.description) {
+                descriptionElement.textContent = product.description;
+            }
+            
+            // Update add to cart button price with size-based pricing
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (addToCartBtn) {
+                // Get the selected size and calculate price
+                const selectedSizeEl = document.querySelector('.size-option.selected');
+                const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
+                const basePrice = parseFloat(product.price) || 20.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                }
+                
+                addToCartBtn.textContent = `Add to Cart - $${finalPrice.toFixed(2)}`;
+                addToCartBtn.dataset.basePrice = basePrice;
+                addToCartBtn.dataset.selectedSize = selectedSize;
+            }
+            
+            // Update shipping information
+            console.log('🚚 About to call updateShippingDisplay with product:', product);
+            updateShippingDisplay(product);
+        }
+        
+        // Function to update shipping display
+        function updateShippingDisplay(product) {
+            console.log('🚚 Updating shipping display with product:', product);
+            console.log('🚚 Raw shipping_cost:', product.shipping_cost, typeof product.shipping_cost);
+            console.log('🚚 Raw local_pickup_enabled:', product.local_pickup_enabled, typeof product.local_pickup_enabled);
+            
+            const shippingCost = parseFloat(product.shipping_cost) || 4.50;
+            const localPickupEnabled = product.local_pickup_enabled !== false;
+            
+            // Update the main shipping info section with shipping method selector
+            const shippingInfoSection = document.getElementById('shipping-info-section');
+            if (shippingInfoSection) {
+                let shippingHTML = `
+                    <div class="text-center text-sm text-text-secondary mb-2">Choose Shipping Method:</div>
+                    <div class="space-y-2">
+                        <!-- Standard Shipping Option -->
+                        <label class="flex items-center justify-between p-3 border border-surface-light rounded-lg cursor-pointer hover:border-accent transition-colors shipping-option" data-method="standard" data-cost="${shippingCost}">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="shipping-method" value="standard" class="text-accent focus:ring-accent" checked>
+                                <div>
+                                    <div class="font-semibold text-white flex items-center space-x-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span>Standard Shipping</span>
+                                    </div>
+                                    <div class="text-text-secondary text-sm">5-7 business days</div>
+                                </div>
+                            </div>
+                            <div class="font-bold text-white">$${shippingCost.toFixed(2)}</div>
+                        </label>
+                `;
+                
+                // Local pickup option (only if enabled)
+                if (localPickupEnabled) {
+                    shippingHTML += `
+                        <!-- Local Pickup Option -->
+                        <label class="flex items-center justify-between p-3 border border-surface-light rounded-lg cursor-pointer hover:border-accent transition-colors shipping-option" data-method="pickup" data-cost="0">
+                            <div class="flex items-center space-x-3">
+                                <input type="radio" name="shipping-method" value="pickup" class="text-accent focus:ring-accent">
+                                <div>
+                                    <div class="font-semibold text-white flex items-center space-x-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        <span>Local Pickup</span>
+                                    </div>
+                                    <div class="text-text-secondary text-sm">Pick up in Goodyear, Arizona</div>
+                                </div>
+                            </div>
+                            <div class="font-bold text-accent">FREE</div>
+                        </label>
+                    `;
+                }
+                
+                shippingHTML += `
+                    </div>
+                    <!-- Returns Policy -->
+                    <div class="flex items-center justify-center space-x-2 text-sm text-text-secondary mt-3 pt-3 border-t border-surface-light">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>Custom Orders - All Sales Final</span>
+                    </div>
+                `;
+                
+                shippingInfoSection.innerHTML = shippingHTML;
+                
+                // Add event listeners for shipping method selection
+                setupShippingMethodListeners();
+            }
+            
+            // Also update the detailed shipping options section if it exists
+            const shippingOptionsContainer = document.getElementById('shipping-options');
+            if (shippingOptionsContainer) {
+                let optionsHTML = '';
+                
+                // Standard shipping option
+                optionsHTML += `
+                    <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
+                        <div>
+                            <div class="font-semibold text-white">Standard Shipping</div>
+                            <div class="text-text-secondary text-sm">5-7 business days</div>
+                        </div>
+                        <div class="text-accent font-bold">$${shippingCost.toFixed(2)}</div>
+                    </div>
+                `;
+                
+                // Local pickup option (if enabled)
+                if (localPickupEnabled) {
+                    optionsHTML += `
+                        <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
+                            <div>
+                                <div class="font-semibold text-white">Local Pickup</div>
+                                <div class="text-text-secondary text-sm">Pick up at our location</div>
+                            </div>
+                            <div class="text-accent font-bold">FREE</div>
+                        </div>
+                    `;
+                }
+                
+                shippingOptionsContainer.innerHTML = optionsHTML;
+            }
+        }
+        
+        // Function to set up shipping method selection listeners
+        function setupShippingMethodListeners() {
+            const shippingOptions = document.querySelectorAll('.shipping-option');
+            shippingOptions.forEach(option => {
+                const radio = option.querySelector('input[type="radio"]');
+                option.addEventListener('click', function() {
+                    // Check the radio button
+                    radio.checked = true;
+                    
+                    // Update visual selection
+                    shippingOptions.forEach(opt => opt.classList.remove('border-accent'));
+                    option.classList.add('border-accent');
+                    
+                    // Store shipping choice for cart
+                    const shippingMethod = option.dataset.method;
+                    const shippingCost = parseFloat(option.dataset.cost);
+                    
+                    console.log('🚚 Shipping method selected:', shippingMethod, 'Cost:', shippingCost);
+                    
+                    // Store in sessionStorage for cart to use
+                    sessionStorage.setItem('selectedShippingMethod', shippingMethod);
+                    sessionStorage.setItem('selectedShippingCost', shippingCost);
+                });
+            });
+        }
+        
+        // Function to update price based on selected size
+        function updatePriceForSize(selectedSize) {
+            const basePrice = parseFloat(window.productData.price);
+            let finalPrice = basePrice;
+            
+            if (selectedSize === '2X' || selectedSize === 'XXL') {
+                finalPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                console.log('🔍 2X/XXL size detected, adding $4.00');
+            }
+            
+            // Update price display
+            const priceElement = document.getElementById('currentPrice');
+            if (priceElement) {
+                priceElement.textContent = `$${finalPrice.toFixed(2)}`;
+            }
+            
+            // Also update Add to Cart button text
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (addToCartBtn) {
+                addToCartBtn.innerHTML = `Add to Cart - $${finalPrice.toFixed(2)}`;
+            }
+            
+            return finalPrice;
+        }
+
+        // Fallback function for when database lookup fails
+        function loadFallbackProduct(productTitle) {
+            console.log('Using fallback data for:', productTitle);
+            
+            // Update page title
+            document.title = `${productTitle} - PlwgsCreativeApparel`;
+            
+            // Update breadcrumb
+            const breadcrumbElement = document.getElementById('breadcrumbProductName');
+            if (breadcrumbElement) {
+                breadcrumbElement.textContent = productTitle;
+            }
+            
+            // Update product title
+            const productTitleElement = document.getElementById('productTitle');
+            if (productTitleElement) {
+                productTitleElement.textContent = productTitle;
+            }
+        }
+        
+        // Particle Animation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Image Gallery
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImage = document.getElementById('mainImage');
+        const zoomModal = document.getElementById('zoomModal');
+        const zoomedImage = document.getElementById('zoomedImage');
+
+        thumbnails.forEach(thumbnail => {
+            thumbnail.addEventListener('click', () => {
+                // Remove active class from all thumbnails
+                thumbnails.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked thumbnail
+                thumbnail.classList.add('active');
+                // Update main image
+                const newImageSrc = thumbnail.dataset.image;
+                mainImage.src = newImageSrc;
+            });
+        });
+
+        // Zoom functionality
+        mainImage.addEventListener('click', () => {
+            zoomedImage.src = mainImage.src;
+            zoomModal.classList.add('active');
+        });
+
+        zoomModal.addEventListener('click', () => {
+            zoomModal.classList.remove('active');
+        });
+
+        // Size Selection
+        const sizeOptions = document.querySelectorAll('.size-option:not(.unavailable)');
+        sizeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                sizeOptions.forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        // Tab Functionality
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+                
+                // Remove active class from all buttons and panes
+                tabButtons.forEach(b => {
+                    b.classList.remove('active', 'text-accent', 'border-accent');
+                    b.classList.add('text-text-secondary');
+                });
+                tabPanes.forEach(p => {
+                    p.classList.remove('active');
+                    p.classList.add('hidden');
+                });
+                
+                // Add active class to clicked button and corresponding pane
+                button.classList.add('active', 'text-accent', 'border-accent');
+                button.classList.remove('text-text-secondary');
+                document.getElementById(targetTab).classList.add('active');
+                document.getElementById(targetTab).classList.remove('hidden');
+            });
+        });
+
+        // Mouse movement particle effect
+        document.addEventListener('mousemove', (e) => {
+            const particles = document.querySelectorAll('.particle');
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+
+            particles.forEach((particle, index) => {
+                const speed = (index % 3 + 1) * 0.5;
+                const x = (mouseX - 0.5) * speed * 20;
+                const y = (mouseY - 0.5) * speed * 20;
+                
+                particle.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize particles on load and load product data
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            loadProductData();
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('header');
+            if (window.scrollY > 100) {
+                navbar.classList.add('backdrop-blur-lg');
+            } else {
+                navbar.classList.remove('backdrop-blur-lg');
+            }
+        });
+
+        // Quantity selector (no visible stock summary)
+        const qtyMinus = document.getElementById('qtyMinus');
+        const qtyPlus = document.getElementById('qtyPlus');
+        const qtyValue = document.getElementById('qtyValue');
+        function updateStockSummaryForQty() {
+            const sizeContainer = document.querySelector('.size-options');
+            const selectedSizeEl = sizeContainer?.querySelector('.size-option.selected');
+            const selectedSizeKey = selectedSizeEl?.getAttribute('data-size');
+            const sizeStock = (productData && productData.size_stock) ? productData.size_stock : {};
+            // Compute base stock: prefer selected size stock; else total stock
+            let baseStock = 0;
+            if (selectedSizeKey && sizeStock[selectedSizeKey] != null) {
+                baseStock = Number(sizeStock[selectedSizeKey]);
+            } else {
+                baseStock = Object.keys(sizeStock).reduce((s,k)=>s + Number(sizeStock[k]||0), 0);
+            }
+            // Intentionally not displaying stock summary per client request
+        }
+        if (qtyMinus && qtyPlus && qtyValue) {
+            qtyMinus.addEventListener('click', () => {
+                let q = parseInt(qtyValue.textContent || '1');
+                if (q > 1) { q--; qtyValue.textContent = String(q); updateStockSummaryForQty(); }
+            });
+            qtyPlus.addEventListener('click', () => {
+                let q = parseInt(qtyValue.textContent || '1');
+                // Do not allow selecting more than available for selected size
+                const selectedSizeEl = document.querySelector('.size-options .size-option.selected');
+                const selectedSizeKey = selectedSizeEl?.getAttribute('data-size');
+                const sizeStock = (productData && productData.size_stock) ? productData.size_stock : {};
+                let maxAllowed = 99;
+                if (selectedSizeKey && sizeStock[selectedSizeKey] != null) {
+                    maxAllowed = Number(sizeStock[selectedSizeKey]);
+                } else if (Object.keys(sizeStock).length) {
+                    maxAllowed = Object.keys(sizeStock).reduce((s,k)=>s + Number(sizeStock[k]||0), 0);
+                }
+                if (q < maxAllowed) { q++; qtyValue.textContent = String(q); updateStockSummaryForQty(); }
+            });
+        }
+        
+        // Show login prompt function
+        function showLoginPrompt(message = 'Please log in to continue') {
+            const loginPrompt = document.createElement('div');
+            loginPrompt.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            loginPrompt.innerHTML = `
+                <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
+                    <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Login Required</h2>
+                    <p class="text-text-secondary mb-6">${message}</p>
+                    <div class="space-y-4">
+                        <button class="btn-primary w-full" onclick="window.location.href='customer-login.html'">Log In</button>
+                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" onclick="window.location.href='customer-login.html'">Create Account</button>
+                        <button class="text-text-secondary w-full py-2 hover:text-accent transition-colors" onclick="this.closest('.fixed').remove()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(loginPrompt);
+        }
+
+        // Add to Cart functionality
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', async () => {
+                try {
+                    // Check if user is logged in
+                    const token = localStorage.getItem('customerToken');
+                    if (!token) {
+                        // Show a better notification
+                        showLoginPrompt('You need to log in to add items to cart');
+                        return;
+                    }
+                    
+                    // Validate token format (basic check)
+                    if (typeof token !== 'string' || token.length < 10) {
+                        // Invalid token format, clear it and show login prompt
+                        localStorage.removeItem('customerToken');
+                        localStorage.removeItem('customerData');
+                        showLoginPrompt('Your session has expired. Please log in again.');
+                        return;
+                    }
+                    
+                    // Get selected size
+                    const selectedSize = document.querySelector('.size-option.selected');
+                    if (!selectedSize) {
+                        alert('Please select a size');
+                        return;
+                    }
+                    
+                    // Get the size from the data-size attribute (more reliable)
+                    const size = selectedSize.dataset.size || 'M';
+                    
+                    // Get quantity
+                    const quantityEl = document.getElementById('qtyValue');
+                    const quantity = quantityEl ? parseInt(quantityEl.textContent) : 1;
+                    
+                    // Determine product name from loaded data
+                    const productTitle = (productData && productData.name) ? productData.name : (document.getElementById('productTitle')?.textContent || '');
+                    
+                    // Collect custom input data
+                    const customInputData = {};
+                    
+                    // Check if birthday custom input is enabled
+                    if (productData && productData.custom_birthday_enabled) {
+                        const birthdayFields = productData.custom_birthday_fields || ['birthdate', 'name', 'additional_info'];
+                        birthdayFields.forEach(field => {
+                            const element = document.getElementById(`birthday-${field}`);
+                            if (element) {
+                                const value = element.value.trim();
+                                if (value) {
+                                    customInputData[`birthday_${field}`] = value;
+                                }
+                            }
+                        });
+
+                        // Collect custom question response for birthday
+                        if (productData.custom_birthday_question && productData.custom_birthday_question.trim()) {
+                            const birthdayQuestionElement = document.getElementById('birthdayCustomQuestionInput');
+                            if (birthdayQuestionElement) {
+                                const value = birthdayQuestionElement.value.trim();
+                                if (value) {
+                                    customInputData['birthday_custom_question'] = value;
+                                }
+                            }
+                        }
+                    }
+
+                    // Check if lyrics custom input is enabled
+                    if (productData && productData.custom_lyrics_enabled) {
+                        const lyricsFields = productData.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
+                        lyricsFields.forEach(field => {
+                            const element = document.getElementById(`lyrics-${field}`);
+                            if (element) {
+                                const value = element.value.trim();
+                                if (value) {
+                                    customInputData[`lyrics_${field}`] = value;
+                                }
+                            }
+                        });
+
+                        // Collect custom question response for lyrics
+                        if (productData.custom_lyrics_question && productData.custom_lyrics_question.trim()) {
+                            const lyricsQuestionElement = document.getElementById('lyricsCustomQuestionInput');
+                            if (lyricsQuestionElement) {
+                                const value = lyricsQuestionElement.value.trim();
+                                if (value) {
+                                    customInputData['lyrics_custom_question'] = value;
+                                }
+                            }
+                        }
+                    }
+
+                    // Store default shipping preferences if not already set
+                    if (!sessionStorage.getItem('selectedShippingMethod')) {
+                        sessionStorage.setItem('selectedShippingMethod', 'standard');
+                        sessionStorage.setItem('selectedShippingCost', productData?.shipping_cost || '4.50');
+                        console.log('🚚 Set default shipping preferences:', 'standard', productData?.shipping_cost || '4.50');
+                    }
+                    
+                    console.log('Adding to cart:', {
+                        product_name: productTitle,
+                        quantity: quantity,
+                        size: size,
+                        color: 'Black',
+                        custom_input: customInputData
+                    });
+                    
+                    // Calculate price based on selected size
+                    const basePrice = parseFloat(productData?.price) || 22.00;
+                    let unitPrice = basePrice;
+                    if (size === '2X' || size === 'XXL') {
+                        unitPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                    }
+                    
+                    // Add to cart via API
+                    const response = await fetch('/api/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            product_name: productTitle,
+                            quantity: quantity,
+                            unit_price: unitPrice,
+                            size: size,
+                            color: selectedColor || 'Black',
+                            custom_input: customInputData
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        
+                        // If token is invalid, clear it and show login prompt
+                        if (response.status === 401 || response.status === 403) {
+                            localStorage.removeItem('customerToken');
+                            localStorage.removeItem('customerData');
+                            showLoginPrompt('Your session has expired. Please log in again.');
+                            return;
+                        }
+                        
+                        throw new Error(error.error || 'Failed to add to cart');
+                    }
+                    
+                    const result = await response.json();
+                    alert('Item added to cart successfully!');
+                    
+                    // Update cart counter
+                    updateCartCounter();
+                    
+                    // DO NOT redirect - stay on the same page
+                    // window.location.href = 'cart.html';
+                    
+                } catch (error) {
+                    console.error('Error adding item to cart:', error);
+                    alert('Error adding item to cart: ' + error.message);
+                }
+            });
+        }
+
+        // Wishlist click
+        const wishlistBtn = document.getElementById('wishlistBtn');
+        if (wishlistBtn) {
+            wishlistBtn.addEventListener('click', async () => {
+                try {
+                    const token = localStorage.getItem('customerToken');
+                    if (!token) {
+                        window.location.href = 'customer-login.html';
+                        return;
+                    }
+                    // Use current product id from URL or embedded data
+                    const url = new URL(window.location.href);
+                    const productId = Number(url.searchParams.get('id')) || (productData && productData.id);
+                    if (!productId) return;
+                    const res = await fetch('/api/customer/wishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ product_id: productId })
+                    });
+                    if (res && res.ok) {
+                        showNotification('Added to wishlist', 'success');
+                        wishlistBtn.classList.add('active');
+                    } else {
+                        showNotification('Failed to add to wishlist', 'error');
+                    }
+                } catch (e) { console.error('Wishlist add failed', e); }
+            });
+        }
+        
+        // Buy Now functionality
+        const buyNowBtn = document.getElementById('buyNowBtn');
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', async () => {
+                try {
+                    // Check if user is logged in
+                    const token = localStorage.getItem('customerToken');
+                    if (!token) {
+                        alert('Please log in to purchase items');
+                        window.location.href = 'customer-login.html';
+                        return;
+                    }
+                    
+                    // Get selected size
+                    const selectedSize = document.querySelector('.size-option.selected');
+                    if (!selectedSize) {
+                        alert('Please select a size');
+                        return;
+                    }
+                    
+                    // Get the size from the data-size attribute (more reliable)
+                    const size = selectedSize.dataset.size || 'M';
+                    
+                    // Get quantity
+                    const quantitySpan = document.querySelector('.sticky-cart span');
+                    const quantity = quantitySpan ? parseInt(quantitySpan.textContent) : 1;
+                    
+                    // Determine product name from loaded data
+                    const productTitle = (productData && productData.name) ? productData.name : (document.getElementById('productTitle')?.textContent || '');
+                    
+                    // Collect custom input data
+                    const customInputData = {};
+                    
+                    // Check if birthday custom input is enabled
+                    if (productData && productData.custom_birthday_enabled) {
+                        const birthdayFields = productData.custom_birthday_fields || ['birthdate', 'name', 'additional_info'];
+                        birthdayFields.forEach(field => {
+                            const element = document.getElementById(`birthday-${field}`);
+                            if (element) {
+                                const value = element.value.trim();
+                                if (value) {
+                                    customInputData[`birthday_${field}`] = value;
+                                }
+                            }
+                        });
+
+                        // Collect custom question response for birthday
+                        if (productData.custom_birthday_question && productData.custom_birthday_question.trim()) {
+                            const birthdayQuestionElement = document.getElementById('birthdayCustomQuestionInput');
+                            if (birthdayQuestionElement) {
+                                const value = birthdayQuestionElement.value.trim();
+                                if (value) {
+                                    customInputData['birthday_custom_question'] = value;
+                                }
+                            }
+                        }
+                    }
+
+                    // Check if lyrics custom input is enabled
+                    if (productData && productData.custom_lyrics_enabled) {
+                        const lyricsFields = productData.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
+                        lyricsFields.forEach(field => {
+                            const element = document.getElementById(`lyrics-${field}`);
+                            if (element) {
+                                const value = element.value.trim();
+                                if (value) {
+                                    customInputData[`lyrics_${field}`] = value;
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Calculate price based on selected size for Buy Now
+                    const basePrice = parseFloat(productData?.price) || 22.00;
+                    let unitPrice = basePrice;
+                    if (size === '2X' || size === 'XXL') {
+                        unitPrice = basePrice + 4.00; // 2X/XXL costs $4 more
+                    }
+                    
+                    console.log('Buy Now - Adding to cart:', {
+                        product_name: productTitle,
+                        quantity: quantity,
+                        size: size,
+                        color: selectedColor || 'Black',
+                        unit_price: unitPrice,
+                        custom_input: customInputData
+                    });
+                    
+                    // Add to cart via API
+                    const response = await fetch('/api/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            product_name: productTitle,
+                            quantity: quantity,
+                            unit_price: unitPrice,
+                            size: size,
+                            color: selectedColor || 'Black',
+                            custom_input: customInputData
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to add to cart');
+                    }
+                    
+                    const result = await response.json();
+                    console.log('Item added to cart, redirecting to checkout...');
+                    
+                    // Redirect to checkout
+                    window.location.href = 'cart.html';
+                    
+                } catch (error) {
+                    console.error('Error with Buy Now:', error);
+                    alert('Error processing purchase: ' + error.message);
+                }
+            });
+        }
+        
+        // Cart counter functionality
+        async function updateCartCounter() {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    document.getElementById('cart-counter').textContent = '0';
+                    return;
+                }
+                
+                const response = await fetch('/api/cart', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const cartData = await response.json();
+                    const totalItems = cartData.items ? cartData.items.reduce((total, item) => total + item.quantity, 0) : 0;
+                    document.getElementById('cart-counter').textContent = totalItems.toString();
+                } else {
+                    document.getElementById('cart-counter').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error updating cart counter:', error);
+                document.getElementById('cart-counter').textContent = '0';
+            }
+        }
+        
+        // Load product data dynamically
+        async function loadProductData() {
+            console.log('🚀 loadProductData function called');
+            
+            try {
+                // Get product ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const productId = urlParams.get('id');
+                
+                console.log('🔍 URL parameters:', window.location.search);
+                console.log('🔍 Product ID from URL:', productId);
+                
+                if (!productId) {
+                    console.error('❌ No product ID found in URL');
+                    return;
+                }
+                
+                console.log('🔄 Loading product data for ID:', productId);
+                
+                // Fetch product data from API
+                const response = await fetch(`/api/products/public/${productId}`);
+                
+                console.log('📡 API Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch product: ${response.status}`);
+                }
+                
+                const apiData = await response.json();
+                console.log('📦 Loaded product data:', apiData);
+                const product = apiData.product || apiData;
+                const reviews = apiData.reviews || { count: 0, average: 0, items: [] };
+                const schema = apiData.schema || null;
+                
+                // Store globally for cart actions
+                productData = product;
+                window.productData = product; // Make globally accessible for price updates
+                console.log('📦 Product image_url:', product.image_url);
+                
+                // Update page content with product data
+                updateProductDisplay(product);
+                updateProductReviews(reviews);
+                
+                // Inject schema markup for SEO
+                if (schema) {
+                    injectSchemaMarkup(schema);
+                }
+                
+                // Track this product as recently viewed
+                trackRecentlyViewed(productId);
+                
+            } catch (error) {
+                console.error('❌ Error loading product data:', error);
+                // Show error message to user
+                const mainContent = document.querySelector('main');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="container mx-auto px-6 py-12">
+                            <div class="glass-card rounded-2xl p-8 text-center">
+                                <h1 class="text-2xl font-bold text-white mb-4">Product Not Found</h1>
+                                <p class="text-text-secondary mb-6">The product you're looking for could not be loaded.</p>
+                                <a href="shop.html" class="btn-primary">Back to Shop</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        // Update product display with dynamic data
+        function updateProductDisplay(product) {
+            console.log('🎨 Updating product display with:', product);
+            console.log('🔍 Product sizes:', product.sizes);
+            console.log('🔍 Product size_stock:', product.size_stock);
+            console.log('🔍 Product price:', product.price);
+            
+            // Update page title
+            const pageTitle = document.getElementById('pageTitle');
+            if (pageTitle) {
+                pageTitle.textContent = `${product.name} - PlwgsCreativeApparel`;
+            }
+            
+            // Update product name
+            const productName = document.getElementById('productTitle');
+            if (productName) {
+                productName.textContent = product.name;
+            }
+            
+            // Update product description
+            const productDescription = document.getElementById('productDescription');
+            if (productDescription) {
+                productDescription.textContent = product.description || 'Quality printed design with custom artwork. Perfect for those who want to express their unique style.';
+            }
+            
+            // Update price with size-based pricing
+            const priceElement = document.getElementById('currentPrice');
+            if (priceElement) {
+                // Get the selected size and calculate price
+                const selectedSizeEl = document.querySelector('.size-option.selected');
+                const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
+                const basePrice = parseFloat(product.price) || 20.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                }
+                
+                priceElement.textContent = `$${finalPrice.toFixed(2)}`;
+                priceElement.dataset.basePrice = basePrice;
+                priceElement.dataset.selectedSize = selectedSize;
+            }
+            
+            // Also update Add to Cart button price
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (addToCartBtn) {
+                // Get the selected size and calculate price
+                const selectedSizeEl = document.querySelector('.size-option.selected');
+                const selectedSize = selectedSizeEl ? selectedSizeEl.dataset.size : 'M';
+                const basePrice = parseFloat(product.price) || 20.00;
+                
+                // Apply size-based pricing
+                let finalPrice = basePrice;
+                if (selectedSize === '2X') {
+                    finalPrice = basePrice + 4.00; // 2X costs $4 more
+                }
+                
+                // Update the button text to show the dynamic price
+                addToCartBtn.innerHTML = `Add to Cart - $${finalPrice.toFixed(2)}`;
+                addToCartBtn.dataset.basePrice = basePrice;
+                addToCartBtn.dataset.selectedSize = selectedSize;
+            }
+            
+            // Update original price if on sale
+            const originalPriceElement = document.getElementById('originalPrice');
+            if (originalPriceElement && product.original_price) {
+                originalPriceElement.textContent = `$${product.original_price}`;
+                originalPriceElement.style.display = 'block';
+            }
+            
+            // Update sale percentage
+            const salePercentageElement = document.querySelector('.sale-percentage');
+            if (salePercentageElement && product.is_on_sale && product.original_price) {
+                const discount = Math.round(((parseFloat(product.original_price) - parseFloat(product.price)) / parseFloat(product.original_price)) * 100);
+                salePercentageElement.textContent = `${discount}% OFF`;
+                salePercentageElement.style.display = 'block';
+            }
+            
+            // Helper: apply Cloudinary pad transform to center any aspect ratio
+            function padTransform(url, w, h) {
+                if (!url || url.startsWith('data:')) return url;
+                try {
+                    const parts = url.split('/upload/');
+                    if (parts.length === 2) {
+                        // Strip any existing transforms between /upload/ and /v###/ to avoid
+                        // stacking transforms on an already-derived low-res asset
+                        const afterUpload = parts[1];
+                        const vPos = afterUpload.indexOf('/v');
+                        const tail = vPos >= 0 ? afterUpload.slice(vPos + 1) : afterUpload;
+                        const normalized = (vPos >= 0 ? afterUpload.slice(vPos) : afterUpload);
+                        // Use high-quality delivery with padding to center
+                        return parts[0] + `/upload/f_auto,q_auto:good,c_pad,g_center,b_black,w_${w},h_${h}/` + normalized;
+                    }
+                    return url;
+                } catch (_) { return url; }
+            }
+
+            // Update main product image
+            const mainImage = document.getElementById('mainImage');
+            if (mainImage && product.image_url) {
+                console.log('🖼️ Setting main image to:', product.image_url);
+                console.log('🖼️ Main image element found:', mainImage);
+                console.log('🖼️ Current src before update:', mainImage.src);
+                
+                mainImage.src = padTransform(product.image_url, 800, 800);
+                mainImage.alt = product.name;
+                
+                console.log('🖼️ New src after update:', mainImage.src);
+                console.log('🖼️ Image dimensions:', mainImage.width, 'x', mainImage.height);
+                console.log('🖼️ Image natural dimensions:', mainImage.naturalWidth, 'x', mainImage.naturalHeight);
+                console.log('🖼️ Image display style:', getComputedStyle(mainImage).display);
+                console.log('🖼️ Image visibility:', getComputedStyle(mainImage).visibility);
+                console.log('🖼️ Image opacity:', getComputedStyle(mainImage).opacity);
+                
+                mainImage.onerror = function() {
+                    console.error('❌ Failed to load image:', product.image_url);
+                    console.error('❌ Image error details:', this.error);
+                    this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik03NSA3NUgyMjVWMjI1SDc1WiIgc3Ryb2tlPSIjMDBDQ0Q0IiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTEwNSAxMzVMMTk1IDEzNUwxOTUgMTk1TDEwNSAxOTVMMTA1IDEzNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
+                };
+                mainImage.onload = function() {
+                    console.log('✅ Main image loaded successfully:', product.image_url);
+                    console.log('✅ Loaded image dimensions:', this.naturalWidth, 'x', this.naturalHeight);
+                    console.log('✅ Image is visible:', this.offsetWidth > 0 && this.offsetHeight > 0);
+                };
+            } else {
+                console.error('❌ Main image element not found or no image_url provided');
+                console.error('❌ mainImage element:', mainImage);
+                console.error('❌ product.image_url:', product.image_url);
+            }
+            
+            // Build thumbnails dynamically
+            const thumbStrip = document.getElementById('thumbStrip');
+            let subs = product.sub_images;
+            if (typeof subs === 'string') {
+                try { subs = JSON.parse(subs); } catch (_) { subs = []; }
+            }
+            const allThumbs = [];
+            if (product.image_url) allThumbs.push(product.image_url);
+            if (Array.isArray(subs)) allThumbs.push(...subs);
+            if (thumbStrip) {
+                if (allThumbs.length <= 1) {
+                    thumbStrip.style.display = 'none';
+                } else {
+                    thumbStrip.style.display = 'grid';
+                    thumbStrip.innerHTML = allThumbs.slice(0, 5).map((u, idx) => {
+                        const t = padTransform(u, 400, 400);
+                        const active = idx === 0 ? ' ring-2 ring-accent ' : '';
+                        return `<div class="thumbnail rounded-lg overflow-hidden cursor-pointer${active}" data-image="${padTransform(u,800,800)}"><img src="${t}" alt="${product.name} - View ${idx+1}" class="w-full h-20 object-contain bg-surface-dark" loading="lazy"/></div>`;
+                    }).join('');
+                    // Wire click handlers
+                    thumbStrip.querySelectorAll('.thumbnail').forEach(th => {
+                        th.addEventListener('click', () => {
+                            thumbStrip.querySelectorAll('.thumbnail').forEach(n=>n.classList.remove('ring-2','ring-accent'));
+                            th.classList.add('ring-2','ring-accent');
+                            const src = th.getAttribute('data-image');
+                            if (src) mainImage.src = src;
+                        });
+                    });
+                }
+            }
+            
+            // Update colors if available
+            {
+                // Normalize colors: may be JSON string, names, or hexes
+                let productColors = product.colors;
+                if (typeof productColors === 'string') {
+                    try { productColors = JSON.parse(productColors); } catch(_) { productColors = []; }
+                }
+                if (Array.isArray(productColors) && productColors.length > 0) {
+                    const colorSelector = document.getElementById('colorSelector');
+                    const colorPreview = document.getElementById('colorPreview');
+                    const colorNameDisplay = document.getElementById('colorNameDisplay');
+                    
+                    if (colorSelector && colorPreview && colorNameDisplay) {
+                        // Map normalized color names (lowercase, no spaces/hyphens) to hex
+                        const colorHexMap = {
+                            black:'#000000', navy:'#252432', athleticgreysolid:'#d3d3d3', stormblue:'#626874', royalblue:'#17489b',
+                            aquablue:'#4098ca', tealbluegreen:'#00a69c', mintgreen:'#b2ddc4', evergreen:'#2b4d35', militarygreen:'#495443',
+                            army:'#585244', natural:'#eee8d8', sunset:'#f8a790', orange:'#f3703b', autumn:'#993f21', gold:'#f1b83e',
+                            mustard:'#caa235', white:'#ffffff', charitypink:'#f27da0', fushsia:'#ec3f77', maroon:'#6c2232',
+                            red:'#d32621', lilac:'#dab2d0', teampurple:'#471b7c'
+                        };
+                        
+                        const resolveColor = (c) => {
+                            if (!c) return '#000000';
+                            if (typeof c === 'string' && c.trim().startsWith('#')) return c.trim();
+                            const name = String(c).trim();
+                            // Try exact CSS color first (browser may support)
+                            // Then normalize for our map: lowercase and remove non-alphanumerics
+                            const normalized = name.toLowerCase().replace(/[^a-z0-9]/g,'');
+                            if (colorHexMap[normalized]) return colorHexMap[normalized];
+                            return name; // Let browser try CSS named color
+                        };
+
+                        // Clear existing options and add new ones
+                        colorSelector.innerHTML = '<option value="">Select a color...</option>';
+                        
+                        // Remove duplicates from productColors before creating options
+                        const uniqueColors = [...new Set(productColors)];
+                        console.log('🎨 Original colors:', productColors);
+                        console.log('🎨 Unique colors:', uniqueColors);
+                        
+                        uniqueColors.forEach((color, idx) => {
+                            const option = document.createElement('option');
+                            option.value = String(color).replace(/"/g,'&quot;');
+                            option.textContent = color;
+                            option.dataset.hex = resolveColor(color);
+                            colorSelector.appendChild(option);
+                        });
+
+                        // Set default selected color (first one)
+                        if (productColors.length > 0) {
+                            const firstColor = productColors[0];
+                            selectedColor = String(firstColor).replace(/"/g,'&quot;');
+                            colorSelector.value = selectedColor;
+                            
+                            // Update preview and display
+                            const firstOption = colorSelector.querySelector(`option[value="${selectedColor}"]`);
+                            if (firstOption) {
+                                const hexColor = firstOption.dataset.hex;
+                                colorPreview.style.backgroundColor = hexColor;
+                                colorNameDisplay.textContent = firstColor;
+                            }
+                        }
+
+                        // Color selection change handler
+                        colorSelector.addEventListener('change', () => {
+                            const selectedOption = colorSelector.options[colorSelector.selectedIndex];
+                            if (selectedOption && selectedOption.value) {
+                                selectedColor = selectedOption.value;
+                                const hexColor = selectedOption.dataset.hex;
+                                colorPreview.style.backgroundColor = hexColor;
+                                colorNameDisplay.textContent = selectedOption.textContent;
+                                console.log('🎨 Selected color:', selectedColor);
+                            }
+                        });
+                    }
+                }
+            }
+            
+            // Update product specifications dynamically
+            console.log('🔍 Checking product specifications:', product.specifications);
+            if (product.specifications) {
+                try {
+                    const specs = typeof product.specifications === 'string' 
+                        ? JSON.parse(product.specifications) 
+                        : product.specifications;
+                    
+                    console.log('🔍 Parsed specifications:', specs);
+                    
+                    // Update each specification field with mapping to database field names
+                    const specFieldMapping = [
+                        { htmlId: 'material', dbField: 'material' },
+                        { htmlId: 'weight', dbField: 'weight' },
+                        { htmlId: 'fit', dbField: 'fit' },
+                        { htmlId: 'print-method', dbField: 'print_method' },
+                        { htmlId: 'neck', dbField: 'neck_style' },
+                        { htmlId: 'sleeve', dbField: 'sleeve_length' },
+                        { htmlId: 'origin', dbField: 'origin' },
+                        { htmlId: 'sustainability', dbField: 'sustainability' }
+                    ];
+                    
+                    specFieldMapping.forEach(mapping => {
+                        const element = document.getElementById(`spec-${mapping.htmlId}`);
+                        if (element && specs[mapping.dbField]) {
+                            console.log(`🔍 Updating ${mapping.htmlId}: ${specs[mapping.dbField]}`);
+                            element.textContent = specs[mapping.dbField];
+                        } else {
+                            console.log(`⚠️ Field ${mapping.htmlId} not found or empty:`, element, specs[mapping.dbField]);
+                        }
+                    });
+                    
+                    console.log('✅ Product specifications updated dynamically');
+                } catch (error) {
+                    console.warn('⚠️ Error updating specifications:', error);
+                }
+            } else {
+                console.log('⚠️ No specifications found in product data');
+            }
+            
+            // Do not render visible tags; keep container hidden intentionally
+
+            // Show brand preference and notes if available
+            try {
+                const brandPref = product.brand_preference || 'Either (Gildan Softstyle 64000 or Bella+Canvas 3001)';
+                const brandTextEl = document.getElementById('brandPrefText');
+                if (brandTextEl) brandTextEl.textContent = brandPref;
+                const notes = product.specs_notes || '';
+                if (notes) {
+                    const row = document.getElementById('specsNotesRow');
+                    const txt = document.getElementById('specsNotesText');
+                    if (row && txt) { txt.textContent = notes; row.style.display = 'flex'; }
+                }
+            } catch (e) { console.warn('Brand/specs notes render failed', e); }
+            
+            // Update size chart dynamically
+            if (product.size_chart) {
+                updateSizeChart(product.size_chart);
+            } else {
+                // Use default adult t-shirt measurements if no size chart is provided
+                const defaultSizeChart = {
+                    garmentType: 'adult-tshirt',
+                    sizes: {
+                        S: { chest: '18', length: '28' },
+                        M: { chest: '20', length: '29' },
+                        L: { chest: '22', length: '30' },
+                        XL: { chest: '24', length: '31' },
+                        '2XL': { chest: '26', length: '32' }
+                    }
+                };
+                updateSizeChart(defaultSizeChart);
+            }
+            
+            // Update sizes and stock dynamically
+            // Always generate size options, even if product data is incomplete
+            if (true) { // Changed from conditional to always generate
+                const sizeContainer = document.querySelector('.size-options');
+                if (sizeContainer) {
+                    console.log('📏 Updating size options with:', product.sizes, product.size_stock);
+
+                    // Build size list: prefer explicit product.sizes; else derive keys from size_stock; else use default sizes
+                    // Order sizes from smallest to largest, with XXL/2X at the end
+                    const knownOrder = ['S','M','L','XL','XXL','2X'];
+                    let sizes = [];
+                    
+                    if (Array.isArray(product.sizes) && product.sizes.length > 0) {
+                        sizes = product.sizes;
+                        console.log('📏 Using product.sizes:', sizes);
+                    } else if (product.size_stock && Object.keys(product.size_stock).length > 0) {
+                        sizes = Object.keys(product.size_stock);
+                        console.log('📏 Using product.size_stock keys:', sizes);
+                    } else {
+                        // Fallback to default sizes if no size data is provided
+                        sizes = ['S', 'M', 'L', 'XL', 'XXL', '2X'];
+                        console.log('📏 Using fallback default sizes:', sizes);
+                    }
+                    
+                    // Remove XS defensively and sort by known order
+                    sizes = sizes.filter(s => s !== 'XS').sort((a,b) => knownOrder.indexOf(a) - knownOrder.indexOf(b));
+
+                    const sizeStock = product.size_stock || {};
+
+                    console.log('📏 Final sizes array:', sizes);
+                    
+                    const sizeHTML = sizes.map(size => {
+                        const optionClass = 'size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent';
+                        const sizeOption = `
+                            <div class="${optionClass}" data-size="${size}">
+                                <span class="font-semibold">${size}</span>
+                            </div>
+                        `;
+                        console.log(`📏 Generated size option for ${size}:`, sizeOption);
+                        return sizeOption;
+                    }).join('');
+
+                    sizeContainer.innerHTML = sizeHTML;
+
+                    // Add click handlers for size selection
+                    sizeContainer.querySelectorAll('.size-option').forEach(option => {
+                        if (!option.classList.contains('unavailable')) {
+                            option.addEventListener('click', () => {
+                                console.log('🎯 Size clicked:', option.dataset.size);
+                                
+                                sizeContainer.querySelectorAll('.size-option').forEach(opt => {
+                                    opt.classList.remove('selected', 'border-accent');
+                                    opt.classList.add('border-surface-light');
+                                });
+                                option.classList.add('selected', 'border-accent');
+                                option.classList.remove('border-surface-light');
+                                
+                                console.log('✅ Size selection updated, calling updatePriceForSize with:', option.dataset.size);
+                                // Update price when size changes
+                                updatePriceForSize(option.dataset.size);
+                            });
+                        }
+                    });
+
+                    // Default select first available size
+                    const firstAvailable = sizeContainer.querySelector('.size-option:not(.unavailable)');
+                    if (firstAvailable) {
+                        firstAvailable.classList.add('selected','border-accent');
+                        firstAvailable.classList.remove('border-surface-light');
+                        console.log('📏 Default selected size:', firstAvailable.dataset.size);
+                        
+                        // Also update price for default size
+                        setTimeout(() => {
+                            console.log('📏 Updating price for default size:', firstAvailable.dataset.size);
+                            updatePriceForSize(firstAvailable.dataset.size);
+                        }, 100);
+                    }
+
+                    // Update total stock summary
+                    const stockSummaryEl = document.getElementById('stockSummary');
+                    if (stockSummaryEl) {
+                        const totalStock = sizes.reduce((sum, s) => sum + Number(sizeStock[s] || 0), 0);
+                        if (totalStock <= 0) {
+                            stockSummaryEl.textContent = 'Sold Out';
+                        } else if (totalStock <= 5) {
+                            stockSummaryEl.textContent = `Only ${totalStock} left in stock`;
+                        } else {
+                            stockSummaryEl.textContent = `${totalStock} in stock`;
+                        }
+                    }
+                }
+            }
+            
+            // Update custom input fields
+            updateCustomInputFields(product);
+            
+            // Update breadcrumbs
+            const breadcrumbContainer = document.querySelector('.breadcrumb-container');
+            if (breadcrumbContainer) {
+                breadcrumbContainer.innerHTML = `
+                    <a href="../index.html" class="text-text-secondary hover:text-accent transition-colors">Home</a>
+                    <span class="text-text-secondary">></span>
+                    <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Shop</a>
+                    <span class="text-text-secondary">></span>
+                    <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">${product.category || 'All Designs'}</a>
+                    <span class="text-text-secondary">></span>
+                    <span class="text-accent">Product Details</span>
+                `;
+            }
+            
+            // Update shipping information
+            console.log('🚚 About to call updateShippingDisplay with product:', product);
+            updateShippingDisplay(product);
+            
+            console.log('✅ Product display updated successfully');
+        }
+
+        // Function to update custom input fields based on product configuration
+        function updateCustomInputFields(product) {
+            console.log('🔍 Full product data for custom inputs:', product);
+            console.log('🔍 Checking custom input configuration:', {
+                birthday: product.custom_birthday_enabled,
+                lyrics: product.custom_lyrics_enabled
+            });
+            
+            const customInputSection = document.getElementById('customInputSection');
+            const birthdayCustomInput = document.getElementById('birthdayCustomInput');
+            const lyricsCustomInput = document.getElementById('lyricsCustomInput');
+            
+            console.log('🔍 Custom input HTML elements found:', {
+                customInputSection: !!customInputSection,
+                birthdayCustomInput: !!birthdayCustomInput,
+                lyricsCustomInput: !!lyricsCustomInput
+            });
+            
+            // Hide all custom input sections initially
+            customInputSection.classList.add('hidden');
+            birthdayCustomInput.classList.add('hidden');
+            lyricsCustomInput.classList.add('hidden');
+            
+            // Check if any custom input is enabled
+            if (product.custom_birthday_enabled || product.custom_lyrics_enabled) {
+                customInputSection.classList.remove('hidden');
+                
+                // Handle Birthday Custom Input
+                if (product.custom_birthday_enabled) {
+                    birthdayCustomInput.classList.remove('hidden');
+                    const birthdayFields = document.getElementById('birthdayFields');
+                    
+                    // Parse fields and labels
+                    const fields = product.custom_birthday_fields || ['birthdate', 'name', 'additional_info'];
+                    const labels = product.custom_birthday_labels || {
+                        birthdate: 'Birthdate',
+                        name: 'Name',
+                        additional_info: 'Any other references or information'
+                    };
+                    
+                    // Generate HTML for birthday fields
+                    birthdayFields.innerHTML = fields.map(field => {
+                        const isRequired = product.custom_birthday_required;
+                        const charLimit = product.custom_birthday_char_limit || 250;
+                        const label = labels[field] || field;
+                        
+                        return `
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-text-primary">
+                                    ${label}${isRequired ? ' *' : ''}
+                                </label>
+                                <textarea 
+                                    id="birthday-${field}" 
+                                    name="birthday-${field}"
+                                    class="w-full px-3 py-2 bg-surface-light bg-opacity-50 border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                    placeholder="${label}${isRequired ? ' (required)' : ' (optional)'}"
+                                    maxlength="${charLimit}"
+                                    ${isRequired ? 'required' : ''}
+                                    rows="2"
+                                ></textarea>
+                                <div class="text-xs text-text-secondary text-right">
+                                    ${charLimit} characters max
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    // Handle Custom Question for Birthday
+                    if (product.custom_birthday_question && product.custom_birthday_question.trim()) {
+                        const birthdayCustomQuestion = document.getElementById('birthdayCustomQuestion');
+                        const birthdayCustomQuestionText = document.getElementById('birthdayCustomQuestionText');
+                        if (birthdayCustomQuestion && birthdayCustomQuestionText) {
+                            birthdayCustomQuestion.classList.remove('hidden');
+                            birthdayCustomQuestionText.textContent = product.custom_birthday_question;
+                        }
+                    }
+                }
+
+                // Handle Lyrics Custom Input
+                if (product.custom_lyrics_enabled) {
+                    lyricsCustomInput.classList.remove('hidden');
+                    const lyricsFields = document.getElementById('lyricsFields');
+                    
+                    // Parse fields and labels
+                    const fields = product.custom_lyrics_fields || ['artist_band', 'song_name', 'song_lyrics'];
+                    const labels = product.custom_lyrics_labels || {
+                        artist_band: 'Artist or Band Name',
+                        song_name: 'Song Name',
+                        song_lyrics: 'Song Lyrics (Optional)'
+                    };
+                    
+                    // Generate HTML for lyrics fields
+                    lyricsFields.innerHTML = fields.map(field => {
+                        const isRequired = product.custom_lyrics_required;
+                        const charLimit = product.custom_lyrics_char_limit || 250;
+                        const label = labels[field] || field;
+                        
+                        return `
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-text-primary">
+                                    ${label}${isRequired ? ' *' : ''}
+                                </label>
+                                <textarea 
+                                    id="lyrics-${field}" 
+                                    name="lyrics-${field}"
+                                    class="w-full px-3 py-2 bg-surface-light bg-opacity-50 border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                    placeholder="${label}${isRequired ? ' (required)' : ''}"
+                                    maxlength="${charLimit}"
+                                    ${isRequired ? 'required' : ''}
+                                    rows="2"
+                                ></textarea>
+                                <div class="text-xs text-text-secondary text-right">
+                                    ${charLimit} characters max
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    // Handle Custom Question for Lyrics
+                    if (product.custom_lyrics_question && product.custom_lyrics_question.trim()) {
+                        const lyricsCustomQuestion = document.getElementById('lyricsCustomQuestion');
+                        const lyricsCustomQuestionText = document.getElementById('lyricsCustomQuestionText');
+                        if (lyricsCustomQuestion && lyricsCustomQuestionText) {
+                            lyricsCustomQuestion.classList.remove('hidden');
+                            lyricsCustomQuestionText.textContent = product.custom_lyrics_question;
+                        }
+                    }
+                }
+
+                console.log('✅ Custom input fields updated successfully');
+            } else {
+                console.log('ℹ️ No custom input fields enabled for this product');
+            }
+        }
+
+        function updateProductReviews(reviews){
+            try{
+                const count = Number(reviews.count || 0);
+                const avg = Number(reviews.average || 0);
+                const items = Array.isArray(reviews.items) ? reviews.items : [];
+
+                const headerCount = document.getElementById('reviewsCountHeader');
+                if (headerCount) headerCount.textContent = `(${count} review${count===1?'':'s'})`;
+                const tabBtn = document.getElementById('reviewsTabButton');
+                if (tabBtn) tabBtn.textContent = `Reviews (${count})`;
+                const avgEl = document.getElementById('reviewsAverageValue');
+                if (avgEl) avgEl.textContent = (Math.round(avg*10)/10).toFixed(1);
+                const basedOnEl = document.getElementById('reviewsBasedOnText');
+                if (basedOnEl) basedOnEl.textContent = `Based on ${count} review${count===1?'':'s'}`;
+
+                const list = document.getElementById('reviewsList');
+                if (!list) return;
+                if (items.length === 0){
+                    list.innerHTML = `<div class="p-4 bg-surface rounded-lg text-text-secondary">No reviews yet. Be the first to review this product from your account after purchase.</div>`;
+                    return;
+                }
+                const starSvg = '<svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
+                list.innerHTML = items.map(r => {
+                    const rStars = Math.max(1, Math.min(5, Number(r.rating||0)));
+                    const stars = Array.from({length: rStars}).map(()=>starSvg).join('');
+                    const date = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
+                    const title = r.title ? `<span class="text-white font-semibold">${r.title}</span>` : '';
+                    const fallbackFromEmail = (r.email || '').split('@')[0];
+                    const firstName = (r.first_name || r.addr_first_name || (r.full_name || '').split(' ')[0] || fallbackFromEmail || '').trim();
+                    const lastInitial = (r.last_name || r.addr_last_name || (r.full_name || '').split(' ')[1] || '').trim().charAt(0);
+                    const displayName = (r.display_name || ((firstName || lastInitial) ? `${firstName}${lastInitial ? ' ' + lastInitial + '.' : ''}` : 'Customer'));
+                    const nameForAvatar = (firstName || 'Alex');
+                    const avatarId = 1 + (nameForAvatar.charCodeAt(0) % 70);
+                    // Simple gender-leaning avatar choice: common female name hints
+                    const lowerName = nameForAvatar.toLowerCase();
+                    const femaleHints = ['a','e','i','y'];
+                    const looksFemale = femaleHints.includes(lowerName.slice(-1));
+                    const avatarUrl = looksFemale
+                        ? `https://i.pravatar.cc/48?img=${(avatarId % 35) + 35}`
+                        : `https://i.pravatar.cc/48?img=${avatarId}`;
+                    return `
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="flex items-start space-x-4">
+                            <img src="${avatarUrl}" alt="${displayName}" class="w-12 h-12 rounded-full" loading="lazy" onerror="this.src='https://i.pravatar.cc/48?img=12'; this.onerror=null;" />
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <h4 class="font-semibold text-white">${displayName}</h4>
+                                        <div class="star-rating flex text-sm">${stars}</div>
+                                        ${title}
+                                    </div>
+                                    <span class="text-text-secondary text-sm">${date}</span>
+                                </div>
+                                <p class="text-text-secondary mb-1">${r.body || ''}</p>
+                                <div class="text-accent text-xs mt-1">Verified Purchase</div>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }catch(e){ console.error('updateProductReviews error', e); }
+        }
+        
+        // Load product data when page loads
+        document.addEventListener('DOMContentLoaded', loadProductData);
+        
+        // Track recently viewed products
+        function trackRecentlyViewed(productId) {
+            try {
+                const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+                if (!recentlyViewed.includes(productId)) {
+                    recentlyViewed.unshift(productId);
+                    if (recentlyViewed.length > 10) recentlyViewed.pop(); // Keep only 10
+                    localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+                    console.log('📱 Tracked recently viewed product:', productId);
+                }
+            } catch (error) {
+                console.error('Error tracking recently viewed:', error);
+            }
+        }
+        
+        // Update cart counter on page load
+        updateCartCounter();
+
+        // Update size chart table with dynamic data
+        function updateSizeChart(sizeChartData) {
+            const tbody = document.getElementById('size-chart-tbody');
+            if (!tbody) return;
+            
+            try {
+                // Parse size chart data if it's a string
+                const sizeChart = typeof sizeChartData === 'string' 
+                    ? JSON.parse(sizeChartData) 
+                    : sizeChartData;
+                
+                // Define size order
+                const sizeOrder = ['S', 'M', 'L', 'XL', '2XL'];
+                
+                // Generate table rows
+                const rows = sizeOrder.map(size => {
+                    const measurements = sizeChart.sizes ? sizeChart.sizes[size] : sizeChart[size];
+
+                    if (!measurements) {
+                        return '';
+                    }
+
+                    return `
+                        <tr class="border-b border-surface-light">
+                            <td class="py-3 font-semibold">${size}</td>
+                            <td class="py-3">${measurements.chest || 'N/A'}"</td>
+                            <td class="py-3">${measurements.length || 'N/A'}"</td>
+                        </tr>
+                    `;
+                }).filter(row => row !== '').join('');
+                
+                tbody.innerHTML = rows;
+            } catch (error) {
+                console.error('❌ Error updating size chart:', error);
+                // Fallback to default adult t-shirt sizes
+                tbody.innerHTML = `
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-semibold">S</td>
+                        <td class="py-3">18"</td>
+                        <td class="py-3">28"</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-semibold">M</td>
+                        <td class="py-3">20"</td>
+                        <td class="py-3">29"</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-semibold">L</td>
+                        <td class="py-3">22"</td>
+                        <td class="py-3">30"</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-semibold">XL</td>
+                        <td class="py-3">24"</td>
+                        <td class="py-3">31"</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 font-semibold">2XL</td>
+                        <td class="py-3">26"</td>
+                        <td class="py-3">32"</td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // Inject schema markup for SEO
+        function injectSchemaMarkup(schema) {
+            try {
+                // Remove any existing schema
+                const existingSchema = document.querySelector('script[type="application/ld+json"]');
+                if (existingSchema) {
+                    existingSchema.remove();
+                }
+                
+                // Create new schema script
+                const schemaScript = document.createElement('script');
+                schemaScript.type = 'application/ld+json';
+                schemaScript.textContent = JSON.stringify(schema, null, 2);
+                
+                // Add to head
+                document.head.appendChild(schemaScript);
+                
+                console.log('✅ Schema markup injected for SEO:', schema['@type']);
+            } catch (error) {
+                console.error('❌ Error injecting schema markup:', error);
+            }
+        }
+        
+        // Load product data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOMContentLoaded event fired');
+            loadProductData();
+        });
+        
+        // Also try calling it immediately
+        console.log('🔍 Calling loadProductData immediately');
+        loadProductData();
+        
+    </script>
+<script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
+<script>
+  if (!window.__DHWS_INJECTOR_VERSION__) {
+    var s = document.createElement('script');
+    s.src = (location.pathname.includes('/pages/') ? '../public/mobile-menu-injector.js?v=20250809d' : 'public/mobile-menu-injector.js?v=20250809d');
+    document.head.appendChild(s);
+  }
+</script>
+</body>
+</html>

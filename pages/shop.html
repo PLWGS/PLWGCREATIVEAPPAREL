@@ -5,8 +5,218 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Custom T-Shirts Online | Design Your Own Shirt | Shop T-Shirt Printing | PLWGS Creative Apparel</title>
     <meta name="description" content="Shop custom t-shirts online with professional DTG printing. Design your own shirt or browse our creative collection. Custom t-shirt printing services with fast shipping and quality guarantee." />
-    <link rel="stylesheet" href="../css/main.css" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff8306',
+                        'primary-light': '#ffa726',
+                        'primary-dark': '#e65100',
+                        'glass-white': 'rgba(255, 255, 255, 0.1)',
+                        'glass-black': 'rgba(0, 0, 0, 0.8)',
+                        'glass-orange': 'rgba(255, 131, 6, 0.1)',
+                        accent: '#ff8306',
+                        background: '#000000',
+                        'text-primary': '#ffffff',
+                        'text-secondary': '#d1d5db',
+                        surface: '#1f2937',
+                        'surface-light': '#374151',
+                        'surface-dark': '#111827'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'orbitron': ['Orbitron', 'sans-serif']
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
+                        'glass': '20px'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'scale-in': 'scaleIn 0.5s ease-out',
+                        'pulse-orange': 'pulseOrange 2s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 20px rgba(255, 131, 6, 0.4)' },
+                            '100%': { boxShadow: '0 0 40px rgba(255, 131, 6, 0.8)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(50px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        pulseOrange: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(255, 131, 6, 0.4)' },
+                            '50%': { boxShadow: '0 0 30px rgba(255, 131, 6, 0.8)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
+        /* BLACK BACKGROUND BASE */
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Glass Morphism - Black Theme */
+        .glass {
+            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-white {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 131, 6, 0.2);
+            color: #000000;
+        }
+        
+        .glass-orange {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 131, 6, 0.1);
+            border: 1px solid rgba(255, 131, 6, 0.3);
+        }
+
+        .glass-nav {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 131, 6, 0.1);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 131, 6, 0.2);
+        }
+        
+        /* ORANGE GRADIENT TEXT */
+        .gradient-text {
+            background: linear-gradient(135deg, #ff8306, #ffa726, #ffcc80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #ff8306, #ffa726, #ffcc80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* ORANGE BUTTONS - Maximum Impact */
+        .btn-primary {
+            background: linear-gradient(135deg, #ff8306, #ffa726);
+            color: #000000;
+            font-weight: 700;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 131, 6, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 131, 6, 0.7);
+            background: linear-gradient(135deg, #ffa726, #ffcc80);
+        }
+        
+        /* Secondary Button */
+        .btn-secondary {
+            background: transparent;
+            color: #ff8306;
+            border: 2px solid #ff8306;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-secondary:hover {
+            background: #ff8306;
+            color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 131, 6, 0.4);
+        }
+
+        /* Input Fields */
+        .input-field {
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000;
+            border: 2px solid rgba(255, 131, 6, 0.3);
+            border-radius: 25px;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #ff8306;
+            box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
+        }
+
         /* Particle Animation Styles */
         .particles-container {
             position: fixed;
@@ -22,7 +232,7 @@
             position: absolute;
             width: 4px;
             height: 4px;
-            background: #00bcd4;
+            background: #ff8306;
             border-radius: 50%;
             opacity: 0.6;
             animation: float 6s ease-in-out infinite;
@@ -43,19 +253,6 @@
             animation-duration: 10s;
         }
         
-        /* Glassmorphism Effects */
-        .glass-nav {
-            backdrop-filter: blur(10px);
-            background: rgba(42, 42, 42, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .glass-card {
-            backdrop-filter: blur(15px);
-            background: rgba(42, 42, 42, 0.6);
-            border: 1px solid rgba(0, 188, 212, 0.2);
-        }
-        
         /* Product Card Hover Effects */
         .product-card {
             transition: all 0.3s ease;
@@ -65,7 +262,7 @@
         
         .product-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 188, 212, 0.3);
+            box-shadow: 0 20px 40px rgba(255, 131, 6, 0.3);
         }
         
         .product-card .product-overlay {
@@ -116,7 +313,7 @@
         }
         
         .filter-sidebar::-webkit-scrollbar-thumb {
-            background: #00bcd4;
+            background: #ff8306;
             border-radius: 3px;
         }
         
@@ -126,9 +323,9 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: rgba(42, 42, 42, 0.95);
+            background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 188, 212, 0.2);
+            border: 1px solid rgba(255, 131, 6, 0.2);
             border-radius: 0.5rem;
             max-height: 300px;
             overflow-y: auto;
@@ -156,8 +353,8 @@
         }
         
         .size-selector:focus {
-            border-color: #00bcd4;
-            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+            border-color: #ff8306;
+            box-shadow: 0 0 0 3px rgba(255, 131, 6, 0.1);
         }
         
         .size-selector option {
@@ -170,8 +367,8 @@
             display: inline-flex;
             align-items: center;
             padding: 0.5rem 1rem;
-            background: rgba(42, 42, 42, 0.8);
-            border: 1px solid rgba(0, 188, 212, 0.3);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 131, 6, 0.3);
             border-radius: 2rem;
             font-size: 0.875rem;
             white-space: nowrap;
@@ -179,8 +376,8 @@
         }
         
         .filter-chip.active {
-            background: rgba(0, 188, 212, 0.2);
-            border-color: #00bcd4;
+            background: rgba(255, 131, 6, 0.2);
+            border-color: #ff8306;
         }
         
         /* Recently Viewed Bar */
@@ -189,9 +386,9 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(42, 42, 42, 0.95);
+            background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(0, 188, 212, 0.2);
+            border-top: 1px solid rgba(255, 131, 6, 0.2);
             padding: 1.5rem;
             transform: translateY(100%);
             transition: transform 0.3s ease;
@@ -207,7 +404,7 @@
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
-            background: linear-gradient(45deg, #f59e0b, #fbbf24);
+            background: linear-gradient(45deg, #ff8306, #ffa726);
             color: #000;
             padding: 0.25rem 0.5rem;
             border-radius: 1rem;
@@ -282,73 +479,67 @@
         <!-- Particles will be generated by JavaScript -->
     </div>
 
-    <!-- Navigation Header -->
+    <!-- Navigation Header - Black Glass -->
     <header class="glass-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300">
         <nav class="container mx-auto px-8 py-5">
             <!-- Desktop Layout -->
             <div class="hidden lg:flex items-center justify-between">
                 <!-- Logo -->
-                <div class="flex items-center space-x-3">
-                    <svg class="w-10 h-10 text-accent" viewBox="0 0 40 40" fill="currentColor">
-                        <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
-                        <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
-                        <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
-                    </svg>
-                    <span class="font-orbitron text-xl font-bold text-gradient">PlwgsCreativeApparel</span>
+                <div class="flex items-center space-x-4">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-r from-primary to-primary-light flex items-center justify-center animate-pulse-orange">
+                        <span class="text-black font-orbitron font-black text-2xl">P</span>
+                    </div>
+                    <div>
+                        <h1 class="font-orbitron font-black text-2xl gradient-text">PLWG'S</h1>
+                        <p class="text-xs text-accent font-semibold tracking-wider">CREATIVE APPAREL</p>
+                    </div>
                 </div>
 
                 <!-- Desktop Navigation -->
-                <div class="flex items-center space-x-8">
-                    <a href="../index.html" class="text-text-primary hover:text-accent transition-colors duration-300">Home</a>
-                    <a href="shop.html" class="text-accent font-medium">Shop</a>
-                    <a href="customer-login.html" class="text-text-primary hover:text-accent transition-colors duration-300" id="nav-login-link">Login</a>
-                    <a href="account.html" class="text-text-primary hover:text-accent transition-colors duration-300 hidden" id="nav-account-link">My Account</a>
-                    <a href="admin.html" class="text-text-primary hover:text-accent transition-colors duration-300">Admin</a>
+                <div class="flex items-center space-x-10">
+                    <a href="../index.html" class="text-white hover:text-accent transition-colors duration-300 font-semibold text-lg">Home</a>
+                    <a href="shop.html" class="text-accent font-bold text-lg border-b-2 border-primary">Shop</a>
+                    <a href="customer-login.html" class="text-white hover:text-accent transition-colors duration-300 font-semibold text-lg" id="nav-login-link">Login</a>
+                    <a href="account.html" class="text-white hover:text-accent transition-colors duration-300 hidden font-semibold text-lg" id="nav-account-link">My Account</a>
+                    <a href="admin.html" class="text-white hover:text-accent transition-colors duration-300 font-semibold text-lg">Admin</a>
                 </div>
 
                 <!-- Desktop Cart & Search -->
-                <div class="flex items-center space-x-4">
-                    <!-- Login/Account Status -->
-                    <div id="auth-status" class="block">
-                        <a href="customer-login.html" class="text-accent hover:text-white transition-colors duration-300 font-medium" id="login-link">Login</a>
-                        <span class="text-text-secondary mx-2">|</span>
-                        <a href="account.html" class="text-text-primary hover:text-accent transition-colors duration-300 hidden" id="account-link">My Account</a>
-                        <button class="text-text-primary hover:text-accent transition-colors duration-300 hidden" id="logout-btn">Logout</button>
-                    </div>
-                    
-                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
+                <div class="flex items-center space-x-6">
+                    <button class="text-white hover:text-accent transition-colors duration-300 relative p-3 glass rounded-full" id="desktop-cart-btn">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
-                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-counter">0</span>
+                        <span class="absolute -top-1 -right-1 bg-primary text-black text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold animate-pulse-orange" id="cart-counter">0</span>
                     </button>
                 </div>
             </div>
 
             <!-- Mobile Layout -->
             <div class="lg:hidden flex items-center justify-between w-full">
-                <!-- Mobile Logo (More Spacious) -->
+                <!-- Mobile Logo -->
                 <div class="flex items-center space-x-3 flex-shrink-0">
-                    <svg class="w-9 h-9 text-accent flex-shrink-0" viewBox="0 0 40 40" fill="currentColor">
-                        <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
-                        <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
-                        <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
-                    </svg>
-                    <span class="font-orbitron text-base font-bold text-gradient">PLWGS</span>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary-light flex items-center justify-center animate-pulse-orange">
+                        <span class="text-black font-orbitron font-black text-xl">P</span>
+                    </div>
+                    <div>
+                        <h1 class="font-orbitron font-black text-lg gradient-text">PLWG'S</h1>
+                        <p class="text-xs text-accent font-semibold">CREATIVE APPAREL</p>
+                    </div>
                 </div>
 
-                <!-- Mobile Actions - More Generous Spacing -->
+                <!-- Mobile Actions -->
                 <div class="flex items-center space-x-3 flex-shrink-0">
                     <!-- Cart Button -->
-                    <button class="mobile-cart-btn relative text-white hover:text-accent transition-colors duration-300 p-3 rounded-lg hover:bg-gray-800 bg-gray-700 border border-gray-600 flex-shrink-0" aria-label="Cart" onclick="window.location.href='cart.html'">
+                    <button class="mobile-cart-btn relative text-white hover:text-accent transition-colors duration-300 p-3 rounded-lg hover:bg-gray-800 glass border border-gray-600 flex-shrink-0" aria-label="Cart" id="mobile-cart-btn">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
-                        <span class="absolute -top-1 -right-1 bg-accent text-black text-xs rounded-full w-4 h-4 flex items-center justify-center text-xs leading-none" id="cart-counter-mobile">0</span>
+                        <span class="absolute -top-1 -right-1 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center text-xs leading-none font-bold" id="cart-counter-mobile">0</span>
                     </button>
                     
                     <!-- Menu Button -->
-                    <button id="mobile-menu-toggle" class="text-white hover:text-accent transition-colors duration-300 p-3 rounded-lg hover:bg-gray-800 bg-gray-700 border border-gray-600 flex-shrink-0" aria-label="Menu">
+                    <button id="mobile-menu-toggle" class="text-white hover:text-accent transition-colors duration-300 p-3 rounded-lg hover:bg-gray-800 glass border border-gray-600 flex-shrink-0" aria-label="Menu">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
@@ -397,12 +588,21 @@
                             <svg class="w-5 h-5 text-text-secondary absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
-                        </div>
                         
                         <!-- Search Dropdown -->
-                        <div class="search-dropdown hidden" id="search-dropdown">
+                            <div id="search-dropdown" class="absolute top-full left-0 right-0 mt-2 bg-surface border border-surface-light rounded-lg shadow-xl z-50 hidden">
                             <div class="p-4">
-                                <h3 class="font-orbitron text-sm font-bold text-accent mb-3">Popular Searches</h3>
+                                    <div class="text-sm text-text-secondary mb-2">Search suggestions:</div>
+                                    <div class="space-y-1">
+                                        <div class="px-3 py-2 hover:bg-surface-light rounded cursor-pointer text-sm" data-search="halloween">Halloween</div>
+                                        <div class="px-3 py-2 hover:bg-surface-light rounded cursor-pointer text-sm" data-search="music">Music</div>
+                                        <div class="px-3 py-2 hover:bg-surface-light rounded cursor-pointer text-sm" data-search="funny">Funny</div>
+                                        <div class="px-3 py-2 hover:bg-surface-light rounded cursor-pointer text-sm" data-search="dad">Dad</div>
+                                        <div class="px-3 py-2 hover:bg-surface-light rounded cursor-pointer text-sm" data-search="birthday">Birthday</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                                 <div class="space-y-2">
                                     <button class="flex items-center space-x-3 w-full text-left hover:bg-surface-light p-2 rounded">
                                         <div class="w-8 h-8 rounded bg-accent bg-opacity-20 flex items-center justify-center">
@@ -576,7 +776,7 @@
                                         <span class="text-text-primary">Mother's Day</span>
                                         <span class="text-text-secondary text-sm ml-auto" id="mothers-day-count">(0)</span>
                                     </label>
-                                                                          <label class="flex items-center space-x-3 cursor-pointer">
+                                                                      <label class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" class="w-4 h-4 text-accent bg-surface border-surface-light rounded focus:ring-accent" />
                                         <span class="text-text-primary">Father's Day</span>
                                         <span class="text-text-secondary text-sm ml-auto" id="fathers-day-count">(0)</span>
@@ -814,88 +1014,86 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-surface-dark border-t border-surface-light py-16 relative z-10">
+    <!-- Footer - Black Glass -->
+    <footer class="glass py-20 relative border-t-2 border-primary">
         <div class="container mx-auto px-6">
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                 <!-- Brand -->
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-3">
-                        <svg class="w-8 h-8 text-accent" viewBox="0 0 40 40" fill="currentColor">
-                            <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
-                            <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
-                            <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
-                        </svg>
-                        <span class="font-orbitron text-lg font-bold text-gradient">PlwgsCreativeApparel</span>
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-primary-light flex items-center justify-center animate-pulse-orange">
+                            <span class="text-black font-orbitron font-black text-2xl">P</span>
+                        </div>
+                        <div>
+                            <h3 class="font-orbitron font-black text-2xl gradient-text">PLWG'S</h3>
+                            <p class="text-sm text-accent font-bold tracking-wider">CREATIVE APPAREL</p>
+                        </div>
                     </div>
-                    <p class="text-text-secondary text-sm">
-                        Creative rebellion through wearable art. Transforming everyday apparel into conversation starters since 2023.
+                    <p class="text-white text-lg leading-relaxed">
+                        <span class="text-accent font-bold">Creative rebellion</span> through wearable art. Transforming everyday apparel into conversation starters since 2023.
                     </p>
                 </div>
 
                 <!-- Custom T-Shirt Services -->
                 <div>
-                    <h3 class="font-orbitron text-white font-bold mb-4">Custom T-Shirt Services</h3>
-                    <ul class="space-y-2">
-                        <li><a href="../index.html" class="text-text-secondary hover:text-accent transition-colors">Custom T-Shirt Printing Online</a></li>
-                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Design Your Own Shirt</a></li>
-                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">DTG Printing Services</a></li>
-                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Custom T-Shirt Collections</a></li>
+                    <h3 class="font-orbitron font-black text-accent mb-6 text-xl uppercase tracking-wider">Custom T-Shirt Services</h3>
+                    <ul class="space-y-3">
+                        <li><a href="../index.html" class="text-white hover:text-accent transition-colors text-lg font-medium">Custom T-Shirt Printing Online</a></li>
+                        <li><a href="shop.html" class="text-white hover:text-accent transition-colors text-lg font-medium">Design Your Own Shirt</a></li>
+                        <li><a href="shop.html" class="text-white hover:text-accent transition-colors text-lg font-medium">DTG Printing Services</a></li>
+                        <li><a href="shop.html" class="text-white hover:text-accent transition-colors text-lg font-medium">Custom T-Shirt Collections</a></li>
                     </ul>
                 </div>
 
                 <!-- Customer Care -->
                 <div>
-                    <h3 class="font-orbitron text-white font-bold mb-4">Customer Care</h3>
-                    <ul class="space-y-2">
-                        <li><a href="account.html" class="text-text-secondary hover:text-accent transition-colors">My Account</a></li>
-                        <li><a href="customer-login.html" class="text-text-secondary hover:text-accent transition-colors">Customer Login</a></li>
-                        <li><a href="cart.html" class="text-text-secondary hover:text-accent transition-colors">Shopping Cart</a></li>
-                        <li><a href="checkout.html" class="text-text-secondary hover:text-accent transition-colors">Checkout</a></li>
+                    <h3 class="font-orbitron font-black text-accent mb-6 text-xl uppercase tracking-wider">Customer Care</h3>
+                    <ul class="space-y-3">
+                        <li><a href="account.html" class="text-white hover:text-accent transition-colors text-lg font-medium">My Account</a></li>
+                        <li><a href="customer-login.html" class="text-white hover:text-accent transition-colors text-lg font-medium">Customer Login</a></li>
+                        <li><a href="cart.html" class="text-white hover:text-accent transition-colors text-lg font-medium">Shopping Cart</a></li>
+                        <li><a href="checkout.html" class="text-white hover:text-accent transition-colors text-lg font-medium">Checkout</a></li>
                     </ul>
                 </div>
 
                 <!-- Connect -->
                 <div>
-                    <h3 class="font-orbitron text-white font-bold mb-4">Connect</h3>
-                    <div class="flex space-x-4 mb-4">
-                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                    <h3 class="font-orbitron font-black text-accent mb-6 text-xl uppercase tracking-wider">Connect</h3>
+                    <div class="flex space-x-4 mb-6">
+                        <a href="javascript:void(0)" class="text-white hover:text-accent transition-colors p-3 glass rounded-full">
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
                             </svg>
                         </a>
-                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                        <a href="javascript:void(0)" class="text-white hover:text-accent transition-colors p-3 glass rounded-full">
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"/>
                             </svg>
                         </a>
-                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                        <a href="javascript:void(0)" class="text-white hover:text-accent transition-colors p-3 glass rounded-full">
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                             </svg>
                         </a>
                     </div>
-                    <p class="text-text-secondary text-sm">
-                        Follow us for daily inspiration and behind-the-scenes content.
+                    <p class="text-white text-lg leading-relaxed">
+                        Follow us for daily <span class="text-accent font-bold">inspiration</span> and behind-the-scenes content.
                     </p>
                 </div>
             </div>
 
-            <div class="border-t border-surface-light pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-text-secondary text-sm">
-                    © 2025 PlwgsCreativeApparel. All Rights Reserved.
+            <div class="border-t-2 border-primary pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-white text-lg font-medium">
+                    © 2025 <span class="text-accent font-bold">PLWG'S Creative Apparel</span>. All Rights Reserved.
                 </p>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                                            <a href="privacy-policy.html" class="text-text-secondary hover:text-accent transition-colors text-sm">Privacy Policy</a>
-                        <a href="terms-of-service.html" class="text-text-secondary hover:text-accent transition-colors text-sm">Terms of Service</a>
-                    <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors text-sm">Shipping Info</a>
+                <div class="flex space-x-8 mt-4 md:mt-0">
+                    <a href="privacy-policy.html" class="text-white hover:text-accent transition-colors font-medium">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="text-white hover:text-accent transition-colors font-medium">Terms of Service</a>
+                    <a href="javascript:void(0)" class="text-white hover:text-accent transition-colors font-medium">Shipping Info</a>
                 </div>
             </div>
         </div>
     </footer>
-
-    <!-- Frontend Enhancements -->
-    <script src="../public/frontend-enhancements.js"></script>
 
     <!-- JavaScript -->
     <script>
@@ -915,14 +1113,14 @@
             modalSecondaryBtn.textContent = secondaryText;
             
             // Set actions
-            modalPrimaryBtn.onclick = () => {
+            modalPrimaryBtn.addEventListener('click', () => {
                 closeCustomModal();
                 if (primaryAction) primaryAction();
-            };
-            modalSecondaryBtn.onclick = () => {
+            });
+            modalSecondaryBtn.addEventListener('click', () => {
                 closeCustomModal();
                 if (secondaryAction) secondaryAction();
-            };
+            });
             
             // Show modal with animation
             modal.classList.remove('hidden');
@@ -987,12 +1185,12 @@
                     mobileMenu.id = 'mobile-menu-drawer';
                     mobileMenu.className = 'fixed inset-0 z-50 lg:hidden';
                     mobileMenu.innerHTML = `
-                        <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeMobileMenu()"></div>
+                        <div class="fixed inset-0 bg-black bg-opacity-50" id="mobile-menu-backdrop"></div>
                         <div class="fixed top-0 right-0 h-full w-80 bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out">
                             <div class="p-6">
                                 <div class="flex justify-between items-center mb-8">
                                     <h2 class="text-xl font-bold text-white">Menu</h2>
-                                    <button onclick="closeMobileMenu()" class="text-white hover:text-accent transition-colors">
+                                    <button id="mobile-menu-close" class="text-white hover:text-accent transition-colors">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                         </svg>
@@ -1009,6 +1207,10 @@
                     `;
                     document.body.appendChild(mobileMenu);
                     document.body.style.overflow = 'hidden';
+                    
+                    // Add event listeners for mobile menu
+                    document.getElementById('mobile-menu-backdrop').addEventListener('click', closeMobileMenu);
+                    document.getElementById('mobile-menu-close').addEventListener('click', closeMobileMenu);
                     
                     // Animate in
                     setTimeout(() => {
@@ -1035,19 +1237,73 @@
             }
         }
 
-        // Search Dropdown
+        // Search functionality
         const searchInput = document.getElementById('search-input');
         const searchDropdown = document.getElementById('search-dropdown');
 
-        searchInput.addEventListener('focus', () => {
-            searchDropdown.classList.remove('hidden');
-        });
+        // Search input event listener
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                // console.log('🔍 Searching for:', searchTerm);
+                
+                if (searchTerm.length === 0) {
+                    // Show all products if search is empty
+                    window.filteredProducts = [];
+                    displayProducts(0, allProducts);
+                    updateProductCounts();
+                } else {
+                    // Filter products based on search term
+                    const filteredProducts = allProducts.filter(product => {
+                        const searchableText = [
+                            product.name,
+                            product.description,
+                            product.category,
+                            ...(product.tags || []),
+                            ...(product.colors || [])
+                        ].join(' ').toLowerCase();
+                        
+                        return searchableText.includes(searchTerm);
+                    });
+                    
+                    // console.log('🔍 Found products:', filteredProducts.length);
+                    
+                    // Update filtered products and display
+                    window.filteredProducts = filteredProducts;
+                    displayProducts(0, filteredProducts);
+                    updateProductCounts(filteredProducts.length);
+                }
+            });
 
-        searchInput.addEventListener('blur', () => {
-            setTimeout(() => {
-                searchDropdown.classList.add('hidden');
-            }, 200);
-        });
+            // Search dropdown focus/blur
+            searchInput.addEventListener('focus', () => {
+                if (searchDropdown) {
+                    searchDropdown.classList.remove('hidden');
+                }
+            });
+
+            searchInput.addEventListener('blur', () => {
+                if (searchDropdown) {
+                    setTimeout(() => {
+                        searchDropdown.classList.add('hidden');
+                    }, 200);
+                }
+            });
+
+            // Search suggestion clicks
+            const searchSuggestions = document.querySelectorAll('[data-search]');
+            searchSuggestions.forEach(suggestion => {
+                suggestion.addEventListener('click', () => {
+                    const searchTerm = suggestion.dataset.search;
+                    searchInput.value = searchTerm;
+                    searchDropdown.classList.add('hidden');
+                    
+                    // Trigger search
+                    const event = new Event('input', { bubbles: true });
+                    searchInput.dispatchEvent(event);
+                });
+            });
+        }
 
         // Filter Chips (Mobile)
         const filterChips = document.querySelectorAll('.filter-chip');
@@ -1210,7 +1466,7 @@
             
             productCard.innerHTML = `
                 <div class="relative">
-                    <img src="${productImage}" alt="${productTitle}" class="w-full h-64 object-cover" loading="lazy" onerror="console.error('❌ Image failed to load:', this.src); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='; this.onerror=null;" onload="console.log('✅ Image loaded successfully:', this.src);">
+                    <img src="${productImage}" alt="${productTitle}" class="w-full h-64 object-cover" loading="lazy" data-product-image>
                     <div class="product-overlay"></div>
                     <div class="product-info">
                         <button class="btn-primary w-full text-sm view-details-btn" data-product="${encodeURIComponent(JSON.stringify(product))}">View Details</button>
@@ -1290,6 +1546,20 @@
                 });
             }
             
+            // Add image error handling
+            const productImageElement = productCard.querySelector('[data-product-image]');
+            if (productImageElement) {
+                productImageElement.addEventListener('error', function() {
+                    console.error('❌ Image failed to load:', this.src);
+                    this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
+                    this.onerror = null;
+                });
+                
+                productImageElement.addEventListener('load', function() {
+                    console.log('✅ Image loaded successfully:', this.src);
+                });
+            }
+            
             // Add event listener for size selector to update price
             const sizeSelector = productCard.querySelector('.size-selector');
             if (sizeSelector) {
@@ -1306,42 +1576,6 @@
             }
             
             return productCard;
-        }
-
-        // Function to handle size changes and price updates
-        function updateProductPrice(productCard, selectedSize) {
-            const sizeSelector = productCard.querySelector('.size-selector');
-            if (!sizeSelector) return;
-            
-            const selectedOption = sizeSelector.querySelector(`option[value="${selectedSize}"]`);
-            if (selectedOption) {
-                const newPrice = parseFloat(selectedOption.dataset.price);
-                const priceDisplay = productCard.querySelector('.product-price-display');
-                
-                if (priceDisplay && !isNaN(newPrice)) {
-                    priceDisplay.textContent = `$${newPrice.toFixed(2)}`;
-                    console.log(`💰 Price updated to $${newPrice.toFixed(2)} for size ${selectedSize}`);
-                }
-            }
-        }
-
-        // Show login prompt function
-        function showLoginPrompt(message = 'Please log in to continue') {
-            const loginPrompt = document.createElement('div');
-            loginPrompt.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            loginPrompt.innerHTML = `
-                <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
-                    <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Login Required</h2>
-                    <p class="text-text-secondary mb-6">${message}</p>
-                    <div class="space-y-4">
-                        <button class="btn-primary w-full" onclick="window.location.href='customer-login.html'">Log In</button>
-                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" onclick="window.location.href='customer-login.html'">Create Account</button>
-                        <button class="text-text-secondary w-full py-2 hover:text-accent transition-colors" onclick="this.closest('.fixed').remove()">Cancel</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(loginPrompt);
         }
 
         // Function to add item to cart via API
@@ -1459,6 +1693,36 @@
             }, 3000);
         }
 
+        // Show login prompt function
+        function showLoginPrompt(message = 'Please log in to continue') {
+            const loginPrompt = document.createElement('div');
+            loginPrompt.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            loginPrompt.innerHTML = `
+                <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
+                    <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Login Required</h2>
+                    <p class="text-text-secondary mb-6">${message}</p>
+                    <div class="space-y-4">
+                        <button class="btn-primary w-full" id="login-btn">Log In</button>
+                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" id="create-account-btn">Create Account</button>
+                        <button class="text-text-secondary w-full py-2 hover:text-accent transition-colors" id="cancel-login-btn">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(loginPrompt);
+            
+            // Add event listeners for the buttons
+            document.getElementById('login-btn').addEventListener('click', () => {
+                window.location.href = 'customer-login.html';
+            });
+            document.getElementById('create-account-btn').addEventListener('click', () => {
+                window.location.href = 'customer-login.html';
+            });
+            document.getElementById('cancel-login-btn').addEventListener('click', () => {
+                loginPrompt.remove();
+            });
+        }
+
         // Function to update product counts and display
         function updateProductCounts(filteredProductsCount = null) {
             const totalProducts = filteredProductsCount !== null ? filteredProductsCount : allProducts.length;
@@ -1506,8 +1770,15 @@
                 return;
             }
             
-            // Clear current products
+            // Clear current products and remove loading skeleton
             productsGrid.innerHTML = '';
+            
+            // Remove loading skeleton if it exists
+            const loadingSkeleton = document.getElementById('loading-skeleton');
+            if (loadingSkeleton) {
+                loadingSkeleton.remove();
+                console.log('✅ Removed loading skeleton');
+            }
             
             // Calculate start and end indices for current page
             const startIndex = page * productsPerPage;
@@ -1549,40 +1820,114 @@
             displayProducts(currentPage, productsToUse); // Display the relevant list
         }
 
-        // Function to reset filters and return to showing all products
-        function resetFilters() {
-            // Clear active filter buttons visually
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-                btn.setAttribute('aria-pressed', 'false');
-            });
+        // Cart counter functionality
+        async function updateCartCounter() {
+            try {
+                const token = localStorage.getItem('customerToken');
+                if (!token) {
+                    document.getElementById('cart-counter').textContent = '0';
+                    document.getElementById('cart-counter-mobile').textContent = '0';
+                    return;
+                }
 
-            // Clear the global filteredProducts array
-            window.filteredProducts = [];
+                const response = await fetch('/api/cart', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
 
-            // Reset to first page
-            currentPage = 0;
-
-            // Clear search
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                searchInput.value = '';
+                if (response.ok) {
+                    const cartData = await response.json();
+                    const itemCount = cartData.items ? cartData.items.length : 0;
+                    document.getElementById('cart-counter').textContent = itemCount.toString();
+                    document.getElementById('cart-counter-mobile').textContent = itemCount.toString();
+                } else if (response.status === 403) {
+                    // Token expired or invalid, clear it and show 0
+                    localStorage.removeItem('customerToken');
+                    document.getElementById('cart-counter').textContent = '0';
+                    document.getElementById('cart-counter-mobile').textContent = '0';
+                    console.log('Cart token expired, cleared from localStorage');
+                } else {
+                    document.getElementById('cart-counter').textContent = '0';
+                    document.getElementById('cart-counter-mobile').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error updating cart counter:', error);
+                document.getElementById('cart-counter').textContent = '0';
+                document.getElementById('cart-counter-mobile').textContent = '0';
             }
+        }
 
-            // Re-display all products from the first page
-            displayProducts(0, window.allProducts);
-
-            // Update counts based on all products
-            if (window.allProducts) {
-                updateProductCounts(window.allProducts.length);
+        // Check authentication status and update UI
+        function checkAuthStatus() {
+            const token = localStorage.getItem('customerToken');
+            const authStatus = document.getElementById('auth-status');
+            const loginLink = document.getElementById('login-link');
+            const accountLink = document.getElementById('account-link');
+            const logoutBtn = document.getElementById('logout-btn');
+            const mobileLoginLink = document.getElementById('mobile-login-link');
+            const mobileAccountLink = document.getElementById('mobile-account-link');
+            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+            const loginCta = document.getElementById('login-cta');
+            const navLoginLink = document.getElementById('nav-login-link');
+            const navAccountLink = document.getElementById('nav-account-link');
+            
+            if (token) {
+                // User is logged in
+                if (loginLink) loginLink.classList.add('hidden');
+                if (accountLink) accountLink.classList.remove('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (mobileLoginLink) mobileLoginLink.classList.add('hidden');
+                if (mobileAccountLink) mobileAccountLink.classList.remove('hidden');
+                if (mobileLogoutBtn) mobileLogoutBtn.classList.remove('hidden');
+                if (loginCta) loginCta.classList.add('hidden');
+                if (navLoginLink) navLoginLink.classList.add('hidden');
+                if (navAccountLink) navAccountLink.classList.remove('hidden');
+                
+                // Add logout functionality
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        localStorage.removeItem('customerToken');
+                        checkAuthStatus();
+                        updateCartCounter();
+                        showNotification('Logged out successfully', 'success');
+                    });
+                }
+                if (mobileLogoutBtn) {
+                    mobileLogoutBtn.addEventListener('click', () => {
+                        localStorage.removeItem('customerToken');
+                        checkAuthStatus();
+                        updateCartCounter();
+                        showNotification('Logged out successfully', 'success');
+                    });
+                }
+            } else {
+                // User is not logged in
+                if (loginLink) loginLink.classList.remove('hidden');
+                if (accountLink) accountLink.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
+                if (mobileLoginLink) mobileLoginLink.classList.remove('hidden');
+                if (mobileAccountLink) mobileAccountLink.classList.add('hidden');
+                if (mobileLogoutBtn) mobileLogoutBtn.classList.add('hidden');
+                if (loginCta) loginCta.classList.remove('hidden');
+                if (navLoginLink) navLoginLink.classList.remove('hidden');
+                if (navAccountLink) navAccountLink.classList.add('hidden');
             }
-            console.log('Filters reset, displaying all products.');
         }
 
 
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('header');
+            if (window.scrollY > 100) {
+                navbar.classList.add('backdrop-blur-lg');
+            } else {
+                navbar.classList.remove('backdrop-blur-lg');
+            }
+        });
 
-        // Initialize with first page - moved to after categories and products are loaded
-
+        // Load more button event listener
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', () => {
                 // Show loading state
@@ -1628,18 +1973,171 @@
             });
         });
 
-        // Initialize particles on load
-        document.addEventListener('DOMContentLoaded', createParticles);
-
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const navbar = document.querySelector('header');
-            if (window.scrollY > 100) {
-                navbar.classList.add('backdrop-blur-lg');
-            } else {
-                navbar.classList.remove('backdrop-blur-lg');
+        // Load smart recommendations
+        async function loadRecommendations() {
+            try {
+                console.log('🎯 Loading recommendations...');
+                const recommendationsContainer = document.getElementById('recommendations-container');
+                
+                if (!recommendationsContainer) {
+                    console.error('❌ Recommendations container not found');
+                    return;
+                }
+                
+                // Get random products for recommendations
+                const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
+                const recommendations = shuffled.slice(0, 4);
+                
+                console.log('🎯 Recommendations loaded:', recommendations.length);
+                displayRecommendations(recommendations);
+            } catch (error) {
+                console.error('❌ Error loading recommendations:', error);
+                showFallbackRecommendations();
             }
-        });
+        }
+
+        function displayRecommendations(recommendations) {
+            const recommendationsContainer = document.getElementById('recommendations-container');
+            if (!recommendationsContainer) return;
+            
+            recommendationsContainer.innerHTML = '';
+            
+            recommendations.forEach(product => {
+                const recommendationCard = document.createElement('div');
+                recommendationCard.className = 'glass-card rounded-xl overflow-hidden group cursor-pointer';
+                recommendationCard.addEventListener('click', () => {
+                    window.location.href = `product-details.html?id=${product.id}`;
+                });
+                
+                const productImage = product.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
+                const productTitle = product.name || 'Product';
+                const productPrice = `$${parseFloat(product.price || 20).toFixed(2)}`;
+                
+                recommendationCard.innerHTML = `
+                    <div class="relative">
+                        <img src="${productImage}" alt="${productTitle}" class="w-full h-40 object-cover" loading="lazy">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-white text-sm mb-2 line-clamp-2">${productTitle}</h3>
+                        <p class="text-accent font-bold">${productPrice}</p>
+                    </div>
+                `;
+                
+                recommendationsContainer.appendChild(recommendationCard);
+            });
+        }
+
+        async function showFallbackRecommendations() {
+            const recommendationsContainer = document.getElementById('recommendations-container');
+            if (!recommendationsContainer) return;
+            
+            recommendationsContainer.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <p class="text-text-secondary">No recommendations available at the moment.</p>
+                </div>
+            `;
+        }
+
+        // Load recently viewed products
+        async function loadRecentlyViewedProducts() {
+            try {
+                console.log('📱 Loading recently viewed products...');
+                const recentlyViewedIds = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+                console.log('📱 Recently viewed product IDs from localStorage:', recentlyViewedIds);
+                
+                if (recentlyViewedIds.length > 0) {
+                    console.log('📱 Converting IDs to product objects...');
+                    // Convert IDs to actual product objects
+                    const recentlyViewedProducts = recentlyViewedIds
+                        .map(id => allProducts.find(product => product.id.toString() === id))
+                        .filter(product => product !== undefined); // Remove any undefined products
+                    
+                    console.log('📱 Converted to products:', recentlyViewedProducts.length);
+                    
+                    if (recentlyViewedProducts.length > 0) {
+                        console.log('📱 Displaying recently viewed products');
+                        displayRecentlyViewedProducts(recentlyViewedProducts);
+                    } else {
+                        console.log('📱 No valid products found, showing random fallback');
+                        await loadRandomProductsAsFallback();
+                    }
+                } else {
+                    console.log('📱 No recently viewed products, showing random fallback');
+                    // Show fallback recommendations
+                    await loadRandomProductsAsFallback();
+                }
+            } catch (error) {
+                console.error('❌ Error loading recently viewed products:', error);
+                console.log('📱 Showing hardcoded fallback');
+                showHardcodedRecentlyViewedFallback();
+            }
+        }
+
+        function displayRecentlyViewedProducts(products) {
+            console.log('📱 Displaying recently viewed products:', products);
+            const recentlyViewedContainer = document.getElementById('recently-viewed-products');
+            if (!recentlyViewedContainer) {
+                console.error('❌ Recently viewed container not found');
+                return;
+            }
+            
+            recentlyViewedContainer.innerHTML = '';
+            console.log('📱 Products to display:', products.length);
+            
+            products.slice(0, 3).forEach((product, index) => {
+                console.log(`📱 Creating product card ${index + 1}:`, product.name);
+                const productCard = document.createElement('div');
+                productCard.className = 'flex-shrink-0 w-24 flex flex-col items-center cursor-pointer';
+                productCard.addEventListener('click', () => {
+                    window.location.href = `product-details.html?id=${product.id}`;
+                });
+                
+                const productImage = product.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
+                const productTitle = product.name || 'Product';
+                
+                productCard.innerHTML = `
+                    <div class="w-20 h-20 bg-surface-light rounded-lg flex items-center justify-center mb-2 overflow-hidden">
+                        <img src="${productImage}" alt="${productTitle}" class="w-full h-full object-cover">
+                    </div>
+                    <p class="text-xs text-text-secondary text-center line-clamp-2">${productTitle}</p>
+                `;
+                
+                recentlyViewedContainer.appendChild(productCard);
+            });
+        }
+
+        async function loadRandomProductsAsFallback() {
+            try {
+                console.log('📱 Loading random products as fallback...');
+                console.log('📱 All products available:', allProducts.length);
+                
+                if (allProducts.length === 0) {
+                    console.log('📱 No products available, showing hardcoded fallback');
+                    showHardcodedRecentlyViewedFallback();
+                    return;
+                }
+                
+                const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
+                const randomProducts = shuffled.slice(0, 3);
+                console.log('📱 Random products selected:', randomProducts.length);
+                displayRecentlyViewedProducts(randomProducts);
+            } catch (error) {
+                console.error('❌ Error loading random products:', error);
+                showHardcodedRecentlyViewedFallback();
+            }
+        }
+
+        function showHardcodedRecentlyViewedFallback() {
+            const recentlyViewedContainer = document.getElementById('recently-viewed-products');
+            if (!recentlyViewedContainer) return;
+            
+            recentlyViewedContainer.innerHTML = `
+                <div class="flex-shrink-0 text-center">
+                    <p class="text-text-secondary text-sm">No recently viewed items</p>
+                </div>
+            `;
+        }
 
         // Category filtering functionality
         let selectedCategories = ['All Designs'];
@@ -1805,602 +2303,11 @@
             await applyAllFilters();
         }
         
-        // Load categories when page loads, then load products
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 DOM loaded, starting initialization...');
-            try {
-                await loadCategories();
-                console.log('✅ Categories loaded, now loading products...');
-                await loadProductsFromDatabase();
-                console.log('✅ Initialization complete!');
-                
-                // Load recommendations and recently viewed products after products are loaded
-                console.log('🎯 Loading recommendations...');
-                await loadRecommendations();
-                
-                console.log('👁️ Loading recently viewed products...');
-                await loadRecentlyViewedProducts();
-            } catch (error) {
-                console.error('❌ Error during initialization:', error);
-                // Still try to load products even if categories fail
-                await loadProductsFromDatabase();
-            }
-        });
-
-        // Size filter functionality
-        const sizeButtons = document.querySelectorAll('button[class*="border-"]');
-        sizeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Remove active state from all size buttons
-                sizeButtons.forEach(btn => {
-                    btn.classList.remove('border-accent', 'text-accent', 'bg-accent', 'bg-opacity-10');
-                    btn.classList.add('border-surface-light', 'text-text-primary');
-                });
-                
-                // Add active state to clicked button
-                button.classList.remove('border-surface-light', 'text-text-primary');
-                button.classList.add('border-accent', 'text-accent', 'bg-accent', 'bg-opacity-10');
-            });
-        });
-
-        // Newsletter Subscription
-        const newsletterForm = document.getElementById('newsletterForm');
-        const newsletterEmail = document.getElementById('newsletterEmail');
-        const subscribeBtn = document.getElementById('subscribeBtn');
-        const btnText = subscribeBtn?.querySelector('.btn-text');
-        const btnLoading = subscribeBtn?.querySelector('.btn-loading');
-        const newsletterMessage = document.getElementById('newsletterMessage');
-
-        if (newsletterForm) {
-            newsletterForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const email = newsletterEmail.value.trim();
-                
-                if (!email) {
-                    showMessage('Please enter a valid email address.', 'error');
-                    return;
-                }
-
-                // Show loading state
-                btnText.classList.add('hidden');
-                btnLoading.classList.remove('hidden');
-                subscribeBtn.disabled = true;
-
-                try {
-                    const response = await fetch('/api/subscribe', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        showMessage('🎉 Welcome to the Creative Rebellion! Check your email for your 20% OFF code.', 'success');
-                        newsletterEmail.value = '';
-                    } else {
-                        showMessage(data.error || 'Something went wrong. Please try again.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Newsletter subscription error:', error);
-                    showMessage('Network error. Please check your connection and try again.', 'error');
-                } finally {
-                    // Reset button state
-                    btnText.classList.remove('hidden');
-                    btnLoading.classList.add('hidden');
-                    subscribeBtn.disabled = false;
-                }
-            });
-        }
-
-        function showMessage(message, type) {
-            if (!newsletterMessage) return;
-            
-            newsletterMessage.textContent = message;
-            newsletterMessage.className = `mt-4 p-3 rounded-lg text-center ${
-                type === 'success' 
-                    ? 'bg-green-900/20 border border-green-500/30 text-green-400' 
-                    : 'bg-red-900/20 border border-red-500/30 text-red-400'
-            }`;
-            newsletterMessage.classList.remove('hidden');
-            
-            // Hide message after 5 seconds
-            setTimeout(() => {
-                newsletterMessage.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Cart counter functionality
-        async function updateCartCounter() {
-            try {
-                const token = localStorage.getItem('customerToken');
-                if (!token) {
-                    document.getElementById('cart-counter').textContent = '0';
-                    return;
-                }
-
-                const response = await fetch('/api/cart', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const cartData = await response.json();
-                    const itemCount = cartData.items ? cartData.items.length : 0;
-                    document.getElementById('cart-counter').textContent = itemCount.toString();
-                } else {
-                    document.getElementById('cart-counter').textContent = '0';
-                }
-            } catch (error) {
-                console.error('Error updating cart counter:', error);
-                document.getElementById('cart-counter').textContent = '0';
-            }
-        }
-
-        // Update cart counter on page load
-        updateCartCounter();
-
-        // Check authentication status and update UI
-        function checkAuthStatus() {
-            const token = localStorage.getItem('customerToken');
-            const authStatus = document.getElementById('auth-status');
-            const loginLink = document.getElementById('login-link');
-            const accountLink = document.getElementById('account-link');
-            const logoutBtn = document.getElementById('logout-btn');
-            const mobileLoginLink = document.getElementById('mobile-login-link');
-            const mobileAccountLink = document.getElementById('mobile-account-link');
-            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
-            const loginCta = document.getElementById('login-cta');
-            const navLoginLink = document.getElementById('nav-login-link');
-            const navAccountLink = document.getElementById('nav-account-link');
-            
-            if (token) {
-                // User is logged in
-                if (loginLink) loginLink.classList.add('hidden');
-                if (accountLink) accountLink.classList.remove('hidden');
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-                if (mobileLoginLink) mobileLoginLink.classList.add('hidden');
-                if (mobileAccountLink) mobileAccountLink.classList.remove('hidden');
-                if (mobileLogoutBtn) mobileLogoutBtn.classList.remove('hidden');
-                if (loginCta) loginCta.classList.add('hidden');
-                if (navLoginLink) navLoginLink.classList.add('hidden');
-                if (navAccountLink) navAccountLink.classList.remove('hidden');
-                
-                // Add logout functionality
-                if (logoutBtn) {
-                    logoutBtn.onclick = () => {
-                        localStorage.removeItem('customerToken');
-                        checkAuthStatus();
-                        updateCartCounter();
-                        showNotification('Logged out successfully', 'success');
-                    };
-                }
-                if (mobileLogoutBtn) {
-                    mobileLogoutBtn.onclick = () => {
-                        localStorage.removeItem('customerToken');
-                        checkAuthStatus();
-                        updateCartCounter();
-                        showNotification('Logged out successfully', 'success');
-                    };
-                }
-            } else {
-                // User is not logged in
-                if (loginLink) loginLink.classList.remove('hidden');
-                if (accountLink) accountLink.classList.add('hidden');
-                if (logoutBtn) logoutBtn.classList.add('hidden');
-                if (mobileLoginLink) mobileLoginLink.classList.remove('hidden');
-                if (mobileAccountLink) mobileAccountLink.classList.add('hidden');
-                if (mobileLogoutBtn) mobileLogoutBtn.classList.add('hidden');
-                if (loginCta) loginCta.classList.remove('hidden');
-                if (navLoginLink) navLoginLink.classList.remove('hidden');
-                if (navAccountLink) navAccountLink.classList.add('hidden');
-            }
-        }
-        
-        // Check auth status on page load
-        checkAuthStatus();
-
-        // Load smart recommendations
-        async function loadRecommendations() {
-            try {
-                const container = document.getElementById('recommendations-container');
-                if (!container) return;
-
-                // Get recently viewed products from localStorage
-                const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-                
-                // Determine which API endpoint to use
-                const token = localStorage.getItem('customerToken');
-                const apiUrl = token ? '/api/recommendations' : '/api/recommendations/public';
-                
-                // Prepare query parameters
-                const params = new URLSearchParams({
-                    limit: 4,
-                    recentlyViewed: JSON.stringify(recentlyViewed)
-                });
-                
-                const response = await fetch(`${apiUrl}?${params}`, {
-                    headers: token ? {
-                        'Authorization': `Bearer ${token}`
-                    } : {}
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('🎯 Recommendations loaded:', data);
-                    
-                    if (data.recommendations && data.recommendations.length > 0) {
-                        displayRecommendations(data.recommendations);
-                        return; // Successfully loaded recommendations
-                    }
-                }
-                
-                // If we get here, either the response wasn't ok or had no recommendations
-                console.log('🔄 No recommendations from primary API, trying fallback...');
-                
-                // Fallback to popular products
-                try {
-                    const fallbackResponse = await fetch('/api/recommendations/public?limit=4');
-                    if (fallbackResponse.ok) {
-                        const fallbackData = await fallbackResponse.json();
-                        if (fallbackData.recommendations && fallbackData.recommendations.length > 0) {
-                            displayRecommendations(fallbackData.recommendations);
-                            return; // Successfully loaded fallback recommendations
-                        }
-                    }
-                } catch (fallbackError) {
-                    console.error('❌ Fallback API also failed:', fallbackError);
-                }
-                
-                // If both APIs fail, show ultimate fallback
-                console.log('🔄 All APIs failed, showing ultimate fallback...');
-                await showFallbackRecommendations();
-                
-            } catch (error) {
-                console.error('❌ Error loading recommendations:', error);
-                // Show fallback content
-                await showFallbackRecommendations();
-            }
-        }
-
-        // Display recommendations in the container
-        function displayRecommendations(recommendations) {
-            const container = document.getElementById('recommendations-container');
-            if (!container) return;
-
-            container.innerHTML = '';
-            
-            recommendations.forEach(product => {
-                const recommendationCard = document.createElement('div');
-                recommendationCard.className = 'glass-card rounded-xl overflow-hidden group cursor-pointer hover:scale-105 transition-transform duration-300';
-                recommendationCard.onclick = () => {
-                    // Store in recently viewed
-                    const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-                    if (!recentlyViewed.includes(product.id)) {
-                        recentlyViewed.unshift(product.id);
-                        if (recentlyViewed.length > 10) recentlyViewed.pop(); // Keep only 10
-                        localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
-                    }
-                    
-                    // Navigate to product page
-                    window.location.href = `product.html?id=${product.id}`;
-                };
-
-                const imageUrl = product.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
-                
-                recommendationCard.innerHTML = `
-                    <img src="${imageUrl}" alt="${product.name}" class="w-full h-40 object-cover" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='; this.onerror=null;">
-                    <div class="p-4">
-                        <h3 class="font-inter text-sm font-semibold text-white mb-1">${product.name}</h3>
-                        <p class="text-accent font-bold">$${(parseFloat(product.price) || 20.00).toFixed(2)}</p>
-                        ${product.category ? `<p class="text-text-secondary text-xs mt-1">${product.category}</p>` : ''}
-                    </div>
-                `;
-                
-                container.appendChild(recommendationCard);
-            });
-        }
-
-        // Show fallback recommendations if everything fails
-        async function showFallbackRecommendations() {
-            const container = document.getElementById('recommendations-container');
-            if (!container) return;
-
-            try {
-                // Try to get random products from the main products API as ultimate fallback
-                const response = await fetch('/api/products/public');
-                if (response.ok) {
-                    const products = await response.json();
-                    if (products && products.length > 0) {
-                        // Take first 4 products as fallback
-                        const fallbackProducts = products.slice(0, 4);
-                        displayRecommendations(fallbackProducts);
-                        return;
-                    }
-                }
-            } catch (fallbackError) {
-                console.error('❌ Ultimate fallback also failed:', fallbackError);
-            }
-
-            // If everything fails, show a message instead of hardcoded placeholders
-            container.innerHTML = `
-                <div class="col-span-full text-center py-8">
-                    <div class="glass-card rounded-xl p-8 max-w-md mx-auto">
-                        <svg class="w-16 h-16 text-accent mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                        <h3 class="font-orbitron text-lg font-bold text-white mb-2">Loading Recommendations</h3>
-                        <p class="text-text-secondary text-sm">We're preparing personalized suggestions for you...</p>
-                        <div class="mt-4">
-                            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-accent"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // The smart recommendations system will now load real products or show a loading message
-        console.log('✅ You Might Also Like section ready for dynamic loading');
-
-        // Load recently viewed products
-        async function loadRecentlyViewedProducts() {
-            try {
-                const container = document.getElementById('recently-viewed-products');
-                if (!container) return;
-
-                // Get recently viewed product IDs from localStorage
-                const recentlyViewedIds = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-                
-                if (recentlyViewedIds.length === 0) {
-                    // No recently viewed products - show random products from database instead
-                    console.log('🔄 No recently viewed products, loading random products as fallback...');
-                    await loadRandomProductsAsFallback();
-                    return;
-                }
-
-                // Fetch product details for recently viewed products
-                const recentlyViewedProducts = [];
-                for (const productId of recentlyViewedIds.slice(0, 6)) { // Show max 6 products
-                    try {
-                        const response = await fetch(`/api/products/public/${productId}`);
-                        if (response.ok) {
-                            const productData = await response.json();
-                            const product = productData.product || productData;
-                            recentlyViewedProducts.push(product);
-                        }
-                    } catch (error) {
-                        console.error(`Error fetching product ${productId}:`, error);
-                    }
-                }
-
-                if (recentlyViewedProducts.length === 0) {
-                    // No products could be fetched - show message
-                    container.innerHTML = `
-                        <div class="flex-shrink-0 w-full text-center py-4">
-                            <p class="text-text-secondary text-sm">No recently viewed products available</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Display recently viewed products
-                displayRecentlyViewedProducts(recentlyViewedProducts);
-
-            } catch (error) {
-                console.error('❌ Error loading recently viewed products:', error);
-                await loadRandomProductsAsFallback();
-            }
-        }
-
-        // Display recently viewed products
-        function displayRecentlyViewedProducts(products) {
-            const container = document.getElementById('recently-viewed-products');
-            if (!container) return;
-
-            console.log('🐛 DEBUG: displayRecentlyViewedProducts called with:', products);
-            console.log('🐛 DEBUG: Products array length:', products.length);
-            console.log('🐛 DEBUG: Products array type:', typeof products);
-            console.log('🐛 DEBUG: Is products an array?', Array.isArray(products));
-            
-            // Clear container and add debugging info
-            container.innerHTML = '';
-            console.log('🐛 DEBUG: Container cleared, starting to add products...');
-            
-            // Ensure container is visible and has proper dimensions
-            container.style.display = 'flex';
-            container.style.visibility = 'visible';
-            container.style.opacity = '1';
-            container.style.minHeight = '120px'; // Ensure minimum height for products
-            
-            products.forEach((product, index) => {
-                console.log(`🐛 DEBUG: Processing product ${index}:`, product);
-                console.log(`🐛 DEBUG: Product image_url:`, product.image_url);
-                const productThumbnail = document.createElement('div');
-                productThumbnail.className = 'flex-shrink-0 w-20 cursor-pointer group';
-                productThumbnail.style.minWidth = '80px'; // Ensure minimum width
-                productThumbnail.style.display = 'block'; // Ensure display
-                productThumbnail.onclick = () => {
-                    // Navigate to product page
-                    window.location.href = `product.html?id=${product.id}`;
-                };
-
-                const imageUrl = product.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
-                console.log(`🐛 DEBUG: Final imageUrl for ${product.name}:`, imageUrl);
-                
-                productThumbnail.innerHTML = `
-                    <div class="relative" style="width: 80px; height: 80px;">
-                        <img src="${imageUrl}" alt="${product.name}" class="w-full h-20 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300" loading="lazy" style="width: 80px; height: 80px;" onerror="console.error('❌ Recently viewed image failed to load:', this.src); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo='; this.onerror=null;" onload="console.log('✅ Recently viewed image loaded successfully:', this.src);">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg"></div>
-                    </div>
-                    <div class="mt-2 text-center">
-                        <p class="text-text-secondary text-xs truncate" title="${product.name}">${product.name}</p>
-                        <p class="text-accent text-xs font-bold">$${(parseFloat(product.price) || 20.00).toFixed(2)}</p>
-                    </div>
-                `;
-                
-                container.appendChild(productThumbnail);
-                console.log(`🐛 DEBUG: Added product ${index} to container. Container now has ${container.children.length} children`);
-            });
-            
-            // Final debugging - check what's actually in the DOM
-            console.log('🐛 DEBUG: Final container state:');
-            console.log('🐛 DEBUG: Container children count:', container.children.length);
-            console.log('🐛 DEBUG: Container innerHTML length:', container.innerHTML.length);
-            console.log('🐛 DEBUG: Container classes:', container.className);
-            console.log('🐛 DEBUG: Container computed styles:', window.getComputedStyle(container));
-            console.log('🐛 DEBUG: Container offsetWidth:', container.offsetWidth);
-            console.log('🐛 DEBUG: Container offsetHeight:', container.offsetHeight);
-            console.log('🐛 DEBUG: Container clientWidth:', container.clientWidth);
-            console.log('🐛 DEBUG: Container clientHeight:', container.clientHeight);
-            
-            // Check each child element
-            Array.from(container.children).forEach((child, index) => {
-                console.log(`🐛 DEBUG: Child ${index}:`, child);
-                console.log(`🐛 DEBUG: Child ${index} classes:`, child.className);
-                console.log(`🐛 DEBUG: Child ${index} computed styles:`, window.getComputedStyle(child));
-                console.log(`🐛 DEBUG: Child ${index} offsetWidth:`, child.offsetWidth);
-                console.log(`🐛 DEBUG: Child ${index} offsetHeight:`, child.offsetHeight);
-            });
-        }
-
-        // Load random products as fallback for recently viewed section
-        async function loadRandomProductsAsFallback() {
-            try {
-                const container = document.getElementById('recently-viewed-products');
-                if (!container) return;
-
-                console.log('🔄 Loading random products for recently viewed fallback...');
-                
-                // Try to get products from the main products API
-                const response = await fetch('/api/products/public');
-                if (response.ok) {
-                    const products = await response.json();
-                    console.log('🐛 DEBUG: Products from API:', products);
-                    if (products && products.length > 0) {
-                        // Take random products (up to 3 instead of 6)
-                        const randomProducts = products
-                            .sort(() => 0.5 - Math.random()) // Shuffle array
-                            .slice(0, 3);
-                        
-                        console.log(`✅ Loaded ${randomProducts.length} random products for fallback`);
-                        console.log('🐛 DEBUG: Random products for recently viewed:', randomProducts);
-                        console.log('🐛 DEBUG: About to call displayRecentlyViewedProducts with:', randomProducts);
-                        displayRecentlyViewedProducts(randomProducts);
-                        return;
-                    }
-                }
-                
-                // If API fails, show hardcoded fallback
-                console.log('❌ API failed, showing hardcoded fallback products');
-                showHardcodedRecentlyViewedFallback();
-                
-            } catch (error) {
-                console.error('❌ Error loading random products fallback:', error);
-                showHardcodedRecentlyViewedFallback();
-            }
-        }
-
-        // Show hardcoded fallback for recently viewed if everything fails
-        function showHardcodedRecentlyViewedFallback() {
-            const container = document.getElementById('recently-viewed-products');
-            if (!container) return;
-
-            container.innerHTML = `
-                <!-- Hardcoded Fallback Product 1 -->
-                <div class="flex-shrink-0 w-20 cursor-pointer group" onclick="window.location.href='shop.html'">
-                    <div class="relative">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Featured Product" class="w-full h-20 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg"></div>
-                    </div>
-                    <div class="mt-2 text-center">
-                        <p class="text-text-secondary text-xs truncate">Featured Product</p>
-                        <p class="text-accent text-xs font-bold">$20.00</p>
-                    </div>
-                </div>
-
-                <!-- Hardcoded Fallback Product 2 -->
-                <div class="flex-shrink-0 w-20 cursor-pointer group" onclick="window.location.href='shop.html'">
-                    <div class="relative">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Popular Product" class="w-full h-20 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg"></div>
-                    </div>
-                    <div class="mt-2 text-center">
-                        <p class="text-text-secondary text-xs truncate">Popular Product</p>
-                        <p class="text-accent text-xs font-bold">$20.00</p>
-                    </div>
-                </div>
-
-                <!-- Hardcoded Fallback Product 3 -->
-                <div class="flex-shrink-0 w-20 cursor-pointer group" onclick="window.location.href='shop.html'">
-                    <div class="relative">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="New Product" class="w-full h-20 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg"></div>
-                    </div>
-                    <div class="mt-2 text-center">
-                        <p class="text-text-secondary text-xs truncate">New Product</p>
-                        <p class="text-accent text-xs font-bold">$20.00</p>
-                    </div>
-                </div>
-            `;
-        }
-
         // Size and Color filtering functionality
         let selectedSize = '';
         let selectedColor = '';
         
-        // Add event listeners for size and color filters
-        document.addEventListener('DOMContentLoaded', () => {
-            const sizeFilter = document.getElementById('size-filter');
-            const colorFilter = document.getElementById('color-filter');
-            const clearFiltersBtn = document.getElementById('clear-filters-btn');
-            
-            // Remove duplicate color options if they exist
-            if (colorFilter) {
-                removeDuplicateColorOptions(colorFilter);
-            }
-            
-            if (sizeFilter) {
-                sizeFilter.addEventListener('change', () => {
-                    selectedSize = sizeFilter.value;
-                    console.log('🎯 Selected size filter:', selectedSize);
-                    applyAllFilters();
-                });
-            }
-            
-            if (colorFilter) {
-                colorFilter.addEventListener('change', () => {
-                    selectedColor = colorFilter.value;
-                    console.log('🎨 Selected color filter:', selectedColor);
-                    applyAllFilters();
-                });
-            }
-            
-            if (clearFiltersBtn) {
-                clearFiltersBtn.addEventListener('click', () => {
-                    // Reset all filters
-                    selectedSize = '';
-                    selectedColor = '';
-                    selectedCategories = ['All Designs'];
-                    
-                    // Reset UI
-                    if (sizeFilter) sizeFilter.value = '';
-                    if (colorFilter) colorFilter.value = '';
-                    
-                    // Reset category checkboxes
-                    document.querySelectorAll('.category-checkbox').forEach(checkbox => {
-                        checkbox.checked = checkbox.dataset.category === 'All Designs';
-                    });
-                    
-                    console.log('🧹 All filters cleared');
-                    resetFilters(); // Use our new resetFilters function instead of applyAllFilters
-                });
-            }
-        });
+        // Size and color filter event listeners will be set up in the main DOMContentLoaded
         
         // Function to remove duplicate color options from a select element
         function removeDuplicateColorOptions(colorFilter) {
@@ -2518,16 +2425,136 @@
             }
         }
 
+        // Function to reset filters and return to showing all products
+        function resetFilters() {
+            // Clear active filter buttons visually
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+
+            // Clear the global filteredProducts array
+            window.filteredProducts = [];
+
+            // Reset to first page
+            currentPage = 0;
+
+            // Clear search
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+
+            // Re-display all products from the first page
+            displayProducts(0, window.allProducts);
+
+            // Update counts based on all products
+            if (window.allProducts) {
+                updateProductCounts(window.allProducts.length);
+            }
+            console.log('Filters reset, displaying all products.');
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 DOM loaded, starting initialization...');
+            try {
+                // Create particles
+                createParticles();
+                
+                // Add event listeners for cart buttons
+                document.getElementById('desktop-cart-btn').addEventListener('click', () => {
+                    window.location.href = 'cart.html';
+                });
+                document.getElementById('mobile-cart-btn').addEventListener('click', () => {
+                    window.location.href = 'cart.html';
+                });
+                
+                // Debug: Check if productsGrid exists
+                const productsGrid = document.getElementById('products-grid');
+                console.log('🔍 productsGrid element:', productsGrid);
+                
+                // Load categories first
+                await loadCategories();
+                console.log('✅ Categories loaded, now loading products...');
+                
+                // Set up size and color filter event listeners
+                const sizeFilter = document.getElementById('size-filter');
+                const colorFilter = document.getElementById('color-filter');
+                const clearFiltersBtn = document.getElementById('clear-filters-btn');
+                
+                // Remove duplicate color options if they exist
+                if (colorFilter) {
+                    removeDuplicateColorOptions(colorFilter);
+                }
+                
+                if (sizeFilter) {
+                    sizeFilter.addEventListener('change', () => {
+                        selectedSize = sizeFilter.value;
+                        console.log('🎯 Selected size filter:', selectedSize);
+                        applyAllFilters();
+                    });
+                }
+                
+                if (colorFilter) {
+                    colorFilter.addEventListener('change', () => {
+                        selectedColor = colorFilter.value;
+                        console.log('🎨 Selected color filter:', selectedColor);
+                        applyAllFilters();
+                    });
+                }
+                
+                if (clearFiltersBtn) {
+                    clearFiltersBtn.addEventListener('click', () => {
+                        // Reset all filters
+                        selectedSize = '';
+                        selectedColor = '';
+                        selectedCategories = ['All Designs'];
+                        
+                        // Reset UI
+                        if (sizeFilter) sizeFilter.value = '';
+                        if (colorFilter) colorFilter.value = '';
+                        
+                        // Reset category checkboxes
+                        document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+                            checkbox.checked = checkbox.dataset.category === 'All Designs';
+                        });
+                        
+                        console.log('🧹 All filters cleared');
+                        resetFilters();
+                    });
+                }
+                
+                // Load products from database
+                await loadProductsFromDatabase();
+                console.log('✅ Products loaded successfully!');
+                console.log('🔍 All products array length:', allProducts.length);
+                console.log('🔍 First product:', allProducts[0]);
+                
+                // Load recommendations after products are loaded
+                await loadRecommendations();
+                console.log('✅ Recommendations loaded!');
+                
+                // Load recently viewed products with a small delay to ensure main products are loaded
+                setTimeout(async () => {
+                    await loadRecentlyViewedProducts();
+                    console.log('✅ Recently viewed products loaded!');
+                }, 100);
+                
+                // Update cart counter
+                updateCartCounter();
+                
+                // Check auth status
+                checkAuthStatus();
+                
+                console.log('✅ Shop page loaded with new black/orange theme!');
+            } catch (error) {
+                console.error('❌ Error during initialization:', error);
+            }
+        });
+
+        // Particles are already initialized in the main DOMContentLoaded listener above
     </script>
-
-
-<script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
-<script>
-  if (!window.__DHWS_INJECTOR_VERSION__) {
-    var s = document.createElement('script');
-    s.src = (location.pathname.includes('/pages/') ? '../public/mobile-menu-injector.js?v=20250809d' : 'public/mobile-menu-injector.js?v=20250809d');
-    document.head.appendChild(s);
-  }
-</script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>

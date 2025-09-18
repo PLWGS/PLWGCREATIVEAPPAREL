@@ -14,7 +14,7 @@ const QRCode = require('qrcode');
 const { uploadProductImages, uploadImageToCloudinary, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
 const { body, validationResult } = require('express-validator');
 const paypal = require('@paypal/checkout-server-sdk');
-require('dotenv').config();
+require('dotenv').config({ silent: true });
 
 // -----------------------------------------------------------------------------
 // Logging Configuration - Reduce Railway log verbosity

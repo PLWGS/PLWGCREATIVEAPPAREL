@@ -1,0 +1,4 @@
+$ ps aux | grep node
+root       475  0.0  0.0   3840  1936 ?        S    12:06   0:00 grep node
+$ pkill -f "node server.js"
+

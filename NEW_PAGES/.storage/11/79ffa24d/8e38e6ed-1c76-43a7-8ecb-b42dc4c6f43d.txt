@@ -1,0 +1,58 @@
+$ find . -name "*.html" -type f | head -20
+./google8d8112fb7368ed52.html
+./index-old.html
+./index.html
+./pages/account.html
+./pages/admin-login.html
+./pages/admin-totp-setup.html
+./pages/admin-uploads.html
+./pages/admin.html
+./pages/cart.html
+./pages/category-management.html
+./pages/checkout.html
+./pages/customer-login.html
+./pages/customer-reviews-management.html
+./pages/customers.html
+./pages/homepage-images.html
+./pages/loading.html
+./pages/order-failure.html
+./pages/order-success.html
+./pages/orders.html
+./pages/privacy-policy.html
+$ ls -la pages/
+
+total 197885
+drwxr-xr-x  42 root root   1765376 Sep 18 10:01 .
+drwxr-xr-x 319 root root 199155712 Sep 18 10:01 ..
+-rw-r--r--   1 root root    150959 Sep 18 10:01 account.html
+-rw-r--r--   1 root root     16479 Sep 18 10:01 admin-login.html
+-rw-r--r--   1 root root     11662 Sep 18 10:01 admin-totp-setup.html
+-rw-r--r--   1 root root    105309 Sep 18 10:01 admin-uploads.html
+-rw-r--r--   1 root root    124729 Sep 18 10:01 admin.html
+-rw-r--r--   1 root root     30367 Sep 18 10:01 cart.html
+-rw-r--r--   1 root root     39958 Sep 18 10:01 category-management.html
+-rw-r--r--   1 root root     60584 Sep 18 10:01 checkout.html
+-rw-r--r--   1 root root     22722 Sep 18 10:01 customer-login.html
+-rw-r--r--   1 root root     23912 Sep 18 10:01 customer-reviews-management.html
+-rw-r--r--   1 root root      4761 Sep 18 10:01 customers.html
+-rw-r--r--   1 root root     25357 Sep 18 10:01 homepage-images.html
+-rw-r--r--   1 root root     17881 Sep 18 10:01 loading.html
+-rw-r--r--   1 root root     10211 Sep 18 10:01 order-failure.html
+-rw-r--r--   1 root root      9911 Sep 18 10:01 order-success.html
+-rw-r--r--   1 root root     14390 Sep 18 10:01 orders.html
+-rw-r--r--   1 root root     25040 Sep 18 10:01 privacy-policy.html
+-rw-r--r--   1 root root     60452 Sep 18 10:01 product-edit-product-1_just_a_little_boost.html
+-rw-r--r--   1 root root     68438 Sep 18 10:01 product-edit-product-21_funny_ugh_shirt_printed_design.html
+-rw-r--r--   1 root root     68591 Sep 18 10:01 product-edit-product-32_motorcycle_grandfather_like_a_regular_grandfather_.html
+-rw-r--r--   1 root root     68561 Sep 18 10:01 product-edit-product-33_christmas_nightmare_before_coffee_shirt_choose_pri.html
+-rw-r--r--   1 root root     68525 Sep 18 10:01 product-edit-product-35_led_zeppelin_stairway_to_heaven_guitar_shape_song_.html
+-rw-r--r--   1 root root     47907 Sep 18 10:01 product-edit-product-45_gun_n_roses_knockin_on_heavens_door_guitar_song_ly.html
+-rw-r--r--   1 root root     61642 Sep 18 10:01 product-edit-product-52_dont_be_a_basic_pitch_baseball_shirt_printed_desig.html
+-rw-r--r--   1 root root     47865 Sep 18 10:01 product-edit-product-62_queen_bohemian_rhapsody_guitar_song_lyric_shirt_pr.html
+-rw-r--r--   1 root root     23764 Sep 18 10:01 product-edit-template.html
+-rw-r--r--   1 root root     67530 Sep 18 10:01 product-edit.html
+-rw-r--r--   1 root root     32386 Sep 18 10:01 product-management.js
+-rw-r--r--   1 root root    155661 Sep 18 10:01 product.html
+drwxr-xr-x  10 root root     65536 Sep 18 10:01 products
+-rw-r--r--   1 root root    141629 Sep 18 10:01 shop.html
+-rw-r--r--   1 root root     32437 Sep 18 10:01 terms-of-service.html

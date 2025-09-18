@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart - Custom T-Shirt Orders | PLWGS Creative Apparel</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>P</text></svg>">
+    <meta name="description" content="Review your custom t-shirt orders, manage quantities, and proceed to checkout with PLWGS Creative Apparel." />
+    
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v31/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nysimxpg.woff2" as="font" type="font/woff2" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff8306',
+                        'primary-light': '#ffa726',
+                        'primary-dark': '#e65100',
+                        'glass-white': 'rgba(255, 255, 255, 0.1)',
+                        'glass-black': 'rgba(0, 0, 0, 0.8)',
+                        'glass-orange': 'rgba(255, 131, 6, 0.1)',
+                        accent: '#ff8306',
+                        background: '#000000',
+                        surface: '#1a1a1a',
+                        'surface-light': '#2a2a2a',
+                        'surface-dark': '#0a0a0a',
+                        'text-primary': '#ffffff',
+                        'text-secondary': '#b3b3b3',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        error: '#ef4444'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'orbitron': ['Orbitron', 'sans-serif']
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
+                        'glass': '20px'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'scale-in': 'scaleIn 0.5s ease-out',
+                        'pulse-orange': 'pulseOrange 2s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 20px rgba(255, 131, 6, 0.4)' },
+                            '100%': { boxShadow: '0 0 40px rgba(255, 131, 6, 0.8)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(50px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        pulseOrange: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(255, 131, 6, 0.4)' },
+                            '50%': { boxShadow: '0 0 30px rgba(255, 131, 6, 0.8)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* BLACK BACKGROUND BASE */
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Glass Morphism - Black Theme */
+        .glass {
+            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 131, 6, 0.2);
+        }
+        
+        .glass-nav {
+            backdrop-filter: blur(25px);
+            background: rgba(0, 0, 0, 0.95);
+            border-bottom: 1px solid rgba(255, 131, 6, 0.2);
+        }
+        
+        /* ORANGE GRADIENT TEXT */
+        .gradient-text {
+            background: linear-gradient(135deg, #ff8306, #ffa726, #ffcc80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #ff8306, #ffa726, #ffcc80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* ORANGE BUTTONS - Maximum Impact */
+        .btn-primary {
+            background: linear-gradient(135deg, #ff8306, #ffa726);
+            color: #000000;
+            font-weight: 700;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 131, 6, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 131, 6, 0.7);
+            background: linear-gradient(135deg, #ffa726, #ffcc80);
+        }
+        
+        /* Secondary Button */
+        .btn-secondary {
+            background: transparent;
+            color: #ff8306;
+            border: 2px solid #ff8306;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-secondary:hover {
+            background: #ff8306;
+            color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 131, 6, 0.4);
+        }
+        
+        /* Enhanced Input Styles */
+        .input-field {
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000;
+            border: 2px solid rgba(255, 131, 6, 0.3);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #ff8306;
+            box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
+        }
+        
+        .input-field::placeholder {
+            color: rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Particle Animation - Orange on Black */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #ff8306;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        /* Neon Glow Effects - Orange */
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(255, 131, 6, 0.4);
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .neon-glow:hover {
+            box-shadow: 0 0 30px rgba(255, 131, 6, 0.6);
+        }
+        
+        /* Custom Scrollbar - Orange */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #ff8306;
+            border-radius: 4px;
+        }
+        
+        /* Enhanced Animations */
+        .animate-glow {
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        
+        .animate-pulse-orange {
+            animation: pulseOrange 2s ease-in-out infinite;
+        }
+        
+        /* Card Hover Effects */
+        .card-hover {
+            transition: all 0.4s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 131, 6, 0.4);
+        }
+        
+        /* Quantity Selector */
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 131, 6, 0.3);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+        
+        .quantity-selector button {
+            background: transparent;
+            border: none;
+            color: #000000;
+            font-weight: bold;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-selector button:hover {
+            background: #ff8306;
+            color: #ffffff;
+        }
+        
+        .quantity-selector input {
+            background: transparent;
+            border: none;
+            text-align: center;
+            width: 60px;
+            color: #000000;
+            font-weight: bold;
+        }
+        
+        .quantity-selector input:focus {
+            outline: none;
+        }
+        
+        /* Cart Item Animation */
+        .cart-item {
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        .cart-item.removing {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+        
+        @keyframes slideOut {
+            0% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0; }
+        }
+        
+        /* Empty Cart Illustration */
+        .empty-cart-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            opacity: 0.5;
+        }
+        
+        /* Promo Code Input */
+        .promo-input {
+            display: flex;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 131, 6, 0.3);
+            border-radius: 50px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .promo-input:focus-within {
+            border-color: #ff8306;
+            box-shadow: 0 0 20px rgba(255, 131, 6, 0.3);
+        }
+        
+        .promo-input input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 1rem 1.5rem;
+            color: #000000;
+            font-weight: 500;
+        }
+        
+        .promo-input input:focus {
+            outline: none;
+        }
+        
+        .promo-input input::placeholder {
+            color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .promo-input button {
+            background: #ff8306;
+            color: #000000;
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .promo-input button:hover {
+            background: #ffa726;
+        }
+    </style>
+</head>
+
+<body class="overflow-x-hidden">
+    <!-- Particle Animation Background -->
+    <div class="particles-container" id="particles">
+        <!-- Particles will be generated by JavaScript -->
+    </div>
+
+    <!-- Navigation Header - Black Glass -->
+    <header class="glass-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <nav class="container mx-auto px-8 py-5">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary-light flex items-center justify-center animate-pulse-orange">
+                            <span class="text-black font-orbitron font-black text-xl">P</span>
+                        </div>
+                        <div>
+                            <h1 class="font-orbitron font-black text-xl gradient-text">PLWG'S</h1>
+                            <p class="text-xs text-primary font-semibold">CREATIVE APPAREL</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="../index.html" class="text-white hover:text-primary transition-colors font-semibold">Home</a>
+                    <div class="relative group">
+                        <a href="shop.html" class="text-white hover:text-primary transition-colors font-semibold flex items-center">
+                            Shop
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </a>
+                        <!-- Mega Menu -->
+                        <div class="absolute top-full left-0 w-96 glass-card rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 mt-2">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h3 class="font-orbitron text-primary text-sm font-bold mb-3">Categories</h3>
+                                    <ul class="space-y-2">
+                                        <li><a href="shop.html" class="text-text-secondary hover:text-primary transition-colors">Horror Essentials</a></li>
+                                        <li><a href="shop.html" class="text-text-secondary hover:text-primary transition-colors">Pop Culture</a></li>
+                                        <li><a href="shop.html" class="text-text-secondary hover:text-primary transition-colors">Humor & Sass</a></li>
+                                        <li><a href="shop.html" class="text-text-secondary hover:text-primary transition-colors">Custom Designs</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h3 class="font-orbitron text-primary text-sm font-bold mb-3">Featured</h3>
+                                    <div class="space-y-2">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Featured Product" class="w-full h-20 object-cover rounded-lg" loading="lazy" />
+                                        <p class="text-xs text-text-secondary">New Horror Collection</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="account.html" class="text-white hover:text-primary transition-colors font-semibold">Account</a>
+                    <a href="admin.html" class="text-white hover:text-primary transition-colors font-semibold">Admin</a>
+                </div>
+
+                <!-- User Profile & Cart -->
+                <div class="flex items-center space-x-4">
+                    <button class="text-white hover:text-primary transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                    <button class="text-primary font-bold relative" id="cart-button">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
+                        </svg>
+                        <span class="absolute -top-2 -right-2 bg-primary text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold" id="cart-counter">3</span>
+                    </button>
+                    
+                    <!-- User Avatar -->
+                    <div class="flex items-center space-x-2">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="User Avatar" class="w-8 h-8 rounded-full border-2 border-primary" loading="lazy" />
+                        <span class="hidden md:block text-sm font-medium" id="customerName">Guest</span>
+                    </div>
+                    
+                    <!-- Login/Logout Button -->
+                    <div id="auth-buttons" class="flex items-center space-x-2">
+                        <button id="login-btn" class="btn-primary px-4 py-2 text-sm" onclick="window.location.href='customer-login.html'">
+                            Log In
+                        </button>
+                        <button id="logout-btn" class="btn-secondary px-4 py-2 text-sm hidden" onclick="logout()">
+                            Log Out
+                        </button>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="lg:hidden text-white hover:text-primary transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-32 pb-16 relative z-10">
+        <div class="container mx-auto px-6">
+            <!-- Page Header -->
+            <div class="mb-12 text-center">
+                <h1 class="font-orbitron text-5xl font-black text-white mb-4 animate-glow">
+                    Your <span class="text-gradient">Creative</span> Cart
+                </h1>
+                <p class="text-text-secondary text-xl max-w-2xl mx-auto">
+                    Review your selected designs and prepare for checkout
+                </p>
+            </div>
+
+            <!-- Cart Content -->
+            <div class="grid lg:grid-cols-3 gap-12">
+                <!-- Cart Items -->
+                <div class="lg:col-span-2">
+                    <!-- Cart Items Container -->
+                    <div id="cart-items-container" class="space-y-6">
+                        <!-- Cart items will be populated here -->
+                    </div>
+
+                    <!-- Empty Cart State -->
+                    <div id="empty-cart" class="glass-card rounded-2xl p-12 text-center hidden">
+                        <div class="empty-cart-icon mx-auto mb-8">
+                            <svg class="w-full h-full text-primary opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-orbitron text-3xl font-bold text-white mb-4">Your Cart is Empty</h3>
+                        <p class="text-text-secondary text-lg mb-8">
+                            Ready to unleash your creative rebellion? Start shopping and fill your cart with conversation starters.
+                        </p>
+                        <a href="shop.html" class="btn-primary animate-glow">
+                            Discover Designs
+                        </a>
+                    </div>
+
+                    <!-- Continue Shopping -->
+                    <div id="continue-shopping" class="mt-8 text-center">
+                        <a href="shop.html" class="text-primary hover:text-primary-light transition-colors font-semibold text-lg">
+                            ← Continue Shopping
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="lg:col-span-1">
+                    <div class="glass-card rounded-2xl p-8 neon-glow sticky top-32">
+                        <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Order Summary</h3>
+                        
+                        <!-- Promo Code -->
+                        <div class="mb-6">
+                            <label class="block text-text-secondary text-sm font-semibold mb-3 uppercase tracking-wider">Promo Code</label>
+                            <div class="promo-input">
+                                <input type="text" id="promo-code" placeholder="Enter promo code" />
+                                <button onclick="applyPromoCode()" class="font-bold">APPLY</button>
+                            </div>
+                            <div id="promo-message" class="mt-2 text-sm hidden"></div>
+                        </div>
+
+                        <!-- Order Breakdown -->
+                        <div class="space-y-4 mb-6">
+                            <div class="flex justify-between items-center">
+                                <span class="text-text-secondary">Subtotal (<span id="item-count">0</span> items)</span>
+                                <span class="text-white font-bold" id="subtotal">$0.00</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center" id="discount-row" style="display: none;">
+                                <span class="text-success">Discount</span>
+                                <span class="text-success font-bold" id="discount-amount">-$0.00</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-text-secondary">Shipping</span>
+                                <span class="text-white font-bold" id="shipping-cost">$5.99</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-text-secondary">Tax</span>
+                                <span class="text-white font-bold" id="tax-amount">$0.00</span>
+                            </div>
+                            
+                            <hr class="border-surface-light">
+                            
+                            <div class="flex justify-between items-center text-xl">
+                                <span class="font-orbitron font-bold text-white">Total</span>
+                                <span class="font-orbitron font-bold text-primary" id="total-amount">$0.00</span>
+                            </div>
+                        </div>
+
+                        <!-- Checkout Button -->
+                        <button id="checkout-btn" class="btn-primary w-full animate-glow mb-4" onclick="proceedToCheckout()">
+                            Proceed to Checkout
+                        </button>
+
+                        <!-- Security Badge -->
+                        <div class="text-center text-text-secondary text-sm">
+                            <svg class="w-5 h-5 inline-block mr-2 text-success" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                            </svg>
+                            Secure SSL Checkout
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div class="mt-6 pt-6 border-t border-surface-light">
+                            <p class="text-text-secondary text-sm font-semibold mb-3 text-center">We Accept</p>
+                            <div class="flex justify-center space-x-4">
+                                <div class="w-12 h-8 bg-surface rounded flex items-center justify-center">
+                                    <span class="text-xs font-bold text-primary">VISA</span>
+                                </div>
+                                <div class="w-12 h-8 bg-surface rounded flex items-center justify-center">
+                                    <span class="text-xs font-bold text-primary">MC</span>
+                                </div>
+                                <div class="w-12 h-8 bg-surface rounded flex items-center justify-center">
+                                    <span class="text-xs font-bold text-primary">AMEX</span>
+                                </div>
+                                <div class="w-12 h-8 bg-surface rounded flex items-center justify-center">
+                                    <span class="text-xs font-bold text-primary">PP</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommended Products -->
+            <div class="mt-20">
+                <h2 class="font-orbitron text-3xl font-bold text-white mb-8 text-center">
+                    You Might Also <span class="text-gradient">Love</span>
+                </h2>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6" id="recommended-products">
+                    <!-- Recommended products will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer - Black Glass -->
+    <footer class="glass py-20 relative border-t-2 border-primary">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <!-- Brand -->
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-primary-light flex items-center justify-center animate-pulse-orange">
+                            <span class="text-black font-orbitron font-black text-2xl">P</span>
+                        </div>
+                        <div>
+                            <h3 class="font-orbitron font-black text-2xl gradient-text">PLWG'S</h3>
+                            <p class="text-sm text-primary font-bold tracking-wider">CREATIVE APPAREL</p>
+                        </div>
+                    </div>
+                    <p class="text-white text-lg leading-relaxed">
+                        <span class="text-primary font-bold">Creative rebellion</span> through wearable art. Transforming everyday apparel into conversation starters since 2023.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="font-orbitron font-black text-primary mb-6 text-xl uppercase tracking-wider">Quick Links</h3>
+                    <ul class="space-y-3">
+                        <li><a href="shop.html" class="text-white hover:text-primary transition-colors text-lg font-medium">Shop All</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-primary transition-colors text-lg font-medium">Size Guide</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-primary transition-colors text-lg font-medium">Care Instructions</a></li>
+                    </ul>
+                </div>
+
+                <!-- Customer Care -->
+                <div>
+                    <h3 class="font-orbitron font-black text-primary mb-6 text-xl uppercase tracking-wider">Customer Care</h3>
+                    <ul class="space-y-3">
+                        <li><a href="account.html" class="text-white hover:text-primary transition-colors text-lg font-medium">My Account</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-primary transition-colors text-lg font-medium">Order Tracking</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-primary transition-colors text-lg font-medium">Returns & Exchanges</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-primary transition-colors text-lg font-medium">Contact Support</a></li>
+                    </ul>
+                </div>
+
+                <!-- Connect -->
+                <div>
+                    <h3 class="font-orbitron font-black text-primary mb-6 text-xl uppercase tracking-wider">Connect</h3>
+                    <div class="flex space-x-4 mb-6">
+                        <a href="javascript:void(0)" class="text-white hover:text-primary transition-colors p-3 glass rounded-full">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                            </svg>
+                        </a>
+                        <a href="javascript:void(0)" class="text-white hover:text-primary transition-colors p-3 glass rounded-full">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"/>
+                            </svg>
+                        </a>
+                        <a href="javascript:void(0)" class="text-white hover:text-primary transition-colors p-3 glass rounded-full">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <p class="text-white text-lg leading-relaxed">
+                        Follow us for daily <span class="text-primary font-bold">inspiration</span> and behind-the-scenes content.
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-t-2 border-primary pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-white text-lg font-medium">
+                    © 2025 <span class="text-primary font-bold">PLWG'S Creative Apparel</span>. All Rights Reserved.
+                </p>
+                <div class="flex space-x-8 mt-4 md:mt-0">
+                    <a href="privacy-policy.html" class="text-white hover:text-primary transition-colors font-medium">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="text-white hover:text-primary transition-colors font-medium">Terms of Service</a>
+                    <a href="javascript:void(0)" class="text-white hover:text-primary transition-colors font-medium">Shipping Info</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Particle Animation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (8 + Math.random() * 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Cart Management
+        let cart = [];
+        let appliedPromo = null;
+
+        // Sample cart data for demonstration
+        const sampleCartItems = [
+            {
+                id: 1,
+                name: "Midnight Horror Tee",
+                price: 29.99,
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=",
+                size: "M",
+                color: "Black",
+                quantity: 2
+            },
+            {
+                id: 2,
+                name: "Retro Pop Culture Hoodie",
+                price: 49.99,
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=",
+                size: "L",
+                color: "Navy",
+                quantity: 1
+            },
+            {
+                id: 3,
+                name: "Sarcastic Sass Tank",
+                price: 24.99,
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=",
+                size: "S",
+                color: "White",
+                quantity: 1
+            }
+        ];
+
+        // Sample recommended products
+        const recommendedProducts = [
+            {
+                id: 4,
+                name: "Gothic Romance Tee",
+                price: 32.99,
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi/+Cjwvc3ZnPgo=",
+                category: "Horror"
+            },
+            {
+                id: 5,
+                name: "Anime Aesthetic Hoodie",
+                price: 54.99,
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=",
+                category: "Pop Culture"
+            },
+            {
+                id: 6,
+                name: "Witty One-Liner Tee",
+                price: 27.99,
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=",
+                category: "Humor"
+            },
+            {
+                id: 7,
+                name: "Dark Academia Sweater",
+                price: 59.99,
+                image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iI0ZGODMwNiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=",
+                category: "Horror"
+            }
+        ];
+
+        // Initialize cart
+        function initializeCart() {
+            cart = [...sampleCartItems];
+            renderCart();
+            updateOrderSummary();
+            renderRecommendedProducts();
+        }
+
+        // Render cart items
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const emptyCart = document.getElementById('empty-cart');
+            const continueShoppingBtn = document.getElementById('continue-shopping');
+
+            if (cart.length === 0) {
+                container.style.display = 'none';
+                emptyCart.classList.remove('hidden');
+                continueShoppingBtn.style.display = 'none';
+            } else {
+                container.style.display = 'block';
+                emptyCart.classList.add('hidden');
+                continueShoppingBtn.style.display = 'block';
+
+                container.innerHTML = cart.map(item => `
+                    <div class="glass-card rounded-2xl p-6 cart-item card-hover" data-item-id="${item.id}">
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <!-- Product Image -->
+                            <div class="flex-shrink-0">
+                                <img src="${item.image}" alt="${item.name}" class="w-32 h-32 object-cover rounded-xl border-2 border-primary" loading="lazy" />
+                            </div>
+
+                            <!-- Product Details -->
+                            <div class="flex-1 space-y-4">
+                                <div>
+                                    <h3 class="font-orbitron text-xl font-bold text-white mb-2">${item.name}</h3>
+                                    <div class="flex items-center space-x-4 text-text-secondary">
+                                        <span>Size: <span class="text-white font-semibold">${item.size}</span></span>
+                                        <span>Color: <span class="text-white font-semibold">${item.color}</span></span>
+                                    </div>
+                                </div>
+
+                                <!-- Price and Quantity Controls -->
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div class="flex items-center space-x-6">
+                                        <!-- Quantity Selector -->
+                                        <div class="quantity-selector">
+                                            <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                                            <input type="number" value="${item.quantity}" min="1" max="10" readonly />
+                                            <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                                        </div>
+
+                                        <!-- Price -->
+                                        <div class="text-right">
+                                            <div class="font-orbitron text-2xl font-bold text-primary">$${(item.price * item.quantity).toFixed(2)}</div>
+                                            <div class="text-text-secondary text-sm">$${item.price.toFixed(2)} each</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="flex items-center space-x-4">
+                                        <button onclick="moveToWishlist(${item.id})" class="text-text-secondary hover:text-primary transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                            </svg>
+                                        </button>
+                                        <button onclick="removeFromCart(${item.id})" class="text-text-secondary hover:text-error transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Update quantity
+        function updateQuantity(itemId, newQuantity) {
+            if (newQuantity < 1) return;
+            
+            const itemIndex = cart.findIndex(item => item.id === itemId);
+            if (itemIndex !== -1) {
+                cart[itemIndex].quantity = newQuantity;
+                renderCart();
+                updateOrderSummary();
+                updateCartCounter();
+            }
+        }
+
+        // Remove from cart
+        function removeFromCart(itemId) {
+            const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+            if (itemElement) {
+                itemElement.classList.add('removing');
+                setTimeout(() => {
+                    cart = cart.filter(item => item.id !== itemId);
+                    renderCart();
+                    updateOrderSummary();
+                    updateCartCounter();
+                }, 300);
+            }
+        }
+
+        // Move to wishlist
+        function moveToWishlist(itemId) {
+            // In a real app, this would add to wishlist and remove from cart
+            showNotification('Item moved to wishlist!', 'success');
+            removeFromCart(itemId);
+        }
+
+        // Update order summary
+        function updateOrderSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const shipping = subtotal > 50 ? 0 : 5.99;
+            const tax = subtotal * 0.08; // 8% tax
+            const discount = appliedPromo ? (subtotal * appliedPromo.discount) : 0;
+            const total = subtotal + shipping + tax - discount;
+
+            document.getElementById('item-count').textContent = itemCount;
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('shipping-cost').textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
+            document.getElementById('tax-amount').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('total-amount').textContent = `$${total.toFixed(2)}`;
+
+            // Show/hide discount row
+            const discountRow = document.getElementById('discount-row');
+            if (discount > 0) {
+                discountRow.style.display = 'flex';
+                document.getElementById('discount-amount').textContent = `-$${discount.toFixed(2)}`;
+            } else {
+                discountRow.style.display = 'none';
+            }
+
+            // Update checkout button state
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (cart.length === 0) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                checkoutBtn.disabled = false;
+                checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Apply promo code
+        function applyPromoCode() {
+            const promoInput = document.getElementById('promo-code');
+            const promoMessage = document.getElementById('promo-message');
+            const code = promoInput.value.trim().toUpperCase();
+
+            // Sample promo codes
+            const promoCodes = {
+                'REBEL10': { discount: 0.10, description: '10% off your order' },
+                'CREATIVE15': { discount: 0.15, description: '15% off your order' },
+                'HORROR20': { discount: 0.20, description: '20% off horror items' }
+            };
+
+            if (promoCodes[code]) {
+                appliedPromo = promoCodes[code];
+                promoMessage.textContent = `✓ ${appliedPromo.description} applied!`;
+                promoMessage.className = 'mt-2 text-sm text-success';
+                promoMessage.classList.remove('hidden');
+                promoInput.disabled = true;
+                updateOrderSummary();
+            } else {
+                promoMessage.textContent = 'Invalid promo code. Please try again.';
+                promoMessage.className = 'mt-2 text-sm text-error';
+                promoMessage.classList.remove('hidden');
+            }
+        }
+
+        // Proceed to checkout
+        function proceedToCheckout() {
+            if (cart.length === 0) return;
+            
+            // In a real app, this would navigate to checkout
+            window.location.href = 'checkout.html';
+        }
+
+        // Render recommended products
+        function renderRecommendedProducts() {
+            const container = document.getElementById('recommended-products');
+            
+            container.innerHTML = recommendedProducts.map(product => `
+                <div class="glass-card rounded-xl p-6 card-hover">
+                    <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4" loading="lazy" />
+                    <div class="space-y-3">
+                        <div>
+                            <h3 class="font-semibold text-white mb-1">${product.name}</h3>
+                            <p class="text-text-secondary text-sm">${product.category}</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-orbitron text-xl font-bold text-primary">$${product.price}</span>
+                            <button onclick="addToCartFromRecommended(${product.id})" class="btn-primary px-4 py-2 text-sm">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add to cart from recommended
+        function addToCartFromRecommended(productId) {
+            const product = recommendedProducts.find(p => p.id === productId);
+            if (product) {
+                const cartItem = {
+                    ...product,
+                    size: 'M',
+                    color: 'Black',
+                    quantity: 1
+                };
+                cart.push(cartItem);
+                renderCart();
+                updateOrderSummary();
+                updateCartCounter();
+                showNotification(`${product.name} added to cart!`, 'success');
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+                type === 'success' ? 'bg-success text-white' :
+                type === 'error' ? 'bg-error text-white' :
+                'bg-primary text-black'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Update cart counter
+        function updateCartCounter() {
+            const counter = document.getElementById('cart-counter');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            counter.textContent = totalItems;
+        }
+
+        // Authentication functions
+        function getAuthToken() {
+            return localStorage.getItem('customerToken');
+        }
+
+        function isCustomerLoggedIn() {
+            return !!getAuthToken();
+        }
+
+        function updateAuthButtons() {
+            const isLoggedIn = isCustomerLoggedIn();
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const customerName = document.getElementById('customerName');
+            
+            if (loginBtn && logoutBtn) {
+                if (isLoggedIn) {
+                    loginBtn.classList.add('hidden');
+                    logoutBtn.classList.remove('hidden');
+                    customerName.textContent = 'Customer';
+                } else {
+                    loginBtn.classList.remove('hidden');
+                    logoutBtn.classList.add('hidden');
+                    customerName.textContent = 'Guest';
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('customerToken');
+            localStorage.removeItem('customerData');
+            updateAuthButtons();
+            showNotification('Logged out successfully', 'success');
+        }
+
+        // Initialize everything on load
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            updateAuthButtons();
+            initializeCart();
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('header');
+            if (window.scrollY > 100) {
+                navbar.style.background = 'rgba(0, 0, 0, 0.98)';
+                navbar.style.backdropFilter = 'blur(25px)';
+            } else {
+                navbar.style.background = 'rgba(0, 0, 0, 0.95)';
+                navbar.style.backdropFilter = 'blur(25px)';
+            }
+        });
+
+        // Mouse movement particle effect
+        document.addEventListener('mousemove', (e) => {
+            const particles = document.querySelectorAll('.particle');
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+
+            particles.forEach((particle, index) => {
+                const speed = (index % 3 + 1) * 0.5;
+                const x = (mouseX - 0.5) * speed * 20;
+                const y = (mouseY - 0.5) * speed * 20;
+                
+                particle.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+    </script>
+<script id="dhws-dataInjector" src="/public/mobile-menu-injector.js?v=20250809d"></script>
+<script>
+  if (!window.__DHWS_INJECTOR_VERSION__) {
+    var s = document.createElement('script');
+    s.src = (location.pathname.includes('/pages/') ? '../public/mobile-menu-injector.js?v=20250809d' : 'public/mobile-menu-injector.js?v=20250809d');
+    document.head.appendChild(s);
+  }
+  </script>
+</body>
+</html>

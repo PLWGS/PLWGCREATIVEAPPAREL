@@ -1,0 +1,21 @@
+$ find . -name "*.html" -type f | head -20
+./google8d8112fb7368ed52.html
+./index-old.html
+./index.html
+./pages/account.html
+./pages/admin-login.html
+./pages/admin-totp-setup.html
+./pages/admin-uploads.html
+./pages/admin.html
+./pages/cart.html
+./pages/category-management.html
+./pages/checkout.html
+./pages/customer-login.html
+./pages/customer-reviews-management.html
+./pages/customers.html
+./pages/homepage-images.html
+./pages/loading.html
+./pages/order-failure.html
+./pages/order-success.html
+./pages/orders.html
+./pages/privacy-policy.html

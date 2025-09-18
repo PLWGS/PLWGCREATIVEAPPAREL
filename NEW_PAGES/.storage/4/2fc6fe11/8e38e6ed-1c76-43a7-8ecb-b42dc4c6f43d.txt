@@ -1,0 +1,113 @@
+$ git clone https://github.com/mariaisabeljuarezgomez/PLWGCREATIVEAPPAREL.git
+Cloning into 'PLWGCREATIVEAPPAREL'...
+Updating files:  17% (45/251)Updating files:  18% (46/251)Updating files:  19% (48/251)Updating files:  20% (51/251)Updating files:  21% (53/251)Updating files:  22% (56/251)Updating files:  23% (58/251)Updating files:  24% (61/251)Updating files:  25% (63/251)Updating files:  26% (66/251)Updating files:  27% (68/251)Updating files:  28% (71/251)Updating files:  29% (73/251)Updating files:  29% (75/251)Updating files:  30% (76/251)Updating files:  31% (78/251)Updating files:  32% (81/251)Updating files:  33% (83/251)Updating files:  34% (86/251)Updating files:  35% (88/251)Updating files:  36% (91/251)Updating files:  37% (93/251)Updating files:  38% (96/251)Updating files:  39% (98/251)Updating files:  40% (101/251)Updating files:  41% (103/251)Updating files:  42% (106/251)Updating files:  43% (108/251)Updating files:  44% (111/251)Updating files:  45% (113/251)Updating files:  46% (116/251)Updating files:  46% (117/251)Updating files:  47% (118/251)Updating files:  48% (121/251)Updating files:  49% (123/251)Updating files:  50% (126/251)Updating files:  51% (129/251)Updating files:  52% (131/251)Updating files:  53% (134/251)Updating files:  54% (136/251)Updating files:  55% (139/251)Updating files:  56% (141/251)Updating files:  57% (144/251)Updating files:  58% (146/251)Updating files:  59% (149/251)Updating files:  60% (151/251)Updating files:  61% (154/251)Updating files:  61% (155/251)Updating files:  62% (156/251)Updating files:  63% (159/251)Updating files:  64% (161/251)Updating files:  65% (164/251)Updating files:  66% (166/251)Updating files:  67% (169/251)Updating files:  68% (171/251)Updating files:  69% (174/251)Updating files:  70% (176/251)Updating files:  71% (179/251)Updating files:  72% (181/251)Updating files:  73% (184/251)Updating files:  74% (186/251)Updating files:  75% (189/251)Updating files:  76% (191/251)Updating files:  77% (194/251)Updating files:  78% (196/251)Updating files:  79% (199/251)Updating files:  80% (201/251)Updating files:  81% (204/251)Updating files:  82% (206/251)Updating files:  83% (209/251)Updating files:  84% (211/251)Updating files:  85% (214/251)Updating files:  86% (216/251)Updating files:  87% (219/251)Updating files:  88% (221/251)Updating files:  89% (224/251)Updating files:  90% (226/251)Updating files:  91% (229/251)Updating files:  92% (231/251)Updating files:  93% (234/251)Updating files:  94% (236/251)Updating files:  95% (239/251)Updating files:  96% (241/251)Updating files:  97% (244/251)Updating files:  98% (246/251)Updating files:  99% (249/251)Updating files: 100% (251/251)Updating files: 100% (251/251), done.
+$ cd PLWGCREATIVEAPPAREL
+
+$ ls -la
+
+total 535102
+drwxr-xr-x 312 root root 199159808 Sep 18 10:01 .
+drwxr-xr-x 367 root root 199393280 Sep 18 10:01 ..
+-rw-r--r--   1 root root       150 Sep 18 10:01 .browserslistrc
+drwxr-xr-x  44 root root  76042240 Sep 18 10:01 .git
+-rw-r--r--   1 root root      1304 Sep 18 10:01 .gitignore
+-rw-r--r--   1 root root       136 Sep 18 10:01 .npmrc
+-rw-r--r--   1 root root       286 Sep 18 10:01 .railwayignore
+-rw-r--r--   1 root root        66 Sep 18 10:01 .totp-secrets.json
+-rw-r--r--   1 root root     18426 Sep 18 10:01 ADMIN_PANEL_TECHNICAL_REFERENCE.md
+-rw-r--r--   1 root root      1926 Sep 18 10:01 AGENT_HANDOVER_FAILURE.md
+-rw-r--r--   1 root root     11998 Sep 18 10:01 CUSTOMER_DASHBOARD_PLAN.md
+-rw-r--r--   1 root root     20215 Sep 18 10:01 CUSTOM_INPUT_FEATURES_REVIEW.md
+-rw-r--r--   1 root root     13738 Sep 18 10:01 DEPLOYMENT_AND_MAINTENANCE.md
+-rw-r--r--   1 root root      6295 Sep 18 10:01 FILTERING_PROBLEM_HANDOVER.md
+-rw-r--r--   1 root root      5264 Sep 18 10:01 PAYPAL_INTEGRATION_SUMMARY.md
+-rw-r--r--   1 root root     42229 Sep 18 10:01 PROJECT_COMPREHENSIVE_REVIEW_AND_PLAN.md
+-rw-r--r--   1 root root     12061 Sep 18 10:01 PROJECT_DOCUMENTATION.md
+-rw-r--r--   1 root root     10663 Sep 18 10:01 PROJECT_STATUS_OVERVIEW.md
+-rw-r--r--   1 root root      7312 Sep 18 10:01 RAILWAY_NETWORK_ANALYSIS_FOR_MANUS.md
+-rw-r--r--   1 root root      8395 Sep 18 10:01 README.md
+-rw-r--r--   1 root root      5866 Sep 18 10:01 SEPTEMBER_6_2025_MAJOR_UPDATE.md
+-rw-r--r--   1 root root     14445 Sep 18 10:01 TECHNICAL_SPECIFICATIONS.md
+-rw-r--r--   1 root root     20851 Sep 18 10:01 TESTING_GUIDE.md
+-rw-r--r--   1 root root    204450 Sep 18 10:01 USER_MANUAL.md
+-rw-r--r--   1 root root     10563 Sep 18 10:01 WEBHOOK_HANDOVER_CRITICAL.md
+-rw-r--r--   1 root root      4869 Sep 18 10:01 add_all_products.py
+-rw-r--r--   1 root root      1601 Sep 18 10:01 add_custom_input_column.sql
+-rw-r--r--   1 root root     16383 Sep 18 10:01 add_size_chart_to_all_edit_pages.py
+-rw-r--r--   1 root root      5546 Sep 18 10:01 apply_size_chart_to_edit_pages.py
+drwxr-xr-x   5 root root     28672 Sep 18 10:01 archive
+drwxr-xr-x  56 root root  62087168 Sep 18 10:01 bin
+-rw-r--r--   1 root root      4890 Sep 18 10:01 cloudinary-upload.js
+-rw-r--r--   1 root root        80 Sep 18 10:01 complete_env_variables.txt
+-rw-r--r--   1 root root     16147 Sep 18 10:01 complete_size_chart_implementation.py
+-rw-r--r--   1 root root      4016 Sep 18 10:01 create-permanent-test-product.js
+-rw-r--r--   1 root root      2502 Sep 18 10:01 create-test-product.js
+-rw-r--r--   1 root root     27373 Sep 18 10:01 create_correct_edit_pages.py
+-rw-r--r--   1 root root      1143 Sep 18 10:01 create_customer_reviews_table.sql
+-rw-r--r--   1 root root     49056 Sep 18 10:01 create_edit_page_for_product.js
+-rw-r--r--   1 root root     29650 Sep 18 10:01 create_missing_edit_pages.py
+drwxr-xr-x   3 root root      8192 Sep 18 10:01 css
+-rw-r--r--   1 root root      3240 Sep 18 10:01 custom_tshirt_keywords_full_enriched.csv
+-rw-r--r--   1 root root      1760 Sep 18 10:01 database_setup.sql
+drwxr-xr-x   3 root root      8192 Sep 18 10:01 db
+-rw-r--r--   1 root root      1514 Sep 18 10:01 debug-image-upload.js
+-rw-r--r--   1 root root      1123 Sep 18 10:01 debug_products_loading.js
+-rw-r--r--   1 root root      3148 Sep 18 10:01 dev-server.js
+-rw-r--r--   1 root root      5132 Sep 18 10:01 diagnose-shop-issue.js
+-rw-r--r--   1 root root      2214 Sep 18 10:01 download_etsy_images.py
+-rw-r--r--   1 root root      5241 Sep 18 10:01 download_etsy_images_advanced.py
+-rw-r--r--   1 root root      1139 Sep 18 10:01 download_video2x.ps1
+-rw-r--r--   1 root root       117 Sep 18 10:01 e price $20.00, 2XL markup +$2.00 (total $22.00)
+-rw-r--r--   1 root root      5402 Sep 18 10:01 email_spf_setup.md
+-rw-r--r--   1 root root       361 Sep 18 10:01 erver.js && git commit -m FIX Make customer reviews API endpoints work with live database
+drwxr-xr-x   3 root root      8192 Sep 18 10:01 etsy_images
+-rw-r--r--   1 root root    133512 Sep 18 10:01 etsy_reviews.json
+-rw-r--r--   1 root root     30155 Sep 18 10:01 fetch_real_data_and_update_edit_pages.py
+-rw-r--r--   1 root root      9147 Sep 18 10:01 fix_size_chart_placement.py
+-rw-r--r--   1 root root      1584 Sep 18 10:01 fix_tailwind_cdn_in_all_edit_pages.py
+-rw-r--r--   1 root root      3662 Sep 18 10:01 fix_uncategory_category.js
+-rw-r--r--   1 root root      2036 Sep 18 10:01 fix_uncategory_category.sql
+-rw-r--r--   1 root root       131 Sep 18 10:01 google8d8112fb7368ed52.html
+drwxr-xr-x   5 root root     16384 Sep 18 10:01 https___plwgscreativeapparel.com_-Coverage-2025-09-14
+-rw-r--r--   1 root root     11750 Sep 18 10:01 index-old.html
+-rw-r--r--   1 root root    119989 Sep 18 10:01 index.html
+drwxr-xr-x   5 root root   8691712 Sep 18 10:01 mockups
+-rw-r--r--   1 root root      1209 Sep 18 10:01 mtp -o -name test  grep -E .(jsmd)$
+-rw-r--r--   1 root root    227389 Sep 18 10:01 package-lock.json
+-rw-r--r--   1 root root      2496 Sep 18 10:01 package.json
+drwxr-xr-x  12 root root    585728 Sep 18 10:01 pages
+drwxr-xr-x   5 root root     24576 Sep 18 10:01 public
+-rw-r--r--   1 root root       434 Sep 18 10:01 railway.json
+-rw-r--r--   1 root root      1512 Sep 18 10:01 revert_currency_to_usd.py
+-rw-r--r--   1 root root       936 Sep 18 10:01 robots.txt
+-rw-r--r--   1 root root    286888 Sep 18 10:01 server.js
+-rw-r--r--   1 root root      6146 Sep 18 10:01 setup_categories_table.js
+-rw-r--r--   1 root root      6731 Sep 18 10:01 setup_product_categories.js
+-rw-r--r--   1 root root      3240 Sep 18 10:01 setup_size_pricing.js
+-rw-r--r--   1 root root       651 Sep 18 10:01 setup_size_pricing.sql
+-rw-r--r--   1 root root      1574 Sep 18 10:01 sitemap.xml
+-rw-r--r--   1 root root      1464 Sep 18 10:01 t pg
+-rw-r--r--   1 root root      3218 Sep 18 10:01 tailwind.config.js
+-rw-r--r--   1 root root     16465 Sep 18 10:01 tatus
+-rw-r--r--   1 root root    124291 Sep 18 10:01 temp.html
+-rw-r--r--   1 root root      4928 Sep 18 10:01 test_admin_dashboard.html
+-rw-r--r--   1 root root      5691 Sep 18 10:01 test_category_api.html
+-rw-r--r--   1 root root     16318 Sep 18 10:01 test_category_filtering.html
+-rw-r--r--   1 root root      5328 Sep 18 10:01 test_size_chart_basic.html
+-rw-r--r--   1 root root      8832 Sep 18 10:01 test_size_chart_system.html
+-rw-r--r--   1 root root      4894 Sep 18 10:01 test_size_pricing.html
+drwxr-xr-x   8 root root     36864 Sep 18 10:01 tests
+drwxr-xr-x   3 root root      8192 Sep 18 10:01 tools
+-rw-r--r--   1 root root        24 Sep 18 10:01 twilio_2FA_recovery_code.txt
+-rw-r--r--   1 root root      3477 Sep 18 10:01 update-product-images.js
+-rw-r--r--   1 root root     29539 Sep 18 10:01 update_all_edit_pages.py
+-rw-r--r--   1 root root     29516 Sep 18 10:01 update_edit_pages_with_real_data_simple.py
+-rw-r--r--   1 root root     16368 Sep 18 10:01 update_edit_pages_with_size_chart.py
+-rw-r--r--   1 root root       919 Sep 18 10:01 update_product_sizes_tags.js
+drwxr-xr-x   3 root root      8192 Sep 18 10:01 videos
+-rw-r--r--   1 root root     25555 Sep 18 10:01 zoho setup 2.png
+-rw-r--r--   1 root root     48780 Sep 18 10:01 zoho setup.png
+drwxr-xr-x   3 root root      8192 Sep 18 10:01 zohoverify
+$ find . -name "index.html" -type f
+
+./index.html

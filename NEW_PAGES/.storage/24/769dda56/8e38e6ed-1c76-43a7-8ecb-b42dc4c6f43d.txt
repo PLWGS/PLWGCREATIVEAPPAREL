@@ -1,0 +1,85 @@
+$ ps aux | grep node
+root       475  0.0  0.0   3840  1936 ?        S    12:06   0:00 grep node
+$ pkill -f "node server.js"
+
+$ PORT=3000 node server.js &
+
+$ cd /workspace/PLWGCREATIVEAPPAREL && PORT=3000 node server.js
+
+node:internal/modules/cjs/loader:1147
+  throw err;
+  ^
+
+Error: Cannot find module 'express'
+Require stack:
+- /workspace/PLWGCREATIVEAPPAREL/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+    at Module._load (node:internal/modules/cjs/loader:985:27)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at require (node:internal/modules/helpers:176:18)
+    at Object.<anonymous> (/workspace/PLWGCREATIVEAPPAREL/server.js:1:17)
+    at Module._compile (node:internal/modules/cjs/loader:1376:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
+    at Module.load (node:internal/modules/cjs/loader:1207:32)
+    at Module._load (node:internal/modules/cjs/loader:1023:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:135:12) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/workspace/PLWGCREATIVEAPPAREL/server.js' ]
+}
+
+Node.js v20.11.0
+node:internal/modules/cjs/loader:1147
+  throw err;
+  ^
+
+Error: Cannot find module 'express'
+Require stack:
+- /workspace/PLWGCREATIVEAPPAREL/server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+    at Module._load (node:internal/modules/cjs/loader:985:27)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at require (node:internal/modules/helpers:176:18)
+    at Object.<anonymous> (/workspace/PLWGCREATIVEAPPAREL/server.js:1:17)
+    at Module._compile (node:internal/modules/cjs/loader:1376:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
+    at Module.load (node:internal/modules/cjs/loader:1207:32)
+    at Module._load (node:internal/modules/cjs/loader:1023:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:135:12) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/workspace/PLWGCREATIVEAPPAREL/server.js' ]
+}
+
+Node.js v20.11.0
+$ npm install
+
+
+> plwgscreativeapparel-admin@1.0.0 postinstall
+> npx update-browserslist-db@latest
+
+Latest version:     1.0.30001743
+Installed version:  1.0.30001737
+Removing old caniuse-lite from lock file
+Installing new caniuse-lite version
+$ npm install caniuse-lite
+Cleaning package.json dependencies from caniuse-lite
+$ npm uninstall caniuse-lite
+caniuse-lite has been successfully updated
+
+No target browser changes
+
+added 412 packages, and audited 413 packages in 1m
+
+70 packages are looking for funding
+  run `npm fund` for details
+
+2 vulnerabilities (1 low, 1 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+npm notice 
+npm notice New major version of npm available! 10.2.4 -> 11.6.0
+npm notice Changelog: <https://github.com/npm/cli/releases/tag/v11.6.0>
+npm notice Run `npm install -g npm@11.6.0` to update!
+npm notice 
