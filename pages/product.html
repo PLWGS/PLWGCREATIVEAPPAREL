@@ -5,9 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title id="pageTitle">Custom T-Shirt | Design Your Own Shirt | DTG Printing | PLWGS Creative Apparel</title>
     <meta name="description" content="Custom t-shirt with professional DTG printing. Design your own shirt or choose from our creative collection. High-quality custom t-shirt printing with fast shipping." />
-    <link rel="stylesheet" href="../css/main.css" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff8306',
+                        'primary-light': '#ffa726',
+                        'primary-dark': '#e65100',
+                        'glass-white': 'rgba(255, 255, 255, 0.1)',
+                        'glass-black': 'rgba(0, 0, 0, 0.8)',
+                        'glass-orange': 'rgba(255, 131, 6, 0.1)',
+                        accent: '#ff8306',
+                        background: '#000000',
+                        'text-primary': '#ffffff',
+                        'text-secondary': '#d1d5db',
+                        surface: '#1f2937',
+                        'surface-light': '#374151',
+                        'surface-dark': '#111827'
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'orbitron': ['Orbitron', 'sans-serif']
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
+                        'glass': '20px'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'scale-in': 'scaleIn 0.5s ease-out',
+                        'pulse-orange': 'pulseOrange 2s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 20px rgba(255, 131, 6, 0.4)' },
+                            '100%': { boxShadow: '0 0 40px rgba(255, 131, 6, 0.8)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(50px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        },
+                        pulseOrange: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(255, 131, 6, 0.4)' },
+                            '50%': { boxShadow: '0 0 30px rgba(255, 131, 6, 0.8)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <style>
+        /* BLACK BACKGROUND BASE */
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        
         /* Particle Animation Styles */
         .particles-container {
             position: fixed;
@@ -44,17 +123,62 @@
             animation-duration: 10s;
         }
         
-        /* Glassmorphism Effects */
-        .glass-nav {
-            backdrop-filter: blur(10px);
-            background: rgba(42, 42, 42, 0.8);
+        /* Glass Morphism - Black Theme */
+        .glass {
+            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .glass-card {
-            backdrop-filter: blur(15px);
-            background: rgba(42, 42, 42, 0.6);
+        .glass-white {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
             border: 1px solid rgba(255, 131, 6, 0.2);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(20px);
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(255, 131, 6, 0.2);
+        }
+        
+        .glass-white {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 131, 6, 0.2);
+            color: #000000;
+        }
+        
+        .banner-white {
+            background: rgba(255, 255, 255, 0.98);
+            color: #000000;
+            border: 2px solid rgba(255, 131, 6, 0.2);
+        }
+        
+        /* Card Hover Effects */
+        .card-hover {
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 25px 50px rgba(255, 131, 6, 0.3);
+            border-color: rgba(255, 131, 6, 0.5);
+        }
+        
+        /* ORANGE HIGHLIGHTS */
+        .text-highlight {
+            color: #ff8306;
+            font-weight: 600;
+        }
+        
+        /* ORANGE GRADIENT TEXT */
+        .gradient-text {
+            background: linear-gradient(135deg, #ff8306, #ffa726, #ffcc80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         /* Image Gallery Styles */
@@ -161,7 +285,7 @@
         }
         
         ::-webkit-scrollbar-thumb {
-            background: #ff8306;
+            background: #00bcd4;
             border-radius: 4px;
         }
         
@@ -218,7 +342,7 @@
     </style>
 
 </head>
-<body class="bg-background text-text-primary overflow-x-hidden">
+<body class="bg-background text-white overflow-x-hidden">
     <!-- Particle Animation Background -->
     <div class="particles-container" id="particles">
         <!-- Particles will be generated by JavaScript -->
@@ -230,7 +354,7 @@
             <div class="flex items-center justify-between">
                 <!-- Logo -->
                 <div class="flex items-center space-x-3">
-                    <svg class="w-10 h-10 text-accent" viewBox="0 0 40 40" fill="currentColor">
+                    <svg class="w-10 h-10 text-highlight" viewBox="0 0 40 40" fill="currentColor">
                         <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
                         <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
                         <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
@@ -240,9 +364,9 @@
 
                 <!-- Desktop Navigation -->
                 <div class="hidden lg:flex items-center space-x-8">
-                    <a href="../index.html" class="text-text-primary hover:text-accent transition-colors duration-300">Home</a>
+                    <a href="../index.html" class="text-white hover:text-highlight transition-colors duration-300">Home</a>
                     <div class="relative group">
-                        <a href="shop.html" class="text-accent font-medium flex items-center">
+                        <a href="shop.html" class="text-highlight font-medium flex items-center">
                             Shop
                             <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -252,44 +376,44 @@
                         <div class="absolute top-full left-0 w-96 glass-card rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 mt-2">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <h3 class="font-inter text-accent text-sm font-bold mb-3">Categories</h3>
+                                    <h3 class="font-inter text-highlight text-sm font-bold mb-3">Categories</h3>
                                     <ul class="space-y-2">
-                                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Horror Essentials</a></li>
-                                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Pop Culture</a></li>
-                                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Humor & Sass</a></li>
-                                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Custom Designs</a></li>
+                                        <li><a href="shop.html" class="text-white hover:text-highlight transition-colors">Horror Essentials</a></li>
+                                        <li><a href="shop.html" class="text-white hover:text-highlight transition-colors">Pop Culture</a></li>
+                                        <li><a href="shop.html" class="text-white hover:text-highlight transition-colors">Humor & Sass</a></li>
+                                        <li><a href="shop.html" class="text-white hover:text-highlight transition-colors">Custom Designs</a></li>
                                     </ul>
                                 </div>
                                 <div>
-                                    <h3 class="font-inter text-accent text-sm font-bold mb-3">Featured</h3>
+                                    <h3 class="font-inter text-highlight text-sm font-bold mb-3">Featured</h3>
                                     <div class="space-y-2">
                                         <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop" alt="Featured Product" class="w-full h-20 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=400'; this.onerror=null;" />
-                                        <p class="text-xs text-text-secondary">New Horror Collection</p>
+                                        <p class="text-xs text-white">New Horror Collection</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <a href="account.html" class="text-text-primary hover:text-accent transition-colors duration-300">Account</a>
-                    <a href="admin.html" class="text-text-primary hover:text-accent transition-colors duration-300">Admin</a>
+                    <a href="account.html" class="text-white hover:text-highlight transition-colors duration-300">Account</a>
+                    <a href="admin.html" class="text-white hover:text-highlight transition-colors duration-300">Admin</a>
                 </div>
 
                 <!-- Cart & Search -->
                 <div class="flex items-center space-x-4">
-                    <button class="text-text-primary hover:text-accent transition-colors duration-300">
+                    <button class="text-white hover:text-highlight transition-colors duration-300">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </button>
-                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
+                    <button class="text-white hover:text-highlight transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
-                        <span class="absolute -top-2 -right-2 bg-accent text-black text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-counter">3</span>
+                        <span class="absolute -top-2 -right-2 bg-highlight text-black text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-counter">3</span>
                     </button>
                     
                     <!-- Mobile Menu Button -->
-                    <button class="lg:hidden text-text-primary hover:text-accent transition-colors duration-300">
+                    <button class="lg:hidden text-white hover:text-highlight transition-colors duration-300">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
@@ -303,19 +427,19 @@
     <section class="pt-24 pb-6 relative z-10">
         <div class="container mx-auto px-6">
             <nav class="flex items-center space-x-2 text-sm">
-                <a href="../index.html" class="text-text-secondary hover:text-accent transition-colors">Home</a>
-                <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="../index.html" class="text-white hover:text-highlight transition-colors">Home</a>
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
-                <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Shop</a>
-                <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="shop.html" class="text-white hover:text-highlight transition-colors">Shop</a>
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
-                <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Horror Essentials</a>
-                <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="shop.html" class="text-white hover:text-highlight transition-colors">Horror Essentials</a>
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
-                <span class="text-accent" id="breadcrumbProductName">Product Details</span>
+                <span class="text-highlight" id="breadcrumbProductName">Product Details</span>
             </nav>
         </div>
     </section>
@@ -344,7 +468,7 @@
                             </div>
                             
                             <!-- Deep Zoom Badge -->
-                            <div class="absolute bottom-4 left-4 bg-accent text-black px-3 py-1 rounded-full text-xs font-bold">
+                            <div class="absolute bottom-4 left-4 bg-highlight text-black px-3 py-1 rounded-full text-xs font-bold">
                                 Deep Zoom Available
                             </div>
                         </div>
@@ -355,19 +479,19 @@
                 </div>
 
                 <!-- Product Information -->
-                <div class="space-y-8">
+                <div class="banner-white rounded-3xl p-8 space-y-8 shadow-2xl">
                     <!-- Product Title & Rating -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <span class="bg-error text-white px-3 py-1 rounded-full text-sm font-bold">Almost Sold Out</span>
-                            <button class="text-text-secondary hover:text-accent transition-colors">
+                            <button class="text-white hover:text-highlight transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                 </svg>
                             </button>
                         </div>
                         
-                        <h1 id="productTitle" class="product-name font-inter text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Product Title</h1>
+                        <h1 id="productTitle" class="product-name font-inter text-2xl sm:text-3xl lg:text-4xl font-bold text-black">Product Title</h1>
                         
                         <div class="flex items-center space-x-4">
                             <div class="flex items-center space-x-1">
@@ -388,22 +512,22 @@
                                         <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                                     </svg>
                                 </div>
-                                <span id="reviewsCountHeader" class="text-text-secondary text-sm">(0 reviews)</span>
+                                <span id="reviewsCountHeader" class="text-gray-600 text-sm">(0 reviews)</span>
                             </div>
-                            <span class="text-accent text-sm">★ Trending Design</span>
+                            <span class="text-highlight text-sm">★ Trending Design</span>
                         </div>
                         
                         <div class="flex items-center space-x-4">
-                            <span id="currentPrice" class="price font-orbitron text-3xl font-bold text-accent">$22.00</span>
-                            <span id="originalPrice" class="original-price text-text-secondary line-through text-lg" style="display: none;">$26.40</span>
+                            <span id="currentPrice" class="price font-orbitron text-3xl font-bold text-highlight">$22.00</span>
+                            <span id="originalPrice" class="original-price text-gray-600 line-through text-lg" style="display: none;">$26.40</span>
                             <span class="sale-percentage bg-warning text-black px-2 py-1 rounded text-sm font-bold" style="display: none;">25% OFF</span>
                         </div>
                     </div>
 
                     <!-- Design Story (tags hidden) -->
-                    <div class="glass-card rounded-xl p-6">
-                        <h3 class="font-orbitron text-xl font-bold text-white mb-4">Design Story</h3>
-                        <p id="productDescription" class="product-description text-text-secondary leading-relaxed">
+                    <div class="bg-gray-100 rounded-xl p-6">
+                        <h3 class="font-orbitron text-xl font-bold text-black mb-4">Design Story</h3>
+                        <p id="productDescription" class="product-description text-gray-700 leading-relaxed">
                             Quality printed design with custom artwork. Perfect for those who want to express their unique style.
                         </p>
                         <div class="flex flex-wrap gap-2 mt-4 product-tags hidden"></div>
@@ -412,29 +536,29 @@
                     <!-- Size Selection -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <h3 class="font-orbitron text-lg font-bold text-white">Size</h3>
-                            <button class="text-accent text-sm hover:text-accent-light transition-colors">Size Guide</button>
+                            <h3 class="font-orbitron text-lg font-bold text-black">Size</h3>
+                            <button class="text-highlight text-sm hover:text-highlight-light transition-colors">Size Guide</button>
                         </div>
                         <div class="grid grid-cols-5 gap-3 size-options"></div>
                     </div>
 
                     <!-- Color Options -->
                     <div class="space-y-4">
-                        <h3 class="font-orbitron text-lg font-bold text-white">Color</h3>
+                        <h3 class="font-orbitron text-lg font-bold text-black">Color</h3>
                         <div class="flex items-center space-x-4">
                             <!-- Color Preview -->
                             <div id="colorPreview" class="w-16 h-16 rounded-lg border-2 border-surface-light shadow-lg" style="background-color: #000000;"></div>
                             
                             <!-- Color Dropdown -->
                             <div class="flex-1">
-                                <select id="colorSelector" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-text-primary focus:border-accent focus:outline-none text-sm">
+                                <select id="colorSelector" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-white focus:border-highlight focus:outline-none text-sm">
                                     <option value="">Select a color...</option>
                                 </select>
                             </div>
                         </div>
                         
                         <!-- Color Name Display -->
-                        <div id="colorNameDisplay" class="text-sm text-text-secondary font-medium px-2 py-1 bg-surface-light rounded-md inline-block"></div>
+                        <div id="colorNameDisplay" class="text-sm text-white font-medium px-2 py-1 bg-surface-light rounded-md inline-block"></div>
                     </div>
 
                     <!-- Quantity & Add to Cart -->
@@ -445,14 +569,14 @@
                                 <span id="qtyValue" class="px-4 py-2 border-x border-surface-light">1</span>
                                 <button id="qtyPlus" class="px-3 py-2 hover:bg-surface-light transition-colors">+</button>
                             </div>
-                            <span id="stockSummary" class="text-text-secondary text-sm hidden">&nbsp;</span>
+                            <span id="stockSummary" class="text-white text-sm hidden">&nbsp;</span>
                         </div>
                         
                         <div class="space-y-3">
                             <button id="addToCartBtn" class="btn-primary w-full neon-glow text-lg py-4">
                                 Add to Cart - <span id="addToCartPrice">$22.00</span>
                             </button>
-                            <button id="buyNowBtn" class="w-full border border-accent text-accent px-6 py-3 rounded-lg font-semibold hover:bg-accent hover:text-black transition-all duration-300">
+                            <button id="buyNowBtn" class="w-full border border-highlight text-highlight px-6 py-3 rounded-lg font-semibold hover:bg-highlight hover:text-black transition-all duration-300">
                                 Buy Now
                             </button>
                         </div>
@@ -467,36 +591,36 @@
                             
                             <!-- Birthday Custom Input -->
                             <div id="birthdayCustomInput" class="space-y-4 hidden">
-                                <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-accent border-opacity-30">
+                                <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-highlight border-opacity-30">
                                     <div id="birthdayFields" class="space-y-3">
                                         <!-- Fields will be populated dynamically -->
                                     </div>
 
                                     <!-- Custom Question Field -->
                                     <div id="birthdayCustomQuestion" class="mt-4 hidden">
-                                        <label class="block text-sm text-text-secondary mb-2 font-medium">Additional Information Request</label>
+                                        <label class="block text-sm text-white mb-2 font-medium">Additional Information Request</label>
                                         <div class="bg-surface bg-opacity-50 rounded-lg p-3 border border-surface-light">
-                                            <p id="birthdayCustomQuestionText" class="text-text-primary text-sm"></p>
+                                            <p id="birthdayCustomQuestionText" class="text-white text-sm"></p>
                                         </div>
-                                        <textarea id="birthdayCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
+                                        <textarea id="birthdayCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-white focus:border-highlight focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Lyrics Custom Input -->
                             <div id="lyricsCustomInput" class="space-y-4 hidden">
-                                <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-accent border-opacity-30">
+                                <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-highlight border-opacity-30">
                                     <div id="lyricsFields" class="space-y-3">
                                         <!-- Fields will be populated dynamically -->
                                     </div>
 
                                     <!-- Custom Question Field -->
                                     <div id="lyricsCustomQuestion" class="mt-4 hidden">
-                                        <label class="block text-sm text-text-secondary mb-2 font-medium">Additional Information Request</label>
+                                        <label class="block text-sm text-white mb-2 font-medium">Additional Information Request</label>
                                         <div class="bg-surface bg-opacity-50 rounded-lg p-3 border border-surface-light">
-                                            <p id="lyricsCustomQuestionText" class="text-text-primary text-sm"></p>
+                                            <p id="lyricsCustomQuestionText" class="text-white text-sm"></p>
                                         </div>
-                                        <textarea id="lyricsCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-text-primary focus:border-accent focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
+                                        <textarea id="lyricsCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-white focus:border-highlight focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -513,7 +637,7 @@
                             </div>
                             <div>
                                 <p id="social-proof-text" class="text-sm text-white">Someone from your area just bought this</p>
-                                <p id="social-proof-time" class="text-xs text-text-secondary">just now</p>
+                                <p id="social-proof-time" class="text-xs text-white">just now</p>
                             </div>
                         </div>
                     </div>
@@ -610,16 +734,16 @@
             <div class="max-w-4xl mx-auto">
                 <!-- Tab Navigation -->
                 <div class="flex border-b border-surface-light mb-8">
-                    <button class="tab-button active px-6 py-3 font-semibold text-accent border-b-2 border-accent" data-tab="details">
+                    <button class="tab-button active px-6 py-3 font-semibold text-highlight border-b-2 border-highlight" data-tab="details">
                         Product Details
                     </button>
-                    <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="reviews" id="reviewsTabButton">
+                    <button class="tab-button px-6 py-3 font-semibold text-white hover:text-highlight transition-colors" data-tab="reviews" id="reviewsTabButton">
                         Reviews (0)
                     </button>
-                    <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="sizing">
+                    <button class="tab-button px-6 py-3 font-semibold text-white hover:text-highlight transition-colors" data-tab="sizing">
                         Size & Care
                     </button>
-                    <button class="tab-button px-6 py-3 font-semibold text-text-secondary hover:text-accent transition-colors" data-tab="shipping">
+                    <button class="tab-button px-6 py-3 font-semibold text-white hover:text-highlight transition-colors" data-tab="shipping">
                         Shipping
                     </button>
                 </div>
@@ -634,46 +758,46 @@
                             <div class="grid md:grid-cols-2 gap-8">
                                 <div class="space-y-4">
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Material:</span>
+                                        <span class="text-white">Material:</span>
                                         <span class="text-white" id="spec-material">100% Premium Cotton</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Weight:</span>
+                                        <span class="text-white">Weight:</span>
                                         <span class="text-white" id="spec-weight">180 GSM</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Fit:</span>
+                                        <span class="text-white">Fit:</span>
                                         <span class="text-white" id="spec-fit">Unisex Regular</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Print Method:</span>
+                                        <span class="text-white">Print Method:</span>
                                         <span class="text-white" id="spec-print-method">Direct-to-Garment</span>
                                     </div>
                                 </div>
                                 
                                 <div class="space-y-4">
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Neck Style:</span>
+                                        <span class="text-white">Neck Style:</span>
                                         <span class="text-white" id="spec-neck">Crew Neck</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Sleeve Length:</span>
+                                        <span class="text-white">Sleeve Length:</span>
                                         <span class="text-white" id="spec-sleeve">Short Sleeve</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Origin:</span>
+                                        <span class="text-white">Origin:</span>
                                         <span class="text-white" id="spec-origin">Made in USA</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Sustainability:</span>
+                                        <span class="text-white">Sustainability:</span>
                                         <span class="text-white" id="spec-sustainability">Eco-Friendly Inks</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-text-secondary">Brand Preference:</span>
+                                        <span class="text-white">Brand Preference:</span>
                                         <span class="text-white" id="brandPrefText">Either (Gildan Softstyle 64000 or Bella+Canvas 3001)</span>
                                     </div>
                                     <div class="flex justify-between" id="specsNotesRow" style="display:none;">
-                                        <span class="text-text-secondary">Notes:</span>
+                                        <span class="text-white">Notes:</span>
                                         <span class="text-white" id="specsNotesText"></span>
                                     </div>
                                 </div>
@@ -683,21 +807,21 @@
                             
                             <div class="border-t border-surface-light pt-6">
                                 <h4 class="font-orbitron text-lg font-bold text-white mb-4">Features</h4>
-                                <ul class="space-y-2 text-text-secondary">
+                                <ul class="space-y-2 text-white">
                                     <li class="flex items-center space-x-3">
-                                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
                                         <span>Double-stitched seams for durability</span>
                                     </li>
                                     <li class="flex items-center space-x-3">
-                                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
                                         <span>Fade-resistant printing technology</span>
                                     </li>
                                     <li class="flex items-center space-x-3">
-                                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
                                         <span>Soft-touch finish for comfort</span>
@@ -714,7 +838,7 @@
                             <div class="glass-card rounded-xl p-8">
                                 <div class="grid md:grid-cols-2 gap-8">
                                     <div class="text-center">
-                                        <div id="reviewsAverageValue" class="text-4xl font-bold text-accent mb-2">0.0</div>
+                                        <div id="reviewsAverageValue" class="text-4xl font-bold text-highlight mb-2">0.0</div>
                                         <div class="star-rating flex justify-center mb-2">
                                             <svg class="w-6 h-6 fill-current" viewBox="0 0 20 20">
                                                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
@@ -732,44 +856,44 @@
                                                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                                             </svg>
                                         </div>
-                                        <div id="reviewsBasedOnText" class="text-text-secondary">Based on 0 reviews</div>
+                                        <div id="reviewsBasedOnText" class="text-white">Based on 0 reviews</div>
                                     </div>
                                     
                                     <div class="space-y-2">
                                         <div class="flex items-center space-x-3">
                                             <span class="text-sm w-8">5★</span>
                                             <div class="flex-1 bg-surface-dark rounded-full h-2">
-                                                <div class="bg-accent h-2 rounded-full" style="width: 65%"></div>
+                                                <div class="bg-highlight h-2 rounded-full" style="width: 65%"></div>
                                             </div>
-                                            <span class="text-sm text-text-secondary w-8">65%</span>
+                                            <span class="text-sm text-white w-8">65%</span>
                                         </div>
                                         <div class="flex items-center space-x-3">
                                             <span class="text-sm w-8">4★</span>
                                             <div class="flex-1 bg-surface-dark rounded-full h-2">
-                                                <div class="bg-accent h-2 rounded-full" style="width: 20%"></div>
+                                                <div class="bg-highlight h-2 rounded-full" style="width: 20%"></div>
                                             </div>
-                                            <span class="text-sm text-text-secondary w-8">20%</span>
+                                            <span class="text-sm text-white w-8">20%</span>
                                         </div>
                                         <div class="flex items-center space-x-3">
                                             <span class="text-sm w-8">3★</span>
                                             <div class="flex-1 bg-surface-dark rounded-full h-2">
-                                                <div class="bg-accent h-2 rounded-full" style="width: 10%"></div>
+                                                <div class="bg-highlight h-2 rounded-full" style="width: 10%"></div>
                                             </div>
-                                            <span class="text-sm text-text-secondary w-8">10%</span>
+                                            <span class="text-sm text-white w-8">10%</span>
                                         </div>
                                         <div class="flex items-center space-x-3">
                                             <span class="text-sm w-8">2★</span>
                                             <div class="flex-1 bg-surface-dark rounded-full h-2">
-                                                <div class="bg-accent h-2 rounded-full" style="width: 3%"></div>
+                                                <div class="bg-highlight h-2 rounded-full" style="width: 3%"></div>
                                             </div>
-                                            <span class="text-sm text-text-secondary w-8">3%</span>
+                                            <span class="text-sm text-white w-8">3%</span>
                                         </div>
                                         <div class="flex items-center space-x-3">
                                             <span class="text-sm w-8">1★</span>
                                             <div class="flex-1 bg-surface-dark rounded-full h-2">
-                                                <div class="bg-accent h-2 rounded-full" style="width: 2%"></div>
+                                                <div class="bg-highlight h-2 rounded-full" style="width: 2%"></div>
                                             </div>
-                                            <span class="text-sm text-text-secondary w-8">2%</span>
+                                            <span class="text-sm text-white w-8">2%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -792,12 +916,12 @@
                                     <table class="w-full text-sm">
                                         <thead>
                                             <tr class="border-b border-surface-light">
-                                                <th class="text-left py-3 text-accent">Size</th>
-                                                <th class="text-left py-3 text-accent">Chest Width</th>
-                                                <th class="text-left py-3 text-accent">Length</th>
+                                                <th class="text-left py-3 text-highlight">Size</th>
+                                                <th class="text-left py-3 text-highlight">Chest Width</th>
+                                                <th class="text-left py-3 text-highlight">Length</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="size-chart-tbody" class="text-text-secondary">
+                                        <tbody id="size-chart-tbody" class="text-white">
                                             <!-- Dynamic content will be populated by JavaScript -->
                                         </tbody>
                                     </table>
@@ -810,22 +934,22 @@
                                 <div class="grid md:grid-cols-2 gap-6">
                                     <div class="space-y-3">
                                         <div class="flex items-center space-x-3">
-                                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                             </svg>
-                                            <span class="text-text-secondary">Machine Wash Cold & Dry Low</span>
+                                            <span class="text-white">Machine Wash Cold & Dry Low</span>
                                         </div>
                                         <div class="flex items-center space-x-3">
-                                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                             </svg>
-                                            <span class="text-text-secondary">Turn inside out before Wash & Dry</span>
+                                            <span class="text-white">Turn inside out before Wash & Dry</span>
                                         </div>
                                         <div class="flex items-center space-x-3">
-                                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                             </svg>
-                                            <span class="text-text-secondary">Use Mild Detergent</span>
+                                            <span class="text-white">Use Mild Detergent</span>
                                         </div>
                                     </div>
                                     <div class="space-y-3">
@@ -833,19 +957,19 @@
                                             <svg class="w-5 h-5 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
-                                            <span class="text-text-secondary">No Fabric Softener</span>
+                                            <span class="text-white">No Fabric Softener</span>
                                         </div>
                                         <div class="flex items-center space-x-3">
                                             <svg class="w-5 h-5 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
-                                            <span class="text-text-secondary">Do Not Use Bleach</span>
+                                            <span class="text-white">Do Not Use Bleach</span>
                                         </div>
                                         <div class="flex items-center space-x-3">
                                             <svg class="w-5 h-5 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
-                                            <span class="text-text-secondary">Do Not Dry Clean or Iron</span>
+                                            <span class="text-white">Do Not Dry Clean or Iron</span>
                                         </div>
                                     </div>
                                 </div>
@@ -868,7 +992,7 @@
                                 
                                 <div>
                                     <h4 class="font-orbitron text-lg font-bold text-white mb-4">Return Policy</h4>
-                                    <div class="space-y-4 text-text-secondary">
+                                    <div class="space-y-4 text-white">
                                         <div class="bg-surface-dark p-4 rounded-lg border border-surface-light">
                                             <p class="text-sm leading-relaxed mb-3">
                                                 <strong class="text-white">Your satisfaction is important to us.</strong> We stand behind our work, and if we made a mistake with your custom order, we will gladly correct it. However, because each item is made specifically for you, <strong class="text-white">all sales are otherwise final</strong>.
@@ -892,7 +1016,7 @@
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="font-orbitron text-4xl font-bold text-white mb-4">You Might Also Like</h2>
-                <p class="text-text-secondary text-lg max-w-2xl mx-auto">Discover more designs that match your dark aesthetic</p>
+                <p class="text-white text-lg max-w-2xl mx-auto">Discover more designs that match your dark aesthetic</p>
             </div>
 
             <div id="related-grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-8"></div>
@@ -919,8 +1043,8 @@
                       </div>
                       <h3 class=\"font-orbitron text-lg font-bold text-white mb-2\">${name}</h3>
                       <div class=\"flex items-center justify-between\">
-                        <span class=\"text-accent font-bold\">${price}</span>
-                        <span class=\"text-accent hover:text-accent-light transition-colors\">View Details →</span>
+                        <span class=\"text-highlight font-bold\">${price}</span>
+                        <span class=\"text-highlight hover:text-highlight-light transition-colors\">View Details →</span>
                       </div>
                     </a>`;
                 }
@@ -965,11 +1089,11 @@
                                 <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                             </svg>
                         </div>
-                        <span class="text-text-secondary text-sm">(89)</span>
+                        <span class="text-white text-sm">(89)</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-accent font-bold">$27.99</span>
-                        <a href="product.html" class="text-accent hover:text-accent-light transition-colors">
+                        <span class="text-highlight font-bold">$27.99</span>
+                        <a href="product.html" class="text-highlight hover:text-highlight-light transition-colors">
                             View Details →
                         </a>
                     </div>
@@ -985,79 +1109,78 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-surface-dark border-t border-surface-light py-16 relative z-10">
+    <footer class="glass py-20 relative border-t-2 border-primary">
         <div class="container mx-auto px-6">
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                 <!-- Brand -->
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-3">
-                        <svg class="w-8 h-8 text-accent" viewBox="0 0 40 40" fill="currentColor">
-                            <path d="M20 2L37 12v16L20 38L3 28V12L20 2z"/>
-                            <circle cx="20" cy="20" r="8" fill="#0a0a0a"/>
-                            <text x="20" y="25" text-anchor="middle" class="text-xs font-bold fill-accent">P</text>
-                        </svg>
-                        <span class="font-orbitron text-lg font-bold text-gradient">PlwgsCreativeApparel</span>
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-primary-light flex items-center justify-center animate-pulse-orange">
+                            <span class="text-black font-orbitron font-black text-2xl">P</span>
                     </div>
-                    <p class="text-text-secondary text-sm">
-                        Creative rebellion through wearable art. Transforming everyday apparel into conversation starters since 2023.
+                        <div>
+                            <h3 class="font-orbitron font-black text-2xl gradient-text">PLWG'S</h3>
+                            <p class="text-sm text-highlight font-bold tracking-wider">CREATIVE APPAREL</p>
+                        </div>
+                    </div>
+                    <p class="text-white text-lg leading-relaxed">
+                        <span class="text-highlight font-bold">Creative rebellion</span> through wearable art. Transforming everyday apparel into conversation starters since 2023.
                     </p>
                 </div>
 
                 <!-- Quick Links -->
                 <div>
-                    <h3 class="font-orbitron text-white font-bold mb-4">Quick Links</h3>
+                    <h3 class="font-bold text-highlight mb-6 text-xl uppercase tracking-wider">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Shop All</a></li>
-                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Size Guide</a></li>
-                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Care Instructions</a></li>
+                        <li><a href="shop.html" class="text-white hover:text-highlight transition-colors text-lg font-medium">Shop All</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors text-lg font-medium">Size Guide</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors text-lg font-medium">Care Instructions</a></li>
                     </ul>
                 </div>
 
                 <!-- Customer Care -->
                 <div>
-                    <h3 class="font-orbitron text-white font-bold mb-4">Customer Care</h3>
+                    <h3 class="font-bold text-highlight mb-6 text-xl uppercase tracking-wider">Customer Care</h3>
                     <ul class="space-y-2">
-                        <li><a href="account.html" class="text-text-secondary hover:text-accent transition-colors">My Account</a></li>
-                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Order Tracking</a></li>
-                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Returns & Exchanges</a></li>
-                        <li><a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">Contact Support</a></li>
+                        <li><a href="account.html" class="text-white hover:text-highlight transition-colors text-lg font-medium">My Account</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors text-lg font-medium">Order Tracking</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors text-lg font-medium">Returns & Exchanges</a></li>
+                        <li><a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors text-lg font-medium">Contact Support</a></li>
                     </ul>
                 </div>
 
                 <!-- Connect -->
                 <div>
-                    <h3 class="font-orbitron text-white font-bold mb-4">Connect</h3>
+                    <h3 class="font-bold text-highlight mb-6 text-xl uppercase tracking-wider">Connect</h3>
                     <div class="flex space-x-4 mb-4">
-                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                        <a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors p-3 glass rounded-full" aria-label="Twitter">
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
                             </svg>
                         </a>
-                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                        <a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors p-3 glass rounded-full" aria-label="Pinterest">
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.001z"/>
                             </svg>
                         </a>
-                        <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors">
+                        <a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors p-3 glass rounded-full" aria-label="Instagram">
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                             </svg>
                         </a>
                     </div>
-                    <p class="text-text-secondary text-sm">
-                        Follow us for daily inspiration and behind-the-scenes content.
-                    </p>
+                    <p class="text-white text-sm font-medium">Follow us for the latest updates and exclusive offers!</p>
                 </div>
             </div>
 
             <div class="border-t border-surface-light pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-text-secondary text-sm">
+                <p class="text-white text-sm font-medium">
                     © 2025 PlwgsCreativeApparel. All Rights Reserved.
                 </p>
                 <div class="flex space-x-6 mt-4 md:mt-0">
-                                            <a href="privacy-policy.html" class="text-text-secondary hover:text-accent transition-colors text-sm">Privacy Policy</a>
-                        <a href="terms-of-service.html" class="text-text-secondary hover:text-accent transition-colors text-sm">Terms of Service</a>
-                    <a href="javascript:void(0)" class="text-text-secondary hover:text-accent transition-colors text-sm">Shipping Info</a>
+                    <a href="privacy-policy.html" class="text-white hover:text-highlight transition-colors text-sm font-medium">Privacy Policy</a>
+                    <a href="terms-of-service.html" class="text-white hover:text-highlight transition-colors text-sm font-medium">Terms of Service</a>
+                    <a href="javascript:void(0)" class="text-white hover:text-highlight transition-colors text-sm font-medium">Shipping Info</a>
                 </div>
             </div>
         </div>
@@ -1231,12 +1354,12 @@
             const shippingInfoSection = document.getElementById('shipping-info-section');
             if (shippingInfoSection) {
                 let shippingHTML = `
-                    <div class="text-center text-sm text-text-secondary mb-2">Choose Shipping Method:</div>
+                    <div class="text-center text-sm text-white mb-2">Choose Shipping Method:</div>
                     <div class="space-y-2">
                         <!-- Standard Shipping Option -->
-                        <label class="flex items-center justify-between p-3 border border-surface-light rounded-lg cursor-pointer hover:border-accent transition-colors shipping-option" data-method="standard" data-cost="${shippingCost}">
+                        <label class="flex items-center justify-between p-3 border border-surface-light rounded-lg cursor-pointer hover:border-highlight transition-colors shipping-option" data-method="standard" data-cost="${shippingCost}">
                             <div class="flex items-center space-x-3">
-                                <input type="radio" name="shipping-method" value="standard" class="text-accent focus:ring-accent" checked>
+                                <input type="radio" name="shipping-method" value="standard" class="text-highlight focus:ring-accent" checked>
                                 <div>
                                     <div class="font-semibold text-white flex items-center space-x-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1244,7 +1367,7 @@
                                         </svg>
                                         <span>Standard Shipping</span>
                                     </div>
-                                    <div class="text-text-secondary text-sm">5-7 business days</div>
+                                    <div class="text-white text-sm">5-7 business days</div>
                                 </div>
                             </div>
                             <div class="font-bold text-white">$${shippingCost.toFixed(2)}</div>
@@ -1255,9 +1378,9 @@
                 if (localPickupEnabled) {
                     shippingHTML += `
                         <!-- Local Pickup Option -->
-                        <label class="flex items-center justify-between p-3 border border-surface-light rounded-lg cursor-pointer hover:border-accent transition-colors shipping-option" data-method="pickup" data-cost="0">
+                        <label class="flex items-center justify-between p-3 border border-surface-light rounded-lg cursor-pointer hover:border-highlight transition-colors shipping-option" data-method="pickup" data-cost="0">
                             <div class="flex items-center space-x-3">
-                                <input type="radio" name="shipping-method" value="pickup" class="text-accent focus:ring-accent">
+                                <input type="radio" name="shipping-method" value="pickup" class="text-highlight focus:ring-accent">
                                 <div>
                                     <div class="font-semibold text-white flex items-center space-x-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1266,10 +1389,10 @@
                                         </svg>
                                         <span>Local Pickup</span>
                                     </div>
-                                    <div class="text-text-secondary text-sm">Pick up in Goodyear, Arizona</div>
+                                    <div class="text-white text-sm">Pick up in Goodyear, Arizona</div>
                                 </div>
                             </div>
-                            <div class="font-bold text-accent">FREE</div>
+                            <div class="font-bold text-highlight">FREE</div>
                         </label>
                     `;
                 }
@@ -1277,7 +1400,7 @@
                 shippingHTML += `
                     </div>
                     <!-- Returns Policy -->
-                    <div class="flex items-center justify-center space-x-2 text-sm text-text-secondary mt-3 pt-3 border-t border-surface-light">
+                    <div class="flex items-center justify-center space-x-2 text-sm text-white mt-3 pt-3 border-t border-surface-light">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
@@ -1301,9 +1424,9 @@
                     <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
                         <div>
                             <div class="font-semibold text-white">Standard Shipping</div>
-                            <div class="text-text-secondary text-sm">5-7 business days</div>
+                            <div class="text-white text-sm">5-7 business days</div>
                         </div>
-                        <div class="text-accent font-bold">$${shippingCost.toFixed(2)}</div>
+                        <div class="text-highlight font-bold">$${shippingCost.toFixed(2)}</div>
                     </div>
                 `;
                 
@@ -1313,9 +1436,9 @@
                         <div class="flex justify-between items-center p-4 border border-surface-light rounded-lg">
                             <div>
                                 <div class="font-semibold text-white">Local Pickup</div>
-                                <div class="text-text-secondary text-sm">Pick up at our location</div>
+                                <div class="text-white text-sm">Pick up at our location</div>
                             </div>
-                            <div class="text-accent font-bold">FREE</div>
+                            <div class="text-highlight font-bold">FREE</div>
                         </div>
                     `;
                 }
@@ -1334,8 +1457,8 @@
                     radio.checked = true;
                     
                     // Update visual selection
-                    shippingOptions.forEach(opt => opt.classList.remove('border-accent'));
-                    option.classList.add('border-accent');
+                    shippingOptions.forEach(opt => opt.classList.remove('border-highlight'));
+                    option.classList.add('border-highlight');
                     
                     // Store shipping choice for cart
                     const shippingMethod = option.dataset.method;
@@ -1457,8 +1580,8 @@
                 
                 // Remove active class from all buttons and panes
                 tabButtons.forEach(b => {
-                    b.classList.remove('active', 'text-accent', 'border-accent');
-                    b.classList.add('text-text-secondary');
+                    b.classList.remove('active', 'text-highlight', 'border-highlight');
+                    b.classList.add('text-white');
                 });
                 tabPanes.forEach(p => {
                     p.classList.remove('active');
@@ -1466,8 +1589,8 @@
                 });
                 
                 // Add active class to clicked button and corresponding pane
-                button.classList.add('active', 'text-accent', 'border-accent');
-                button.classList.remove('text-text-secondary');
+                button.classList.add('active', 'text-highlight', 'border-highlight');
+                button.classList.remove('text-white');
                 document.getElementById(targetTab).classList.add('active');
                 document.getElementById(targetTab).classList.remove('hidden');
             });
@@ -1564,11 +1687,11 @@
             loginPrompt.innerHTML = `
                 <div class="glass-card rounded-2xl p-8 max-w-md w-full mx-4">
                     <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Login Required</h2>
-                    <p class="text-text-secondary mb-6">${message}</p>
+                    <p class="text-white mb-6">${message}</p>
                     <div class="space-y-4">
                         <button class="btn-primary w-full" onclick="window.location.href='customer-login.html'">Log In</button>
-                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" onclick="window.location.href='customer-login.html'">Create Account</button>
-                        <button class="text-text-secondary w-full py-2 hover:text-accent transition-colors" onclick="this.closest('.fixed').remove()">Cancel</button>
+                        <button class="border border-highlight text-highlight w-full py-2 rounded-lg hover:bg-highlight hover:text-black transition-all duration-300" onclick="window.location.href='customer-login.html'">Create Account</button>
+                        <button class="text-white w-full py-2 hover:text-highlight transition-colors" onclick="this.closest('.fixed').remove()">Cancel</button>
                     </div>
                 </div>
             `;
@@ -1981,7 +2104,7 @@
                         <div class="container mx-auto px-6 py-12">
                             <div class="glass-card rounded-2xl p-8 text-center">
                                 <h1 class="text-2xl font-bold text-white mb-4">Product Not Found</h1>
-                                <p class="text-text-secondary mb-6">The product you're looking for could not be loaded.</p>
+                                <p class="text-white mb-6">The product you're looking for could not be loaded.</p>
                                 <a href="shop.html" class="btn-primary">Back to Shop</a>
                             </div>
                         </div>
@@ -2336,7 +2459,7 @@
                     console.log('📏 Final sizes array:', sizes);
                     
                     const sizeHTML = sizes.map(size => {
-                        const optionClass = 'size-option border border-surface-light rounded-lg p-3 text-center hover:border-accent';
+                        const optionClass = 'size-option border border-surface-light rounded-lg p-3 text-center hover:border-highlight';
                         const sizeOption = `
                             <div class="${optionClass}" data-size="${size}">
                                 <span class="font-semibold">${size}</span>
@@ -2355,10 +2478,10 @@
                                 console.log('🎯 Size clicked:', option.dataset.size);
                                 
                                 sizeContainer.querySelectorAll('.size-option').forEach(opt => {
-                                    opt.classList.remove('selected', 'border-accent');
+                                    opt.classList.remove('selected', 'border-highlight');
                                     opt.classList.add('border-surface-light');
                                 });
-                                option.classList.add('selected', 'border-accent');
+                                option.classList.add('selected', 'border-highlight');
                                 option.classList.remove('border-surface-light');
                                 
                                 console.log('✅ Size selection updated, calling updatePriceForSize with:', option.dataset.size);
@@ -2371,7 +2494,7 @@
                     // Default select first available size
                     const firstAvailable = sizeContainer.querySelector('.size-option:not(.unavailable)');
                     if (firstAvailable) {
-                        firstAvailable.classList.add('selected','border-accent');
+                        firstAvailable.classList.add('selected','border-highlight');
                         firstAvailable.classList.remove('border-surface-light');
                         console.log('📏 Default selected size:', firstAvailable.dataset.size);
                         
@@ -2404,13 +2527,13 @@
             const breadcrumbContainer = document.querySelector('.breadcrumb-container');
             if (breadcrumbContainer) {
                 breadcrumbContainer.innerHTML = `
-                    <a href="../index.html" class="text-text-secondary hover:text-accent transition-colors">Home</a>
-                    <span class="text-text-secondary">></span>
-                    <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">Shop</a>
-                    <span class="text-text-secondary">></span>
-                    <a href="shop.html" class="text-text-secondary hover:text-accent transition-colors">${product.category || 'All Designs'}</a>
-                    <span class="text-text-secondary">></span>
-                    <span class="text-accent">Product Details</span>
+                    <a href="../index.html" class="text-white hover:text-highlight transition-colors">Home</a>
+                    <span class="text-white">></span>
+                    <a href="shop.html" class="text-white hover:text-highlight transition-colors">Shop</a>
+                    <span class="text-white">></span>
+                    <a href="shop.html" class="text-white hover:text-highlight transition-colors">${product.category || 'All Designs'}</a>
+                    <span class="text-white">></span>
+                    <span class="text-highlight">Product Details</span>
                 `;
             }
             
@@ -2469,19 +2592,19 @@
                         
                         return `
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-text-primary">
+                                <label class="block text-sm font-medium text-white">
                                     ${label}${isRequired ? ' *' : ''}
                                 </label>
                                 <textarea 
                                     id="birthday-${field}" 
                                     name="birthday-${field}"
-                                    class="w-full px-3 py-2 bg-surface-light bg-opacity-50 border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                    class="w-full px-3 py-2 bg-surface-light bg-opacity-50 border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-highlight focus:ring-1 focus:ring-accent"
                                     placeholder="${label}${isRequired ? ' (required)' : ' (optional)'}"
                                     maxlength="${charLimit}"
                                     ${isRequired ? 'required' : ''}
                                     rows="2"
                                 ></textarea>
-                                <div class="text-xs text-text-secondary text-right">
+                                <div class="text-xs text-white text-right">
                                     ${charLimit} characters max
                                 </div>
                             </div>
@@ -2520,19 +2643,19 @@
                         
                         return `
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-text-primary">
+                                <label class="block text-sm font-medium text-white">
                                     ${label}${isRequired ? ' *' : ''}
                                 </label>
                                 <textarea 
                                     id="lyrics-${field}" 
                                     name="lyrics-${field}"
-                                    class="w-full px-3 py-2 bg-surface-light bg-opacity-50 border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                                    class="w-full px-3 py-2 bg-surface-light bg-opacity-50 border border-surface-light rounded-lg text-white placeholder-text-secondary focus:outline-none focus:border-highlight focus:ring-1 focus:ring-accent"
                                     placeholder="${label}${isRequired ? ' (required)' : ''}"
                                     maxlength="${charLimit}"
                                     ${isRequired ? 'required' : ''}
                                     rows="2"
                                 ></textarea>
-                                <div class="text-xs text-text-secondary text-right">
+                                <div class="text-xs text-white text-right">
                                     ${charLimit} characters max
                                 </div>
                             </div>
@@ -2574,7 +2697,7 @@
                 const list = document.getElementById('reviewsList');
                 if (!list) return;
                 if (items.length === 0){
-                    list.innerHTML = `<div class="p-4 bg-surface rounded-lg text-text-secondary">No reviews yet. Be the first to review this product from your account after purchase.</div>`;
+                    list.innerHTML = `<div class="p-4 bg-surface rounded-lg text-white">No reviews yet. Be the first to review this product from your account after purchase.</div>`;
                     return;
                 }
                 const starSvg = '<svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
@@ -2607,10 +2730,10 @@
                                         <div class="star-rating flex text-sm">${stars}</div>
                                         ${title}
                                     </div>
-                                    <span class="text-text-secondary text-sm">${date}</span>
+                                    <span class="text-white text-sm">${date}</span>
                                 </div>
-                                <p class="text-text-secondary mb-1">${r.body || ''}</p>
-                                <div class="text-accent text-xs mt-1">Verified Purchase</div>
+                                <p class="text-white mb-1">${r.body || ''}</p>
+                                <div class="text-highlight text-xs mt-1">Verified Purchase</div>
                             </div>
                         </div>
                     </div>`;
