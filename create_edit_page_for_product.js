@@ -219,10 +219,10 @@ function createEditPageForProduct(productId, productName) {
         <div class="mt-8 pt-6 border-t border-surface-light">
             <h3 class="text-text-secondary text-sm font-medium mb-4">Quick Actions</h3>
             <div class="space-y-2">
-                <button onclick="window.location.href='admin-uploads.html'" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                <button id="back-to-uploads-btn" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                     Back to Uploads
                 </button>
-                <button onclick="loadProductData()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                <button id="refresh-product-btn" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                     Refresh Product Data
                 </button>
             </div>
@@ -465,10 +465,10 @@ function createEditPageForProduct(productId, productName) {
 
                         <!-- Action Buttons -->
                         <div class="flex space-x-4">
-                            <button id="save-product-btn" onclick="saveProductChanges()" class="btn-primary px-8 py-3">
+                            <button id="save-product-btn" class="btn-primary px-8 py-3">
                                 Save Changes
                             </button>
-                            <button onclick="cancelEdit()" class="px-8 py-3 border border-surface-light text-text-primary rounded-lg hover:bg-surface-light transition-colors">
+                            <button id="cancel-edit-btn" class="px-8 py-3 border border-surface-light text-text-primary rounded-lg hover:bg-surface-light transition-colors">
                                 Cancel
                             </button>
                         </div>
@@ -489,7 +489,60 @@ function createEditPageForProduct(productId, productName) {
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthentication();
+            setupEventListeners();
         });
+
+        function setupEventListeners() {
+            // Back to uploads button
+            const backToUploadsBtn = document.getElementById('back-to-uploads-btn');
+            if (backToUploadsBtn) {
+                backToUploadsBtn.addEventListener('click', function() {
+                    window.location.href = 'admin-uploads.html';
+                });
+            }
+
+            // Refresh product data button
+            const refreshProductBtn = document.getElementById('refresh-product-btn');
+            if (refreshProductBtn) {
+                refreshProductBtn.addEventListener('click', function() {
+                    loadProductData();
+                });
+            }
+
+            // Save product button
+            const saveProductBtn = document.getElementById('save-product-btn');
+            if (saveProductBtn) {
+                saveProductBtn.addEventListener('click', function() {
+                    saveProductChanges();
+                });
+            }
+
+            // Cancel edit button
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            if (cancelEditBtn) {
+                cancelEditBtn.addEventListener('click', function() {
+                    cancelEdit();
+                });
+            }
+
+            // Retry load button (for error states)
+            const retryLoadBtn = document.getElementById('retry-load-btn');
+            if (retryLoadBtn) {
+                retryLoadBtn.addEventListener('click', function() {
+                    loadProductData();
+                });
+            }
+
+            // Image remove buttons (delegated event listener)
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-btn')) {
+                    const index = e.target.getAttribute('data-image-index');
+                    if (index !== null) {
+                        removeImage(parseInt(index));
+                    }
+                }
+            });
+        }
 
         async function checkAuthentication() {
             const token = localStorage.getItem('adminToken');
@@ -545,7 +598,7 @@ function createEditPageForProduct(productId, productName) {
                 document.getElementById('loading-state').innerHTML = \`
                     <div class="text-red-500 text-xl mb-4">❌ Error loading product data</div>
                     <div class="text-gray-400">Please make sure you are logged in as admin and try again.</div>
-                    <button onclick="loadProductData()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Retry</button>
+                    <button id="retry-load-btn" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Retry</button>
                 \`;
             }
         }
@@ -687,7 +740,7 @@ function createEditPageForProduct(productId, productName) {
                     imgDiv.className = 'image-preview';
                     imgDiv.innerHTML = \`
                         <img src="\${image}" alt="Product image" class="w-24 h-24 object-cover rounded">
-                        <div class="remove-btn" onclick="removeImage(\${index})">×</div>
+                        <div class="remove-btn" data-image-index="\${index}">×</div>
                     \`;
                     imagePreviews.appendChild(imgDiv);
                 });

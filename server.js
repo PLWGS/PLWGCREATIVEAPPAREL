@@ -17,6 +17,13 @@ const paypal = require('@paypal/checkout-server-sdk');
 require('dotenv').config({ silent: true });
 
 // -----------------------------------------------------------------------------
+// Timeout Configuration - Fix request aborted errors
+// -----------------------------------------------------------------------------
+const serverTimeout = 300000; // 5 minutes for server timeout
+const requestTimeout = 120000; // 2 minutes for request timeout
+const uploadTimeout = 180000; // 3 minutes for image uploads
+
+// -----------------------------------------------------------------------------
 // Logging Configuration - Reduce Railway log verbosity
 // -----------------------------------------------------------------------------
 const isProduction = process.env.NODE_ENV === 'production';
@@ -304,6 +311,13 @@ async function getActiveAdminPasswordHash() {
 const app = express();
 const PORT = process.env.PORT || 3000;
 const FEATURE_STATIC_PRODUCT_PAGES = String(process.env.FEATURE_STATIC_PRODUCT_PAGES || 'false').toLowerCase() === 'true';
+
+// Configure timeouts to prevent request aborted errors
+app.use((req, res, next) => {
+  req.setTimeout(requestTimeout);
+  res.setTimeout(requestTimeout);
+  next();
+});
 
 // EARLY TEST ENDPOINT - should work if Express is functioning
 app.get('/api/test', (req, res) => {
@@ -996,7 +1010,8 @@ app.post('/api/admin/login',
       
       if (isValidPassword) {
         // TOTP gate (Google Authenticator) enabled by default unless disabled
-        const totpEnabled = (process.env.ADMIN_2FA_ENABLED || 'true') !== 'false';
+        const admin2faEnabled = (process.env.ADMIN_2FA_ENABLED || 'true').replace(/"/g, '').toLowerCase();
+        const totpEnabled = admin2faEnabled !== 'false';
         
         // REMOVED: Emergency fallback - forcing proper TOTP authentication
         if (totpEnabled) {
@@ -4676,6 +4691,25 @@ app.get('/api/products/search', async (req, res) => {
   }
 });
 
+// Image Upload Endpoint
+app.post('/api/upload-image', authenticateToken, async (req, res) => {
+  try {
+    const { image, productName } = req.body;
+    
+    if (!image) {
+      return res.status(400).json({ error: 'No image provided' });
+    }
+    
+    // Upload to Cloudinary
+    const cloudinaryUrl = await uploadImageToCloudinary(image, productName || 'admin-upload', 1, true);
+    
+    res.json({ url: cloudinaryUrl });
+  } catch (error) {
+    logger.error('Error uploading image:', error);
+    res.status(500).json({ error: 'Failed to upload image' });
+  }
+});
+
 // Admin Product Management Endpoints
 app.get('/api/admin/products', authenticateToken, async (req, res) => {
   if (!databaseAvailable) {
@@ -5095,9 +5129,12 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
     }
 
     // Validate required fields
-    if (!name || !price || !category) {
-      return res.status(400).json({ error: 'Name, price, and category are required' });
+    if (!name || !price) {
+      return res.status(400).json({ error: 'Name and price are required' });
     }
+    
+    // If category is empty, use a default value
+    const finalCategory = category || 'Uncategorized';
 
     // Handle image uploads to Cloudinary
     let final_image_url = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=';
@@ -5220,7 +5257,7 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       WHERE id = $35
       RETURNING *
     `, [
-      name, description, price, original_price, final_image_url, category,
+      name, description, price, original_price, final_image_url, finalCategory,
       processedTags, stock_quantity || 50, low_stock_threshold || 5,
       sale_percentage || 15, JSON.stringify(colors || []), JSON.stringify((Array.isArray(sizes) ? sizes.filter(s => s !== 'XS') : [])),
       JSON.stringify(finalSpecifications), JSON.stringify(features || {}),
@@ -7978,12 +8015,17 @@ app.use((req, res, next) => {
 // Initialize admin credentials and start server
 initializeAdminCredentials().then(() => {
   // Start server first
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     logger.info(`🚀 Admin Dashboard API server running on port ${PORT}`);
     logger.info(`📧 Email configured: ${process.env.EMAIL_FROM}`);
     logger.info(`🗄️ Database connected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}`);
     logger.info(`🔐 Admin email: ${ADMIN_EMAIL_MEMO}`);
     logger.info(`🏷️ Category management system active`);
+    
+    // Configure server timeouts
+    server.timeout = serverTimeout;
+    server.keepAliveTimeout = 65000; // 65 seconds
+    server.headersTimeout = 66000; // 66 seconds
     
     // Try to initialize database in background (non-blocking)
     initializeDatabase().catch(err => {

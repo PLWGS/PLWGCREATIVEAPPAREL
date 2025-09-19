@@ -43,7 +43,9 @@ async function uploadImageToCloudinary(base64Image, productName, imageIndex = 1,
         folder: 'plwg-creative-apparel',
         resource_type: 'image',
         overwrite: true,
-        use_filename: false
+        use_filename: false,
+        timeout: 180000, // 3 minutes timeout for uploads
+        chunk_size: 6000000 // 6MB chunks for large images
       }
     );
     
