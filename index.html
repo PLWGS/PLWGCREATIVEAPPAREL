@@ -63,8 +63,6 @@
     
     <!-- Preload critical fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v31/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nysimxpg.woff2" as="font" type="font/woff2" crossorigin>
     
     <!-- Preload critical hero image -->
     <link rel="preload" as="image" href="https://res.cloudinary.com/dfistxzb9/image/upload/f_auto,q_auto,w_800,h_600,c_fit/v1758120666/plwg-creative-apparel/mockups/covergirl.webp">
@@ -416,28 +414,28 @@
             </div>
 
             <!-- Mobile Navigation -->
-            <div class="lg:hidden flex items-center justify-between">
+            <div class="lg:hidden flex items-center justify-between w-full">
                 <!-- Mobile Logo -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary-light flex items-center justify-center animate-pulse-orange">
-                        <span class="text-black font-orbitron font-black text-xl">P</span>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary-light flex items-center justify-center animate-pulse-orange">
+                        <span class="text-black font-orbitron font-black text-lg">P</span>
                     </div>
-                    <div>
-                        <h1 class="font-orbitron font-black text-lg gradient-text">PLWG'S</h1>
-                        <p class="text-xs text-highlight font-semibold">CREATIVE APPAREL</p>
+                    <div class="min-w-0">
+                        <h1 class="font-orbitron font-black text-sm gradient-text truncate">PLWG'S</h1>
+                        <p class="text-xs text-highlight font-semibold truncate">CREATIVE APPAREL</p>
                     </div>
                 </div>
 
                 <!-- Mobile Actions -->
-                <div class="flex items-center space-x-3">
-                    <button class="glass p-3 rounded-full text-white hover:text-highlight transition-colors relative" onclick="window.location.href='pages/cart.html'" aria-label="Cart">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <button class="glass p-2 rounded-full text-white hover:text-highlight transition-colors relative" onclick="window.location.href='pages/cart.html'" aria-label="Cart">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
-                        <span class="absolute -top-1 -right-1 bg-primary text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold" id="cart-counter-mobile">0</span>
+                        <span class="absolute -top-1 -right-1 bg-primary text-black text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold" id="cart-counter-mobile">0</span>
                     </button>
-                    <button id="mobile-menu-toggle" class="glass p-3 rounded-full text-white hover:text-highlight transition-colors" aria-label="Menu">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="mobile-menu-toggle" class="glass p-2 rounded-full text-white hover:text-highlight transition-colors" aria-label="Menu">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
                     </button>
@@ -447,19 +445,19 @@
     </nav>
 
     <!-- Hero Section - Black Background with White Banner -->
-    <section class="relative min-h-screen flex items-center justify-center pt-24 pb-12">
-        <div class="container mx-auto px-6">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
+    <section class="relative min-h-screen flex items-center justify-center pt-20 sm:pt-24 pb-8 sm:pb-12">
+        <div class="container mx-auto px-4 sm:px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                 <!-- Hero Content -->
-                <div class="text-center lg:text-left space-y-10 animate-slide-up">
+                <div class="text-center lg:text-left space-y-6 sm:space-y-8 lg:space-y-10 animate-slide-up">
                     <!-- Brand Introduction -->
-                    <div class="space-y-6">
-                        <h1 class="font-orbitron font-black text-6xl lg:text-8xl hero-text leading-none">
+                    <div class="space-y-4 sm:space-y-6">
+                        <h1 class="font-orbitron font-black text-4xl sm:text-5xl md:text-6xl lg:text-8xl hero-text leading-tight">
                             <span class="gradient-text">PLWG'S</span><br>
                             <span class="text-white">CREATIVE</span><br>
                             <span class="gradient-text">APPAREL</span>
                         </h1>
-                        <p class="text-2xl lg:text-3xl text-highlight font-bold tracking-wide">
+                        <p class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-highlight font-bold tracking-wide">
                             Where Creative Rebellion Meets Wearable Art
                         </p>
                     </div>
@@ -915,28 +913,45 @@
                         mobileMenu.id = 'mobile-menu-drawer';
                         mobileMenu.className = 'fixed inset-0 z-50 lg:hidden';
                         mobileMenu.innerHTML = `
-                            <div class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm" onclick="closeMobileMenu()"></div>
-                            <div class="fixed top-0 right-0 h-full w-80 glass shadow-2xl transform transition-transform duration-300 ease-in-out translate-x-full border-l-2 border-primary">
-                                <div class="p-8">
-                                    <div class="flex justify-between items-center mb-12">
-                                        <h2 class="text-2xl font-bold gradient-text font-orbitron">MENU</h2>
-                                        <button onclick="closeMobileMenu()" class="text-white hover:text-highlight transition-colors p-2">
-                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm" id="mobile-menu-overlay"></div>
+                            <div class="fixed top-0 right-0 h-full w-80 max-w-sm glass shadow-2xl transform transition-transform duration-300 ease-in-out translate-x-full border-l-2 border-primary">
+                                <div class="p-6">
+                                    <div class="flex justify-between items-center mb-8">
+                                        <h2 class="text-xl font-bold gradient-text font-orbitron">MENU</h2>
+                                        <button id="mobile-menu-close" class="text-white hover:text-highlight transition-colors p-2">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
                                         </button>
                                     </div>
-                                    <nav class="space-y-6">
-                                        <a href="index.html" class="block text-white hover:text-highlight transition-colors py-4 text-xl font-semibold border-b border-gray-700">Home</a>
-                                        <a href="pages/shop.html" class="block text-white hover:text-highlight transition-colors py-4 text-xl font-semibold border-b border-gray-700">Shop</a>
-                                        <a href="pages/account.html" class="block text-white hover:text-highlight transition-colors py-4 text-xl font-semibold border-b border-gray-700">My Account</a>
-                                        <a href="pages/cart.html" class="block text-white hover:text-highlight transition-colors py-4 text-xl font-semibold border-b border-gray-700">Cart</a>
+                                    <nav class="space-y-4">
+                                        <a href="index.html" class="block text-white hover:text-highlight transition-colors py-3 text-lg font-semibold">Home</a>
+                                        <a href="pages/shop.html" class="block text-white hover:text-highlight transition-colors py-3 text-lg font-semibold">Shop</a>
+                                        <a href="pages/account.html" class="block text-white hover:text-highlight transition-colors py-3 text-lg font-semibold">My Account</a>
+                                        <a href="pages/cart.html" class="block text-white hover:text-highlight transition-colors py-3 text-lg font-semibold">Cart</a>
                                     </nav>
                                 </div>
                             </div>
                         `;
                         document.body.appendChild(mobileMenu);
                         document.body.style.overflow = 'hidden';
+                        
+                        // Add event listeners for close functionality
+                        const overlay = mobileMenu.querySelector('#mobile-menu-overlay');
+                        const closeBtn = mobileMenu.querySelector('#mobile-menu-close');
+                        
+                        function closeMenu() {
+                            const drawer = mobileMenu.querySelector('.fixed.top-0.right-0');
+                            if (drawer) drawer.style.transform = 'translateX(100%)';
+                            
+                            setTimeout(() => {
+                                mobileMenu.remove();
+                                document.body.style.overflow = '';
+                            }, 300);
+                        }
+                        
+                        if (overlay) overlay.addEventListener('click', closeMenu);
+                        if (closeBtn) closeBtn.addEventListener('click', closeMenu);
                         
                         // Animate in
                         setTimeout(() => {
