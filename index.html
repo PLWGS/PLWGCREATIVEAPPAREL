@@ -905,6 +905,7 @@
                 mobileMenuToggle.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('Mobile menu button clicked');
                     
                     let mobileMenu = document.getElementById('mobile-menu-drawer');
                     if (!mobileMenu) {
@@ -914,7 +915,7 @@
                         mobileMenu.className = 'fixed inset-0 z-50 lg:hidden';
                         mobileMenu.innerHTML = `
                             <div class="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm" id="mobile-menu-overlay"></div>
-                            <div class="fixed top-0 right-0 h-full w-80 max-w-sm glass shadow-2xl transform transition-transform duration-300 ease-in-out translate-x-full border-l-2 border-primary">
+                            <div class="fixed top-0 right-0 h-full w-80 max-w-sm glass shadow-2xl border-l-2 border-primary" id="mobile-menu-panel">
                                 <div class="p-6">
                                     <div class="flex justify-between items-center mb-8">
                                         <h2 class="text-xl font-bold gradient-text font-orbitron">MENU</h2>
@@ -935,14 +936,17 @@
                         `;
                         document.body.appendChild(mobileMenu);
                         document.body.style.overflow = 'hidden';
+                        console.log('Mobile menu created and added to DOM');
                         
                         // Add event listeners for close functionality
                         const overlay = mobileMenu.querySelector('#mobile-menu-overlay');
                         const closeBtn = mobileMenu.querySelector('#mobile-menu-close');
+                        const panel = mobileMenu.querySelector('#mobile-menu-panel');
                         
                         function closeMenu() {
-                            const drawer = mobileMenu.querySelector('.fixed.top-0.right-0');
-                            if (drawer) drawer.style.transform = 'translateX(100%)';
+                            if (panel) {
+                                panel.style.transform = 'translateX(100%)';
+                            }
                             
                             setTimeout(() => {
                                 mobileMenu.remove();
@@ -953,11 +957,11 @@
                         if (overlay) overlay.addEventListener('click', closeMenu);
                         if (closeBtn) closeBtn.addEventListener('click', closeMenu);
                         
-                        // Animate in
-                        setTimeout(() => {
-                            const drawer = mobileMenu.querySelector('.fixed.top-0.right-0');
-                            if (drawer) drawer.style.transform = 'translateX(0)';
-                        }, 10);
+                        // Animate in immediately
+                        if (panel) {
+                            panel.style.transform = 'translateX(0)';
+                            panel.style.transition = 'transform 0.3s ease-in-out';
+                        }
                     } else {
                         closeMobileMenu();
                     }
@@ -969,8 +973,10 @@
         function closeMobileMenu() {
             const mobileMenu = document.getElementById('mobile-menu-drawer');
             if (mobileMenu) {
-                const drawer = mobileMenu.querySelector('.fixed.top-0.right-0');
-                if (drawer) drawer.style.transform = 'translateX(100%)';
+                const panel = mobileMenu.querySelector('#mobile-menu-panel');
+                if (panel) {
+                    panel.style.transform = 'translateX(100%)';
+                }
                 
                 setTimeout(() => {
                     mobileMenu.remove();
