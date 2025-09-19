@@ -512,22 +512,22 @@
                                         <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                                     </svg>
                                 </div>
-                                <span id="reviewsCountHeader" class="text-gray-600 text-sm">(0 reviews)</span>
+                                <span id="reviewsCountHeader" class="text-white text-sm">(0 reviews)</span>
                             </div>
                             <span class="text-highlight text-sm">★ Trending Design</span>
                         </div>
                         
                         <div class="flex items-center space-x-4">
                             <span id="currentPrice" class="price font-orbitron text-3xl font-bold text-highlight">$22.00</span>
-                            <span id="originalPrice" class="original-price text-gray-600 line-through text-lg" style="display: none;">$26.40</span>
+                            <span id="originalPrice" class="original-price text-white line-through text-lg" style="display: none;">$26.40</span>
                             <span class="sale-percentage bg-warning text-black px-2 py-1 rounded text-sm font-bold" style="display: none;">25% OFF</span>
                         </div>
                     </div>
 
                     <!-- Design Story (tags hidden) -->
-                    <div class="bg-gray-100 rounded-xl p-6">
-                        <h3 class="font-orbitron text-xl font-bold text-black mb-4">Design Story</h3>
-                        <p id="productDescription" class="product-description text-gray-700 leading-relaxed">
+                    <div class="glass-orange rounded-xl p-6">
+                        <h3 class="font-orbitron text-xl font-bold text-white mb-4">Design Story</h3>
+                        <p id="productDescription" class="product-description text-white leading-relaxed">
                             Quality printed design with custom artwork. Perfect for those who want to express their unique style.
                         </p>
                         <div class="flex flex-wrap gap-2 mt-4 product-tags hidden"></div>
@@ -997,7 +997,7 @@
                                             <p class="text-sm leading-relaxed mb-3">
                                                 <strong class="text-white">Your satisfaction is important to us.</strong> We stand behind our work, and if we made a mistake with your custom order, we will gladly correct it. However, because each item is made specifically for you, <strong class="text-white">all sales are otherwise final</strong>.
                                             </p>
-                                            <p class="text-xs text-gray-400">
+                                            <p class="text-xs text-white">
                                                 <em>Note: We will, of course, accept returns and issue a replacement or refund if an error was made on our part.</em>
                                             </p>
                                         </div>
@@ -1011,102 +1011,6 @@
         </div>
     </section>
 
-    <!-- Related Products -->
-    <section class="py-20 relative z-10">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="font-orbitron text-4xl font-bold text-white mb-4">You Might Also Like</h2>
-                <p class="text-white text-lg max-w-2xl mx-auto">Discover more designs that match your dark aesthetic</p>
-            </div>
-
-            <div id="related-grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-8"></div>
-            <script>
-              (function(){
-                async function fetchActiveProducts(){
-                  try{
-                    const resp = await fetch('/api/products/public');
-                    if(!resp.ok) return [];
-                    const list = await resp.json();
-                    return Array.isArray(list) ? list : [];
-                  }catch(e){ return []; }
-                }
-                function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
-                function buildCard(p){
-                  const img = (p && p.image_url) ? p.image_url : 'https://via.placeholder.com/400x240?text=Coming+Soon';
-                  const name = (p && p.name) ? p.name : 'New Design Coming Soon';
-                  const price = (p && p.price) ? `$${Number(p.price).toFixed(2)}` : '$—';
-                  const href = (p && p.id) ? `product.html?id=${p.id}` : 'shop.html';
-                  return `
-                    <a href="${href}" class="glass-card rounded-2xl p-6 neon-glow group block cursor-pointer transition-all duration-300 hover:scale-105">
-                      <div class=\"relative mb-6 overflow-hidden rounded-xl\">
-                        <img src=\"${img}\" alt=\"${name}\" class=\"w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500\" loading=\"lazy\" />
-                      </div>
-                      <h3 class=\"font-orbitron text-lg font-bold text-white mb-2\">${name}</h3>
-                      <div class=\"flex items-center justify-between\">
-                        <span class=\"text-highlight font-bold\">${price}</span>
-                        <span class=\"text-highlight hover:text-highlight-light transition-colors\">View Details →</span>
-                      </div>
-                    </a>`;
-                }
-                async function renderRelated(){
-                  const grid = document.getElementById('related-grid');
-                  if(!grid) return;
-                  const products = await fetchActiveProducts();
-                  const candidates = products.filter(p=>p && p.is_active !== false);
-                  const pick = shuffle(candidates).slice(0,4);
-                  const cards = (pick.length?pick:Array(4).fill(null)).map(buildCard).join('');
-                  grid.innerHTML = cards;
-                }
-                if (document.readyState === 'loading') {
-                  document.addEventListener('DOMContentLoaded', renderRelated);
-                } else { renderRelated(); }
-              })();
-            </script>
-                <!-- Related Product 1 (static removed; now dynamic) -->
-                <div class="glass-card rounded-2xl p-6 neon-glow group cursor-pointer transition-all duration-300 hover:scale-105">
-                    <div class="relative mb-6 overflow-hidden rounded-xl">
-                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=400&auto=format&fit=crop" alt="Gothic Rose Skull Tee" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onerror="this.src='https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=400'; this.onerror=null;" />
-                        <div class="absolute top-4 right-4 bg-warning text-black px-2 py-1 rounded-full text-xs font-bold">
-                            New
-                        </div>
-                    </div>
-                    <h3 class="font-orbitron text-lg font-bold text-white mb-2">Gothic Rose Skull Tee</h3>
-                    <div class="flex items-center space-x-2 mb-3">
-                        <div class="star-rating flex text-sm">
-                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
-                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                            </svg>
-                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
-                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                            </svg>
-                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
-                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                            </svg>
-                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
-                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                            </svg>
-                            <svg class="w-4 h-4 fill-current text-warning" viewBox="0 0 20 20">
-                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                            </svg>
-                        </div>
-                        <span class="text-white text-sm">(89)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-highlight font-bold">$27.99</span>
-                        <a href="product.html" class="text-highlight hover:text-highlight-light transition-colors">
-                            View Details →
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Related Product 2 (static removed; now dynamic) -->
-
-                <!-- Related Product 3 (static removed; now dynamic) -->
-
-                <!-- Related Product 4 (static removed; now dynamic) -->
-            </div>
-        </div>
-    </section>
 
     <!-- Footer -->
     <footer class="glass py-20 relative border-t-2 border-primary">
