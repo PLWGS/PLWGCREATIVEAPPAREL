@@ -80,13 +80,157 @@
     </script>
     
     <style>
-        /* BLACK BACKGROUND BASE */
+        /* BLACK BACKGROUND BASE WITH STARRY EFFECT */
         body {
             background: #000000;
             color: #ffffff;
             font-family: 'Inter', sans-serif;
             -webkit-text-size-adjust: 100%;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Starry Background Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(2px 2px at 20px 30px, #ff8306, transparent),
+                radial-gradient(2px 2px at 40px 70px, #ff8306, transparent),
+                radial-gradient(1px 1px at 90px 40px, #ff8306, transparent),
+                radial-gradient(1px 1px at 130px 80px, #ff8306, transparent),
+                radial-gradient(2px 2px at 160px 30px, #ff8306, transparent),
+                radial-gradient(1px 1px at 200px 60px, #ff8306, transparent),
+                radial-gradient(1px 1px at 240px 20px, #ff8306, transparent),
+                radial-gradient(2px 2px at 280px 50px, #ff8306, transparent),
+                radial-gradient(1px 1px at 320px 80px, #ff8306, transparent),
+                radial-gradient(1px 1px at 360px 30px, #ff8306, transparent),
+                radial-gradient(2px 2px at 400px 70px, #ff8306, transparent),
+                radial-gradient(1px 1px at 440px 40px, #ff8306, transparent),
+                radial-gradient(1px 1px at 480px 90px, #ff8306, transparent),
+                radial-gradient(2px 2px at 520px 20px, #ff8306, transparent),
+                radial-gradient(1px 1px at 560px 60px, #ff8306, transparent),
+                radial-gradient(1px 1px at 600px 30px, #ff8306, transparent),
+                radial-gradient(2px 2px at 640px 80px, #ff8306, transparent),
+                radial-gradient(1px 1px at 680px 50px, #ff8306, transparent),
+                radial-gradient(1px 1px at 720px 20px, #ff8306, transparent),
+                radial-gradient(2px 2px at 760px 70px, #ff8306, transparent);
+            background-repeat: repeat;
+            background-size: 800px 100px;
+            opacity: 0.3;
+            z-index: -1;
+            animation: twinkle 20s linear infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+        
+        /* Enhanced Visual Effects */
+        .glow-effect {
+            box-shadow: 
+                0 0 20px rgba(255, 131, 6, 0.3),
+                0 0 40px rgba(255, 131, 6, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .glow-effect:hover {
+            box-shadow: 
+                0 0 30px rgba(255, 131, 6, 0.5),
+                0 0 60px rgba(255, 131, 6, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        /* ORANGE BUTTONS - Maximum Impact */
+        .btn-primary {
+            background: linear-gradient(135deg, #ff8306, #ffa726);
+            color: #000000;
+            font-weight: 700;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 131, 6, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 131, 6, 0.7);
+            background: linear-gradient(135deg, #ffa726, #ffcc80);
+        }
+        
+        /* Secondary Button */
+        .btn-secondary {
+            background: transparent;
+            color: #ff8306;
+            border: 2px solid #ff8306;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-secondary:hover {
+            background: #ff8306;
+            color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 131, 6, 0.4);
+        }
+        
+        /* Enhanced Card Styles */
+        .card-enhanced {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 131, 6, 0.3);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(255, 131, 6, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card-enhanced:hover {
+            border-color: rgba(255, 131, 6, 0.5);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(255, 131, 6, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
         
         /* Mobile Optimizations */
@@ -161,18 +305,40 @@
         .glass {
             backdrop-filter: blur(20px);
             background: rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 131, 6, 0.3);
+            box-shadow: 
+                0 0 20px rgba(255, 131, 6, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .glass:hover {
+            border-color: rgba(255, 131, 6, 0.5);
+            box-shadow: 
+                0 0 30px rgba(255, 131, 6, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
         
         .glass-white {
             backdrop-filter: blur(20px);
             background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(255, 131, 6, 0.2);
+            border: 1px solid rgba(255, 131, 6, 0.3);
+            box-shadow: 
+                0 0 20px rgba(255, 131, 6, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-white:hover {
+            border-color: rgba(255, 131, 6, 0.5);
+            box-shadow: 
+                0 0 30px rgba(255, 131, 6, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
         
         .glass-card {
-            backdrop-filter: blur(20px);
-            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid rgba(255, 131, 6, 0.2);
         }
         
@@ -439,7 +605,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </button>
-                    <button class="text-white hover:text-highlight transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
+                    <button class="text-white hover:text-highlight transition-colors duration-300 relative" id="cart-button">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
@@ -509,7 +675,7 @@
                 <div class="space-y-6">
                     <!-- Main Image -->
                     <div class="image-gallery">
-                        <div class="relative overflow-hidden rounded-2xl bg-surface-dark">
+                        <div class="relative overflow-hidden rounded-2xl">
                             <img id="mainImage" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjM0I0QjVCIi8+CjxwYXRoIGQ9Ik0yNSAyNUg3NVY3NUgyNVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CjxwYXRoIGQ9Ik0zNSA0NUw2NSA0NU02NSA2NUwzNSA2NUwzNSA0NVoiIHN0cm9rZT0iIzAwQkNENCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPgo=" alt="Product Image" class="main-image w-full h-80 sm:h-96 lg:h-[500px] object-contain cursor-zoom-in" loading="lazy" />
                             
                             <!-- Zoom Icon -->
@@ -536,7 +702,7 @@
                 </div>
 
                 <!-- Product Information -->
-                <div class="glass rounded-3xl p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 shadow-2xl">
+                <div class="space-y-8">
                     <!-- Product Title & Rating -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
@@ -581,10 +747,10 @@
                         </div>
                     </div>
 
-                    <!-- Design Story (tags hidden) -->
-                    <div class="glass-orange rounded-xl p-6">
+                    <!-- Design Story -->
+                    <div class="glass-card rounded-2xl p-6 neon-glow">
                         <h3 class="font-orbitron text-xl font-bold text-white mb-4">Design Story</h3>
-                        <p id="productDescription" class="product-description text-white leading-relaxed">
+                        <p id="productDescription" class="product-description text-text-secondary leading-relaxed">
                             Quality printed design with custom artwork. Perfect for those who want to express their unique style.
                         </p>
                         <div class="flex flex-wrap gap-2 mt-4 product-tags hidden"></div>
@@ -596,7 +762,7 @@
                             <h3 class="font-orbitron text-lg font-bold text-white">Size</h3>
                             <button class="text-highlight text-sm hover:text-highlight-light transition-colors">Size Guide</button>
                         </div>
-                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 size-options"></div>
+                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 size-options glow-effect"></div>
                     </div>
 
                     <!-- Color Options -->
@@ -608,32 +774,32 @@
                             
                             <!-- Color Dropdown -->
                             <div class="flex-1">
-                                <select id="colorSelector" class="w-full px-4 py-3 bg-surface border border-surface-light rounded-lg text-white focus:border-highlight focus:outline-none text-sm">
+                                <select id="colorSelector" class="w-full px-4 py-3 bg-black border border-orange-500/30 rounded-lg text-white focus:border-highlight focus:outline-none text-sm glow-effect">
                                     <option value="">Select a color...</option>
                                 </select>
                             </div>
                         </div>
                         
                         <!-- Color Name Display -->
-                        <div id="colorNameDisplay" class="text-sm text-white font-medium px-2 py-1 bg-surface-light rounded-md inline-block"></div>
+                        <div id="colorNameDisplay" class="text-sm text-white font-medium px-2 py-1 bg-black rounded-md inline-block"></div>
                     </div>
 
                     <!-- Quantity & Add to Cart -->
-                    <div class="sticky-cart glass-card rounded-xl p-6 space-y-4">
+                    <div class="sticky-cart glass-card rounded-2xl p-6 space-y-6 neon-glow">
                         <div class="flex items-center space-x-4">
-                            <div class="flex items-center border border-surface-light rounded-lg">
-                                <button id="qtyMinus" class="px-4 py-3 hover:bg-surface-light transition-colors min-h-[48px] touch-manipulation">-</button>
-                                <span id="qtyValue" class="px-4 py-3 border-x border-surface-light min-h-[48px] flex items-center justify-center">1</span>
-                                <button id="qtyPlus" class="px-4 py-3 hover:bg-surface-light transition-colors min-h-[48px] touch-manipulation">+</button>
+                            <div class="flex items-center border border-primary rounded-lg">
+                                <button id="qtyMinus" class="px-3 py-2 hover:bg-primary hover:text-black transition-colors">-</button>
+                                <span id="qtyValue" class="px-4 py-2 border-x border-primary">1</span>
+                                <button id="qtyPlus" class="px-3 py-2 hover:bg-primary hover:text-black transition-colors">+</button>
                             </div>
                             <span id="stockSummary" class="text-white text-sm hidden">&nbsp;</span>
                         </div>
                         
-                        <div class="space-y-3">
-                            <button id="addToCartBtn" class="btn-primary w-full neon-glow text-lg py-4 min-h-[56px] touch-manipulation">
+                        <div class="space-y-4">
+                            <button id="addToCartBtn" class="btn-primary w-full text-lg py-4 animate-glow">
                                 Add to Cart - <span id="addToCartPrice">$22.00</span>
                             </button>
-                            <button id="buyNowBtn" class="w-full border border-highlight text-highlight px-6 py-4 rounded-lg font-semibold hover:bg-highlight hover:text-black transition-all duration-300 min-h-[56px] touch-manipulation">
+                            <button id="buyNowBtn" class="btn-secondary w-full py-3">
                                 Buy Now
                             </button>
                         </div>
@@ -648,7 +814,7 @@
                             
                             <!-- Birthday Custom Input -->
                             <div id="birthdayCustomInput" class="space-y-4 hidden">
-                                <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-highlight border-opacity-30">
+                                <div class="bg-black bg-opacity-20 rounded-lg p-4 border border-highlight border-opacity-30">
                                     <div id="birthdayFields" class="space-y-3">
                                         <!-- Fields will be populated dynamically -->
                                     </div>
@@ -656,17 +822,17 @@
                                     <!-- Custom Question Field -->
                                     <div id="birthdayCustomQuestion" class="mt-4 hidden">
                                         <label class="block text-sm text-white mb-2 font-medium">Additional Information Request</label>
-                                        <div class="bg-surface bg-opacity-50 rounded-lg p-3 border border-surface-light">
+                                        <div class="bg-black bg-opacity-50 rounded-lg p-3 border border-surface-light">
                                             <p id="birthdayCustomQuestionText" class="text-white text-sm"></p>
                                         </div>
-                                        <textarea id="birthdayCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-white focus:border-highlight focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
+                                        <textarea id="birthdayCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-black border border-surface-light rounded text-white focus:border-highlight focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Lyrics Custom Input -->
                             <div id="lyricsCustomInput" class="space-y-4 hidden">
-                                <div class="bg-surface-light bg-opacity-20 rounded-lg p-4 border border-highlight border-opacity-30">
+                                <div class="bg-black bg-opacity-20 rounded-lg p-4 border border-highlight border-opacity-30">
                                     <div id="lyricsFields" class="space-y-3">
                                         <!-- Fields will be populated dynamically -->
                                     </div>
@@ -674,18 +840,18 @@
                                     <!-- Custom Question Field -->
                                     <div id="lyricsCustomQuestion" class="mt-4 hidden">
                                         <label class="block text-sm text-white mb-2 font-medium">Additional Information Request</label>
-                                        <div class="bg-surface bg-opacity-50 rounded-lg p-3 border border-surface-light">
+                                        <div class="bg-black bg-opacity-50 rounded-lg p-3 border border-surface-light">
                                             <p id="lyricsCustomQuestionText" class="text-white text-sm"></p>
                                         </div>
-                                        <textarea id="lyricsCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-surface border border-surface-light rounded text-white focus:border-highlight focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
+                                        <textarea id="lyricsCustomQuestionInput" class="mt-2 w-full px-3 py-2 bg-black border border-surface-light rounded text-white focus:border-highlight focus:outline-none" rows="3" placeholder="Please provide your response here..."></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Social Proof (dynamic) -->
-                    <div class="glass-card rounded-xl p-4">
+                    <!-- Social Proof -->
+                    <div class="glass-card rounded-2xl p-4">
                         <div class="flex items-center space-x-3">
                             <div class="flex -space-x-2 social-proof-avatars">
                                 <img src="https://i.pravatar.cc/40?img=12" alt="Recent customer" class="w-8 h-8 rounded-full border-2 border-background" loading="lazy" />
@@ -694,7 +860,7 @@
                             </div>
                             <div>
                                 <p id="social-proof-text" class="text-sm text-white">Someone from your area just bought this</p>
-                                <p id="social-proof-time" class="text-xs text-white">just now</p>
+                                <p id="social-proof-time" class="text-xs text-text-secondary">just now</p>
                             </div>
                         </div>
                     </div>
@@ -809,52 +975,52 @@
                 <div class="tab-content">
                     <!-- Product Details Tab -->
                     <div id="details" class="tab-pane active">
-                        <div class="glass-card rounded-xl p-8 space-y-6">
+                        <div class="glass-card rounded-2xl p-8 space-y-6 neon-glow">
                             <h3 class="font-orbitron text-2xl font-bold text-white mb-6">Product Specifications</h3>
                             
                             <div class="grid md:grid-cols-2 gap-8">
                                 <div class="space-y-4">
                                     <div class="flex justify-between">
-                                        <span class="text-white">Material:</span>
+                                        <span class="text-text-secondary">Material:</span>
                                         <span class="text-white" id="spec-material">100% Premium Cotton</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-white">Weight:</span>
+                                        <span class="text-text-secondary">Weight:</span>
                                         <span class="text-white" id="spec-weight">180 GSM</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-white">Fit:</span>
+                                        <span class="text-text-secondary">Fit:</span>
                                         <span class="text-white" id="spec-fit">Unisex Regular</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-white">Print Method:</span>
+                                        <span class="text-text-secondary">Print Method:</span>
                                         <span class="text-white" id="spec-print-method">Direct-to-Garment</span>
                                     </div>
                                 </div>
                                 
                                 <div class="space-y-4">
                                     <div class="flex justify-between">
-                                        <span class="text-white">Neck Style:</span>
+                                        <span class="text-text-secondary">Neck Style:</span>
                                         <span class="text-white" id="spec-neck">Crew Neck</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-white">Sleeve Length:</span>
+                                        <span class="text-text-secondary">Sleeve Length:</span>
                                         <span class="text-white" id="spec-sleeve">Short Sleeve</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-white">Origin:</span>
+                                        <span class="text-text-secondary">Origin:</span>
                                         <span class="text-white" id="spec-origin">Made in USA</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-white">Sustainability:</span>
+                                        <span class="text-text-secondary">Sustainability:</span>
                                         <span class="text-white" id="spec-sustainability">Eco-Friendly Inks</span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-white">Brand Preference:</span>
+                                        <span class="text-text-secondary">Brand Preference:</span>
                                         <span class="text-white" id="brandPrefText">Either (Gildan Softstyle 64000 or Bella+Canvas 3001)</span>
                                     </div>
                                     <div class="flex justify-between" id="specsNotesRow" style="display:none;">
-                                        <span class="text-white">Notes:</span>
+                                        <span class="text-text-secondary">Notes:</span>
                                         <span class="text-white" id="specsNotesText"></span>
                                     </div>
                                 </div>
@@ -1050,7 +1216,7 @@
                                 <div>
                                     <h4 class="font-orbitron text-lg font-bold text-white mb-4">Return Policy</h4>
                                     <div class="space-y-4 text-white">
-                                        <div class="bg-surface-dark p-4 rounded-lg border border-surface-light">
+                                        <div class="bg-black p-4 rounded-lg border border-surface-light">
                                             <p class="text-sm leading-relaxed mb-3">
                                                 <strong class="text-white">Your satisfaction is important to us.</strong> We stand behind our work, and if we made a mistake with your custom order, we will gladly correct it. However, because each item is made specifically for you, <strong class="text-white">all sales are otherwise final</strong>.
                                             </p>
@@ -1411,9 +1577,16 @@
         // Function to set up shipping method selection listeners
         function setupShippingMethodListeners() {
             const shippingOptions = document.querySelectorAll('.shipping-option');
+            console.log('🔧 Setting up shipping listeners for', shippingOptions.length, 'options');
+            
             shippingOptions.forEach(option => {
                 const radio = option.querySelector('input[type="radio"]');
-                option.addEventListener('click', function() {
+                
+                // Add click listener to the entire option
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🖱️ Shipping option clicked:', option.dataset.method);
+                    
                     // Check the radio button
                     radio.checked = true;
                     
@@ -1431,6 +1604,27 @@
                     sessionStorage.setItem('selectedShippingMethod', shippingMethod);
                     sessionStorage.setItem('selectedShippingCost', shippingCost);
                 });
+                
+                // Also add direct listener to radio button
+                if (radio) {
+                    radio.addEventListener('change', function() {
+                        console.log('📻 Radio button changed:', radio.value);
+                        
+                        // Update visual selection
+                        shippingOptions.forEach(opt => opt.classList.remove('border-highlight'));
+                        option.classList.add('border-highlight');
+                        
+                        // Store shipping choice for cart
+                        const shippingMethod = option.dataset.method;
+                        const shippingCost = parseFloat(option.dataset.cost);
+                        
+                        console.log('🚚 Shipping method selected:', shippingMethod, 'Cost:', shippingCost);
+                        
+                        // Store in sessionStorage for cart to use
+                        sessionStorage.setItem('selectedShippingMethod', shippingMethod);
+                        sessionStorage.setItem('selectedShippingCost', shippingCost);
+                    });
+                }
             });
         }
         
@@ -1650,14 +1844,37 @@
                     <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Login Required</h2>
                     <p class="text-white mb-6">${message}</p>
                     <div class="space-y-4">
-                        <button class="btn-primary w-full" onclick="window.location.href='customer-login.html'">Log In</button>
-                        <button class="border border-highlight text-highlight w-full py-2 rounded-lg hover:bg-highlight hover:text-black transition-all duration-300" onclick="window.location.href='customer-login.html'">Create Account</button>
-                        <button class="text-white w-full py-2 hover:text-highlight transition-colors" onclick="this.closest('.fixed').remove()">Cancel</button>
+                        <button id="loginBtn" class="btn-primary w-full">LOG IN</button>
+                        <button id="createAccountBtn" class="border border-highlight text-highlight w-full py-2 rounded-lg hover:bg-highlight hover:text-black transition-all duration-300">Create Account</button>
+                        <button id="cancelLoginBtn" class="text-white w-full py-2 hover:text-highlight transition-colors">Cancel</button>
                     </div>
                 </div>
             `;
             
             document.body.appendChild(loginPrompt);
+            
+            // Add event listeners
+            const loginBtn = loginPrompt.querySelector('#loginBtn');
+            const createAccountBtn = loginPrompt.querySelector('#createAccountBtn');
+            const cancelBtn = loginPrompt.querySelector('#cancelLoginBtn');
+            
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function() {
+                    window.location.href = 'customer-login.html';
+                });
+            }
+            
+            if (createAccountBtn) {
+                createAccountBtn.addEventListener('click', function() {
+                    window.location.href = 'customer-login.html';
+                });
+            }
+            
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    loginPrompt.remove();
+                });
+            }
         }
 
         // Add to Cart functionality
@@ -1806,10 +2023,12 @@
                     }
                     
                     const result = await response.json();
+                    console.log('✅ Item added to cart successfully:', result);
                     alert('Item added to cart successfully!');
                     
                     // Update cart counter
-                    updateCartCounter();
+                    console.log('🔄 Updating cart counter...');
+                    await updateCartCounter();
                     
                     // DO NOT redirect - stay on the same page
                     // window.location.href = 'cart.html';
@@ -1818,6 +2037,14 @@
                     console.error('Error adding item to cart:', error);
                     alert('Error adding item to cart: ' + error.message);
                 }
+            });
+        }
+
+        // Cart Button functionality
+        const cartButton = document.getElementById('cart-button');
+        if (cartButton) {
+            cartButton.addEventListener('click', () => {
+                window.location.href = 'cart.html';
             });
         }
 
@@ -1979,9 +2206,16 @@
         // Cart counter functionality
         async function updateCartCounter() {
             try {
+                const cartCounter = document.getElementById('cart-counter');
+                if (!cartCounter) {
+                    console.error('Cart counter element not found');
+                    return;
+                }
+                
                 const token = localStorage.getItem('customerToken');
                 if (!token) {
-                    document.getElementById('cart-counter').textContent = '0';
+                    cartCounter.textContent = '0';
+                    cartCounter.style.display = 'none';
                     return;
                 }
                 
@@ -1995,13 +2229,31 @@
                 if (response.ok) {
                     const cartData = await response.json();
                     const totalItems = cartData.items ? cartData.items.reduce((total, item) => total + item.quantity, 0) : 0;
-                    document.getElementById('cart-counter').textContent = totalItems.toString();
+                    console.log('🛒 Cart data received:', cartData);
+                    console.log('🔢 Total items in cart:', totalItems);
+                    
+                    cartCounter.textContent = totalItems.toString();
+                    
+                    // Show/hide counter based on items
+                    if (totalItems > 0) {
+                        cartCounter.style.display = 'flex';
+                        console.log('✅ Cart counter shown with', totalItems, 'items');
+                    } else {
+                        cartCounter.style.display = 'none';
+                        console.log('❌ Cart counter hidden (0 items)');
+                    }
                 } else {
-                    document.getElementById('cart-counter').textContent = '0';
+                    console.log('❌ Cart API response not ok:', response.status);
+                    cartCounter.textContent = '0';
+                    cartCounter.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error updating cart counter:', error);
-                document.getElementById('cart-counter').textContent = '0';
+                const cartCounter = document.getElementById('cart-counter');
+                if (cartCounter) {
+                    cartCounter.textContent = '0';
+                    cartCounter.style.display = 'none';
+                }
             }
         }
         
@@ -2222,7 +2474,7 @@
                     thumbStrip.innerHTML = allThumbs.slice(0, 5).map((u, idx) => {
                         const t = padTransform(u, 400, 400);
                         const active = idx === 0 ? ' ring-2 ring-accent ' : '';
-                        return `<div class="thumbnail rounded-lg overflow-hidden cursor-pointer${active}" data-image="${padTransform(u,800,800)}"><img src="${t}" alt="${product.name} - View ${idx+1}" class="w-full h-20 object-contain bg-surface-dark" loading="lazy"/></div>`;
+                        return `<div class="thumbnail rounded-lg overflow-hidden cursor-pointer${active}" data-image="${padTransform(u,800,800)}"><img src="${t}" alt="${product.name} - View ${idx+1}" class="w-full h-20 object-contain" loading="lazy"/></div>`;
                     }).join('');
                     // Wire click handlers
                     thumbStrip.querySelectorAll('.thumbnail').forEach(th => {
@@ -2658,7 +2910,7 @@
                 const list = document.getElementById('reviewsList');
                 if (!list) return;
                 if (items.length === 0){
-                    list.innerHTML = `<div class="p-4 bg-surface rounded-lg text-white">No reviews yet. Be the first to review this product from your account after purchase.</div>`;
+                    list.innerHTML = `<div class="p-4 bg-black rounded-lg text-white">No reviews yet. Be the first to review this product from your account after purchase.</div>`;
                     return;
                 }
                 const starSvg = '<svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
@@ -2870,5 +3122,6 @@
         initMobileMenu();
         
 </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>

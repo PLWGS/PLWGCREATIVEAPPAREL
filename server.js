@@ -324,43 +324,15 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'API routes are working!', timestamp: new Date().toISOString() });
 });
 
-// Security Headers Configuration
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.tailwindcss.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.tailwindcss.com", "https://www.paypal.com", "https://www.paypalobjects.com"],
-      scriptSrcAttr: [
-        "'unsafe-hashes'",
-        "'sha256-1jAmyYXcRq6zFldLe/GCgIDJBiOONdXjTLgEFMDnDSM='",
-        "'sha256-R6AaG80nmkGc9oFSNvZVF7OOo5gLWHC/2y0eOYYohJ8='",
-        "'sha256-GMTUiihXfPWngWeq4wqBusQMc3uhwAYGIklr70mSqTc='",
-        "'sha256-/l6w0vnC+DN7tMFOiJiEWqLyy8uJoFwM6E0yzhKXRRQ='"
-      ],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
-      imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
-      connectSrc: ["'self'", "https://api.paypal.com", "https://api.sandbox.paypal.com"],
-      frameSrc: ["'self'", "https://www.paypal.com", "https://www.sandbox.paypal.com"],
-      objectSrc: ["'none'"],
-      baseUri: ["'self'"],
-      formAction: ["'self'"],
-      frameAncestors: ["'none'"],
-      upgradeInsecureRequests: []
-    }
-  },
-  crossOriginEmbedderPolicy: false, // Disable COEP to avoid breaking Cloudinary images
-  crossOriginOpenerPolicy: { policy: "same-origin" },
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  hsts: {
-    maxAge: 31536000, // 1 year
-    includeSubDomains: true,
-    preload: true
-  },
-  noSniff: true,
-  xssFilter: true,
-  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
-}));
+// CSP Test endpoint
+app.get('/api/csp-test', (req, res) => {
+  res.json({ 
+    message: 'CSP Test', 
+    headers: req.headers,
+    cspHeader: req.get('Content-Security-Policy')
+  });
+});
+
 
 // Middleware
 app.use(cors({
@@ -399,6 +371,53 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Add compression middleware for better performance
 app.use(compression());
 
+// Security Headers Configuration - MUST be before static file serving
+app.use((req, res, next) => {
+  // Add cache-busting headers to force CSP refresh
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.tailwindcss.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.tailwindcss.com", "https://www.paypal.com", "https://www.paypalobjects.com"],
+      scriptSrcAttr: [
+        "'unsafe-hashes'",
+        "'sha256-1jAmyYXcRq6zFldLe/GCgIDJBiOONdXjTLgEFMDnDSM='",
+        "'sha256-R6AaG80nmkGc9oFSNvZVF7OOo5gLWHC/2y0eOYYohJ8='",
+        "'sha256-GMTUiihXfPWngWeq4wqBusQMc3uhwAYGIklr70mSqTc='",
+        "'sha256-/l6w0vnC+DN7tMFOiJiEWqLyy8uJoFwM6E0yzhKXRRQ='",
+        "'sha256-2rvfFrggTCtyF5WOiTri1gDS8Boibj4Njn0e+VCBmDI='"
+      ],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
+      connectSrc: ["'self'", "https://api.paypal.com", "https://api.sandbox.paypal.com", "https://www.paypal.com", "https://www.sandbox.paypal.com", "https://*.paypal.com", "https://*.paypalobjects.com"],
+      frameSrc: ["'self'", "https://www.paypal.com", "https://www.sandbox.paypal.com"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'self'", "https://www.paypal.com", "https://www.sandbox.paypal.com"],
+      upgradeInsecureRequests: []
+    }
+  },
+  crossOriginEmbedderPolicy: false, // Disable COEP to avoid breaking Cloudinary images
+  crossOriginOpenerPolicy: { policy: "same-origin" },
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  },
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
+}));
+
 app.use(express.static('.'));
 app.use('/public', express.static('public'));
 // Removed etsy_images static route - now using Cloudinary for image hosting
@@ -418,6 +437,27 @@ app.get('/robots.txt', (req, res) => {
 // Serve product.html for product detail pages
 app.get('/product.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'pages', 'product.html'));
+});
+
+// Serve checkout.html with explicit CSP headers
+app.get('/pages/checkout.html', (req, res) => {
+  // Set explicit CSP headers for checkout page
+  res.setHeader('Content-Security-Policy', 
+    "default-src 'self'; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com; " +
+    "script-src-attr 'unsafe-hashes' 'sha256-1jAmyYXcRq6zFldLe/GCgIDJBiOONdXjTLgEFMDnDSM=' 'sha256-R6AaG80nmkGc9oFSNvZVF7OOo5gLWHC/2y0eOYYohJ8=' 'sha256-GMTUiihXfPWngWeq4wqBusQMc3uhwAYGIklr70mSqTc=' 'sha256-/l6w0vnC+DN7tMFOiJiEWqLyy8uJoFwM6E0yzhKXRRQ=' 'sha256-2rvfFrggTCtyF5WOiTri1gDS8Boibj4Njn0e+VCBmDI='; " +
+    "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; " +
+    "img-src 'self' data: https: http: blob:; " +
+    "connect-src 'self' https://api.paypal.com https://api.sandbox.paypal.com https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com; " +
+    "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com; " +
+    "object-src 'none'; " +
+    "base-uri 'self'; " +
+    "form-action 'self'; " +
+    "frame-ancestors 'self' https://www.paypal.com https://www.sandbox.paypal.com; " +
+    "upgrade-insecure-requests"
+  );
+  res.sendFile(path.join(__dirname, 'pages', 'checkout.html'));
 });
 
 // Database connection - DISABLED FOR LOCAL DEVELOPMENT
@@ -5645,7 +5685,7 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
     logger.info('🔍 Order number:', orderNumber);
 
     res.json({ 
-      orderId: response.result.id,
+      id: response.result.id,
       orderNumber: orderNumber,
       total: total
     });
@@ -5714,6 +5754,7 @@ app.post('/api/paypal/capture-order', authenticateCustomer, async (req, res) => 
         message: 'Payment captured successfully', 
         order: order,
         orderNumber: order.order_number,
+        finalTotal: order.total_amount,
         paymentDetails: response.result
       });
     } else {
