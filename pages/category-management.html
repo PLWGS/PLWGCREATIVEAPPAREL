@@ -231,13 +231,13 @@
             <div class="mt-8 pt-6 border-t border-surface-light">
                 <h3 class="text-text-secondary text-sm font-medium mb-4">Quick Actions</h3>
                 <div class="space-y-2">
-                    <button onclick="showAddCategoryForm()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                    <button id="add-category-btn" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                         Add New Category
                     </button>
-                    <button onclick="refreshCategories()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                    <button id="refresh-categories-btn" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                         Refresh Categories
                     </button>
-                    <button onclick="exportCategories()" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                    <button id="export-categories-btn" class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                         Export Categories
                     </button>
                 </div>
@@ -324,7 +324,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <button type="submit" class="btn-primary">Create Category</button>
-                    <button type="button" onclick="hideAddCategoryForm()" class="btn-secondary">Cancel</button>
+                    <button type="button" id="cancel-add-category-btn" class="btn-secondary">Cancel</button>
                 </div>
             </form>
         </div>
@@ -333,7 +333,7 @@
         <div class="glass-card rounded-xl p-6">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-bold text-accent">Product Categories</h2>
-                <button onclick="showAddCategoryForm()" class="btn-primary">
+                <button id="show-add-category-btn" class="btn-primary">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
@@ -386,7 +386,7 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         <button type="submit" class="btn-primary">Update Category</button>
-                        <button type="button" onclick="closeEditModal()" class="btn-secondary">Cancel</button>
+                        <button type="button" id="close-edit-modal-btn" class="btn-secondary">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -406,8 +406,8 @@
                     </p>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button onclick="confirmDeleteCategory()" class="btn-danger">Delete Category</button>
-                    <button onclick="closeDeleteModal()" class="btn-secondary">Cancel</button>
+                    <button id="confirm-delete-category-btn" class="btn-danger">Delete Category</button>
+                    <button id="close-delete-modal-btn" class="btn-secondary">Cancel</button>
                 </div>
             </div>
         </div>
@@ -425,7 +425,87 @@
             loadCategories();
             loadProducts();
             setupEventListeners();
+            setupButtonEventListeners();
+            setupMobileMenu();
         });
+
+        // Setup button event listeners
+        function setupButtonEventListeners() {
+            console.log('🔍 Setting up button event listeners...');
+            
+            // Add category buttons (with null checks)
+            const addCategoryBtn = document.getElementById('add-category-btn');
+            console.log('add-category-btn found:', addCategoryBtn);
+            if (addCategoryBtn) {
+                addCategoryBtn.addEventListener('click', showAddCategoryForm);
+                console.log('✅ Added event listener to add-category-btn');
+            } else {
+                console.error('❌ add-category-btn not found! This might be because the sidebar is hidden on mobile.');
+                // On mobile, the sidebar is hidden by default, so we'll use event delegation for all buttons
+            }
+            
+            const showAddCategoryBtn = document.getElementById('show-add-category-btn');
+            if (showAddCategoryBtn) showAddCategoryBtn.addEventListener('click', showAddCategoryForm);
+            
+            const refreshCategoriesBtn = document.getElementById('refresh-categories-btn');
+            if (refreshCategoriesBtn) refreshCategoriesBtn.addEventListener('click', refreshCategories);
+            
+            const exportCategoriesBtn = document.getElementById('export-categories-btn');
+            if (exportCategoriesBtn) exportCategoriesBtn.addEventListener('click', exportCategories);
+            
+            const cancelAddCategoryBtn = document.getElementById('cancel-add-category-btn');
+            if (cancelAddCategoryBtn) cancelAddCategoryBtn.addEventListener('click', hideAddCategoryForm);
+            
+            const closeEditModalBtn = document.getElementById('close-edit-modal-btn');
+            if (closeEditModalBtn) closeEditModalBtn.addEventListener('click', closeEditModal);
+            
+            const confirmDeleteCategoryBtn = document.getElementById('confirm-delete-category-btn');
+            if (confirmDeleteCategoryBtn) confirmDeleteCategoryBtn.addEventListener('click', confirmDeleteCategory);
+            
+            const closeDeleteModalBtn = document.getElementById('close-delete-modal-btn');
+            if (closeDeleteModalBtn) closeDeleteModalBtn.addEventListener('click', closeDeleteModal);
+            
+            // Event delegation for dynamically created buttons and mobile sidebar buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('[data-action="edit-category"]')) {
+                    const categoryId = e.target.closest('[data-action="edit-category"]').dataset.categoryId;
+                    editCategory(categoryId);
+                } else if (e.target.closest('[data-action="delete-category"]')) {
+                    const button = e.target.closest('[data-action="delete-category"]');
+                    const categoryId = button.dataset.categoryId;
+                    const categoryName = button.dataset.categoryName;
+                    const productCount = button.dataset.productCount;
+                    deleteCategory(categoryId, categoryName, productCount);
+                } else if (e.target && e.target.id === 'create-category-btn') {
+                    showAddCategoryForm();
+                } else if (e.target && e.target.id === 'add-category-btn') {
+                    showAddCategoryForm();
+                } else if (e.target && e.target.id === 'refresh-categories-btn') {
+                    refreshCategories();
+                } else if (e.target && e.target.id === 'export-categories-btn') {
+                    exportCategories();
+                }
+            });
+        }
+
+        // Setup mobile menu toggle
+        function setupMobileMenu() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                });
+                
+                // Close sidebar when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            }
+        }
 
         // Setup event listeners
         function setupEventListeners() {
@@ -491,7 +571,7 @@
                         </svg>
                         <h3 class="text-lg font-semibold text-text-secondary mb-2">No Categories Found</h3>
                         <p class="text-text-secondary mb-4">Create your first category to get started!</p>
-                        <button onclick="showAddCategoryForm()" class="btn-primary">Create Category</button>
+                        <button id="create-category-btn" class="btn-primary">Create Category</button>
                     </div>
                 `;
                 return;
@@ -511,12 +591,12 @@
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="editCategory('${category.id}')" class="p-2 text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                                <button data-action="edit-category" data-category-id="${category.id}" class="p-2 text-accent hover:bg-accent hover:bg-opacity-10 rounded-lg transition-all duration-300">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
-                                <button onclick="deleteCategory('${category.id}', '${category.name}', ${productCount})" class="p-2 text-red-400 hover:bg-red-400 hover:bg-opacity-10 rounded-lg transition-all duration-300">
+                                <button data-action="delete-category" data-category-id="${category.id}" data-category-name="${category.name}" data-product-count="${productCount}" class="p-2 text-red-400 hover:bg-red-400 hover:bg-opacity-10 rounded-lg transition-all duration-300">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>

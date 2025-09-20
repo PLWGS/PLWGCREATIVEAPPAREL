@@ -8082,4 +8082,54 @@ initializeAdminCredentials().then(() => {
   process.exit(1);
 });
 
+// Serve order success page
+app.get('/order-success.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'order-success.html'));
+});
+
+// Serve order failure page
+app.get('/order-failure.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'order-failure.html'));
+});
+
+// Serve account page
+app.get('/account.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'account.html'));
+});
+
+// Serve cart page
+app.get('/cart.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'cart.html'));
+});
+
+// Serve customer login page
+app.get('/customer-login.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'customer-login.html'));
+});
+
+// Serve shop page
+app.get('/shop.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'shop.html'));
+});
+
+// Serve admin page
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'admin.html'));
+});
+
+// Serve privacy policy page
+app.get('/privacy-policy.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'privacy-policy.html'));
+});
+
+// Serve terms of service page
+app.get('/terms-of-service.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'terms-of-service.html'));
+});
+
+// Serve category management page
+app.get('/category-management.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'category-management.html'));
+});
+
 module.exports = app; 

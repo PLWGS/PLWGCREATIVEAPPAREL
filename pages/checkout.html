@@ -93,9 +93,9 @@
         // Prevent multiple PayPal initializations globally
         if (window.paypalCheckoutInitialized) {
             console.log('⚠️ PayPal checkout already initialized on this page, skipping...');
-            return;
+        } else {
+            window.paypalCheckoutInitialized = true;
         }
-        window.paypalCheckoutInitialized = true;
         
         // Override window.open to prevent unwanted popups
         const originalWindowOpen = window.open;
