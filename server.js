@@ -457,6 +457,9 @@ app.get('/pages/checkout.html', (req, res) => {
     "frame-ancestors 'self' https://www.paypal.com https://www.sandbox.paypal.com; " +
     "upgrade-insecure-requests"
   );
+  
+  // Add Cross-Origin-Opener-Policy to allow PayPal popups
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.sendFile(path.join(__dirname, 'pages', 'checkout.html'));
 });
 
@@ -5484,7 +5487,7 @@ app.post('/api/cart/checkout', authenticateCustomer, validateCheckout, async (re
     }
 
     const cartItems = cartResult.rows;
-    const total_amount = cartItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const total_amount = cartItems.reduce((sum, item) => sum + (item.quantity * parseFloat(item.unit_price)), 0);
 
     // Generate order number
     const orderNumber = 'PLW-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-4);
@@ -5580,7 +5583,7 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
     }
 
     const cartItems = cartResult.rows;
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.quantity * parseFloat(item.unit_price)), 0);
     const shipping = subtotal >= 50 ? 0 : 5.99;
     const tax = subtotal * 0.085; // 8.5% tax
     const total = subtotal + shipping + tax;
@@ -5617,7 +5620,7 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
         item.product_name, 
         item.quantity, 
         item.unit_price, 
-        (item.quantity * item.unit_price), 
+        (item.quantity * parseFloat(item.unit_price)), 
         item.size, 
         item.color, 
         item.custom_input
@@ -5653,7 +5656,7 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
           name: item.product_name,
           unit_amount: {
             currency_code: 'USD',
-            value: item.unit_price.toFixed(2)
+            value: parseFloat(item.unit_price).toFixed(2)
           },
           quantity: item.quantity.toString(),
           category: 'PHYSICAL_GOODS'
@@ -5690,8 +5693,9 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
       total: total
     });
   } catch (error) {
+    console.error('PayPal create order error:', error);
     logger.error('PayPal create order error:', error);
-    res.status(500).json({ error: 'Failed to create PayPal order' });
+    res.status(500).json({ error: 'Failed to create PayPal order', details: error.message });
   }
 });
 
@@ -5797,7 +5801,7 @@ app.post('/api/orders/create', authenticateCustomer, async (req, res) => {
     }
 
     const cartItems = cartResult.rows;
-    const total_amount = cartItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const total_amount = cartItems.reduce((sum, item) => sum + (item.quantity * parseFloat(item.unit_price)), 0);
 
     // Generate order number
     const orderNumber = 'PLW-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-4);
@@ -5832,7 +5836,7 @@ app.post('/api/orders/create', authenticateCustomer, async (req, res) => {
         item.product_name, 
         item.quantity, 
         item.unit_price, 
-        (item.quantity * item.unit_price), 
+        (item.quantity * parseFloat(item.unit_price)), 
         item.size, 
         item.color, 
         item.custom_input
@@ -6616,7 +6620,7 @@ async function sendCustomerPaymentConfirmationEmail(order, orderItems, paymentDe
                   ${item.custom_input ? `<div class="item-custom">Custom: ${item.custom_input}</div>` : ''}
                 </div>
                 <div class="item-price">
-                  ${item.quantity} × $${item.unit_price} = $${(item.quantity * item.unit_price).toFixed(2)}
+                  ${item.quantity} × $${item.unit_price} = $${(item.quantity * parseFloat(item.unit_price)).toFixed(2)}
                 </div>
               </div>
             `).join('')}
@@ -6978,7 +6982,7 @@ async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetai
                   ${item.custom_input ? `<div class="item-custom">Custom: ${item.custom_input}</div>` : ''}
                 </div>
                 <div class="item-price">
-                  ${item.quantity} × $${item.unit_price} = $${(item.quantity * item.unit_price).toFixed(2)}
+                  ${item.quantity} × $${item.unit_price} = $${(item.quantity * parseFloat(item.unit_price)).toFixed(2)}
                 </div>
               </div>
             `).join('')}

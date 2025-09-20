@@ -88,6 +88,159 @@
         // PayPal integration
         let paypalClientId = null;
         let paypalInitialized = false;
+        let paypalScriptLoaded = false;
+        
+        // Prevent multiple PayPal initializations globally
+        if (window.paypalCheckoutInitialized) {
+            console.log('⚠️ PayPal checkout already initialized on this page, skipping...');
+        } else {
+            window.paypalCheckoutInitialized = true;
+        
+        // PayPal popups are now properly handled by COOP headers
+        
+        // Initialize PayPal function
+        function initializePayPal() {
+            console.log('🔍 Checking PayPal SDK availability...');
+            if (typeof paypal === 'undefined') {
+                console.error('❌ PayPal SDK not loaded');
+                return;
+            }
+            
+            if (paypalInitialized) {
+                console.log('⚠️ PayPal already initialized, skipping...');
+                return;
+            }
+            
+            console.log('✅ PayPal SDK is available, creating buttons...');
+            paypalInitialized = true;
+            
+            const container = document.getElementById('paypal-button-container');
+            if (!container) {
+                console.error('❌ PayPal button container not found');
+                return;
+            }
+            
+            // Check if buttons already exist
+            if (container.querySelector('[data-paypal-button]')) {
+                console.log('⚠️ PayPal buttons already rendered, skipping...');
+                return;
+            }
+            
+            // Add a loading indicator
+            container.innerHTML = '<div class="loading-spinner"></div><span class="ml-3 text-text-secondary">Loading payment options...</span>';
+
+            paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'blue',
+                    shape: 'rect',
+                    label: 'pay',
+                    height: 45
+                },
+                enableFunding: 'venmo,paylater,card',
+                
+                // createOrder: Uses the server-side /api/paypal/create-order endpoint
+                createOrder: async (data, actions) => {
+                    console.log('🎬 Initiating server-side order creation...');
+                    if (!validateShippingInfoWithAlerts()) {
+                        showMessage('Please complete all required shipping information before proceeding.', 'error');
+                        return Promise.reject('Shipping information is invalid.');
+                    }
+
+                    try {
+                        const token = localStorage.getItem('customerToken');
+                        const response = await fetch('/api/paypal/create-order', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                shipping_address: getShippingData()
+                            })
+                        });
+
+                        const order = await response.json();
+
+                        if (response.ok) {
+                            console.log('✅ PayPal Order ID from server:', order.id);
+                            return order.id;
+                        } else {
+                            console.error('❌ Server failed to create order:', order);
+                            showMessage(order.error || 'Failed to create order.', 'error');
+                            return Promise.reject(order.error);
+                        }
+                    } catch (error) {
+                        console.error('❌ Network error during order creation:', error);
+                        showMessage('A network error occurred while creating the order.', 'error');
+                        return Promise.reject(error);
+                    }
+                },
+
+                // onApprove: Captures the funds on the server-side
+                onApprove: async (data, actions) => {
+                    console.log('👍 Order approved by user. Capturing payment on server...');
+                    showLoadingOverlay(true);
+
+                    try {
+                        const token = localStorage.getItem('customerToken');
+                        const response = await fetch('/api/paypal/capture-order', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                orderId: data.orderID 
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            console.log('🎉 Payment captured successfully:', result);
+                            processOrder(result.orderNumber, result.finalTotal, 'PayPal');
+                            return result;
+                        } else {
+                            console.error('❌ Server failed to capture payment:', result);
+                            showMessage(result.error || 'Payment capture failed.', 'error');
+                            showLoadingOverlay(false);
+                            return Promise.reject(result.error);
+                        }
+                    } catch (error) {
+                        console.error('❌ Network error during payment capture:', error);
+                        showMessage('A network error occurred while capturing the payment.', 'error');
+                        showLoadingOverlay(false);
+                        return Promise.reject(error);
+                    }
+                },
+
+                onError: function(err) {
+                    console.error('An error occurred with the PayPal button:', err);
+                    showMessage('An unexpected error occurred. Please try again.', 'error');
+                    showLoadingOverlay(false);
+                },
+
+                onCancel: function(data) {
+                    console.log('Payment was cancelled by the user.');
+                    showMessage('Payment was cancelled.', 'warning');
+                    showLoadingOverlay(false);
+                }
+            }).render('#paypal-button-container').then(() => {
+                // Mark the container as having PayPal buttons
+                const container = document.getElementById('paypal-button-container');
+                if (container) {
+                    container.setAttribute('data-paypal-button', 'true');
+                    console.log('✅ PayPal buttons rendered successfully');
+                }
+            }).catch((error) => {
+                console.error('❌ Error rendering PayPal buttons:', error);
+                const container = document.getElementById('paypal-button-container');
+                if (container) {
+                    container.innerHTML = '<div class="text-red-500">Error loading payment options. Please refresh the page.</div>';
+                }
+            });
+        }
         
         // Fetch PayPal Client ID from server
         fetch('/api/paypal/client-id')
@@ -103,18 +256,39 @@
             });
         
         function loadPayPalSDK() {
-            if (!paypalClientId) return;
+            if (!paypalClientId || paypalScriptLoaded) {
+                console.log('⚠️ PayPal SDK already loaded or client ID missing, skipping...');
+                return;
+            }
             
+            // Check if PayPal script is already loaded
+            if (document.querySelector('script[src*="paypal.com/sdk/js"]')) {
+                console.log('⚠️ PayPal SDK script already exists, skipping...');
+                if (typeof paypal !== 'undefined' && !paypalInitialized) {
+                    initializePayPal();
+                }
+                return;
+            }
+            
+            console.log('🔄 Loading PayPal SDK...');
+            paypalScriptLoaded = true;
             const script = document.createElement('script');
             script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD&intent=capture`;
             
             script.onload = function() {
+                console.log('✅ PayPal SDK loaded successfully');
                 if (typeof paypal !== 'undefined' && !paypalInitialized) {
                     initializePayPal();
                 }
             };
             
+            script.onerror = function() {
+                console.error('❌ Failed to load PayPal SDK');
+                paypalScriptLoaded = false;
+            };
+            
             document.head.appendChild(script);
+        }
         }
     </script>
     
@@ -392,6 +566,18 @@
         ::-webkit-scrollbar-thumb {
             background: #ff8306;
             border-radius: 4px;
+        }
+        
+        /* Fix PayPal font loading errors */
+        @font-face {
+            font-family: 'PayPalFont';
+            src: local('Arial'), local('Helvetica'), local('sans-serif');
+            font-display: swap;
+        }
+        
+        /* Override PayPal's font requests */
+        [class*="paypal"] {
+            font-family: 'Inter', 'Arial', sans-serif !important;
         }
     </style>
 </head>
@@ -1190,126 +1376,6 @@
         
         
 
-        // Initialize PayPal
-        function initializePayPal() {
-            console.log('🔍 Checking PayPal SDK availability...');
-            if (typeof paypal === 'undefined') {
-                console.error('❌ PayPal SDK not loaded');
-                return;
-            }
-            
-            if (paypalInitialized) {
-                console.log('⚠️ PayPal already initialized, skipping...');
-                return;
-            }
-            
-            console.log('✅ PayPal SDK is available, creating buttons...');
-            paypalInitialized = true;
-            
-            const container = document.getElementById('paypal-button-container');
-            if (container) {
-                container.innerHTML = '';
-            }
-
-            paypal.Buttons({
-                style: {
-                    layout: 'vertical',
-                    color: 'blue',
-                    shape: 'rect',
-                    label: 'pay',
-                    height: 45
-                },
-                enableFunding: 'venmo,paylater,card',
-                
-                // createOrder: Uses the server-side /api/paypal/create-order endpoint
-                createOrder: async (data, actions) => {
-                    console.log('🎬 Initiating server-side order creation...');
-                    if (!validateShippingInfoWithAlerts()) {
-                        showMessage('Please complete all required shipping information before proceeding.', 'error');
-                        return Promise.reject('Shipping information is invalid.');
-                    }
-
-                    try {
-                        const token = localStorage.getItem('customerToken');
-                        const response = await fetch('/api/paypal/create-order', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({
-                                shipping_address: getShippingData()
-                            })
-                        });
-
-                        const order = await response.json();
-
-                        if (response.ok) {
-                            console.log('✅ PayPal Order ID from server:', order.id);
-                            return order.id;
-                        } else {
-                            console.error('❌ Server failed to create PayPal order:', order);
-                            showMessage(order.error || 'Could not initiate PayPal payment.', 'error');
-                            return Promise.reject(order.error);
-                        }
-                    } catch (error) {
-                        console.error('❌ Network error during order creation:', error);
-                        showMessage('A network error occurred. Please try again.', 'error');
-                        return Promise.reject(error);
-                    }
-                },
-
-                // onApprove: Captures the funds on the server-side
-                onApprove: async (data, actions) => {
-                    console.log('👍 Order approved by user. Capturing payment on server...');
-                    showLoadingOverlay(true);
-
-                    try {
-                        const token = localStorage.getItem('customerToken');
-                        const response = await fetch('/api/paypal/capture-order', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify({
-                                orderId: data.orderID 
-                            })
-                        });
-
-                        const result = await response.json();
-
-                        if (response.ok) {
-                            console.log('🎉 Payment captured successfully:', result);
-                            processOrder(result.orderNumber, result.finalTotal, 'PayPal');
-                            return result;
-                        } else {
-                            console.error('❌ Server failed to capture payment:', result);
-                            showMessage(result.error || 'Payment capture failed.', 'error');
-                            showLoadingOverlay(false);
-                            return Promise.reject(result.error);
-                        }
-                    } catch (error) {
-                        console.error('❌ Network error during payment capture:', error);
-                        showMessage('A network error occurred while capturing the payment.', 'error');
-                        showLoadingOverlay(false);
-                        return Promise.reject(error);
-                    }
-                },
-
-                onError: function(err) {
-                    console.error('An error occurred with the PayPal button:', err);
-                    showMessage('An unexpected error occurred. Please try again.', 'error');
-                    showLoadingOverlay(false);
-                },
-
-                onCancel: function(data) {
-                    console.log('Payment was cancelled by the user.');
-                    showMessage('Payment was cancelled.', 'warning');
-                    showLoadingOverlay(false);
-                }
-            }).render('#paypal-button-container');
-        }
 
         // Process order after successful payment
         async function processOrder(orderNumber, totalAmount, paymentMethod) {
@@ -1459,5 +1525,6 @@
             });
         });
     </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
 </body>
 </html>

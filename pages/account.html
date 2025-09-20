@@ -280,7 +280,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </button>
-                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button" onclick="window.location.href='cart.html'">
+                    <button class="text-text-primary hover:text-accent transition-colors duration-300 relative" id="cart-button">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
@@ -295,10 +295,10 @@
                     
                     <!-- Login/Logout Button -->
                     <div id="auth-buttons" class="flex items-center space-x-2">
-                        <button id="login-btn" class="btn-primary px-4 py-2 text-sm hidden" onclick="window.location.href='customer-login.html'">
+                        <button id="login-btn" class="btn-primary px-4 py-2 text-sm hidden">
                             Log In
                         </button>
-                        <button id="logout-btn" class="border border-accent text-accent px-4 py-2 text-sm rounded-lg hover:bg-accent hover:text-black transition-all duration-300 hidden" onclick="logout()">
+                        <button id="logout-btn" class="border border-accent text-accent px-4 py-2 text-sm rounded-lg hover:bg-accent hover:text-black transition-all duration-300 hidden">
                             Log Out
                         </button>
                     </div>
@@ -353,11 +353,11 @@
                 <div class="glass-card rounded-2xl p-6 w-full max-w-2xl">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="font-orbitron text-xl font-bold text-white">Order Details</h3>
-                        <button class="text-text-secondary hover:text-accent" onclick="closeOrderDetailsModal()">✕</button>
+                        <button class="text-text-secondary hover:text-accent" id="close-order-details-modal">✕</button>
                     </div>
                     <div id="orderDetailsBody" class="space-y-4"></div>
                     <div class="text-right mt-6">
-                        <button class="btn-primary" onclick="closeOrderDetailsModal()">Close</button>
+                        <button class="btn-primary" id="close-order-details-modal-btn">Close</button>
                     </div>
                 </div>
             </div>
@@ -367,11 +367,11 @@
                 <div class="glass-card rounded-2xl p-6 w-full max-w-2xl">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="font-orbitron text-xl font-bold text-white">Leave a Review</h3>
-                        <button class="text-text-secondary hover:text-accent" onclick="closeLeaveReviewModal()">✕</button>
+                        <button class="text-text-secondary hover:text-accent" id="close-leave-review-modal">✕</button>
                     </div>
                     <div id="leaveReviewBody" class="space-y-6"></div>
                     <div class="text-right mt-6">
-                        <button class="btn-primary" onclick="submitPendingReviews()">Submit</button>
+                        <button class="btn-primary" id="submit-pending-reviews-btn">Submit</button>
                     </div>
                 </div>
             </div>
@@ -1318,6 +1318,133 @@
             document.querySelectorAll('input[data-pref-key]').forEach(el => {
                 el.addEventListener('change', savePrefsDebounced);
             });
+
+            // Add event listeners for buttons that had onclick handlers
+            // Cart button
+            const cartButton = document.getElementById('cart-button');
+            if (cartButton) {
+                cartButton.addEventListener('click', () => {
+                    window.location.href = 'cart.html';
+                });
+            }
+
+            // Login/Logout buttons
+            const loginBtn = document.getElementById('login-btn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', () => {
+                    window.location.href = 'customer-login.html';
+                });
+            }
+
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    logout();
+                });
+            }
+
+            // Modal buttons
+            const closeOrderDetailsModalBtn = document.getElementById('close-order-details-modal');
+            if (closeOrderDetailsModalBtn) {
+                closeOrderDetailsModalBtn.addEventListener('click', () => {
+                    closeOrderDetailsModal();
+                });
+            }
+
+            const closeOrderDetailsModalBtn2 = document.getElementById('close-order-details-modal-btn');
+            if (closeOrderDetailsModalBtn2) {
+                closeOrderDetailsModalBtn2.addEventListener('click', () => {
+                    closeOrderDetailsModal();
+                });
+            }
+
+            const closeLeaveReviewModalBtn = document.getElementById('close-leave-review-modal');
+            if (closeLeaveReviewModalBtn) {
+                closeLeaveReviewModalBtn.addEventListener('click', () => {
+                    closeLeaveReviewModal();
+                });
+            }
+
+            const submitPendingReviewsBtn = document.getElementById('submit-pending-reviews-btn');
+            if (submitPendingReviewsBtn) {
+                submitPendingReviewsBtn.addEventListener('click', () => {
+                    submitPendingReviews();
+                });
+            }
+
+            // Event delegation for dynamically created buttons
+            document.addEventListener('click', (e) => {
+                // Login modal buttons
+                if (e.target && e.target.id === 'login-modal-btn') {
+                    window.location.href = 'customer-login.html';
+                }
+                if (e.target && e.target.id === 'create-account-modal-btn') {
+                    window.location.href = 'customer-register.html';
+                }
+                
+                // Dynamic buttons with data attributes
+                if (e.target && e.target.dataset.action) {
+                    e.preventDefault();
+                    const action = e.target.dataset.action;
+                    
+                    switch (action) {
+                        case 'reorder':
+                            const orderId = e.target.dataset.orderId;
+                            if (orderId) {
+                                reorderOrderById(parseInt(orderId), e.target);
+                            }
+                            break;
+                        case 'remove-wishlist':
+                            const productId = e.target.dataset.productId;
+                            if (productId) {
+                                removeFromWishlist(parseInt(productId));
+                            }
+                            break;
+                        case 'add-to-cart':
+                            const addToCartProductId = e.target.dataset.productId;
+                            if (addToCartProductId) {
+                                addToCart(parseInt(addToCartProductId));
+                            }
+                            break;
+                        case 'redeem-reward':
+                            const rewardId = e.target.dataset.rewardId;
+                            if (rewardId) {
+                                redeemReward(parseInt(rewardId));
+                            }
+                            break;
+                        case 'leave-review':
+                            const reviewOrderId = e.target.dataset.orderId;
+                            if (reviewOrderId) {
+                                openLeaveReviewModal(parseInt(reviewOrderId));
+                            }
+                            break;
+                        case 'edit-address':
+                            const editAddressIdx = e.target.dataset.addressIdx;
+                            if (editAddressIdx) {
+                                openEditAddressModal(parseInt(editAddressIdx));
+                            }
+                            break;
+                        case 'delete-address':
+                            const deleteAddressIdx = e.target.dataset.addressIdx;
+                            if (deleteAddressIdx) {
+                                deleteAddress(parseInt(deleteAddressIdx));
+                            }
+                            break;
+                        case 'set-default-address':
+                            const defaultAddressIdx = e.target.dataset.addressIdx;
+                            if (defaultAddressIdx) {
+                                setDefaultAddress(parseInt(defaultAddressIdx));
+                            }
+                            break;
+                        case 'add-to-wishlist':
+                            const wishlistProductId = e.target.dataset.productId;
+                            if (wishlistProductId) {
+                                addToWishlist(parseInt(wishlistProductId));
+                            }
+                            break;
+                    }
+                }
+            });
         });
 
         // Small debounce helper
@@ -1609,16 +1736,16 @@
                 }
                 // Wire up the "Reorder All Items" button for the most recent order
                 if (reorderRecentButton) {
-                    reorderRecentButton.onclick = () => reorderOrderById(recentOrder.id, reorderRecentButton);
+                    reorderRecentButton.addEventListener('click', () => reorderOrderById(recentOrder.id, reorderRecentButton));
                 }
                 // Wire up View Details / Leave Review for recent order
                 const viewRecentDetails = document.getElementById('viewRecentDetails');
                 if (viewRecentDetails) {
-                    viewRecentDetails.onclick = () => openOrderDetailsModal(recentOrder.id);
+                    viewRecentDetails.addEventListener('click', () => openOrderDetailsModal(recentOrder.id));
                 }
                 const leaveRecentReview = document.getElementById('leaveRecentReview');
                 if (leaveRecentReview) {
-                    leaveRecentReview.onclick = () => openLeaveReviewModal(recentOrder.id);
+                    leaveRecentReview.addEventListener('click', () => openLeaveReviewModal(recentOrder.id));
                 }
                 
                 // Update recent order items
@@ -1658,7 +1785,7 @@
                                 </div>
                                 <div class="flex items-center space-x-4">
                                     <span class="status-${order.status} px-3 py-1 rounded-full text-white text-sm font-medium">${order.status}</span>
-                                    <button class="text-accent hover:text-accent-light transition-colors" onclick="reorderOrderById(${order.id}, this)">Reorder</button>
+                                    <button class="text-accent hover:text-accent-light transition-colors" data-action="reorder" data-order-id="${order.id}">Reorder</button>
                                 </div>
                             </div>
                         `).join('');
@@ -1709,7 +1836,7 @@
 
             wishlistContainer.innerHTML = wishlist.map(item => `
                 <div class="glass-card rounded-xl p-6 relative">
-                    <button class="heart-icon absolute top-4 right-4 active" onclick="removeFromWishlist(${item.product_id})">
+                    <button class="heart-icon absolute top-4 right-4 active" data-action="remove-wishlist" data-product-id="${item.product_id}">
                         <svg class="w-6 h-6 text-accent" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                         </svg>
@@ -1726,7 +1853,7 @@
                                 <span class="text-accent font-bold">$${item.price}</span>
                             `}
                         </div>
-                        <button class="btn-primary text-xs px-3 py-1" onclick="addToCart(${item.id})">Add to Cart</button>
+                        <button class="btn-primary text-xs px-3 py-1" data-action="add-to-cart" data-product-id="${item.id}">Add to Cart</button>
                     </div>
                 </div>
             `).join('');
@@ -1789,7 +1916,7 @@
                         <span class="text-accent font-bold text-sm">${reward.points_cost} pts</span>
                     </div>
                     <p class="text-text-secondary text-sm mb-4">${reward.reward_type}</p>
-                    <button class="btn-primary w-full text-sm" onclick="redeemReward(${reward.id})">Redeem Now</button>
+                    <button class="btn-primary w-full text-sm" data-action="redeem-reward" data-reward-id="${reward.id}">Redeem Now</button>
                 </div>
             `).join('');
         }
@@ -1934,7 +2061,7 @@
                                 </div>
                             </div>
                             <div class="text-right">
-                                ${reviewed ? `<span class='text-accent text-sm'>Reviewed ★${reviewed.rating}</span>` : `<button class='btn-primary text-xs' onclick='openLeaveReviewModal(${order.id})'>Review</button>`}
+                                ${reviewed ? `<span class='text-accent text-sm'>Reviewed ★${reviewed.rating}</span>` : `<button class='btn-primary text-xs' data-action='leave-review' data-order-id='${order.id}'>Review</button>`}
                             </div>
                         </div>`;
                     }).join('');
@@ -2055,8 +2182,8 @@
                     <h2 class="font-orbitron text-2xl font-bold text-white mb-4">Welcome to Your Account</h2>
                     <p class="text-text-secondary mb-6">Please log in to access your personalized dashboard.</p>
                     <div class="space-y-4">
-                        <button class="btn-primary w-full" onclick="window.location.href='customer-login.html'">Log In</button>
-                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" onclick="window.location.href='customer-register.html'">Create Account</button>
+                        <button class="btn-primary w-full" id="login-modal-btn">Log In</button>
+                        <button class="border border-accent text-accent w-full py-2 rounded-lg hover:bg-accent hover:text-black transition-all duration-300" id="create-account-modal-btn">Create Account</button>
                     </div>
                 </div>
             `;
@@ -2146,7 +2273,7 @@
                     <p class="text-text-secondary text-sm mb-4">${product.description || ''}</p>
                     <div class="flex items-center justify-between">
                         <span class="text-accent font-bold">${formatUSD(product.price)}</span>
-                        <button class="btn-primary text-xs px-3 py-1" onclick="addToWishlist(${product.id})">Add to Wishlist</button>
+                        <button class="btn-primary text-xs px-3 py-1" data-action="add-to-wishlist" data-product-id="${product.id}">Add to Wishlist</button>
                     </div>
                 </div>
             `).join('');
@@ -2171,9 +2298,9 @@
                     <div class="flex items-center justify-between mb-2">
                         <span class="${addr.is_default ? 'text-accent' : 'text-text-secondary'} text-sm font-bold">${addr.is_default ? 'DEFAULT' : (addr.address_type || 'ADDRESS')}</span>
                         <div class="flex items-center gap-3 text-sm">
-                            <button class="text-accent" onclick="openEditAddressModal(${idx})">Edit</button>
-                            <button class="text-text-secondary hover:text-error" onclick="deleteAddress(${idx})">Delete</button>
-                            <button class="${addr.is_default ? 'text-text-secondary cursor-not-allowed opacity-50' : 'text-accent'}" ${addr.is_default ? 'disabled' : ''} onclick="setDefaultAddress(${idx})">Set default</button>
+                            <button class="text-accent" data-action="edit-address" data-address-idx="${idx}">Edit</button>
+                            <button class="text-text-secondary hover:text-error" data-action="delete-address" data-address-idx="${idx}">Delete</button>
+                            <button class="${addr.is_default ? 'text-text-secondary cursor-not-allowed opacity-50' : 'text-accent'}" ${addr.is_default ? 'disabled' : ''} data-action="set-default-address" data-address-idx="${idx}">Set default</button>
                         </div>
                     </div>
                     <p class="text-white font-medium">${addr.first_name || ''} ${addr.last_name || ''}</p>
