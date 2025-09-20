@@ -93,10 +93,20 @@
         // Prevent multiple PayPal initializations globally
         if (window.paypalCheckoutInitialized) {
             console.log('⚠️ PayPal checkout already initialized on this page, skipping...');
-        } else {
-            window.paypalCheckoutInitialized = true;
+            return;
+        }
+        window.paypalCheckoutInitialized = true;
         
-        // PayPal popups are now properly handled by COOP headers
+        // Override window.open to prevent unwanted popups
+        const originalWindowOpen = window.open;
+        window.open = function(url, name, specs) {
+            console.log('🚫 Blocked popup attempt:', url, name, specs);
+            // Only allow PayPal popups
+            if (url && url.includes('paypal.com')) {
+                return originalWindowOpen.call(this, url, name, specs);
+            }
+            return null;
+        };
         
         // Initialize PayPal function
         function initializePayPal() {
@@ -140,39 +150,70 @@
                 enableFunding: 'venmo,paylater,card',
                 
                 // createOrder: Uses the server-side /api/paypal/create-order endpoint
-                createOrder: async (data, actions) => {
+                createOrder: function(data, actions) {
                     console.log('🎬 Initiating server-side order creation...');
-                    if (!validateShippingInfoWithAlerts()) {
-                        showMessage('Please complete all required shipping information before proceeding.', 'error');
-                        return Promise.reject('Shipping information is invalid.');
-                    }
-
+                    
                     try {
+                        if (!validateShippingInfoWithAlerts()) {
+                            showMessage('Please complete all required shipping information before proceeding.', 'error');
+                            return Promise.reject('Shipping information is invalid.');
+                        }
+
                         const token = localStorage.getItem('customerToken');
-                        const response = await fetch('/api/paypal/create-order', {
+                        if (!token) {
+                            showMessage('Authentication required. Please log in again.', 'error');
+                            return Promise.reject('No authentication token');
+                        }
+                        
+                        // Get form data safely
+                        const shippingData = {
+                            first_name: document.getElementById('first-name')?.value || '',
+                            last_name: document.getElementById('last-name')?.value || '',
+                            email: document.getElementById('email')?.value || '',
+                            address: document.getElementById('address')?.value || '',
+                            city: document.getElementById('city')?.value || '',
+                            state: document.getElementById('state')?.value || '',
+                            zip: document.getElementById('zip')?.value || '',
+                            phone: document.getElementById('phone')?.value || ''
+                        };
+                        
+                        console.log('📦 Shipping data:', shippingData);
+                        
+                        // CRITICAL FIX: Return fetch promise directly (prevents popup)
+                        return fetch('/api/paypal/create-order', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${token}`
                             },
                             body: JSON.stringify({
-                                shipping_address: getShippingData()
+                                shipping_address: shippingData
                             })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+                            return response.json();
+                        })
+                        .then(order => {
+                            if (order.id) {
+                                console.log('✅ PayPal Order ID from server:', order.id);
+                                return order.id; // Return order ID directly
+                            } else {
+                                console.error('❌ Server failed to create order:', order);
+                                showMessage(order.error || 'Failed to create order.', 'error');
+                                throw new Error(order.error || 'Failed to create order');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('❌ Error creating order:', error);
+                            showMessage('A network error occurred while creating the order.', 'error');
+                            throw error; // Re-throw to prevent popup
                         });
-
-                        const order = await response.json();
-
-                        if (response.ok) {
-                            console.log('✅ PayPal Order ID from server:', order.id);
-                            return order.id;
-                        } else {
-                            console.error('❌ Server failed to create order:', order);
-                            showMessage(order.error || 'Failed to create order.', 'error');
-                            return Promise.reject(order.error);
-                        }
                     } catch (error) {
-                        console.error('❌ Network error during order creation:', error);
-                        showMessage('A network error occurred while creating the order.', 'error');
+                        console.error('❌ Critical error in createOrder:', error);
+                        showMessage('An unexpected error occurred. Please try again.', 'error');
                         return Promise.reject(error);
                     }
                 },
@@ -273,22 +314,31 @@
             console.log('🔄 Loading PayPal SDK...');
             paypalScriptLoaded = true;
             const script = document.createElement('script');
-            script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD&intent=capture`;
+            script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD&intent=capture&enable-funding=venmo,paylater,card`;
             
             script.onload = function() {
                 console.log('✅ PayPal SDK loaded successfully');
-                if (typeof paypal !== 'undefined' && !paypalInitialized) {
-                    initializePayPal();
-                }
+                // Wait a bit for PayPal to fully initialize
+                setTimeout(() => {
+                    if (typeof paypal !== 'undefined' && !paypalInitialized) {
+                        initializePayPal();
+                    } else {
+                        console.error('❌ PayPal SDK not available after loading');
+                    }
+                }, 100);
             };
             
             script.onerror = function() {
                 console.error('❌ Failed to load PayPal SDK');
                 paypalScriptLoaded = false;
+                // Show error message to user
+                const container = document.getElementById('paypal-button-container');
+                if (container) {
+                    container.innerHTML = '<div class="text-red-500">Error loading payment options. Please refresh the page.</div>';
+                }
             };
             
             document.head.appendChild(script);
-        }
         }
     </script>
     
@@ -959,6 +1009,22 @@
             loadOrderData();
             setupFormValidation();
         });
+        
+        // Global error handler to prevent popups from unhandled errors
+        window.addEventListener('error', function(event) {
+            console.error('🚨 Global error caught:', event.error);
+            // Prevent any popups from unhandled errors
+            event.preventDefault();
+            return false;
+        });
+        
+        // Global unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('🚨 Unhandled promise rejection:', event.reason);
+            // Prevent any popups from unhandled promise rejections
+            event.preventDefault();
+            return false;
+        });
 
         // Setup form validation and step management
         function setupFormValidation() {
@@ -973,6 +1039,16 @@
                     field.addEventListener('blur', updateStepStatus);
                 }
             });
+            
+            // Add event listener to state field to recalculate tax when changed
+            const stateField = document.getElementById('state');
+            if (stateField) {
+                stateField.addEventListener('change', () => {
+                    if (orderData && orderData.items) {
+                        displayOrderSummary(orderData.items);
+                    }
+                });
+            }
             
             // Add click handler for continue button
             const continueBtn = document.getElementById('continue-to-payment');
@@ -1223,6 +1299,64 @@
             }, 100);
         }
 
+        // Get tax rate based on state
+        function getTaxRateByState(state) {
+            const taxRates = {
+                'AL': 0.088, // Alabama
+                'AK': 0.088, // Alaska
+                'AZ': 0.088, // Arizona
+                'AR': 0.088, // Arkansas
+                'CA': 0.088, // California
+                'CO': 0.088, // Colorado
+                'CT': 0.088, // Connecticut
+                'DE': 0.088, // Delaware
+                'FL': 0.088, // Florida
+                'GA': 0.088, // Georgia
+                'HI': 0.088, // Hawaii
+                'ID': 0.088, // Idaho
+                'IL': 0.088, // Illinois
+                'IN': 0.088, // Indiana
+                'IA': 0.088, // Iowa
+                'KS': 0.088, // Kansas
+                'KY': 0.088, // Kentucky
+                'LA': 0.088, // Louisiana
+                'ME': 0.088, // Maine
+                'MD': 0.088, // Maryland
+                'MA': 0.088, // Massachusetts
+                'MI': 0.088, // Michigan
+                'MN': 0.088, // Minnesota
+                'MS': 0.088, // Mississippi
+                'MO': 0.088, // Missouri
+                'MT': 0.088, // Montana
+                'NE': 0.088, // Nebraska
+                'NV': 0.088, // Nevada
+                'NH': 0.088, // New Hampshire
+                'NJ': 0.088, // New Jersey
+                'NM': 0.088, // New Mexico
+                'NY': 0.088, // New York
+                'NC': 0.088, // North Carolina
+                'ND': 0.088, // North Dakota
+                'OH': 0.088, // Ohio
+                'OK': 0.088, // Oklahoma
+                'OR': 0.088, // Oregon
+                'PA': 0.088, // Pennsylvania
+                'RI': 0.088, // Rhode Island
+                'SC': 0.088, // South Carolina
+                'SD': 0.088, // South Dakota
+                'TN': 0.088, // Tennessee
+                'TX': 0.088, // Texas
+                'UT': 0.088, // Utah
+                'VT': 0.088, // Vermont
+                'VA': 0.088, // Virginia
+                'WA': 0.088, // Washington
+                'WV': 0.088, // West Virginia
+                'WI': 0.088, // Wisconsin
+                'WY': 0.088  // Wyoming
+            };
+            
+            return taxRates[state] || 0.088; // Default to 8.8% if state not found
+        }
+
         // Display order summary
         function displayOrderSummary(cartData) {
             console.log('🛒 Displaying order summary with cart data:', cartData);
@@ -1265,11 +1399,28 @@
 
             orderItemsContainer.innerHTML = orderItemsHTML;
 
-            // Calculate shipping (free over $50, otherwise $5.99)
-            const shipping = subtotal >= 50 ? 0 : 5.99;
+            // Get shipping method from sessionStorage (set on product page)
+            const selectedShipping = sessionStorage.getItem('selectedShippingMethod') || 'standard';
+            let shipping = 0;
             
-            // Calculate tax (8.5% for example)
-            const tax = subtotal * 0.085;
+            // Calculate shipping based on selected method
+            const selectedShippingCost = sessionStorage.getItem('selectedShippingCost');
+            if (selectedShippingCost) {
+                shipping = parseFloat(selectedShippingCost);
+            } else if (selectedShipping === 'local-pickup') {
+                shipping = 0; // FREE
+            } else if (selectedShipping === 'standard') {
+                shipping = 4.50; // Standard shipping
+            } else {
+                // Fallback to free over $50, otherwise $5.99
+                shipping = subtotal >= 50 ? 0 : 5.99;
+            }
+            
+            // Get tax rate based on shipping address state
+            const stateField = document.getElementById('state');
+            const state = stateField ? stateField.value : '';
+            const taxRate = getTaxRateByState(state);
+            const tax = subtotal * taxRate;
             
             // Calculate total
             const total = subtotal + shipping + tax;
