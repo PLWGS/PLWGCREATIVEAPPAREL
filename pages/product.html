@@ -760,9 +760,30 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
                             <h3 class="font-orbitron text-lg font-bold text-white">Size</h3>
-                            <button class="text-highlight text-sm hover:text-highlight-light transition-colors">Size Guide</button>
+                            <button id="sizeGuideBtn" class="text-highlight text-sm hover:text-highlight-light transition-colors">Size Guide</button>
                         </div>
                         <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 size-options glow-effect"></div>
+                        
+                        <!-- Size Chart Section (initially hidden) -->
+                        <div id="sizeChartSection" class="hidden mt-6">
+                            <div class="glass-card rounded-lg p-6 border border-accent border-opacity-20">
+                                <h4 class="font-orbitron text-lg font-bold text-white mb-4">Size Chart (inches)</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="border-b border-surface-light">
+                                                <th class="text-left py-3 text-highlight">Size</th>
+                                                <th class="text-left py-3 text-highlight">Chest Width</th>
+                                                <th class="text-left py-3 text-highlight">Length</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="main-size-chart-tbody" class="text-white">
+                                            <!-- Dynamic content will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Color Options -->
@@ -2552,6 +2573,34 @@
                             }
                         }
 
+                        // Show/hide color options section based on color_chart_enabled setting (default to true)
+                        const colorSection = Array.from(document.querySelectorAll('.space-y-4')).find(section => {
+                            const h3 = section.querySelector('h3');
+                            return h3 && h3.textContent.includes('Color');
+                        });
+                        
+                        console.log('🔍 Color section found:', colorSection);
+                        console.log('🔍 Product color_chart_enabled:', product.color_chart_enabled);
+                        
+                        // Convert to boolean and handle string values
+                        const colorEnabled = product.color_chart_enabled === true || 
+                                           product.color_chart_enabled === 'true' || 
+                                           product.color_chart_enabled === 1 || 
+                                           product.color_chart_enabled === '1' ||
+                                           product.color_chart_enabled === undefined; // Default to true if not set
+                        
+                        console.log('🔍 Color enabled value:', product.color_chart_enabled, '->', colorEnabled);
+                        
+                        if (colorEnabled) {
+                            // Show color options
+                            console.log('✅ Showing color options');
+                            if (colorSection) colorSection.style.display = 'block';
+                        } else {
+                            // Hide color options
+                            console.log('❌ Hiding color options (explicitly disabled)');
+                            if (colorSection) colorSection.style.display = 'none';
+                        }
+
                         // Color selection change handler
                         colorSelector.addEventListener('change', () => {
                             const selectedOption = colorSelector.options[colorSelector.selectedIndex];
@@ -2622,22 +2671,147 @@
                 }
             } catch (e) { console.warn('Brand/specs notes render failed', e); }
             
-            // Update size chart dynamically
-            if (product.size_chart) {
-                updateSizeChart(product.size_chart);
+            // Update size chart dynamically - only if enabled (default to true)
+            const sizeChartSection = document.getElementById('sizeChartSection');
+            const sizeGuideBtn = document.getElementById('sizeGuideBtn');
+            console.log('🔍 Size chart section found:', sizeChartSection);
+            console.log('🔍 Product size_chart_enabled:', product.size_chart_enabled);
+            
+            // Convert to boolean and handle string values
+            const sizeEnabled = product.size_chart_enabled === true || 
+                               product.size_chart_enabled === 'true' || 
+                               product.size_chart_enabled === 1 || 
+                               product.size_chart_enabled === '1' ||
+                               product.size_chart_enabled === undefined; // Default to true if not set
+            
+            console.log('🔍 Size enabled value:', product.size_chart_enabled, '->', sizeEnabled);
+            
+            if (sizeEnabled) {
+                // Show size guide button (default behavior)
+                console.log('✅ Showing size guide button');
+                if (sizeGuideBtn) {
+                    sizeGuideBtn.style.display = 'block';
+                    sizeGuideBtn.classList.remove('hidden');
+                }
+                
+                // Add click handler for size guide button
+                if (sizeGuideBtn && sizeChartSection) {
+                    sizeGuideBtn.addEventListener('click', () => {
+                        sizeChartSection.classList.toggle('hidden');
+                        sizeGuideBtn.textContent = sizeChartSection.classList.contains('hidden') ? 'Size Guide' : 'Hide Size Guide';
+                    });
+                }
+                
+                if (product.size_chart) {
+                    console.log('📊 Using product size chart data');
+                    updateMainSizeChart(product.size_chart);
+                    updateSizeChart(product.size_chart); // Also update tab version
+                } else {
+                    console.log('📊 Using default size chart data');
+                    // Use default adult t-shirt measurements if no size chart is provided
+                    const defaultSizeChart = {
+                        garmentType: 'adult-tshirt',
+                        sizes: {
+                            S: { chest: '18', length: '28' },
+                            M: { chest: '20', length: '29' },
+                            L: { chest: '22', length: '30' },
+                            XL: { chest: '24', length: '31' },
+                            '2XL': { chest: '26', length: '32' }
+                        }
+                    };
+                    updateMainSizeChart(defaultSizeChart);
+                    updateSizeChart(defaultSizeChart); // Also update tab version
+                }
+                
+                // Show the tab version of the size chart
+                const tabSizeChart = document.querySelector('#sizing .mb-8');
+                if (tabSizeChart) {
+                    console.log('✅ Showing tab size chart');
+                    tabSizeChart.style.display = 'block';
+                    tabSizeChart.classList.remove('hidden');
+                }
+                
+                // Show the sizing tab and its button
+                const sizingTab = document.getElementById('sizing');
+                const sizingTabButton = document.querySelector('button[data-tab="sizing"]');
+                if (sizingTab) {
+                    console.log('✅ Showing sizing tab');
+                    sizingTab.style.display = 'block';
+                    sizingTab.classList.remove('hidden');
+                }
+                if (sizingTabButton) {
+                    console.log('✅ Showing sizing tab button');
+                    sizingTabButton.style.display = 'block';
+                    sizingTabButton.classList.remove('hidden');
+                }
+                
+                // Show the Size Guide link in footer
+                const footerSizeGuideLink = document.querySelector('a[href="javascript:void(0)"]');
+                if (footerSizeGuideLink && footerSizeGuideLink.textContent.includes('Size Guide')) {
+                    console.log('✅ Showing footer Size Guide link');
+                    footerSizeGuideLink.style.display = 'block';
+                    footerSizeGuideLink.classList.remove('hidden');
+                }
+                
+                // Show the size selection section when enabled
+                const sizeHeaders = Array.from(document.querySelectorAll('h3'));
+                const sizeHeader = sizeHeaders.find(h3 => h3.textContent.includes('Size'));
+                const sizeSelectionSection = sizeHeader?.closest('.space-y-4');
+                if (sizeSelectionSection) {
+                    console.log('✅ Showing size selection section');
+                    sizeSelectionSection.style.display = 'block';
+                    sizeSelectionSection.classList.remove('hidden');
+                }
             } else {
-                // Use default adult t-shirt measurements if no size chart is provided
-                const defaultSizeChart = {
-                    garmentType: 'adult-tshirt',
-                    sizes: {
-                        S: { chest: '18', length: '28' },
-                        M: { chest: '20', length: '29' },
-                        L: { chest: '22', length: '30' },
-                        XL: { chest: '24', length: '31' },
-                        '2XL': { chest: '26', length: '32' }
-                    }
-                };
-                updateSizeChart(defaultSizeChart);
+                // Hide size guide button if explicitly disabled
+                console.log('❌ Hiding size guide button (explicitly disabled)');
+                if (sizeGuideBtn) {
+                    sizeGuideBtn.style.display = 'none';
+                    sizeGuideBtn.classList.add('hidden');
+                }
+                if (sizeChartSection) {
+                    sizeChartSection.style.display = 'none';
+                    sizeChartSection.classList.add('hidden');
+                }
+                
+                // Clear the size chart content when disabled
+                const mainSizeChartTbody = document.getElementById('main-size-chart-tbody');
+                if (mainSizeChartTbody) {
+                    console.log('❌ Clearing main size chart content (explicitly disabled)');
+                    mainSizeChartTbody.innerHTML = '';
+                }
+                
+                // Hide the entire size selection section when disabled
+                const sizeHeaders = Array.from(document.querySelectorAll('h3'));
+                const sizeHeader = sizeHeaders.find(h3 => h3.textContent.includes('Size'));
+                const sizeSelectionSection = sizeHeader?.closest('.space-y-4');
+                if (sizeSelectionSection) {
+                    console.log('❌ Hiding size selection section (explicitly disabled)');
+                    sizeSelectionSection.style.display = 'none';
+                    sizeSelectionSection.classList.add('hidden');
+                }
+                
+                // Hide the entire sizing tab and its button
+                const sizingTab = document.getElementById('sizing');
+                const sizingTabButton = document.querySelector('button[data-tab="sizing"]');
+                if (sizingTab) {
+                    console.log('❌ Hiding sizing tab (explicitly disabled)');
+                    sizingTab.style.display = 'none';
+                    sizingTab.classList.add('hidden');
+                }
+                if (sizingTabButton) {
+                    console.log('❌ Hiding sizing tab button (explicitly disabled)');
+                    sizingTabButton.style.display = 'none';
+                    sizingTabButton.classList.add('hidden');
+                }
+                
+                // Hide the Size Guide link in footer
+                const footerSizeGuideLink = document.querySelector('a[href="javascript:void(0)"]');
+                if (footerSizeGuideLink && footerSizeGuideLink.textContent.includes('Size Guide')) {
+                    console.log('❌ Hiding footer Size Guide link (explicitly disabled)');
+                    footerSizeGuideLink.style.display = 'none';
+                    footerSizeGuideLink.classList.add('hidden');
+                }
             }
             
             // Update sizes and stock dynamically
@@ -2975,7 +3149,72 @@
         // Update cart counter on page load
         updateCartCounter();
 
-        // Update size chart table with dynamic data
+        // Update main size chart table with dynamic data
+        function updateMainSizeChart(sizeChartData) {
+            const tbody = document.getElementById('main-size-chart-tbody');
+            if (!tbody) return;
+            
+            try {
+                // Parse size chart data if it's a string
+                const sizeChart = typeof sizeChartData === 'string' 
+                    ? JSON.parse(sizeChartData) 
+                    : sizeChartData;
+                
+                // Define size order
+                const sizeOrder = ['S', 'M', 'L', 'XL', '2XL'];
+                
+                // Generate table rows
+                const rows = sizeOrder.map(size => {
+                    const measurements = sizeChart.sizes ? sizeChart.sizes[size] : sizeChart[size];
+
+                    if (!measurements) {
+                        return '';
+                    }
+
+                    return `
+                        <tr class="border-b border-surface-light">
+                            <td class="py-3 font-medium">${size}</td>
+                            <td class="py-3">${measurements.chest || ''}</td>
+                            <td class="py-3">${measurements.length || ''}</td>
+                        </tr>
+                    `;
+                }).filter(row => row !== '').join('');
+                
+                tbody.innerHTML = rows;
+            } catch (error) {
+                console.error('❌ Error updating main size chart:', error);
+                // Fallback to default adult t-shirt sizes
+                tbody.innerHTML = `
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-medium">S</td>
+                        <td class="py-3">18</td>
+                        <td class="py-3">28</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-medium">M</td>
+                        <td class="py-3">20</td>
+                        <td class="py-3">29</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-medium">L</td>
+                        <td class="py-3">22</td>
+                        <td class="py-3">30</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-medium">XL</td>
+                        <td class="py-3">24</td>
+                        <td class="py-3">31</td>
+                    </tr>
+                    <tr class="border-b border-surface-light">
+                        <td class="py-3 font-medium">2XL</td>
+                        <td class="py-3">26</td>
+                        <td class="py-3">32</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Update size chart table with dynamic data (for tab version)
         function updateSizeChart(sizeChartData) {
             const tbody = document.getElementById('size-chart-tbody');
             if (!tbody) return;

@@ -803,6 +803,8 @@ async function initializeDatabase() {
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS local_pickup_enabled BOOLEAN DEFAULT true`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS size_chart JSON`);
       await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS specs_notes TEXT`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS size_chart_enabled BOOLEAN DEFAULT true`);
+      await pool.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS color_chart_enabled BOOLEAN DEFAULT true`);
       
       // Add custom input columns if they don't exist
       await pool.query(`ALTER TABLE order_items ADD COLUMN IF NOT EXISTS custom_input JSONB`);
@@ -5043,8 +5045,8 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
         custom_birthday_fields, custom_birthday_labels, custom_birthday_char_limit, 
         custom_lyrics_enabled, custom_lyrics_required, custom_lyrics_fields, custom_lyrics_labels, 
         custom_lyrics_char_limit, shipping_cost, local_pickup_enabled, size_chart, 
-        custom_birthday_question, custom_lyrics_question
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45)
+        custom_birthday_question, custom_lyrics_question, size_chart_enabled, color_chart_enabled
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47)
       RETURNING *
     `, [
       nextId, // id
@@ -5097,7 +5099,9 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
         '2XL': { chest: '26', length: '32' }
       }),
       custom_birthday_question || '', // custom_birthday_question
-      custom_lyrics_question || '' // custom_lyrics_question
+      custom_lyrics_question || '', // custom_lyrics_question
+      size_chart_enabled !== false, // size_chart_enabled
+      color_chart_enabled !== false // color_chart_enabled
     ]);
 
     logger.info(`✅ Product created with ID ${nextId}`);
@@ -5180,7 +5184,9 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
       custom_lyrics_question,
       shipping_cost,
       local_pickup_enabled,
-      size_chart
+      size_chart,
+      size_chart_enabled,
+      color_chart_enabled
     } = req.body;
     
     // Debug: Log the extracted custom input values
@@ -5338,9 +5344,9 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
         size_stock = $16, track_inventory = $17, brand_preference = $18, specs_notes = $19,
         custom_birthday_enabled = $20, custom_birthday_required = $21, custom_birthday_fields = $22, custom_birthday_labels = $23, custom_birthday_char_limit = $24, custom_birthday_question = $25,
         custom_lyrics_enabled = $26, custom_lyrics_required = $27, custom_lyrics_fields = $28, custom_lyrics_labels = $29, custom_lyrics_char_limit = $30, custom_lyrics_question = $31,
-        shipping_cost = $32, local_pickup_enabled = $33, size_chart = $34,
+        shipping_cost = $32, local_pickup_enabled = $33, size_chart = $34, size_chart_enabled = $35, color_chart_enabled = $36,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $35
+      WHERE id = $37
       RETURNING *
     `, [
       name, description, price, original_price, final_image_url, finalCategory,
@@ -5367,6 +5373,8 @@ app.put('/api/admin/products/:id', authenticateToken, validateProduct, async (re
         XL: { chest: '24', length: '31' },
         '2XL': { chest: '26', length: '32' }
       }),
+      size_chart_enabled !== false, // size_chart_enabled
+      color_chart_enabled !== false, // color_chart_enabled
       productId
     ]);
 
@@ -8091,6 +8099,16 @@ app.get('/shop.html', (req, res) => {
 // Serve admin page
 app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'pages', 'admin.html'));
+});
+
+// Serve admin uploads page
+app.get('/admin-uploads.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'admin-uploads.html'));
+});
+
+// Serve product edit page
+app.get('/product-edit.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'product-edit.html'));
 });
 
 // Serve privacy policy page

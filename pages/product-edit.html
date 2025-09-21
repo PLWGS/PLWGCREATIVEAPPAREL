@@ -196,6 +196,29 @@
           </div>
         </div>
 
+        <!-- Chart Display Options -->
+        <div class="space-y-4">
+          <h3 class="font-orbitron text-lg font-semibold text-accent">Chart Display Options</h3>
+          <div class="glass-card rounded-lg p-4 border border-accent border-opacity-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="text-sm font-medium text-text-primary">Enable Size Chart</label>
+                  <p class="text-xs text-text-secondary">Show size chart to customers on product page</p>
+                </div>
+                <input type="checkbox" id="size-chart-enabled" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="text-sm font-medium text-text-primary">Enable Color Chart</label>
+                  <p class="text-xs text-text-secondary">Show color options to customers on product page</p>
+                </div>
+                <input type="checkbox" id="color-chart-enabled" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label class="block text-sm font-medium text-text-primary mb-2">Stock Quantity</label>
@@ -421,7 +444,7 @@
         </div>
 
         <!-- Size Chart (inches) -->
-        <div class="space-y-4">
+        <div class="space-y-4" id="size-chart-section">
           <label class="block text-sm font-medium text-text-primary mb-2">Size Chart (inches)</label>
           <div class="glass-card rounded-lg p-4 border border-accent border-opacity-20">
             <!-- Garment Type Presets -->
@@ -805,6 +828,16 @@
       document.getElementById('lyrics-custom-question').classList.toggle('hidden', !p.custom_lyrics_enabled);
       document.getElementById('custom_lyrics_question').value = p.custom_lyrics_question || '';
 
+      // Chart display options
+      document.getElementById('size-chart-enabled').checked = p.size_chart_enabled !== false;
+      document.getElementById('color-chart-enabled').checked = p.color_chart_enabled !== false;
+      
+      // Set initial size chart section visibility
+      const sizeChartSection = document.getElementById('size-chart-section');
+      if (sizeChartSection) {
+        sizeChartSection.style.display = p.size_chart_enabled !== false ? 'block' : 'none';
+      }
+
       // Colors
       selectedColors = Array.isArray(p.colors) ? p.colors.slice() : [];
       document.querySelectorAll('#color-options .color-swatch').forEach(el => {
@@ -1056,7 +1089,9 @@
             custom_lyrics_labels: JSON.stringify(getLyricsLabels()),
             custom_lyrics_char_limit: parseInt(document.getElementById('custom_lyrics_char_limit').value) || 250,
             custom_lyrics_question: document.getElementById('custom_lyrics_question').value.trim() || '',
-            size_chart: getSizeChartData()
+            size_chart: getSizeChartData(),
+            size_chart_enabled: !!document.getElementById('size-chart-enabled').checked,
+            color_chart_enabled: !!document.getElementById('color-chart-enabled').checked
          };
 
         // Images: Build from individual slots
@@ -1207,12 +1242,25 @@
        });
      }
 
+     function setupChartToggles() {
+       const sizeChartEnabled = document.getElementById('size-chart-enabled');
+       const sizeChartSection = document.getElementById('size-chart-section');
+       
+       if (sizeChartEnabled && sizeChartSection) {
+         // Add event listener
+         sizeChartEnabled.addEventListener('change', function() {
+           sizeChartSection.style.display = this.checked ? 'block' : 'none';
+         });
+       }
+     }
+
          // Wait for DOM to be fully loaded before initializing
     document.addEventListener('DOMContentLoaded', () => {
       setupColorSelection();
       setupSizeSelection();
       setupCustomInputOptions();
       setupSizeChart();
+      setupChartToggles();
       setupImageSlotHandlers();
        if (!productId) {
          document.getElementById('loading').textContent = 'Missing product ID';

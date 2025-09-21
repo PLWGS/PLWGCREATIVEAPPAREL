@@ -526,8 +526,31 @@
                         </div>
                     </div>
 
-                    <!-- Size Chart Configuration -->
+                    <!-- Chart Display Options -->
                     <div class="space-y-4">
+                        <h3 class="font-orbitron text-lg font-semibold text-accent">Chart Display Options</h3>
+                        <div class="glass-card rounded-lg p-4 border border-accent border-opacity-20">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-text-primary">Enable Size Chart</label>
+                                        <p class="text-xs text-text-secondary">Show size chart to customers on product page</p>
+                                    </div>
+                                    <input type="checkbox" id="size-chart-enabled" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-text-primary">Enable Color Chart</label>
+                                        <p class="text-xs text-text-secondary">Show color options to customers on product page</p>
+                                    </div>
+                                    <input type="checkbox" id="color-chart-enabled" class="rounded border-surface-light text-accent focus:ring-accent" checked>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Size Chart Configuration -->
+                    <div class="space-y-4" id="size-chart-section">
                         <label class="block text-sm font-medium text-text-primary mb-2">Size Chart (inches)</label>
                         <div class="glass-card rounded-lg p-4 border border-accent border-opacity-20">
                             <!-- Garment Type Presets -->
@@ -1391,6 +1414,8 @@
                 sizes: selectedSizes,
                 size_stock: sizeStock, // Add size-specific stock quantities
                 size_chart: getSizeChartData(), // Add size chart measurements
+                size_chart_enabled: !!document.getElementById('size-chart-enabled').checked,
+                color_chart_enabled: !!document.getElementById('color-chart-enabled').checked,
                 track_inventory: !!document.getElementById('track-inventory').checked,
                 specs_notes: document.getElementById('specs-notes').value,
                 images: uploadedImages,
@@ -1762,6 +1787,20 @@
                     if (this.value !== 'custom') {
                         applySizeChartPreset(this.value);
                     }
+                });
+            }
+
+            // Initialize chart toggle functionality
+            const sizeChartEnabled = document.getElementById('size-chart-enabled');
+            const sizeChartSection = document.getElementById('size-chart-section');
+            
+            if (sizeChartEnabled && sizeChartSection) {
+                // Set initial state
+                sizeChartSection.style.display = sizeChartEnabled.checked ? 'block' : 'none';
+                
+                // Add event listener
+                sizeChartEnabled.addEventListener('change', function() {
+                    sizeChartSection.style.display = this.checked ? 'block' : 'none';
                 });
             }
         });
