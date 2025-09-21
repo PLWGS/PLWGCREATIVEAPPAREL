@@ -423,6 +423,11 @@ app.use('/public', express.static('public'));
 // Removed etsy_images static route - now using Cloudinary for image hosting
 app.use('/favicon.ico', express.static('public/favicon.ico'));
 
+// Serve admin-login.html
+app.get('/admin-login.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'admin-login.html'));
+});
+
 // Serve sitemap.xml and robots.txt with proper content type
 app.get('/sitemap.xml', (req, res) => {
   res.set('Content-Type', 'application/xml');
@@ -440,7 +445,7 @@ app.get('/product.html', (req, res) => {
 });
 
 // Serve checkout.html with explicit CSP headers
-app.get('/pages/checkout.html', (req, res) => {
+app.get('/checkout.html', (req, res) => {
   // Set explicit CSP headers for checkout page
   res.setHeader('Content-Security-Policy', 
     "default-src 'self'; " +
@@ -462,6 +467,7 @@ app.get('/pages/checkout.html', (req, res) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.sendFile(path.join(__dirname, 'pages', 'checkout.html'));
 });
+
 
 // Database connection - DISABLED FOR LOCAL DEVELOPMENT
 let pool = null;
@@ -1490,10 +1496,12 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    query += ` GROUP BY o.id, c.name, c.email, o.order_number, o.status, o.total_amount, o.created_at ORDER BY o.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    query += ` GROUP BY o.id, c.name, c.email, o.order_number, o.status, o.total_amount, o.created_at, o.customer_id, o.customer_email, o.customer_name, o.shipping_address, o.tracking_number, o.notes, o.updated_at, o.subtotal, o.shipping_amount, o.tax_amount, o.discount_amount, o.payment_method, o.payment_id, o.payment_status, o.payment_details ORDER BY o.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(Math.min(parseInt(limit, 10) || 50, 200), parseInt(offset, 10) || 0);
 
     const result = await pool.query(query, params);
+    console.log(`Orders API returning ${result.rows.length} orders`);
+    console.log('Order statuses in result:', result.rows.map(o => ({ id: o.id, status: o.status, order_number: o.order_number })));
     res.json({ orders: result.rows });
   } catch (error) {
     logger.error('Error fetching orders:', error);
@@ -1648,11 +1656,17 @@ app.patch('/api/orders/:id/status', authenticateToken, validateOrderStatusUpdate
     const { id } = req.params;
     const { status, tracking_number } = req.body;
     
+    console.log(`🔧 UPDATING ORDER ${id} TO STATUS: ${status}`);
+    console.log(`🔧 Request body:`, req.body);
+    
     const result = await pool.query(`
       UPDATE orders 
       SET status = $1, tracking_number = $2, updated_at = CURRENT_TIMESTAMP
       WHERE id = $3 RETURNING *
     `, [status, tracking_number, id]);
+    
+    console.log(`🔧 UPDATE RESULT:`, result.rows[0]);
+    console.log(`🔧 ROWS AFFECTED:`, result.rowCount);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
@@ -1728,8 +1742,8 @@ app.post('/api/orders', validateOrder, async (req, res) => {
     
     // Create order
     const orderResult = await pool.query(`
-      INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address)
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *
+            INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address, status)
+            VALUES ($1, $2, $3, $4, $5, $6, 'pending') RETURNING *
     `, [orderNumber, customerId, customer_email, customer_name, total_amount, shipping_address]);
     
     const order = orderResult.rows[0];
@@ -2560,6 +2574,17 @@ app.post('/api/orders/process-all', authenticateToken, validateProcessAllOrders,
   } catch (e) {
     logger.error('Error processing all orders:', e);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Reset all orders to pending status for testing
+app.post('/api/orders/reset-to-pending', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query('UPDATE orders SET status = $1 WHERE status = $2', ['pending', 'completed']);
+    res.json({ success: true, message: `Updated ${result.rowCount} orders to pending status` });
+  } catch (error) {
+    logger.error('❌ Error updating orders:', error.message);
+    res.status(500).json({ error: 'Failed to update orders' });
   }
 });
 
@@ -3810,6 +3835,24 @@ app.post('/api/customer/reviews', authenticateCustomer, validateCustomerReview, 
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+// Get customer addresses
+app.get('/api/customer/addresses', authenticateCustomer, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+
+    const addressesResult = await pool.query(`
+      SELECT * FROM customer_addresses 
+      WHERE customer_id = $1 
+      ORDER BY is_default DESC, created_at DESC
+    `, [customerId]);
+
+    res.json({ addresses: addressesResult.rows });
+  } catch (error) {
+    console.error('Error fetching addresses:', error);
+    res.status(500).json({ error: 'Failed to fetch addresses' });
+  }
+});
+
 // Get customer wishlist
 app.get('/api/customer/wishlist', authenticateCustomer, async (req, res) => {
   try {
@@ -5494,8 +5537,8 @@ app.post('/api/cart/checkout', authenticateCustomer, validateCheckout, async (re
 
     // Create order
     const orderResult = await pool.query(`
-      INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address)
-      VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address, status)
+            VALUES ($1, $2, $3, $4, $5, $6, 'pending')
       RETURNING *
     `, [orderNumber, customerId, customer.email, `${customer.first_name} ${customer.last_name}`, total_amount, shipping_address]);
 
@@ -5593,8 +5636,8 @@ app.post('/api/paypal/create-order', authenticateCustomer, async (req, res) => {
 
     // Create order in database first (with pending status)
     const orderResult = await pool.query(`
-      INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address, payment_method, payment_status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address, payment_method, payment_status, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
       RETURNING *
     `, [
       orderNumber, 
@@ -5730,10 +5773,11 @@ app.post('/api/paypal/capture-order', authenticateCustomer, async (req, res) => 
 
       const order = orderResult.rows[0];
 
-      // Update order status to completed
+      // Update order status to pending (not completed)
       await pool.query(`
         UPDATE orders 
-        SET payment_status = 'completed', 
+        SET status = 'pending',
+            payment_status = 'completed', 
             payment_details = $1,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = $2
@@ -5808,8 +5852,8 @@ app.post('/api/orders/create', authenticateCustomer, async (req, res) => {
 
     // Create order
     const orderResult = await pool.query(`
-      INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address, payment_method, payment_id, payment_status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            INSERT INTO orders (order_number, customer_id, customer_email, customer_name, total_amount, shipping_address, payment_method, payment_id, payment_status, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
       RETURNING *
     `, [
       orderNumber, 
@@ -6090,7 +6134,7 @@ async function handlePaymentCompleted(webhookData) {
     // Update the order with the actual payment ID from the webhook
     await pool.query(`
       UPDATE orders 
-      SET status = 'completed',
+      SET status = 'pending',
           payment_status = 'completed', 
           payment_details = $1,
           payment_id = $2,
@@ -8014,6 +8058,56 @@ app.delete('/api/admin/customer-reviews/:id', authenticateToken, async (req, res
   }
 });
 
+// Serve order success page
+app.get('/order-success.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'order-success.html'));
+});
+
+// Serve order failure page
+app.get('/order-failure.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'order-failure.html'));
+});
+
+// Serve account page
+app.get('/account.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'account.html'));
+});
+
+// Serve cart page
+app.get('/cart.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'cart.html'));
+});
+
+// Serve customer login page
+app.get('/customer-login.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'customer-login.html'));
+});
+
+// Serve shop page
+app.get('/shop.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'shop.html'));
+});
+
+// Serve admin page
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'admin.html'));
+});
+
+// Serve privacy policy page
+app.get('/privacy-policy.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'privacy-policy.html'));
+});
+
+// Serve terms of service page
+app.get('/terms-of-service.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'terms-of-service.html'));
+});
+
+// Serve category management page
+app.get('/category-management.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'category-management.html'));
+});
+
 // 404 handler for missing pages/files - must come AFTER all API routes
 app.use((req, res, next) => {
   // Check if it's an API request
@@ -8080,56 +8174,6 @@ initializeAdminCredentials().then(() => {
 }).catch(err => {
   logger.error('❌ Failed to initialize admin credentials:', err);
   process.exit(1);
-});
-
-// Serve order success page
-app.get('/order-success.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'order-success.html'));
-});
-
-// Serve order failure page
-app.get('/order-failure.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'order-failure.html'));
-});
-
-// Serve account page
-app.get('/account.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'account.html'));
-});
-
-// Serve cart page
-app.get('/cart.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'cart.html'));
-});
-
-// Serve customer login page
-app.get('/customer-login.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'customer-login.html'));
-});
-
-// Serve shop page
-app.get('/shop.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'shop.html'));
-});
-
-// Serve admin page
-app.get('/admin.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'admin.html'));
-});
-
-// Serve privacy policy page
-app.get('/privacy-policy.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'privacy-policy.html'));
-});
-
-// Serve terms of service page
-app.get('/terms-of-service.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'terms-of-service.html'));
-});
-
-// Serve category management page
-app.get('/category-management.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'pages', 'category-management.html'));
 });
 
 module.exports = app; 

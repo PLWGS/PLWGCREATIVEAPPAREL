@@ -215,21 +215,21 @@
                     <span>Customers</span>
                 </a>
 
-                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                <a href="admin.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                     <span>Analytics</span>
                 </a>
 
-                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                <a href="admin.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
                     <span>Marketing</span>
                 </a>
 
-                <a href="admin-login.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
+                <a href="admin.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-text-secondary hover:text-accent hover:bg-accent hover:bg-opacity-10 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
                     </svg>
@@ -395,7 +395,7 @@
                             </div>
                             <div class="flex items-center space-x-2">
                                 <span class="text-error text-sm font-medium">Pending</span>
-                                <button onclick="refreshCustomRequestsCount()" class="text-error hover:text-error-light transition-colors" title="Refresh count">
+                                <button id="refresh-custom-requests" class="text-error hover:text-error-light transition-colors" title="Refresh count">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                     </svg>
@@ -455,7 +455,7 @@
                 <div class="glass-card rounded-xl p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="font-orbitron text-lg font-bold text-white">Top Performing Designs</h3>
-                        <button onclick="forceRefreshTopProducts()" class="text-accent hover:text-accent-light text-xs px-3 py-1 border border-accent rounded transition-colors" title="Force refresh">
+                        <button id="force-refresh-products" class="text-accent hover:text-accent-light text-xs px-3 py-1 border border-accent rounded transition-colors" title="Force refresh">
                             🔄 Refresh
                         </button>
                             </div>
@@ -472,7 +472,7 @@
 
             <!-- Quick Stats Summary -->
             <section class="mb-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div class="glass-card rounded-xl p-4 text-center">
                         <div class="text-2xl font-bold text-accent mb-1" id="totalOrdersCount">0</div>
                         <div class="text-text-secondary text-sm">Total Orders</div>
@@ -484,6 +484,10 @@
                     <div class="glass-card rounded-xl p-4 text-center">
                         <div class="text-2xl font-bold text-accent mb-1" id="processingOrdersCount">0</div>
                         <div class="text-text-secondary text-sm">Processing</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-info mb-1" id="shippedOrdersCount">0</div>
+                        <div class="text-text-secondary text-sm">Shipped</div>
                     </div>
                     <div class="glass-card rounded-xl p-4 text-center">
                         <div class="text-2xl font-bold text-success mb-1" id="completedOrdersCount">0</div>
@@ -501,8 +505,11 @@
                         <button id="exportOrdersBtn" class="border border-accent text-accent px-4 py-2 rounded-lg text-sm hover:bg-accent hover:text-black transition-all duration-300">
                             Export Orders
                         </button>
-                        <button onclick="toggleOrderView()" class="text-accent hover:text-accent-light text-sm px-3 py-2 border border-accent rounded-lg transition-all duration-300">
+                        <button id="toggle-order-view" class="text-accent hover:text-accent-light text-sm px-3 py-2 border border-accent rounded-lg transition-all duration-300">
                             <span id="orderViewToggle">Compact View</span>
+                        </button>
+                        <button id="reset-orders-to-pending" class="text-error hover:text-error-light text-sm px-3 py-2 border border-error rounded-lg transition-all duration-300">
+                            Reset Orders to Pending
                         </button>
                     </div>
                 </div>
@@ -685,8 +692,8 @@
                             <div class="flex items-center justify-between mb-6">
             <h3 class="font-orbitron text-lg font-bold text-white">Custom Requests</h3>
             <div class="flex items-center space-x-2">
-                <button onclick="testCustomInputAPI()" class="text-accent hover:text-accent-light text-xs px-2 py-1 border border-accent rounded">Test API</button>
-                <button onclick="loadCustomRequests()" class="text-accent hover:text-accent-light text-xs px-2 py-1 border border-accent rounded">Load Now</button>
+                <button id="test-custom-api" class="text-accent hover:text-accent-light text-xs px-2 py-1 border border-accent rounded">Test API</button>
+                <button id="load-custom-requests" class="text-accent hover:text-accent-light text-xs px-2 py-1 border border-accent rounded">Load Now</button>
             </div>
         </div>
         <div id="customRequestsContainer" class="space-y-4 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-accent scrollbar-track-surface-dark">
@@ -1138,6 +1145,11 @@
                 if (!response) return;
                 
                 const data = await response.json();
+                console.log('Orders loaded:', data.orders);
+                console.log('Order statuses:', data.orders.map(o => ({ id: o.id, status: o.status, order_number: o.order_number })));
+                console.log('Order 81 status after update:', data.orders.find(o => o.id == 81)?.status);
+                console.log('All order statuses:', data.orders.map(o => ({ id: o.id, status: o.status, order_number: o.order_number })));
+                // Debug logs removed - order workflow is working correctly
                 
                 if (response.ok) {
                     updateOrderKanban(data.orders);
@@ -1155,30 +1167,47 @@
             const totalOrders = orders.length;
             const pendingCount = orders.filter(order => order.status === 'pending').length;
             const processingCount = orders.filter(order => order.status === 'processing').length;
+            const shippedCount = orders.filter(order => order.status === 'shipped').length;
             const completedCount = orders.filter(order => order.status === 'completed').length;
             
             // Update summary cards
             const totalElement = document.getElementById('totalOrdersCount');
             const pendingElement = document.getElementById('pendingOrdersCount');
             const processingElement = document.getElementById('processingOrdersCount');
+            const shippedElement = document.getElementById('shippedOrdersCount');
             const completedElement = document.getElementById('completedOrdersCount');
             
             if (totalElement) totalElement.textContent = totalOrders;
             if (pendingElement) pendingElement.textContent = pendingCount;
             if (processingElement) processingElement.textContent = processingCount;
+            if (shippedElement) shippedElement.textContent = shippedCount;
             if (completedElement) completedElement.textContent = completedCount;
             
             statuses.forEach(status => {
-                const column = document.querySelector(`[data-status="${status}"]`);
-                if (!column) return;
+                const column = document.querySelector(`.kanban-column[data-status="${status}"]`);
+                if (!column) {
+                    console.log(`Column not found for status: ${status}`);
+                    return;
+                }
                 
                 const statusOrders = orders.filter(order => order.status === status);
                 const orderContainer = column.querySelector('.space-y-3');
                 
+                console.log(`🔧 STATUS: ${status}, ORDERS:`, statusOrders.map(o => ({ id: o.id, status: o.status, order_number: o.order_number })));
+                console.log(`🔧 COLUMN:`, column);
+                console.log(`🔧 ORDER CONTAINER:`, orderContainer);
+                if (status === 'processing') {
+                    console.log(`🔧 PROCESSING ORDERS DETAILS:`, statusOrders);
+                    statusOrders.forEach(order => {
+                        console.log(`🔧 PROCESSING ORDER ${order.id}: status="${order.status}", next="${getNextStatus(order.status)}"`);
+                    });
+                }
+                
                 if (orderContainer) {
                     orderContainer.innerHTML = statusOrders.map(order => {
                         const next = getNextStatus(order.status);
-                        const actionBtn = next ? `<button class="text-xs border border-accent text-accent px-2 py-1 rounded hover:bg-accent hover:text-black transition-all duration-300" onclick="updateOrderStatus(${order.id}, '${next}')">${labelForStatus(next)}</button>` : '';
+                        console.log(`🔧 ORDER ${order.id} (${order.status}) -> NEXT: ${next}`);
+                           const actionBtn = next ? `<button class="text-xs border border-accent text-accent px-2 py-1 rounded hover:bg-accent hover:text-black transition-all duration-300" data-order-id="${order.id}" data-status="${next}">${labelForStatus(next)}</button>` : '';
                         
                         // Get product information from order items
                         let productInfo = 'Product details unavailable';
@@ -1197,7 +1226,7 @@
                             : customerName;
                         
                         return `
-                        <div class="kanban-card rounded-lg p-3 cursor-pointer" draggable="true" data-order-id="${order.id}" title="Click to view full details" onclick="showOrderDetails(${order.id})">
+                        <div class="kanban-card rounded-lg p-3 cursor-pointer" draggable="true" data-order-id="${order.id}" title="Click to view full details">
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-white font-medium text-xs">${order.order_number}</span>
                                 <span class="text-text-secondary text-xs">${formatTimeAgo(order.created_at)}</span>
@@ -1257,11 +1286,13 @@
         }
 
         async function updateOrderStatus(orderId, status) {
+            console.log('updateOrderStatus called:', { orderId, status });
             try {
                 const response = await apiRequest(`/api/orders/${orderId}/status`, {
                     method: 'PATCH',
                     body: JSON.stringify({ status })
                 });
+                console.log('API response:', response);
                 if (response && response.ok) {
                     showNotification('Order status updated', 'success');
                     await loadOrders();
@@ -1274,6 +1305,7 @@
                         await loadDashboardData();
                     }
                 } else {
+                    console.error('Failed to update order status:', response);
                     showNotification('Failed to update order status', 'error');
                 }
             } catch (e) {
@@ -1462,8 +1494,8 @@
                         <div class="flex items-center justify-between">
                             <span class="text-accent font-bold text-sm">Budget: ${request.budget_range}</span>
                             ${request.type === 'order' ? 
-                                `<button class="border border-accent text-accent px-3 py-1 rounded text-xs hover:bg-accent hover:text-black transition-all duration-300" onclick="viewOrderWithCustomInput('${request.order_number}')">View Order</button>` :
-                                `<button class="btn-primary text-xs px-3 py-1" onclick="viewCustomRequest(${request.id})">View Details</button>`
+                                `<button class="border border-accent text-accent px-3 py-1 rounded text-xs hover:bg-accent hover:text-black transition-all duration-300" data-order-number="${request.order_number}">View Order</button>` :
+                                `<button class="btn-primary text-xs px-3 py-1" data-request-id="${request.id}">View Details</button>`
                             }
                         </div>
                     </div>
@@ -1503,7 +1535,7 @@
                 <div class="glass-card rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-orbitron text-xl font-bold text-white">Custom Request Details</h3>
-                        <button onclick="this.closest('.fixed').remove()" class="text-text-secondary hover:text-accent">
+                        <button class="modal-close-btn text-text-secondary hover:text-accent">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
@@ -1597,8 +1629,8 @@
                                 <span class="text-text-secondary text-sm ml-2">Created: ${new Date(request.created_at).toLocaleString()}</span>
                             </div>
                             <div class="space-x-2">
-                                <button onclick="updateRequestStatus(${request.id}, 'processing')" class="btn-primary text-sm px-4 py-2">Start Processing</button>
-                                <button onclick="sendQuote(${request.id})" class="border border-accent text-accent px-4 py-2 rounded text-sm hover:bg-accent hover:text-black transition-all duration-300">Send Quote</button>
+                                <button data-request-id="${request.id}" data-action="processing" class="btn-primary text-sm px-4 py-2">Start Processing</button>
+                                <button data-request-id="${request.id}" data-action="quote" class="border border-accent text-accent px-4 py-2 rounded text-sm hover:bg-accent hover:text-black transition-all duration-300">Send Quote</button>
                             </div>
                         </div>
                     </div>
@@ -1671,7 +1703,7 @@
                 <div class="glass-card rounded-2xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-orbitron text-xl font-bold text-white">Order Details - ${order.order_number}</h3>
-                        <button onclick="this.closest('.fixed').remove()" class="text-text-secondary hover:text-accent">
+                        <button class="modal-close-btn text-text-secondary hover:text-accent">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
@@ -1724,7 +1756,7 @@
                     </div>
                     
                     <div class="flex justify-end space-x-3">
-                        <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-text-secondary hover:text-accent transition-colors">
+                        <button class="modal-close-btn px-4 py-2 text-text-secondary hover:text-accent transition-colors">
                             Close
                         </button>
                     </div>
@@ -1884,7 +1916,7 @@
                                 <td class="py-3 ${statusClass}">${status}</td>
                                 <td class="py-3 ${welcomeClass}">${welcomeEmail}</td>
                                 <td class="py-3">
-                                    <button class="text-accent hover:text-accent-light text-sm" onclick="resendWelcomeEmail('${subscriber.email}')">
+                                    <button class="text-accent hover:text-accent-light text-sm" data-email="${subscriber.email}">
                                         Resend Welcome
                                     </button>
                                 </td>
@@ -2040,7 +2072,7 @@
                         const title = n.title || n.type || 'Notification';
                         const body = n.body ? `<div class=\"text-text-secondary text-xs mt-1\">${n.body}</div>` : '';
                         return `
-                        <a href=\"${href}\" class=\"block p-2 bg-surface-dark rounded border border-surface-light hover:bg-surface-light\" onclick=\"document.getElementById('notifDropdown').classList.add('hidden')\">\n                            <div class=\"flex items-center justify-between\">\n                                <span class=\"text-white text-xs font-medium\">${title}</span>\n                                <span class=\"text-text-secondary text-2xs\">${formatTimeAgo(n.created_at)}</span>\n                            </div>\n                            ${body}\n                        </a>`;
+                        <a href=\"${href}\" class=\"block p-2 bg-surface-dark rounded border border-surface-light hover:bg-surface-light notification-link\">\n                            <div class=\"flex items-center justify-between\">\n                                <span class=\"text-white text-xs font-medium\">${title}</span>\n                                <span class=\"text-text-secondary text-2xs\">${formatTimeAgo(n.created_at)}</span>\n                            </div>\n                            ${body}\n                        </a>`;
                     }).join('');
                 }
             } catch (e) { console.error('Load notifications error', e); }
@@ -2104,7 +2136,137 @@
             if (periodSel) {
                 periodSel.addEventListener('change', () => { loadSalesSeries(periodSel.value); loadDashboardData(); });
             }
+
+            // Add event listeners for all buttons
+            setupEventListeners();
         });
+
+        // Setup all event listeners
+        // Reset orders to pending status
+        async function resetOrdersToPending() {
+            if (!confirm('This will reset ALL orders to pending status. Are you sure?')) {
+                return;
+            }
+            
+            try {
+                const response = await apiRequest('/api/orders/reset-to-pending', {
+                    method: 'POST'
+                });
+                
+                if (response && response.ok) {
+                    showNotification('Orders reset to pending status', 'success');
+                    await loadOrders();
+                } else {
+                    showNotification('Failed to reset orders', 'error');
+                }
+            } catch (error) {
+                console.error('Error resetting orders:', error);
+                showNotification('Error resetting orders', 'error');
+            }
+        }
+
+        function setupEventListeners() {
+            // Order status update buttons - use event delegation on document
+            document.addEventListener('click', (e) => {
+                console.log('Click detected on:', e.target);
+                if (e.target.matches('[data-order-id][data-status]')) {
+                    const orderId = e.target.getAttribute('data-order-id');
+                    const status = e.target.getAttribute('data-status');
+                    console.log('Order status update clicked:', { orderId, status });
+                    e.preventDefault();
+                    e.stopPropagation();
+                    updateOrderStatus(orderId, status);
+                }
+            });
+
+            // Order card click handlers
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.kanban-card[data-order-id]')) {
+                    const orderId = e.target.closest('.kanban-card[data-order-id]').getAttribute('data-order-id');
+                    showOrderDetails(orderId);
+                }
+            });
+
+            // Refresh buttons
+            const refreshCustomRequests = document.getElementById('refresh-custom-requests');
+            if (refreshCustomRequests) {
+                refreshCustomRequests.addEventListener('click', refreshCustomRequestsCount);
+            }
+
+            const forceRefreshProducts = document.getElementById('force-refresh-products');
+            if (forceRefreshProducts) {
+                forceRefreshProducts.addEventListener('click', forceRefreshTopProducts);
+            }
+
+            const toggleOrderView = document.getElementById('toggle-order-view');
+            if (toggleOrderView) {
+                toggleOrderView.addEventListener('click', toggleOrderView);
+            }
+
+            // Test API buttons
+            const testCustomAPI = document.getElementById('test-custom-api');
+            if (testCustomAPI) {
+                testCustomAPI.addEventListener('click', testCustomInputAPI);
+            }
+
+            const loadCustomRequests = document.getElementById('load-custom-requests');
+            if (loadCustomRequests) {
+                loadCustomRequests.addEventListener('click', loadCustomRequests);
+            }
+
+            // Custom request buttons
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('[data-order-number]')) {
+                    const orderNumber = e.target.getAttribute('data-order-number');
+                    viewOrderWithCustomInput(orderNumber);
+                }
+                if (e.target.matches('[data-request-id]')) {
+                    const requestId = e.target.getAttribute('data-request-id');
+                    viewCustomRequest(requestId);
+                }
+            });
+
+            // Custom request action buttons
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('[data-request-id][data-action="processing"]')) {
+                    const requestId = e.target.getAttribute('data-request-id');
+                    updateRequestStatus(requestId, 'processing');
+                }
+                if (e.target.matches('[data-request-id][data-action="quote"]')) {
+                    const requestId = e.target.getAttribute('data-request-id');
+                    sendQuote(requestId);
+                }
+            });
+
+            // Email resend button
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('[data-email]')) {
+                    const email = e.target.getAttribute('data-email');
+                    resendWelcomeEmail(email);
+                }
+            });
+
+            // Modal close buttons
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('.modal-close-btn')) {
+                    e.target.closest('.fixed').remove();
+                }
+            });
+
+                // Notification links
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('.notification-link')) {
+                        document.getElementById('notifDropdown').classList.add('hidden');
+                    }
+                });
+
+                // Reset orders to pending button
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('#reset-orders-to-pending')) {
+                        resetOrdersToPending();
+                    }
+                });
+        }
 
         const refreshActivityBtn = document.getElementById('refreshActivity');
         if (refreshActivityBtn) {
@@ -2255,7 +2417,7 @@
                 <div class="glass-card rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-orbitron text-xl font-bold text-white">Order with Custom Input</h3>
-                        <button onclick="this.closest('.fixed').remove()" class="text-text-secondary hover:text-accent">
+                        <button class="modal-close-btn text-text-secondary hover:text-accent">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>

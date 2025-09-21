@@ -46,37 +46,45 @@
                         'glass': '20px'
                     },
                     animation: {
-                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'spin-slow': 'spin 3s linear infinite',
+                        'float': 'float 3s ease-in-out infinite',
                         'glow': 'glow 2s ease-in-out infinite alternate',
-                        'slide-up': 'slideUp 0.6s ease-out',
-                        'fade-in': 'fadeIn 0.8s ease-out',
-                        'scale-in': 'scaleIn 0.5s ease-out',
-                        'pulse-orange': 'pulseOrange 2s ease-in-out infinite'
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'confetti': 'confetti 0.5s ease-out',
+                        'particle': 'particle 4s linear infinite'
                     },
                     keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-20px)' }
-                        },
-                        glow: {
-                            '0%': { boxShadow: '0 0 20px rgba(255, 131, 6, 0.4)' },
-                            '100%': { boxShadow: '0 0 40px rgba(255, 131, 6, 0.8)' }
-                        },
-                        slideUp: {
-                            '0%': { transform: 'translateY(50px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' }
-                        },
                         fadeIn: {
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' }
                         },
-                        scaleIn: {
-                            '0%': { transform: 'scale(0.9)', opacity: '0' },
-                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
                         },
-                        pulseOrange: {
-                            '0%, 100%': { boxShadow: '0 0 20px rgba(255, 131, 6, 0.4)' },
-                            '50%': { boxShadow: '0 0 30px rgba(255, 131, 6, 0.8)' }
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px #ff8306' },
+                            '100%': { boxShadow: '0 0 20px #ff8306, 0 0 30px #ff8306' }
+                        },
+                        shimmer: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' }
+                        },
+                        confetti: {
+                            '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '1' },
+                            '100%': { transform: 'translateY(-100vh) rotate(360deg)', opacity: '0' }
+                        },
+                        particle: {
+                            '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '1' },
+                            '100%': { transform: 'translateY(-100vh) rotate(360deg)', opacity: '0' }
                         }
                     }
                 }
@@ -97,16 +105,7 @@
             window.paypalCheckoutInitialized = true;
         }
         
-        // Override window.open to prevent unwanted popups
-        const originalWindowOpen = window.open;
-        window.open = function(url, name, specs) {
-            console.log('🚫 Blocked popup attempt:', url, name, specs);
-            // Only allow PayPal popups
-            if (url && url.includes('paypal.com')) {
-                return originalWindowOpen.call(this, url, name, specs);
-            }
-            return null;
-        };
+        // Allow PayPal popups by not blocking window.open
         
         // Initialize PayPal function
         function initializePayPal() {
@@ -148,6 +147,21 @@
                     height: 45
                 },
                 enableFunding: 'venmo,paylater,card',
+                // Prevent iframe fallback by ensuring popup mode
+                intent: 'capture',
+                // Add popup handling
+                onInit: function(data, actions) {
+                    console.log('🎬 PayPal buttons initialized');
+                    // Ensure popup mode is enabled
+                    return actions.enable();
+                },
+                
+                // Handle popup opening
+                onClick: function(data, actions) {
+                    console.log('🖱️ PayPal button clicked, opening popup...');
+                    // This ensures we're in popup mode, not iframe mode
+                    return actions.resolve();
+                },
                 
                 // createOrder: Uses the server-side /api/paypal/create-order endpoint
                 createOrder: function(data, actions) {
@@ -258,7 +272,18 @@
 
                 onError: function(err) {
                     console.error('An error occurred with the PayPal button:', err);
-                    showMessage('An unexpected error occurred. Please try again.', 'error');
+                    
+                    // Check if it's a popup blocker error
+                    if (err && err.message && err.message.includes('popup')) {
+                        console.error('🚫 Popup blocked error detected:', err);
+                        showMessage('Popup blocked! Please allow popups for this site and try again.', 'error');
+                    } else if (err && err.message && err.message.includes('iframe')) {
+                        console.error('🚫 Iframe fallback error detected:', err);
+                        showMessage('Payment window failed to open. Please try again.', 'error');
+                    } else {
+                        showMessage('An unexpected error occurred. Please try again.', 'error');
+                    }
+                    
                     showLoadingOverlay(false);
                 },
 
@@ -314,7 +339,7 @@
             console.log('🔄 Loading PayPal SDK...');
             paypalScriptLoaded = true;
             const script = document.createElement('script');
-            script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD&intent=capture&enable-funding=venmo,paylater,card`;
+            script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD&intent=capture&enable-funding=venmo,paylater,card&disable-funding=credit&components=buttons`;
             
             script.onload = function() {
                 console.log('✅ PayPal SDK loaded successfully');
@@ -1001,6 +1026,19 @@
         let orderData = null;
         let paypalOrderId = null;
         let currentStep = 1;
+        let cartItemsForOrder = []; // Store cart items for order success page
+
+        // Check for popup blocker on page load
+        function checkPopupBlocker() {
+            const testPopup = window.open('', '_blank', 'width=1,height=1');
+            if (testPopup) {
+                testPopup.close();
+                console.log('✅ Popup blocker check passed');
+            } else {
+                console.warn('⚠️ Popup blocker detected - PayPal payments may not work properly');
+                showMessage('Popup blocker detected! Please allow popups for this site to complete payments.', 'warning');
+            }
+        }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -1008,6 +1046,7 @@
             checkAuthentication();
             loadOrderData();
             setupFormValidation();
+            checkPopupBlocker(); // Check for popup blocker after functions are defined
         });
         
         // Global error handler to prevent popups from unhandled errors
@@ -1183,8 +1222,10 @@
 
         // Load order data from cart and customer profile
         async function loadOrderData() {
+            console.log('🚀 LOAD ORDER DATA CALLED');
             try {
                 const token = localStorage.getItem('customerToken');
+                console.log('🔑 Token found:', token ? 'YES' : 'NO');
                 if (!token) {
                     console.log('No customer token found, redirecting to login');
                     window.location.href = 'customer-login.html';
@@ -1192,6 +1233,7 @@
                 }
 
                 // Load cart data and customer profile in parallel
+                console.log('🔄 Loading order data...');
                 const [cartResponse, profileResponse] = await Promise.all([
                     fetch('/api/cart', {
                         headers: { 'Authorization': `Bearer ${token}` }
@@ -1201,26 +1243,40 @@
                     })
                 ]);
 
+                console.log('📦 Cart response status:', cartResponse.status);
                 if (cartResponse.ok) {
                     const cartData = await cartResponse.json();
+                    console.log('📦 Raw cart data:', cartData);
                     orderData = cartData;
                     
                     // Check if cart has items
                     if (cartData.items && cartData.items.length > 0) {
+                        // Store cart items for order success page
+                        cartItemsForOrder = cartData.items.map(item => ({
+                            name: item.product_name || item.name || 'Unknown Product',
+                            size: item.size || 'N/A',
+                            color: item.color || 'N/A',
+                            price: parseFloat(item.unit_price || item.price || 0),
+                            quantity: parseInt(item.quantity || 1)
+                        }));
+                        console.log('🛒 Cart items stored for order success:', cartItemsForOrder);
                         displayOrderSummary(cartData.items);
                     } else {
-                        console.log('Cart is empty, redirecting to cart page');
+                        console.log('⚠️ Cart is empty, redirecting to cart page');
+                        console.log('📦 Cart data structure:', cartData);
                         window.location.href = 'cart.html';
                         return;
                     }
                 } else if (cartResponse.status === 401 || cartResponse.status === 403) {
-                    console.log('Authentication failed, redirecting to login');
+                    console.log('🔐 Authentication failed, redirecting to login');
+                    console.log('🔐 Cart response status:', cartResponse.status);
                     localStorage.removeItem('customerToken');
                     localStorage.removeItem('customerData');
                     window.location.href = 'customer-login.html';
                     return;
                 } else {
-                    console.error('Failed to load cart data:', cartResponse.status);
+                    console.error('❌ Failed to load cart data:', cartResponse.status);
+                    console.error('❌ Cart response text:', await cartResponse.text());
                     alert('Failed to load cart data. Redirecting to cart...');
                     window.location.href = 'cart.html';
                     return;
@@ -1235,7 +1291,8 @@
                 }
 
             } catch (error) {
-                console.error('Error loading order data:', error);
+                console.error('💥 Error loading order data:', error);
+                console.error('💥 Error stack:', error.stack);
                 alert('Error loading order data. Please try again.');
             }
         }
@@ -1539,12 +1596,35 @@
                 
                 // Redirect to success page with order details
                 setTimeout(() => {
-                    const redirectUrl = `order-success.html?order=${orderNumber}&total=${totalAmount}&payment=${paymentMethod}`;
+                    // Use the stored cart items (captured before order creation)
+                    let orderItems = cartItemsForOrder;
+                    console.log('🛒 Using stored cart items for redirect:', orderItems);
+                    console.log('🛒 cartItemsForOrder length:', cartItemsForOrder.length);
+                    console.log('🛒 orderData:', orderData);
+                    
+                    // Fallback to orderData if cartItemsForOrder is empty
+                    if (orderItems.length === 0 && orderData && orderData.items && orderData.items.length > 0) {
+                        orderItems = orderData.items.map(item => ({
+                            name: item.product_name || item.name || 'Unknown Product',
+                            size: item.size || 'N/A',
+                            color: item.color || 'N/A',
+                            price: parseFloat(item.unit_price || item.price || 0),
+                            quantity: parseInt(item.quantity || 1)
+                        }));
+                        console.log('🛒 Fallback to orderData items:', orderItems);
+                    }
+                    
+                    // Encode items for URL
+                    const itemsParam = encodeURIComponent(JSON.stringify(orderItems));
+                    
+                    const redirectUrl = `order-success.html?order=${orderNumber}&total=${totalAmount}&payment=${paymentMethod}&items=${itemsParam}`;
                     
                     console.log('🎉 Redirecting to success page with:', {
                         orderNumber: orderNumber,
                         totalAmount: totalAmount,
                         paymentMethod: paymentMethod,
+                        items: orderItems,
+                        itemsCount: orderItems.length,
                         redirectUrl: redirectUrl
                     });
                     
