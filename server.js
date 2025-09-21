@@ -227,7 +227,7 @@ function generateBusinessSchema() {
     "description": "Professional custom t-shirt printing with DTG technology. Design your own shirt or choose from our creative collection.",
     "url": baseUrl,
     "logo": `${baseUrl}/mockups/mockup1.png`,
-    "foundingDate": "2023",
+    "foundingDate": "2021",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "US"

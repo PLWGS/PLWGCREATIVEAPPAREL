@@ -603,31 +603,8 @@
                                 </div>
                             </div>
                         </div>
-                                <div class="space-y-2">
-                                    <button class="flex items-center space-x-3 w-full text-left hover:bg-surface-light p-2 rounded">
-                                        <div class="w-8 h-8 rounded bg-accent bg-opacity-20 flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-text-primary">Horror Essentials</span>
-                                    </button>
-                                    <button class="flex items-center space-x-3 w-full text-left hover:bg-surface-light p-2 rounded">
-                                        <div class="w-8 h-8 rounded bg-accent bg-opacity-20 flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-text-primary">Pop Culture</span>
-                                    </button>
-                                    <button class="flex items-center space-x-3 w-full text-left hover:bg-surface-light p-2 rounded">
-                                        <div class="w-8 h-8 rounded bg-accent bg-opacity-20 flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2"/>
-                                            </svg>
-                                        </div>
-                                        <span class="text-text-primary">Humor & Sass</span>
-                                    </button>
+                                <div id="search-categories" class="space-y-2">
+                                    <div class="text-gray-500 text-sm">Loading categories...</div>
                                 </div>
                             </div>
                         </div>
@@ -1030,7 +1007,7 @@
                         </div>
                     </div>
                     <p class="text-white text-lg leading-relaxed">
-                        <span class="text-accent font-bold">Creative rebellion</span> through wearable art. Transforming everyday apparel into conversation starters since 2023.
+                        <span class="text-accent font-bold">Creative rebellion</span> through wearable art. Transforming everyday apparel into conversation starters since 2021.
                     </p>
                 </div>
 
@@ -2548,10 +2525,97 @@
                 checkAuthStatus();
                 
                 console.log('✅ Shop page loaded with new black/orange theme!');
+                
+                // Load dynamic categories and implement search
+                loadShopCategories();
+                initializeSearch();
             } catch (error) {
                 console.error('❌ Error during initialization:', error);
             }
         });
+
+        // Load dynamic categories for search dropdown
+        async function loadShopCategories() {
+            try {
+                const response = await fetch('/api/categories/top');
+                const categories = await response.json();
+                
+                const categoriesContainer = document.getElementById('search-categories');
+                if (categoriesContainer && categories.length > 0) {
+                    categoriesContainer.innerHTML = categories.slice(0, 4).map(category => 
+                        `<button class="flex items-center space-x-3 w-full text-left hover:bg-surface-light p-2 rounded" onclick="filterByCategory('${category.category}')">
+                            <div class="w-8 h-8 rounded bg-accent bg-opacity-20 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2"/>
+                                </svg>
+                            </div>
+                            <span class="text-text-primary">${category.category}</span>
+                        </button>`
+                    ).join('');
+                } else if (categoriesContainer) {
+                    categoriesContainer.innerHTML = '<div class="text-gray-500 text-sm">No categories available</div>';
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                const categoriesContainer = document.getElementById('search-categories');
+                if (categoriesContainer) {
+                    categoriesContainer.innerHTML = '<div class="text-gray-500 text-sm">Error loading categories</div>';
+                }
+            }
+        }
+
+        // Initialize search functionality
+        function initializeSearch() {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                let searchTimeout;
+                
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        const query = e.target.value.trim();
+                        if (query.length >= 2) {
+                            performSearch(query);
+                        } else if (query.length === 0) {
+                            clearSearch();
+                        }
+                    }, 300);
+                });
+                
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const query = e.target.value.trim();
+                        if (query.length >= 2) {
+                            performSearch(query);
+                        }
+                    }
+                });
+            }
+        }
+
+        // Perform search
+        async function performSearch(query) {
+            try {
+                console.log('Searching for:', query);
+                // Redirect to shop with search parameter
+                window.location.href = `shop.html?search=${encodeURIComponent(query)}`;
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        }
+
+        // Filter by category
+        function filterByCategory(category) {
+            console.log('Filtering by category:', category);
+            window.location.href = `shop.html?category=${encodeURIComponent(category)}`;
+        }
+
+        // Clear search
+        function clearSearch() {
+            // Reset to show all products
+            window.location.href = 'shop.html';
+        }
 
         // Particles are already initialized in the main DOMContentLoaded listener above
     </script>

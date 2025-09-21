@@ -36,7 +36,7 @@
       "description": "Professional custom t-shirt printing with DTG technology. Design your own shirt or choose from our creative collection.",
       "url": "https://plwgscreativeapparel.com",
       "logo": "https://plwgscreativeapparel.com/mockups/mockup1.png",
-      "foundingDate": "2023",
+      "foundingDate": "2021",
       "address": {
         "@type": "PostalAddress",
         "addressCountry": "US"
@@ -376,18 +376,15 @@
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
                                     <h3 class="font-bold text-highlight text-sm mb-4 uppercase tracking-wider">Categories</h3>
-                                    <ul class="space-y-3">
-                                        <li><a href="shop.html" class="text-black hover:text-highlight transition-colors font-medium">Horror Essentials</a></li>
-                                        <li><a href="shop.html" class="text-black hover:text-highlight transition-colors font-medium">Pop Culture</a></li>
-                                        <li><a href="shop.html" class="text-black hover:text-highlight transition-colors font-medium">Humor & Sass</a></li>
-                                        <li><a href="shop.html" class="text-black hover:text-highlight transition-colors font-medium">Custom Designs</a></li>
+                                    <ul id="shop-categories" class="space-y-3">
+                                        <li class="text-gray-500">Loading...</li>
                                     </ul>
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-highlight text-sm mb-4 uppercase tracking-wider">Featured</h3>
-                                    <div class="space-y-2">
+                                    <div id="shop-featured" class="space-y-2">
                                         <div class="w-full h-20 bg-gray-200 rounded-lg loading-pulse"></div>
-                                        <p class="text-xs text-gray-600">Loading featured product...</p>
+                                        <p class="text-xs text-gray-600">Loading featured products...</p>
                                     </div>
                                 </div>
                             </div>
@@ -810,7 +807,7 @@
                         </div>
                     </div>
                     <p class="text-white text-lg leading-relaxed">
-                        <span class="text-highlight font-bold">Creative rebellion</span> through wearable art. Transforming everyday apparel into conversation starters since 2023.
+                        <span class="text-highlight font-bold">Creative rebellion</span> through wearable art. Transforming everyday apparel into conversation starters since 2021.
                     </p>
                 </div>
 
@@ -1314,7 +1311,62 @@
             if (showMoreBtn) {
                 showMoreBtn.addEventListener('click', showMoreReviews);
             }
+            
+            // Load shop dropdown data
+            loadShopDropdown();
         });
+        
+        // Load shop dropdown categories and featured products
+        async function loadShopDropdown() {
+            try {
+                // Load categories
+                const categoriesResponse = await fetch('/api/categories/top');
+                const categories = await categoriesResponse.json();
+                
+                const categoriesContainer = document.getElementById('shop-categories');
+                if (categoriesContainer && categories.length > 0) {
+                    categoriesContainer.innerHTML = categories.slice(0, 4).map(category => 
+                        `<li><a href="shop.html?category=${encodeURIComponent(category.category)}" class="text-black hover:text-highlight transition-colors font-medium">${category.category}</a></li>`
+                    ).join('');
+                } else if (categoriesContainer) {
+                    categoriesContainer.innerHTML = '<li class="text-gray-500">No categories available</li>';
+                }
+                
+                // Load featured products
+                const featuredResponse = await fetch('/api/products/dropdown-featured');
+                const featuredProducts = await featuredResponse.json();
+                
+                const featuredContainer = document.getElementById('shop-featured');
+                if (featuredContainer && featuredProducts.length > 0) {
+                    featuredContainer.innerHTML = featuredProducts.slice(0, 3).map(product => 
+                        `<div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <img src="${product.image_url}" alt="${product.name}" class="w-12 h-12 object-cover rounded">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">${product.name}</p>
+                                <p class="text-xs text-gray-500">$${Number(product.price).toFixed(2)}</p>
+                            </div>
+                        </div>`
+                    ).join('');
+                } else if (featuredContainer) {
+                    featuredContainer.innerHTML = '<p class="text-xs text-gray-600">No featured products available</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading shop dropdown data:', error);
+                
+                // Fallback for categories
+                const categoriesContainer = document.getElementById('shop-categories');
+                if (categoriesContainer) {
+                    categoriesContainer.innerHTML = '<li class="text-gray-500">Error loading categories</li>';
+                }
+                
+                // Fallback for featured products
+                const featuredContainer = document.getElementById('shop-featured');
+                if (featuredContainer) {
+                    featuredContainer.innerHTML = '<p class="text-xs text-gray-600">Error loading featured products</p>';
+                }
+            }
+        }
     </script>
 <script id="dhws-dataInjector" src="/public/dhws-data-injector.js"></script>
 </body>
