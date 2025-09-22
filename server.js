@@ -5714,7 +5714,9 @@ app.post('/api/admin/products', authenticateToken, validateProduct, async (req, 
       custom_lyrics_question,
       shipping_cost,
       local_pickup_enabled,
-      size_chart
+      size_chart,
+      size_chart_enabled,
+      color_chart_enabled
     } = req.body;
 
     // Process tags to ensure it's always a JavaScript array
