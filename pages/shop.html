@@ -1900,8 +1900,8 @@
                 const cartCounter = document.getElementById('cart-counter');
                 const cartCounterMobile = document.getElementById('cart-counter-mobile');
                 
-                if (!token) {
-                    // Not logged in, hide counters
+                if (!token || token.trim() === '') {
+                    // User not logged in - hide counters and don't make API call
                     if (cartCounter) {
                         cartCounter.classList.add('hidden');
                         cartCounter.classList.remove('flex');
@@ -1913,10 +1913,12 @@
                     return;
                 }
 
+                // User is logged in - fetch cart data
                 const response = await fetch('/api/cart', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
                 });
 
@@ -1970,7 +1972,8 @@
                     }
                 }
             } catch (error) {
-                console.error('Error updating cart counter:', error);
+                // Network or other errors - hide counters
+                console.log('Cart update failed (this is normal for non-logged-in users):', error.message);
                 const cartCounter = document.getElementById('cart-counter');
                 const cartCounterMobile = document.getElementById('cart-counter-mobile');
                 if (cartCounter) {
