@@ -401,7 +401,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </button>
-                    <button class="text-white hover:text-highlight transition-colors duration-300 relative p-3 glass rounded-full" id="cart-button" onclick="window.location.href='cart.html'" aria-label="Shopping Cart">
+                    <button class="text-white hover:text-highlight transition-colors duration-300 relative p-3 glass rounded-full" id="cart-button" onclick="navigateToCart()" aria-label="Shopping Cart">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
@@ -425,7 +425,7 @@
 
                 <!-- Mobile Actions -->
                 <div class="flex items-center space-x-2 flex-shrink-0">
-                    <button class="glass p-2 rounded-full text-white hover:text-highlight transition-colors relative" onclick="window.location.href='cart.html'" aria-label="Cart">
+                    <button class="glass p-2 rounded-full text-white hover:text-highlight transition-colors relative" onclick="navigateToCart()" aria-label="Cart">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 11-4 0v-6m4 0V9a2 2 0 10-4 0v4.01"/>
                         </svg>
@@ -1052,32 +1052,64 @@
         async function updateCartCounter() {
             try {
                 const token = localStorage.getItem('customerToken');
-                if (!token) {
-                    document.getElementById('cart-counter').textContent = '0';
-                    document.getElementById('cart-counter-mobile').textContent = '0';
+                
+                // Set default cart count to 0 for non-logged-in users
+                const cartCounterElements = [
+                    document.getElementById('cart-counter'),
+                    document.getElementById('cart-counter-mobile')
+                ];
+                
+                if (!token || token.trim() === '') {
+                    // User not logged in - show empty cart
+                    cartCounterElements.forEach(el => {
+                        if (el) el.textContent = '0';
+                    });
                     return;
                 }
                 
+                // User is logged in - fetch cart data
                 const response = await fetch('/api/cart', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
                 });
                 
                 if (response.ok) {
                     const cartData = await response.json();
                     const totalItems = cartData.items ? cartData.items.reduce((total, item) => total + item.quantity, 0) : 0;
-                    document.getElementById('cart-counter').textContent = totalItems.toString();
-                    document.getElementById('cart-counter-mobile').textContent = totalItems.toString();
+                    cartCounterElements.forEach(el => {
+                        if (el) el.textContent = totalItems.toString();
+                    });
+                } else if (response.status === 403 || response.status === 401) {
+                    // Token invalid/expired - clear it and show empty cart
+                    localStorage.removeItem('customerToken');
+                    cartCounterElements.forEach(el => {
+                        if (el) el.textContent = '0';
+                    });
                 } else {
-                    document.getElementById('cart-counter').textContent = '0';
-                    document.getElementById('cart-counter-mobile').textContent = '0';
+                    // Other errors - show empty cart
+                    cartCounterElements.forEach(el => {
+                        if (el) el.textContent = '0';
+                    });
                 }
             } catch (error) {
-                document.getElementById('cart-counter').textContent = '0';
-                document.getElementById('cart-counter-mobile').textContent = '0';
+                // Network or other errors - show empty cart
+                console.log('Cart update failed (this is normal for non-logged-in users):', error.message);
+                const cartCounterElements = [
+                    document.getElementById('cart-counter'),
+                    document.getElementById('cart-counter-mobile')
+                ];
+                cartCounterElements.forEach(el => {
+                    if (el) el.textContent = '0';
+                });
             }
+        }
+
+        // Navigation function for cart (fixes CSP inline script issue)
+        function navigateToCart() {
+            window.location.href = '/pages/cart.html';
         }
 
         // Dynamic content functions (preserved from original)
