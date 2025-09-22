@@ -14,7 +14,14 @@ const QRCode = require('qrcode');
 const { uploadProductImages, uploadImageToCloudinary, deleteImagesFromCloudinary } = require('./cloudinary-upload.js');
 const { body, validationResult } = require('express-validator');
 const paypal = require('@paypal/checkout-server-sdk');
+const { OAuth2Client } = require('google-auth-library');
 require('dotenv').config({ silent: true });
+
+// Initialize Google OAuth client
+const googleClient = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET
+);
 
 // -----------------------------------------------------------------------------
 // Timeout Configuration - Fix request aborted errors
@@ -336,7 +343,22 @@ app.get('/api/csp-test', (req, res) => {
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://plwgscreativeapparel.com',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000'
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
@@ -384,8 +406,8 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.tailwindcss.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.tailwindcss.com", "https://www.paypal.com", "https://www.paypalobjects.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.tailwindcss.com", "https://accounts.google.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.tailwindcss.com", "https://www.paypal.com", "https://www.paypalobjects.com", "https://accounts.google.com", "https://apis.google.com"],
       scriptSrcAttr: [
         "'unsafe-hashes'",
         "'sha256-1jAmyYXcRq6zFldLe/GCgIDJBiOONdXjTLgEFMDnDSM='",
@@ -396,7 +418,7 @@ app.use(helmet({
       ],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
       imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
-      connectSrc: ["'self'", "https://api.paypal.com", "https://api.sandbox.paypal.com", "https://www.paypal.com", "https://www.sandbox.paypal.com", "https://*.paypal.com", "https://*.paypalobjects.com"],
+      connectSrc: ["'self'", "https://api.paypal.com", "https://api.sandbox.paypal.com", "https://www.paypal.com", "https://www.sandbox.paypal.com", "https://*.paypal.com", "https://*.paypalobjects.com", "https://accounts.google.com"],
       frameSrc: ["'self'", "https://www.paypal.com", "https://www.sandbox.paypal.com"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
@@ -449,12 +471,12 @@ app.get('/checkout.html', (req, res) => {
   // Set explicit CSP headers for checkout page
   res.setHeader('Content-Security-Policy', 
     "default-src 'self'; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com https://accounts.google.com; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com https://accounts.google.com https://apis.google.com; " +
     "script-src-attr 'unsafe-hashes' 'sha256-1jAmyYXcRq6zFldLe/GCgIDJBiOONdXjTLgEFMDnDSM=' 'sha256-R6AaG80nmkGc9oFSNvZVF7OOo5gLWHC/2y0eOYYohJ8=' 'sha256-GMTUiihXfPWngWeq4wqBusQMc3uhwAYGIklr70mSqTc=' 'sha256-/l6w0vnC+DN7tMFOiJiEWqLyy8uJoFwM6E0yzhKXRRQ=' 'sha256-2rvfFrggTCtyF5WOiTri1gDS8Boibj4Njn0e+VCBmDI='; " +
     "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; " +
     "img-src 'self' data: https: http: blob:; " +
-    "connect-src 'self' https://api.paypal.com https://api.sandbox.paypal.com https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com; " +
+    "connect-src 'self' https://api.paypal.com https://api.sandbox.paypal.com https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://accounts.google.com; " +
     "frame-src 'self' https://www.paypal.com https://www.sandbox.paypal.com; " +
     "object-src 'none'; " +
     "base-uri 'self'; " +
@@ -601,7 +623,10 @@ async function initializeDatabase() {
         average_order_value DECIMAL(10,2) DEFAULT 0.00,
         favorite_day_to_shop VARCHAR(20),
         style_consistency VARCHAR(20) DEFAULT 'High',
-        most_active_season VARCHAR(20)
+        most_active_season VARCHAR(20),
+        google_id VARCHAR(255),
+        profile_picture TEXT,
+        email_verified BOOLEAN DEFAULT false
       )
     `);
 
@@ -3045,7 +3070,7 @@ async function sendAdminContactNotification(contactData) {
   `;
 
   // Send to all admin emails
-  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PLWGSCREATIVEAPPAREL@yahoo.com'].filter(Boolean);
+  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PlwgsCreativeApparel@yahoo.com'].filter(Boolean);
   
   await sendResendEmail(
     adminEmails,
@@ -3750,7 +3775,7 @@ async function sendCustomRequestEmail(customRequest) {
   `;
 
   // Send to all admin emails
-  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PLWGSCREATIVEAPPAREL@yahoo.com'].filter(Boolean);
+  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PlwgsCreativeApparel@yahoo.com'].filter(Boolean);
   
   try {
     await sendResendEmail(
@@ -3865,7 +3890,73 @@ app.post('/api/customer/auth', validateRegistration, async (req, res) => {
   try {
     const { email, password, action = 'login', first_name, last_name } = req.body;
 
-    if (action === 'register') {
+    if (action === 'google_login') {
+      // Handle Google OAuth login
+      const { google_id, profile_picture } = req.body;
+      
+      // Check if customer already exists
+      let existingCustomer = await pool.query(
+        'SELECT * FROM customers WHERE email = $1 OR google_id = $2',
+        [email, google_id]
+      );
+
+      let customer;
+
+      if (existingCustomer.rows.length === 0) {
+        // Create new customer with Google data
+        const newCustomer = await pool.query(`
+          INSERT INTO customers (email, first_name, last_name, name, google_id, profile_picture, email_verified)
+          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+        `, [
+          email, 
+          first_name, 
+          last_name, 
+          `${first_name} ${last_name}`, 
+          google_id, 
+          profile_picture, 
+          true
+        ]);
+
+        customer = newCustomer.rows[0];
+
+        // Create default style profile
+        await pool.query(`
+          INSERT INTO customer_style_profile (customer_id)
+          VALUES ($1)
+        `, [customer.id]);
+
+      } else {
+        // Update existing customer with Google data if needed
+        customer = existingCustomer.rows[0];
+        
+        if (!customer.google_id) {
+          await pool.query(`
+            UPDATE customers 
+            SET google_id = $1, profile_picture = $2, email_verified = $3
+            WHERE id = $4
+          `, [google_id, profile_picture, true, customer.id]);
+        }
+      }
+
+      const token = jwt.sign(
+        { id: customer.id, email, role: 'customer' },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.json({
+        success: true,
+        token,
+        customer: {
+          id: customer.id,
+          email: customer.email,
+          name: customer.name,
+          profile_picture: customer.profile_picture,
+          loyalty_points: customer.loyalty_points,
+          loyalty_tier: customer.loyalty_tier
+        }
+      });
+    } else if (action === 'register') {
       // Check if customer already exists
       const existingCustomer = await pool.query(
         'SELECT * FROM customers WHERE email = $1',
@@ -3948,6 +4039,179 @@ app.post('/api/customer/auth', validateRegistration, async (req, res) => {
   } catch (error) {
     logger.error('Customer auth error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get Google OAuth client ID for frontend
+app.get('/api/config/google-client-id', (req, res) => {
+  // Set CORS headers
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.json({ client_id: process.env.GOOGLE_CLIENT_ID });
+});
+
+// Handle preflight OPTIONS request for Google OAuth
+app.options('/api/customer/auth/google', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.sendStatus(200);
+});
+
+// Handle Google OAuth callback (when user returns from Google)
+app.get('/oauth/callback', async (req, res) => {
+  try {
+    const { code, state } = req.query;
+    
+    if (!code) {
+      return res.status(400).send(`
+        <script>
+          window.opener.postMessage({error: 'Authorization code not received'}, '*');
+          window.close();
+        </script>
+      `);
+    }
+
+    // Exchange code for access token
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        code: code,
+        grant_type: 'authorization_code',
+        redirect_uri: `${req.protocol}://${req.get('host')}/oauth/callback`
+      })
+    });
+
+    const tokenData = await tokenResponse.json();
+    
+    if (!tokenData.access_token) {
+      throw new Error('Failed to get access token');
+    }
+
+    // Get user info from Google
+    const userResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenData.access_token}`);
+    const userData = await userResponse.json();
+
+    // Send success message to parent window
+    res.send(`
+      <script>
+        window.opener.postMessage({
+          success: true,
+          user: ${JSON.stringify(userData)},
+          token: '${tokenData.access_token}'
+        }, '*');
+        window.close();
+      </script>
+    `);
+
+  } catch (error) {
+    console.error('OAuth callback error:', error);
+    res.send(`
+      <script>
+        window.opener.postMessage({error: 'OAuth failed: ${error.message}'}, '*');
+        window.close();
+      </script>
+    `);
+  }
+});
+
+// Google OAuth login endpoint
+app.post('/api/customer/auth/google', async (req, res) => {
+  // Set CORS headers
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ error: 'Google credential is required' });
+    }
+
+    // Verify the Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    const { email, given_name, family_name, picture, email_verified } = payload;
+
+    if (!email_verified) {
+      return res.status(400).json({ error: 'Google email not verified' });
+    }
+
+    // Check if customer already exists
+    let customerResult = await pool.query(
+      'SELECT * FROM customers WHERE email = $1',
+      [email]
+    );
+
+    let customer;
+
+    if (customerResult.rows.length === 0) {
+      // Create new customer with Google data
+      const newCustomer = await pool.query(`
+        INSERT INTO customers (email, first_name, last_name, name, google_id, profile_picture, email_verified)
+        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+      `, [
+        email, 
+        given_name, 
+        family_name, 
+        `${given_name} ${family_name}`, 
+        payload.sub, 
+        picture, 
+        email_verified
+      ]);
+
+      customer = newCustomer.rows[0];
+
+      // Create default style profile for new customer
+      await pool.query(`
+        INSERT INTO customer_style_profile (customer_id)
+        VALUES ($1)
+      `, [customer.id]);
+
+    } else {
+      // Update existing customer with Google data if needed
+      customer = customerResult.rows[0];
+      
+      if (!customer.google_id) {
+        await pool.query(`
+          UPDATE customers 
+          SET google_id = $1, profile_picture = $2, email_verified = $3
+          WHERE id = $4
+        `, [payload.sub, picture, email_verified, customer.id]);
+      }
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: customer.id, email, role: 'customer' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      customer: {
+        id: customer.id,
+        email: customer.email,
+        name: customer.name,
+        profile_picture: customer.profile_picture,
+        loyalty_points: customer.loyalty_points,
+        loyalty_tier: customer.loyalty_tier
+      }
+    });
+
+  } catch (error) {
+    logger.error('Google OAuth error:', error);
+    res.status(500).json({ error: 'Google authentication failed' });
   }
 });
 
@@ -7549,7 +7813,7 @@ async function sendAdminPaymentNotificationEmail(order, orderItems, paymentDetai
   `;
 
   // Send to all admin emails
-  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PLWGSCREATIVEAPPAREL@yahoo.com'].filter(Boolean);
+  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PlwgsCreativeApparel@yahoo.com'].filter(Boolean);
   
   await sendResendEmail(
     adminEmails,

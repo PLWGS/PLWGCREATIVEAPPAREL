@@ -16,6 +16,11 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google OAuth Popup (Legacy) as fallback -->
+    <script src="https://apis.google.com/js/api:client.js" async defer></script>
     <script>
         tailwind.config = {
             theme: {
@@ -696,22 +701,223 @@
                 loginSpinner.classList.add('hidden');
             });
             
-            // Google login button
+            // Initialize Google Sign-In
+            async function initializeGoogleSignIn() {
+                try {
+                    console.log('🔍 Starting Google Sign-In initialization...');
+                    
+                    // Check if Google script is loaded
+                    if (typeof google === 'undefined') {
+                        console.error('❌ Google script not loaded');
+                        return;
+                    }
+                    
+                    console.log('✅ Google script loaded');
+                    
+                    // Get Google Client ID from server
+                    console.log('🔍 Fetching client ID from server...');
+                    const configResponse = await fetch('/api/config/google-client-id');
+                    
+                    if (!configResponse.ok) {
+                        console.error('❌ Failed to fetch client ID:', configResponse.status);
+                        return;
+                    }
+                    
+                    const config = await configResponse.json();
+                    console.log('✅ Client ID fetched:', config.client_id ? 'Yes' : 'No');
+                    
+                    if (config.client_id && google.accounts) {
+                        google.accounts.id.initialize({
+                            client_id: config.client_id,
+                            callback: handleGoogleSignIn,
+                            auto_select: false,
+                            cancel_on_tap_outside: false
+                        });
+                        console.log('✅ Google Sign-In initialized successfully');
+                    } else {
+                        console.error('❌ Missing client ID or Google accounts not available');
+                        console.log('Client ID:', config.client_id);
+                        console.log('Google accounts:', typeof google.accounts);
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to initialize Google Sign-In:', error);
+                }
+            }
+
+            // Handle Google Sign-In response
+            async function handleGoogleSignIn(response) {
+                try {
+                    showMessage('Signing in with Google...', 'info');
+                    
+                    const response_data = await fetch('/api/customer/auth/google', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ credential: response.credential })
+                    });
+
+                    const data = await response_data.json();
+
+                    if (data.success) {
+                        // Store token and user data
+                        localStorage.setItem('customerToken', data.token);
+                        localStorage.setItem('customerUser', JSON.stringify(data.customer));
+                        
+                        showMessage('Successfully signed in with Google! Redirecting...', 'success');
+                        
+                        // Redirect to dashboard or home page
+                        setTimeout(() => {
+                            window.location.href = '../index.html';
+                        }, 1500);
+                    } else {
+                        showMessage(data.error || 'Google sign-in failed. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Google sign-in error:', error);
+                    showMessage('Google sign-in failed. Please try again.', 'error');
+                }
+            }
+
+            // Alternative Google OAuth using popup method
+            async function googleOAuthPopup() {
+                console.log('🔍 googleOAuthPopup() function called');
+                try {
+                    // Get client ID
+                    console.log('🔍 Fetching client ID...');
+                    const configResponse = await fetch('/api/config/google-client-id');
+                    const config = await configResponse.json();
+                    console.log('🔍 Config received:', config);
+                    
+                    if (!config.client_id) {
+                        throw new Error('No Google Client ID configured');
+                    }
+
+                    // Create OAuth URL
+                    const redirectUri = `${window.location.origin}/oauth/callback`;
+                    const scope = 'openid email profile';
+                    const responseType = 'code';
+                    const state = Math.random().toString(36).substring(2, 15);
+                    
+                    const googleAuthUrl = `https://accounts.google.com/oauth/authorize?` +
+                        `client_id=${encodeURIComponent(config.client_id)}&` +
+                        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+                        `scope=${encodeURIComponent(scope)}&` +
+                        `response_type=${responseType}&` +
+                        `state=${state}`;
+
+                    // Open popup
+                    console.log('🔍 Opening popup with URL:', googleAuthUrl);
+                    const popup = window.open(
+                        googleAuthUrl,
+                        'google-oauth',
+                        'width=500,height=600,scrollbars=yes,resizable=yes'
+                    );
+                    
+                    console.log('🔍 Popup object:', popup);
+                    
+                    if (!popup) {
+                        console.error('❌ Popup was blocked by browser');
+                        showMessage('Popup blocked! Please allow popups for this site and try again.', 'error');
+                        return;
+                    }
+
+                    // Listen for messages from popup
+                    const messageListener = (event) => {
+                        if (event.origin !== window.location.origin) return;
+                        
+                        if (event.data.success) {
+                            // Handle successful OAuth
+                            console.log('✅ Google OAuth successful:', event.data.user);
+                            handleGoogleUserData(event.data.user);
+                            window.removeEventListener('message', messageListener);
+                        } else if (event.data.error) {
+                            console.error('❌ Google OAuth error:', event.data.error);
+                            showMessage(`Google login failed: ${event.data.error}`, 'error');
+                            window.removeEventListener('message', messageListener);
+                        }
+                    };
+                    
+                    window.addEventListener('message', messageListener);
+                    
+                    // Listen for popup to close
+                    const checkClosed = setInterval(() => {
+                        if (popup.closed) {
+                            clearInterval(checkClosed);
+                            window.removeEventListener('message', messageListener);
+                            showMessage('Google login cancelled', 'info');
+                        }
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('❌ Google OAuth popup error:', error);
+                    console.error('❌ Error stack:', error.stack);
+                    console.error('❌ Error details:', error);
+                    showMessage('Failed to open Google login: ' + error.message, 'error');
+                }
+            }
+
+            // Handle Google user data from OAuth popup
+            async function handleGoogleUserData(userData) {
+                try {
+                    showMessage('Processing Google login...', 'info');
+                    
+                    // Create or login user with Google data
+                    const response = await fetch('/api/customer/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'google_login',
+                            email: userData.email,
+                            first_name: userData.given_name,
+                            last_name: userData.family_name,
+                            google_id: userData.id,
+                            profile_picture: userData.picture
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Store token and user data
+                        localStorage.setItem('customerToken', data.token);
+                        localStorage.setItem('customerUser', JSON.stringify(data.customer));
+                        
+                        showMessage('Successfully signed in with Google! Redirecting...', 'success');
+                        
+                        // Redirect to dashboard or home page
+                        setTimeout(() => {
+                            window.location.href = '../index.html';
+                        }, 1500);
+                    } else {
+                        showMessage(data.error || 'Google sign-in failed. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error processing Google login:', error);
+                    showMessage('Failed to process Google login. Please try again.', 'error');
+                }
+            }
+
+            // Google login button click handler
             document.getElementById('googleLoginBtn').addEventListener('click', async (e) => {
                 e.preventDefault();
+                console.log('🔘 Google login button clicked');
+                
                 try {
-                    // For now, show a message that Google login is coming soon
-                    showMessage('Google login is coming soon! Please use email/password for now.', 'info');
-                    
-                    // TODO: Implement Google OAuth
-                    // This would require:
-                    // 1. Google OAuth setup
-                    // 2. Server-side Google token verification
-                    // 3. User creation/login with Google data
+                    // Skip GSI method due to CORS issues, go straight to popup
+                    console.log('✅ Using popup method (GSI has CORS issues)');
+                    await googleOAuthPopup();
                 } catch (error) {
-                    console.error('Google login error:', error);
+                    console.error('❌ Google login error:', error);
                     showMessage('Google login failed. Please try again.', 'error');
                 }
+            });
+
+            // Initialize Google Sign-In when page loads
+            window.addEventListener('load', () => {
+                setTimeout(initializeGoogleSignIn, 1000); // Give Google script time to load
             });
 
             // Register form
