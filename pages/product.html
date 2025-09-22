@@ -587,7 +587,7 @@
                                 <div>
                                     <h3 class="font-inter text-highlight text-sm font-bold mb-3">Featured</h3>
                                     <div class="space-y-2">
-                                        <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop" alt="Featured Product" class="w-full h-20 object-cover rounded-lg" loading="lazy" onerror="this.src='https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=400'; this.onerror=null;" />
+                                        <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop" alt="Featured Product" class="w-full h-20 object-cover rounded-lg" loading="lazy" onError="handleImageError(this, 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=400')" />
                                         <p class="text-xs text-white">New Horror Collection</p>
                                     </div>
                                 </div>
@@ -3112,7 +3112,7 @@
                     return `
                     <div class="glass-card rounded-xl p-6">
                         <div class="flex items-start space-x-4">
-                            <img src="${avatarUrl}" alt="${displayName}" class="w-12 h-12 rounded-full" loading="lazy" onerror="this.src='https://i.pravatar.cc/48?img=12'; this.onerror=null;" />
+                            <img src="${avatarUrl}" alt="${displayName}" class="w-12 h-12 rounded-full" loading="lazy" onError="handleAvatarError(this)" />
                             <div class="flex-1">
                                 <div class="flex items-center justify-between mb-2">
                                     <div>
@@ -3315,6 +3315,21 @@
         console.log('🔍 Calling loadProductData immediately');
         loadProductData();
         
+        // Image error handling functions (fixes CSP violations)
+        function handleImageError(img, fallbackUrl) {
+            if (img.src !== fallbackUrl) {
+                img.src = fallbackUrl;
+                img.onerror = null; // Prevent infinite loops
+            }
+        }
+        
+        function handleAvatarError(img) {
+            if (img.src !== 'https://i.pravatar.cc/48?img=12') {
+                img.src = 'https://i.pravatar.cc/48?img=12';
+                img.onerror = null; // Prevent infinite loops
+            }
+        }
+
         // Mobile Menu Functionality
         function initMobileMenu() {
             const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
