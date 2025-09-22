@@ -2717,6 +2717,355 @@ app.patch('/api/products/:id/stock', authenticateToken, async (req, res) => {
 });
 
 // =============================================================================
+// CONTACT FORM ENDPOINTS
+// =============================================================================
+
+// Contact form validation
+const validateContactForm = [
+  body('firstName').notEmpty().trim().withMessage('First name is required'),
+  body('lastName').notEmpty().trim().withMessage('Last name is required'),
+  body('email').isEmail().withMessage('Please enter a valid email address'),
+  body('phone').optional().isMobilePhone().withMessage('Please enter a valid phone number'),
+  body('subject').notEmpty().withMessage('Subject is required'),
+  body('message').isLength({ min: 10 }).withMessage('Message must be at least 10 characters long'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
+
+// Handle contact form submission
+app.post('/api/contact', validateContactForm, async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, subject, message, newsletter } = req.body;
+    
+    // Store contact submission in database (optional)
+    const dbCheck = checkDatabase();
+    let contactId = null;
+    
+    if (dbCheck.available) {
+      try {
+        // Create contact_submissions table if it doesn't exist
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS contact_submissions (
+            id SERIAL PRIMARY KEY,
+            first_name VARCHAR(100),
+            last_name VARCHAR(100),
+            email VARCHAR(255),
+            phone VARCHAR(50),
+            subject VARCHAR(255),
+            message TEXT,
+            newsletter_opt_in BOOLEAN DEFAULT false,
+            status VARCHAR(50) DEFAULT 'new',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
+        
+        // Insert contact submission
+        const result = await pool.query(`
+          INSERT INTO contact_submissions (first_name, last_name, email, phone, subject, message, newsletter_opt_in)
+          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id
+        `, [firstName, lastName, email, phone || null, subject, message, newsletter === 'on']);
+        
+        contactId = result.rows[0].id;
+        logger.info(`📝 Contact submission stored with ID: ${contactId}`);
+      } catch (dbError) {
+        logger.error('Database error storing contact submission:', dbError);
+        // Continue without storing in database
+      }
+    }
+    
+    // Send email notifications
+    await sendContactFormEmails({
+      id: contactId,
+      firstName,
+      lastName,
+      email,
+      phone,
+      subject,
+      message,
+      newsletter
+    });
+    
+    // If newsletter subscription was requested, add to newsletter
+    if (newsletter === 'on') {
+      try {
+        if (dbCheck.available) {
+          // Check if already subscribed
+          const existing = await pool.query('SELECT * FROM subscribers WHERE email = $1', [email]);
+          
+          if (existing.rows.length === 0) {
+            // Add to newsletter
+            await pool.query(
+              'INSERT INTO subscribers (email, name, welcome_email_sent) VALUES ($1, $2, $3)',
+              [email, `${firstName} ${lastName}`, true] // Mark as sent since we'll send it with contact confirmation
+            );
+            logger.info(`📧 Added ${email} to newsletter via contact form`);
+          }
+        }
+      } catch (newsletterError) {
+        logger.error('Error adding to newsletter:', newsletterError);
+        // Don't fail the contact form if newsletter signup fails
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Thank you for your message! We\'ll get back to you within 24 hours.',
+      contactId: contactId 
+    });
+
+  } catch (error) {
+    logger.error('Error processing contact form:', error);
+    res.status(500).json({ error: 'Internal server error. Please try again.' });
+  }
+});
+
+// Send contact form emails
+async function sendContactFormEmails(contactData) {
+  try {
+    // Send confirmation email to customer
+    await sendCustomerContactConfirmation(contactData);
+    
+    // Send notification email to admin
+    await sendAdminContactNotification(contactData);
+    
+    logger.info(`✅ Contact form emails sent for ${contactData.email}`);
+  } catch (error) {
+    logger.error('❌ Error sending contact form emails:', error);
+    throw error;
+  }
+}
+
+// Send confirmation email to customer
+async function sendCustomerContactConfirmation(contactData) {
+  const customerEmailHTML = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Thank You for Contacting PLWG'S Creative Apparel</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }
+            .content {
+                padding: 40px 30px;
+            }
+            .message-details {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 20px 0;
+                border-left: 4px solid #ff8306;
+            }
+            .footer {
+                background: #f8f9fa;
+                padding: 30px;
+                text-align: center;
+                color: #666;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>✅ Message Received!</h1>
+                <p>Thank you for contacting PLWG'S Creative Apparel</p>
+            </div>
+            
+            <div class="content">
+                <p>Hi ${contactData.firstName},</p>
+                
+                <p>Thank you for reaching out to us! We've received your message and will get back to you within 24 hours during business days.</p>
+                
+                <div class="message-details">
+                    <h3>Your Message Details:</h3>
+                    <p><strong>Subject:</strong> ${contactData.subject}</p>
+                    <p><strong>Message:</strong></p>
+                    <p style="font-style: italic;">"${contactData.message}"</p>
+                </div>
+                
+                <p><strong>What happens next?</strong></p>
+                <ul>
+                    <li>Our team will review your message</li>
+                    <li>We'll respond within 24 hours (business days)</li>
+                    <li>For urgent matters, you can also email us directly at admin@plwgscreativeapparel.com</li>
+                </ul>
+                
+                <p>In the meantime, feel free to browse our latest designs and custom apparel options on our website!</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://plwgscreativeapparel.com/pages/shop.html" 
+                       style="display: inline-block; background: linear-gradient(135deg, #ff8306 0%, #ffa726 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold;">
+                        Browse Our Shop
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p><strong>PLWG'S Creative Apparel</strong></p>
+                <p>Custom DTG Printing & Unique Designs</p>
+                <p>Questions? Contact us at <a href="mailto:admin@plwgscreativeapparel.com">admin@plwgscreativeapparel.com</a></p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  await sendResendEmail(
+    contactData.email,
+    '✅ Thank You for Contacting PLWG\'S Creative Apparel',
+    customerEmailHTML
+  );
+  logger.info(`✅ Customer contact confirmation sent to ${contactData.email}`);
+}
+
+// Send notification email to admin
+async function sendAdminContactNotification(contactData) {
+  const adminEmailHTML = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Contact Form Submission</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 0;
+                background: #f4f4f4;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+            .header {
+                background: linear-gradient(135deg, #ff8306 0%, #ffa726 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+            .content {
+                padding: 30px;
+            }
+            .contact-details {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+            }
+            .priority-high {
+                border-left: 4px solid #dc3545;
+            }
+            .priority-medium {
+                border-left: 4px solid #ffc107;
+            }
+            .priority-low {
+                border-left: 4px solid #28a745;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🔔 New Contact Form Submission</h1>
+                <p>Someone has submitted a message through the website</p>
+            </div>
+            
+            <div class="content">
+                <div class="contact-details ${getPriorityClass(contactData.subject)}">
+                    <h3>Contact Information:</h3>
+                    <p><strong>Name:</strong> ${contactData.firstName} ${contactData.lastName}</p>
+                    <p><strong>Email:</strong> <a href="mailto:${contactData.email}">${contactData.email}</a></p>
+                    ${contactData.phone ? `<p><strong>Phone:</strong> <a href="tel:${contactData.phone}">${contactData.phone}</a></p>` : ''}
+                    <p><strong>Subject:</strong> ${contactData.subject}</p>
+                    <p><strong>Newsletter Signup:</strong> ${contactData.newsletter === 'on' ? 'Yes ✅' : 'No'}</p>
+                    <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
+                    ${contactData.id ? `<p><strong>Contact ID:</strong> #${contactData.id}</p>` : ''}
+                </div>
+                
+                <div class="contact-details">
+                    <h3>Message:</h3>
+                    <p style="background: white; padding: 15px; border-radius: 5px; font-style: italic;">
+                        "${contactData.message}"
+                    </p>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="mailto:${contactData.email}?subject=Re: ${contactData.subject}" 
+                       style="display: inline-block; background: linear-gradient(135deg, #ff8306 0%, #ffa726 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin-right: 10px;">
+                        Reply to Customer
+                    </a>
+                </div>
+                
+                <p style="font-size: 12px; color: #666; text-align: center;">
+                    This is an automated notification from your PLWG'S Creative Apparel website contact form.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+
+  // Send to all admin emails
+  const adminEmails = [process.env.ADMIN_EMAIL, 'letsgetcreative@myyahoo.com', 'PLWGSCREATIVEAPPAREL@yahoo.com'].filter(Boolean);
+  
+  await sendResendEmail(
+    adminEmails,
+    `🔔 New Contact Form: ${contactData.subject} - ${contactData.firstName} ${contactData.lastName}`,
+    adminEmailHTML
+  );
+  logger.info(`✅ Admin contact notification sent to ${adminEmails.join(', ')}`);
+}
+
+// Helper function to determine priority class based on subject
+function getPriorityClass(subject) {
+  const highPriority = ['technical-support', 'order-inquiry', 'bulk-order'];
+  const mediumPriority = ['custom-design', 'partnership'];
+  
+  if (highPriority.includes(subject)) return 'priority-high';
+  if (mediumPriority.includes(subject)) return 'priority-medium';
+  return 'priority-low';
+}
+
+// =============================================================================
 // EXISTING NEWSLETTER ENDPOINTS
 // =============================================================================
 
@@ -3852,6 +4201,145 @@ app.get('/api/customer/addresses', authenticateCustomer, async (req, res) => {
   } catch (error) {
     console.error('Error fetching addresses:', error);
     res.status(500).json({ error: 'Failed to fetch addresses' });
+  }
+});
+
+// Create new customer address
+app.post('/api/customer/addresses', authenticateCustomer, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const { 
+      address_type, 
+      first_name, 
+      last_name, 
+      address_line1, 
+      address_line2, 
+      city, 
+      state, 
+      postal_code, 
+      country, 
+      is_default 
+    } = req.body;
+
+    // If this is set as default, remove default from other addresses
+    if (is_default) {
+      await pool.query(
+        'UPDATE customer_addresses SET is_default = false WHERE customer_id = $1',
+        [customerId]
+      );
+    }
+
+    const result = await pool.query(`
+      INSERT INTO customer_addresses (
+        customer_id, address_type, first_name, last_name, 
+        address_line1, address_line2, city, state, 
+        postal_code, country, is_default
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+      RETURNING *
+    `, [
+      customerId, address_type || 'Home', first_name, last_name,
+      address_line1, address_line2, city, state,
+      postal_code, country || 'United States', is_default || false
+    ]);
+
+    logger.info(`✅ Address created for customer ${customerId}`);
+    res.json({ success: true, address: result.rows[0] });
+  } catch (error) {
+    logger.error('Error creating customer address:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update customer address
+app.put('/api/customer/addresses/:id', authenticateCustomer, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const addressId = req.params.id;
+    const { 
+      address_type, 
+      first_name, 
+      last_name, 
+      address_line1, 
+      address_line2, 
+      city, 
+      state, 
+      postal_code, 
+      country, 
+      is_default 
+    } = req.body;
+
+    // Verify address belongs to customer
+    const existingAddress = await pool.query(
+      'SELECT * FROM customer_addresses WHERE id = $1 AND customer_id = $2',
+      [addressId, customerId]
+    );
+
+    if (existingAddress.rows.length === 0) {
+      return res.status(404).json({ error: 'Address not found' });
+    }
+
+    // If this is set as default, remove default from other addresses
+    if (is_default) {
+      await pool.query(
+        'UPDATE customer_addresses SET is_default = false WHERE customer_id = $1 AND id != $2',
+        [customerId, addressId]
+      );
+    }
+
+    const result = await pool.query(`
+      UPDATE customer_addresses SET
+        address_type = COALESCE($1, address_type),
+        first_name = COALESCE($2, first_name),
+        last_name = COALESCE($3, last_name),
+        address_line1 = COALESCE($4, address_line1),
+        address_line2 = COALESCE($5, address_line2),
+        city = COALESCE($6, city),
+        state = COALESCE($7, state),
+        postal_code = COALESCE($8, postal_code),
+        country = COALESCE($9, country),
+        is_default = COALESCE($10, is_default)
+      WHERE id = $11 AND customer_id = $12
+      RETURNING *
+    `, [
+      address_type, first_name, last_name, address_line1, address_line2,
+      city, state, postal_code, country, is_default,
+      addressId, customerId
+    ]);
+
+    logger.info(`✅ Address ${addressId} updated for customer ${customerId}`);
+    res.json({ success: true, address: result.rows[0] });
+  } catch (error) {
+    logger.error('Error updating customer address:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete customer address
+app.delete('/api/customer/addresses/:id', authenticateCustomer, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const addressId = req.params.id;
+
+    // Verify address belongs to customer
+    const existingAddress = await pool.query(
+      'SELECT * FROM customer_addresses WHERE id = $1 AND customer_id = $2',
+      [addressId, customerId]
+    );
+
+    if (existingAddress.rows.length === 0) {
+      return res.status(404).json({ error: 'Address not found' });
+    }
+
+    await pool.query(
+      'DELETE FROM customer_addresses WHERE id = $1 AND customer_id = $2',
+      [addressId, customerId]
+    );
+
+    logger.info(`✅ Address ${addressId} deleted for customer ${customerId}`);
+    res.json({ success: true, message: 'Address deleted successfully' });
+  } catch (error) {
+    logger.error('Error deleting customer address:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -8119,6 +8607,21 @@ app.get('/privacy-policy.html', (req, res) => {
 // Serve terms of service page
 app.get('/terms-of-service.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'pages', 'terms-of-service.html'));
+});
+
+// Serve about page
+app.get('/about.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'about.html'));
+});
+
+// Serve contact page
+app.get('/contact.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'contact.html'));
+});
+
+// Handle Chrome DevTools requests silently (prevents 404 spam)
+app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
+  res.status(204).end(); // No content, but not an error
 });
 
 // Serve category management page
