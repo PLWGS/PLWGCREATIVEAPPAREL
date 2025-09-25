@@ -105,3 +105,9 @@ railway-*.js
 # Database structure documentation with sensitive connection details
 DATABASE_COMPLETE_STRUCTURE.md
 inspect_database_structure.js
+
+# All markdown documentation files
+*.md
+
+# NEW_PAGES folder
+NEW_PAGES/
