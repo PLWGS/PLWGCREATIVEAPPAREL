@@ -1,21 +1,28 @@
 User-agent: *
 Allow: /
 
-# Important: Allow all public pages
+# Allow all public pages and static assets
 Allow: /index.html
-Allow: /pages/shop.html
-Allow: /pages/customer-login.html
-Allow: /pages/account.html
-Allow: /pages/cart.html
-Allow: /pages/checkout.html
-Allow: /pages/privacy-policy.html
-Allow: /pages/terms-of-service.html
-Allow: /pages/products/
+Allow: /shop.html
+Allow: /customer-login.html
+Allow: /account.html
+Allow: /cart.html
+Allow: /checkout.html
+Allow: /privacy-policy.html
+Allow: /terms-of-service.html
+Allow: /about.html
+Allow: /contact.html
+Allow: /product.html
+Allow: /products/
+Allow: /order-success.html
+Allow: /order-failure.html
 
 # Allow static assets
 Allow: /public/
 Allow: /css/
 Allow: /js/
+Allow: /images/
+Allow: /videos/
 
 # Block admin and sensitive pages from search engines
 Disallow: /pages/admin.html
@@ -27,6 +34,9 @@ Disallow: /pages/customers.html
 Disallow: /pages/orders.html
 Disallow: /pages/product-edit*.html
 Disallow: /pages/product-management.js
+Disallow: /pages/customer-reviews-management.html
+Disallow: /pages/homepage-images.html
+Disallow: /pages/loading.html
 
 # Block API endpoints from indexing
 Disallow: /api/
@@ -34,6 +44,13 @@ Disallow: /api/
 # Block temporary/test files
 Disallow: /test*
 Disallow: /debug*
+Disallow: /temp*
+Disallow: /mockups/
+Disallow: /etsy_images/
+
+# Block backup files
+Disallow: /*-backup*
+Disallow: /*backup*
 
 # Sitemap location
 Sitemap: https://plwgscreativeapparel.com/sitemap.xml

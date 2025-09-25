@@ -1,50 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
   <url>
     <loc>https://plwgscreativeapparel.com/</loc>
-    <lastmod>2025-09-14</lastmod>
+    <lastmod>2025-09-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+  
+  <!-- Main Shop Page -->
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/shop.html</loc>
-    <lastmod>2025-09-14</lastmod>
+    <loc>https://plwgscreativeapparel.com/shop.html</loc>
+    <lastmod>2025-09-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
+  
+  <!-- Product Pages -->
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/customer-login.html</loc>
-    <lastmod>2025-09-14</lastmod>
+    <loc>https://plwgscreativeapparel.com/product.html</loc>
+    <lastmod>2025-09-24</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
+  
+  <!-- Customer Pages -->
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/account.html</loc>
-    <lastmod>2025-09-14</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://plwgscreativeapparel.com/customer-login.html</loc>
+    <lastmod>2025-09-24</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/cart.html</loc>
-    <lastmod>2025-09-14</lastmod>
+    <loc>https://plwgscreativeapparel.com/account.html</loc>
+    <lastmod>2025-09-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Shopping Cart and Checkout -->
+  <url>
+    <loc>https://plwgscreativeapparel.com/cart.html</loc>
+    <lastmod>2025-09-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/checkout.html</loc>
-    <lastmod>2025-09-14</lastmod>
+    <loc>https://plwgscreativeapparel.com/checkout.html</loc>
+    <lastmod>2025-09-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
+  
+  <!-- Order Confirmation Pages -->
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/privacy-policy.html</loc>
-    <lastmod>2025-09-14</lastmod>
+    <loc>https://plwgscreativeapparel.com/order-success.html</loc>
+    <lastmod>2025-09-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://plwgscreativeapparel.com/pages/terms-of-service.html</loc>
-    <lastmod>2025-09-14</lastmod>
+    <loc>https://plwgscreativeapparel.com/order-failure.html</loc>
+    <lastmod>2025-09-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  
+  <!-- Information Pages -->
+  <url>
+    <loc>https://plwgscreativeapparel.com/about.html</loc>
+    <lastmod>2025-09-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://plwgscreativeapparel.com/contact.html</loc>
+    <lastmod>2025-09-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://plwgscreativeapparel.com/privacy-policy.html</loc>
+    <lastmod>2025-09-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://plwgscreativeapparel.com/terms-of-service.html</loc>
+    <lastmod>2025-09-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
