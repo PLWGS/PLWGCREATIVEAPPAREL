@@ -25,18 +25,18 @@ Allow: /images/
 Allow: /videos/
 
 # Block admin and sensitive pages from search engines
-Disallow: /pages/admin.html
-Disallow: /pages/admin-login.html
-Disallow: /pages/admin-totp-setup.html
-Disallow: /pages/admin-uploads.html
-Disallow: /pages/category-management.html
-Disallow: /pages/customers.html
-Disallow: /pages/orders.html
-Disallow: /pages/product-edit*.html
-Disallow: /pages/product-management.js
-Disallow: /pages/customer-reviews-management.html
-Disallow: /pages/homepage-images.html
-Disallow: /pages/loading.html
+Disallow: /admin.html
+Disallow: /admin-login.html
+Disallow: /admin-totp-setup.html
+Disallow: /admin-uploads.html
+Disallow: /category-management.html
+Disallow: /customers.html
+Disallow: /orders.html
+Disallow: /product-edit*.html
+Disallow: /product-management.js
+Disallow: /customer-reviews-management.html
+Disallow: /homepage-images.html
+Disallow: /loading.html
 
 # Block API endpoints from indexing
 Disallow: /api/
